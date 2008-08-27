@@ -1,0 +1,17 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+	xmlns:jm="/hudson/plugins/jmeter/tags">
+	<td>${it.size()}</td>
+	<td>${it.getAverage()}</td>
+	<td>${it.getMin()}</td>
+	<td>
+		${it.getMax()}
+	</td>
+	<td>
+		<j:invokeStatic className="java.lang.Math" method="round"
+			var="errorPercentage">
+			<j:arg value="${(it.countErrors()/it.size())*100}" type="double" />
+		</j:invokeStatic>
+		${errorPercentage}
+	</td>
+</j:jelly>

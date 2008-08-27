@@ -1,0 +1,13 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+  -->
+  <f:entry title="JMeter report" description="
+           Specify the path to the JMeter report file, relative to
+           &lt;a href='ws/'>the workspace root&lt;/a>.
+           ">
+    <f:textbox name="jmeter.filename" value="${instance.filename}" />
+	</f:entry>
+</j:jelly>

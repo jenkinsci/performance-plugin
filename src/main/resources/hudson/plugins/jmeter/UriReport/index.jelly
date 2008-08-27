@@ -1,0 +1,30 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<l:layout xmlns:jm="/hudson/plugins/jmeter/tags">
+		<st:include it="${it.build}" page="sidepanel.jelly" />
+		<l:main-panel>
+			<h1>URI ${it.uri}</h1>
+			<h2>JMeter Summary</h2>
+			<table border="1">
+				<jm:captionLine />
+				<tr>
+					<td>${it.uri}</td>
+					<jm:summaryTable it="${it}" />
+				</tr>
+			</table>
+			<h2>JMeter samples</h2>
+			<table class="sortable" border="1">
+				<th>URI</th>
+				<th>Time</th>
+				<th>Duration (ms)</th>
+				<j:forEach var="c" items="${it.httpSampleList}">
+					<tr bgcolor="${h.ifThenElse(c.failed,'red',null)}">
+						<td>${c.uri}</td>
+						<td>${c.time}</td>
+						<td>${c.duration}</td>
+					</tr>
+				</j:forEach>
+			</table>
+		</l:main-panel>
+	</l:layout>
+</j:jelly>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testResults version="1.2">
+<httpSample t="31" lt="31" ts="1219160357175" s="true" lb="Login" rc="200" rm="OK" tn="Threads serveur1 1-1" dt="text" by="188">
+  <assertionResult>
+    <name>OK 2000000</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="26" lt="26" ts="1219160357663" s="false" lb="Logout" rc="200" rm="OK" tn="Threads serveur1 1-2" dt="text" by="188">
+  <assertionResult>
+    <name>OK 2000000</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+</testResults>
