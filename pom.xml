@@ -7,8 +7,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   
-  <groupId>hudson.plugins.jmeter</groupId>
-  <artifactId>JMeterPlugin</artifactId>
+  <artifactId>jmeter</artifactId>
   <packaging>hpi</packaging>
   <version>0.1-SNAPSHOT</version>
   <url>http://hudson.gotdns.com/wiki/display/HUDSON/JMeter+Plugin</url>
