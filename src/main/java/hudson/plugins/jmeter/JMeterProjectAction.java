@@ -14,6 +14,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jfree.chart.ChartFactory;
@@ -43,7 +44,7 @@ public class JMeterProjectAction implements Action {
 
 	private boolean checkIfGraphModified(StaplerRequest request,
 			StaplerResponse response) throws IOException {
-		AbstractBuild build = getProject().getLastBuild();
+		AbstractBuild<?, ?> build = getProject().getLastBuild();
 		Calendar t = build.getTimestamp();
 
 		return request.checkIfModified(t, response);
@@ -165,9 +166,10 @@ public class JMeterProjectAction implements Action {
 
 		DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderErrors = new DataSetBuilder<String, NumberOnlyBuildLabel>();
 
-		List<AbstractBuild<?, ?>> builds = (List<AbstractBuild<?, ?>>) getProject()
-				.getBuilds();
-		for (AbstractBuild<?, ?> currentBuild : builds) {
+		List<?> builds = getProject().getBuilds();
+		for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
+			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator
+					.next();
 			if (Result.SUCCESS.equals(currentBuild.getResult())) {
 				NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(
 						currentBuild);
@@ -198,9 +200,10 @@ public class JMeterProjectAction implements Action {
 
 		DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
 
-		List<AbstractBuild<?, ?>> builds = (List<AbstractBuild<?, ?>>) getProject()
-				.getBuilds();
-		for (AbstractBuild<?, ?> currentBuild : builds) {
+		List<?> builds = getProject().getBuilds();
+		for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
+			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator
+					.next();
 			if (Result.SUCCESS.equals(currentBuild.getResult())) {
 				NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(
 						currentBuild);
