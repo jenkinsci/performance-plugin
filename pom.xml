@@ -12,10 +12,5 @@
   <packaging>hpi</packaging>
   <version>0.1-SNAPSHOT</version>
   <url>http://hudson.gotdns.com/wiki/display/HUDSON/JMeter+Plugin</url>
-  <scm>
-    <connection>scm:svn:http://svn.dev.java.net/svn/hudson/trunk/hudson/plugins/jmeter</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/trunk/hudson/plugins/jmeter</developerConnection>
-  </scm>
-  
 
 </project>
