@@ -1,155 +1,148 @@
 <project>
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>hudson.plugins.jmeter</groupId>
-	<artifactId>jmeter</artifactId>
-	<packaging>hpi</packaging>
-	<name>Hudson JMeter plugin</name>
-	<version>0.1</version>
-	<dependencies>
-		<!--
-			Replace 1.153 with any version of Hudson that you'd like to develop
-			against.
-		-->
-		<dependency>
-			<groupId>org.jvnet.hudson.main</groupId>
-			<artifactId>hudson-core</artifactId>
-			<version>1.153</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jvnet.hudson.main</groupId>
-			<artifactId>hudson-war</artifactId>
-			<type>war</type>
-			<version>1.153</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-	<description>Parse JMeter results and gives an overview of it</description>
-	<build>
-		<!--
-			Since new versions need to overwrite old versions, it's better not to
-			have version number in the .hpi file name.
-		-->
-		<finalName>${project.artifactId}</finalName>
-		<defaultGoal>package</defaultGoal>
-		<plugins>
-			<plugin>
-				<groupId>org.jvnet.hudson.tools</groupId>
-				<artifactId>maven-hpi-plugin</artifactId>
-				<version>1.20</version>
-				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
-				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<repositories>
-		<!--
-			We put the central repository first, as most artifacts will be found
-			there
-		-->
-		<repository>
-			<id>central</id>
-			<url>http://repo1.maven.org/maven2</url>
-			<releases>
-				<enabled>true</enabled>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>hudson.plugins.jmeter</groupId>
+  <artifactId>JMeterPlugin</artifactId>
+  <packaging>hpi</packaging>
+  <version>0.1-SNAPSHOT</version>
+  <url>http://hudson.gotdns.com/wiki/display/HUDSON/JMeter+Plugin</url>
+  <scm>
+    <connection>scm:svn:http://svn.dev.java.net/svn/hudson/trunk/hudson/plugins/jmeter</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/trunk/hudson/plugins/jmeter</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+  
+  <dependencies>
+    <!--
+      Replace 1.153 with any version of Hudson that you'd like to develop against.
+    -->
+    <dependency>
+      <groupId>org.jvnet.hudson.main</groupId>
+      <artifactId>hudson-core</artifactId>
+      <version>1.153</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jvnet.hudson.main</groupId>
+      <artifactId>hudson-war</artifactId>
+      <type>war</type>
+      <version>1.153</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <!--
+      Since new versions need to overwrite old versions, it's better
+      not to have version number in the .hpi file name.
+    -->
+    <finalName>${project.artifactId}</finalName>
+    <defaultGoal>package</defaultGoal>
+    <plugins>
+      <plugin>
+        <groupId>org.jvnet.hudson.tools</groupId>
+        <artifactId>maven-hpi-plugin</artifactId>
+        <version>1.20</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <repositories>
+    <!-- We put the central repository first, as most artifacts will be
+         found there
+    -->
+    <repository>
+      <id>central</id>
+      <url>http://repo1.maven.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
         <!-- only look for jars here when they are not present locally -->
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<!--
-			We put the java.net2 repository second, as it's a Maven2 format and
-			therefore _should_ be faster for Maven2. Hopefully, people will stop
-			pushing their artifacts to java.net and push to java.net2 or somebody
-			will put a synchronizer in place to require only the java.net2
-			repository.
-		-->
-		<repository>
-			<id>java.net2</id>
-			<url>http://download.java.net/maven/2
-			</url>
-			<releases>
-				<enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+    <!-- We put the java.net2 repository second, as it's a Maven2 format
+         and therefore _should_ be faster for Maven2. Hopefully, people
+         will stop pushing their artifacts to java.net and push to java.net2
+         or somebody will put a synchronizer in place to require
+         only the java.net2 repository.
+    -->
+    <repository>
+      <id>java.net2</id>
+      <url>http://download.java.net/maven/2</url>
+      <releases>
+        <enabled>true</enabled>
         <!-- only look for jars here when they are not present locally -->
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
 
     <!-- Now for the java.net repository (legacy layout) -->
-		<repository>
-			<id>java.net</id>
-			<url>http://download.java.net/maven/1
-			</url>
-			<layout>legacy</layout>
-			<releases>
-				<enabled>true</enabled>
+    <repository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/1</url>
+      <layout>legacy</layout>
+      <releases>
+        <enabled>true</enabled>
         <!-- only look for jars here when they are not present locally -->
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
 
     <!-- Finally, the slowest repository of them all -->
-		<repository>
-			<id>hudson-libs</id>
-			<url>
-				https://hudson.dev.java.net/source/browse/*checkout*/hudson/hudson/main/lib
-			</url>
-			<layout>legacy</layout>
-			<releases>
-				<enabled>true</enabled>
+    <repository>
+      <id>hudson-libs</id>
+      <url>https://hudson.dev.java.net/source/browse/*checkout*/hudson/hudson/main/lib</url>
+      <layout>legacy</layout>
+      <releases>
+        <enabled>true</enabled>
         <!-- only look for jars here when they are not present locally -->
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<!--
-			We put the central repository first, as most artifacts will be found
-			there
-		-->
-		<pluginRepository>
-			<id>central</id>
-			<url>http://repo1.maven.org/maven2</url>
-			<releases>
-				<enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <!-- We put the central repository first, as most artifacts will be
+         found there
+    -->
+    <pluginRepository>
+      <id>central</id>
+      <url>http://repo1.maven.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
         <!-- only look for jars here when they are not present locally -->
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>java.net2</id>
-			<url>http://download.java.net/maven/2
-			</url>
-			<releases>
-				<enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+
+    <pluginRepository>
+      <id>java.net2</id>
+      <url>http://download.java.net/maven/2</url>
+      <releases>
+        <enabled>true</enabled>
         <!-- only look for jars here when they are not present locally -->
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 </project>
