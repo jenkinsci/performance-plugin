@@ -20,6 +20,50 @@ public class JMeterReportTest extends TestCase {
 		jmeterReport = new JMeterReport();
 	}
 
+	public void testAddSample() throws Exception {
+		HttpSample sample1 = new HttpSample();
+		try {
+			jmeterReport.addSample(sample1);
+			fail("An exception must be raised");
+		} catch (SAXException e) {
+			assertEquals(
+					"lb cannot be empty or containing '/' character, please ensure your jmx file specifies name properly for each http sample",
+					e.getMessage());
+		}
+		try {
+			sample1.setUri("invalidCharacter/");
+			jmeterReport.addSample(sample1);
+			fail("An exception must be raised");
+		} catch (SAXException e) {
+			assertEquals(
+					"lb cannot be empty or containing '/' character, please ensure your jmx file specifies name properly for each http sample",
+					e.getMessage());
+		}
+
+		String uri = "uri";
+		sample1.setUri(uri);
+		jmeterReport.addSample(sample1);
+		Map<String, UriReport> uriReportMap = jmeterReport.getUriReportMap();
+		UriReport uriReport = uriReportMap.get(uri);
+		assertNotNull(uriReport);
+		List<HttpSample> httpSampleList = uriReport.getHttpSampleList();
+		assertEquals(1, httpSampleList.size());
+		assertEquals(sample1, httpSampleList.get(0));
+	}
+
+	public void testCountError() throws SAXException {
+		HttpSample sample1 = new HttpSample();
+		sample1.setSuccessful(false);
+		sample1.setUri("sample1");
+		jmeterReport.addSample(sample1);
+
+		HttpSample sample2 = new HttpSample();
+		sample2.setSuccessful(true);
+		sample2.setUri("sample2");
+		jmeterReport.addSample(sample2);
+		assertEquals(1, jmeterReport.countErrors());
+	}
+
 	public void testJMeterReport() throws IOException, SAXException {
 		JMeterReport jmeterReport = new JMeterReport(null, new File(
 				"src/test/resources/JMeterResults.jtl"));
@@ -40,40 +84,6 @@ public class JMeterReportTest extends TestCase {
 		assertEquals(26, secondHttpSample.getDuration());
 		assertEquals(new Date(1219160357663L), secondHttpSample.getTime());
 		assertFalse(secondHttpSample.isSuccessful());
-	}
-
-	public void testAddSample() {
-		HttpSample sample1 = new HttpSample();
-		try {
-			jmeterReport.addSample(sample1);
-			fail("An exception must be raised");
-		} catch (SAXException e) {
-			assertEquals(
-					"lb cannot be empty, please ensure your jmx file specifies name for each http sample",
-					e.getMessage());
-		}
-		String uri = "uri";
-		sample1.setUri(uri);
-		Map<String, UriReport> uriReportMap = jmeterReport.getUriReportMap();
-		UriReport uriReport = uriReportMap.get(uri);
-		assertNotNull(uriReport);
-		List<HttpSample> httpSampleList = uriReport.getHttpSampleList();
-		assertEquals(1, httpSampleList.size());
-		assertEquals(sample1, httpSampleList.get(0));
-
-	}
-
-	public void testCountError() throws SAXException {
-		HttpSample sample1 = new HttpSample();
-		sample1.setSuccessful(false);
-		sample1.setUri("sample1");
-		jmeterReport.addSample(sample1);
-
-		HttpSample sample2 = new HttpSample();
-		sample2.setSuccessful(true);
-		sample2.setUri("sample2");
-		jmeterReport.addSample(sample2);
-		assertEquals(1, jmeterReport.countErrors());
 	}
 
 }

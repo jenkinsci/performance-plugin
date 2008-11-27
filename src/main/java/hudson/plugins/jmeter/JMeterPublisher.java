@@ -22,7 +22,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 public class JMeterPublisher extends Publisher {
 
-	private static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		protected DescriptorImpl() {
 			super(JMeterPublisher.class);
@@ -30,12 +30,12 @@ public class JMeterPublisher extends Publisher {
 
 		@Override
 		public String getDisplayName() {
-			return "Record JMeter report";
+			return "Publish JMeter test result report";
 		}
 
 		@Override
 		public String getHelpFile() {
-			return "/totoro/test/help.html";
+			return "/plugin/jmeter/help.html";
 		}
 
 		@Override
@@ -55,10 +55,23 @@ public class JMeterPublisher extends Publisher {
 
 	public static final Descriptor<Publisher> DESCRIPTOR = new DescriptorImpl();
 
+	public static File getJMeterReport(AbstractBuild<?, ?> build) {
+		return new File(build.getRootDir(), "jmeter.xml");
+	}
+
 	private String filename;
 
 	public Descriptor<Publisher> getDescriptor() {
 		return DESCRIPTOR;
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	@Override
+	public Action getProjectAction(Project project) {
+		return new JMeterProjectAction(project);
 	}
 
 	@Override
@@ -86,7 +99,8 @@ public class JMeterPublisher extends Publisher {
 		final File localReport = getJMeterReport(build);
 		src.copyTo(new FilePath(localReport));
 
-		JMeterBuildAction jmeterBuildAction = new JMeterBuildAction(build);
+		JMeterBuildAction jmeterBuildAction = new JMeterBuildAction(build,
+				logger);
 		build.addAction(jmeterBuildAction);
 
 		if (jmeterBuildAction.isFailed()) {
@@ -98,21 +112,8 @@ public class JMeterPublisher extends Publisher {
 		return true;
 	}
 
-	public static File getJMeterReport(AbstractBuild<?, ?> build) {
-		return new File(build.getRootDir(), "jmeter.xml");
-	}
-
-	@Override
-	public Action getProjectAction(Project project) {
-		return new JMeterProjectAction();
-	}
-
 	public void setFilename(String filename) {
 		this.filename = filename;
-	}
-
-	public String getFilename() {
-		return filename;
 	}
 
 }

@@ -22,6 +22,9 @@ public class JMeterReport implements ModelObject {
 	private JMeterBuildAction buildAction;
 	private final Map<String, UriReport> uriReportMap = new HashMap<String, UriReport>();
 
+	JMeterReport() {
+	}
+
 	JMeterReport(JMeterBuildAction buildAction, File pFile) throws IOException {
 		this.buildAction = buildAction;
 		Digester digester = createDigester();
@@ -30,6 +33,28 @@ public class JMeterReport implements ModelObject {
 		} catch (SAXException e) {
 			throw new IOException2("Failed to parse " + pFile, e);
 		}
+	}
+
+	public void addSample(HttpSample pHttpSample) throws SAXException {
+		String uri = pHttpSample.getUri();
+		if ((uri == null) || uri.contains("/")) {
+			throw new SAXException(
+					"lb cannot be empty or containing '/' character, please ensure your jmx file specifies name properly for each http sample");
+		}
+		UriReport uriReport = uriReportMap.get(uri);
+		if (uriReport == null) {
+			uriReport = new UriReport(this, uri);
+			uriReportMap.put(uri, uriReport);
+		}
+		uriReport.addHttpSample(pHttpSample);
+	}
+
+	public int countErrors() {
+		int nbError = 0;
+		for (UriReport currentReport : uriReportMap.values()) {
+			nbError += currentReport.countErrors();
+		}
+		return nbError;
 	}
 
 	private Digester createDigester() {
@@ -51,38 +76,25 @@ public class JMeterReport implements ModelObject {
 		return digester;
 	}
 
-	JMeterReport() {
-	}
-
-	public UriReport getDynamic(String token, StaplerRequest req,
-			StaplerResponse rsp) throws IOException {
-		return getUriReportMap().get(token);
-	}
-
-	public void addSample(HttpSample pHttpSample) throws SAXException {
-		String uri = pHttpSample.getUri();
-		if (uri == null) {
-			throw new SAXException(
-					"lb cannot be empty, please ensure your jmx file specifies name for each http sample");
-		}
-		UriReport uriReport = uriReportMap.get(uri);
-		if (uriReport == null) {
-			uriReport = new UriReport(this, uri);
-			uriReportMap.put(uri, uriReport);
-		}
-		uriReport.addHttpSample(pHttpSample);
-	}
-
-	public AbstractBuild<?, ?> getBuild() {
-		return buildAction.getBuild();
-	}
-
 	public long getAverage() {
 		long average = 0;
 		for (UriReport currentReport : uriReportMap.values()) {
 			average += currentReport.getAverage() * currentReport.size();
 		}
 		return average / size();
+	}
+
+	public AbstractBuild<?, ?> getBuild() {
+		return buildAction.getBuild();
+	}
+
+	public String getDisplayName() {
+		return "JMeter";
+	}
+
+	public UriReport getDynamic(String token, StaplerRequest req,
+			StaplerResponse rsp) throws IOException {
+		return getUriReportMap().get(token);
 	}
 
 	public long getMax() {
@@ -101,28 +113,16 @@ public class JMeterReport implements ModelObject {
 		return min;
 	}
 
+	public Map<String, UriReport> getUriReportMap() {
+		return uriReportMap;
+	}
+
 	public int size() {
 		int size = 0;
 		for (UriReport currentReport : uriReportMap.values()) {
 			size += currentReport.size();
 		}
 		return size;
-	}
-
-	public int countErrors() {
-		int nbError = 0;
-		for (UriReport currentReport : uriReportMap.values()) {
-			nbError += currentReport.countErrors();
-		}
-		return nbError;
-	}
-
-	public Map<String, UriReport> getUriReportMap() {
-		return uriReportMap;
-	}
-
-	public String getDisplayName() {
-		return "JMeter";
 	}
 
 }

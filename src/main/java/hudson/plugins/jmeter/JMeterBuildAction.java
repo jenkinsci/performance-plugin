@@ -5,10 +5,10 @@ import hudson.model.Action;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.ref.WeakReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.kohsuke.stapler.StaplerProxy;
 
 public class JMeterBuildAction implements Action, StaplerProxy {
@@ -20,10 +20,17 @@ public class JMeterBuildAction implements Action, StaplerProxy {
 
 	private transient WeakReference<JMeterReport> jmeterReport;
 
+	private transient final PrintStream hudsonConsoleWriter;
+
 	private final AbstractBuild<?, ?> build;
 
-	public JMeterBuildAction(AbstractBuild<?, ?> pBuild) {
+	public JMeterBuildAction(AbstractBuild<?, ?> pBuild, PrintStream logger) {
 		build = pBuild;
+		hudsonConsoleWriter = logger;
+	}
+
+	public AbstractBuild<?, ?> getBuild() {
+		return build;
 	}
 
 	public String getDisplayName() {
@@ -34,10 +41,6 @@ public class JMeterBuildAction implements Action, StaplerProxy {
 		return "graph.gif";
 	}
 
-	public String getUrlName() {
-		return "jmeter";
-	}
-
 	public JMeterReport getJmeterReport() {
 		JMeterReport meterReport = null;
 		if ((jmeterReport == null) || (jmeterReport.get() == null)) {
@@ -46,7 +49,13 @@ public class JMeterBuildAction implements Action, StaplerProxy {
 				meterReport = new JMeterReport(this, reportFile);
 				jmeterReport = new WeakReference<JMeterReport>(meterReport);
 			} catch (IOException e) {
-				logger.log(Level.WARNING, "Failed to load " + reportFile, e);
+				logger.warn("Failed to load " + reportFile, e);
+				Throwable ex = e;
+				do {
+					hudsonConsoleWriter.println(ex.getLocalizedMessage());
+					ex = ex.getCause();
+				} while (ex != null);
+
 			}
 		} else {
 			meterReport = jmeterReport.get();
@@ -54,15 +63,15 @@ public class JMeterBuildAction implements Action, StaplerProxy {
 		return meterReport;
 	}
 
-	public boolean isFailed() {
-		return getJmeterReport() == null;
-	}
-
 	public Object getTarget() {
 		return getJmeterReport();
 	}
 
-	public AbstractBuild<?, ?> getBuild() {
-		return build;
+	public String getUrlName() {
+		return "jmeter";
+	}
+
+	public boolean isFailed() {
+		return getJmeterReport() == null;
 	}
 }

@@ -19,10 +19,6 @@ public class UriReport implements ModelObject {
 		setUri(uri);
 	}
 
-	public AbstractBuild getBuild() {
-		return jmeterReport.getBuild();
-	}
-
 	public void addHttpSample(HttpSample httpSample) {
 		httpSampleList.add(httpSample);
 	}
@@ -45,16 +41,24 @@ public class UriReport implements ModelObject {
 		return average / size();
 	}
 
+	public AbstractBuild getBuild() {
+		return jmeterReport.getBuild();
+	}
+
+	public String getDisplayName() {
+		return "toto";
+	}
+
+	public List<HttpSample> getHttpSampleList() {
+		return httpSampleList;
+	}
+
 	public long getMax() {
 		return httpSampleList.get(size() - 1).getDuration();
 	}
 
 	public long getMin() {
 		return httpSampleList.get(0).getDuration();
-	}
-
-	public List<HttpSample> getHttpSampleList() {
-		return httpSampleList;
 	}
 
 	public String getUri() {
@@ -71,9 +75,5 @@ public class UriReport implements ModelObject {
 
 	public int size() {
 		return httpSampleList.size();
-	}
-
-	public String getDisplayName() {
-		return getUri();
 	}
 }
