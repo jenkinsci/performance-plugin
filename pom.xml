@@ -10,5 +10,6 @@
   <artifactId>jmeter</artifactId>
   <packaging>hpi</packaging>
   <version>0.2-SNAPSHOT</version>
+  <name>Hudson JMeter plugin</name>
   <url>http://hudson.gotdns.com/wiki/display/HUDSON/JMeter+Plugin</url>
 </project>
