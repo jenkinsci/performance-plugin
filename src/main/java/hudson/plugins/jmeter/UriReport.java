@@ -14,8 +14,11 @@ public class UriReport implements ModelObject {
 
 	private String uri;
 
-	UriReport(JMeterReport jmeterReport, String uri) {
+	private final String staplerUri;
+
+	UriReport(JMeterReport jmeterReport, String staplerUri, String uri) {
 		this.jmeterReport = jmeterReport;
+		this.staplerUri = staplerUri;
 		setUri(uri);
 	}
 
@@ -45,10 +48,6 @@ public class UriReport implements ModelObject {
 		return jmeterReport.getBuild();
 	}
 
-	public String getDisplayName() {
-		return "toto";
-	}
-
 	public List<HttpSample> getHttpSampleList() {
 		return httpSampleList;
 	}
@@ -75,5 +74,13 @@ public class UriReport implements ModelObject {
 
 	public int size() {
 		return httpSampleList.size();
+	}
+
+	public String getDisplayName() {
+		return getUri();
+	}
+
+	public String getStaplerUri() {
+		return staplerUri;
 	}
 }

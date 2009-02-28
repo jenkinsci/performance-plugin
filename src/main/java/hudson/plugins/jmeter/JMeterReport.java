@@ -20,6 +20,15 @@ import org.xml.sax.SAXException;
 public class JMeterReport implements ModelObject {
 
 	private JMeterBuildAction buildAction;
+
+	JMeterBuildAction getBuildAction() {
+		return buildAction;
+	}
+
+	void setBuildAction(JMeterBuildAction buildAction) {
+		this.buildAction = buildAction;
+	}
+
 	private final Map<String, UriReport> uriReportMap = new HashMap<String, UriReport>();
 
 	JMeterReport() {
@@ -37,14 +46,19 @@ public class JMeterReport implements ModelObject {
 
 	public void addSample(HttpSample pHttpSample) throws SAXException {
 		String uri = pHttpSample.getUri();
-		if ((uri == null) || uri.contains("/")) {
-			throw new SAXException(
-					"lb cannot be empty or containing '/' character, please ensure your jmx file specifies name properly for each http sample");
+		if (uri == null) {
+			buildAction
+					.getHudsonConsoleWriter()
+					.println(
+							"label cannot be empty, please ensure your jmx file specifies name properly for each http sample: skipping sample");
+			return;
 		}
-		UriReport uriReport = uriReportMap.get(uri);
+
+		String staplerUri = uri.replace("http:", "").replaceAll("/", "_");
+		UriReport uriReport = uriReportMap.get(staplerUri);
 		if (uriReport == null) {
-			uriReport = new UriReport(this, uri);
-			uriReportMap.put(uri, uriReport);
+			uriReport = new UriReport(this, staplerUri, uri);
+			uriReportMap.put(staplerUri, uriReport);
 		}
 		uriReport.addHttpSample(pHttpSample);
 	}
@@ -61,27 +75,41 @@ public class JMeterReport implements ModelObject {
 		Digester digester = new Digester();
 		digester.setClassLoader(getClass().getClassLoader());
 		digester.push(this);
-		digester.addObjectCreate("*/httpSample", HttpSample.class);
-		String[] attributeNames = new String[] { "lb", "ts", "t", "s" };
-		String[] propertyNames = new String[] { "uri", "time", "duration",
+		String sampleFormat2_0 = "testResults/sampleResult";
+		String sampleFormat2_1 = "testResults/httpSample";
+		digester.addObjectCreate(sampleFormat2_0, HttpSample.class);
+		digester.addObjectCreate(sampleFormat2_1, HttpSample.class);
+
+		String[] attributeNamesFormat2_0 = new String[] { "label", "timeStamp",
+				"time", "success" };
+		String[] attributeNamesFormat2_1 = new String[] { "lb", "ts", "t", "s" };
+		String[] propertyNames = new String[] { "uri", "date", "duration",
 				"successful" };
-		digester
-				.addSetProperties("*/httpSample", attributeNames, propertyNames);
+		digester.addSetProperties(sampleFormat2_0, attributeNamesFormat2_0,
+				propertyNames);
+		digester.addSetProperties(sampleFormat2_1, attributeNamesFormat2_1,
+				propertyNames);
 		ConvertUtils.register(new Converter() {
 			public Object convert(Class type, Object value) {
 				return new Date(Long.valueOf(value.toString()));
 			}
 		}, Date.class);
-		digester.addSetNext("*/httpSample", "addSample");
+		digester.addSetNext(sampleFormat2_0, "addSample");
+		digester.addSetNext(sampleFormat2_1, "addSample");
 		return digester;
 	}
 
 	public long getAverage() {
-		long average = 0;
-		for (UriReport currentReport : uriReportMap.values()) {
-			average += currentReport.getAverage() * currentReport.size();
+		long result = 0;
+		int size = size();
+		if (size != 0) {
+			long average = 0;
+			for (UriReport currentReport : uriReportMap.values()) {
+				average += currentReport.getAverage() * currentReport.size();
+			}
+			result = average / size;
 		}
-		return average / size();
+		return result;
 	}
 
 	public AbstractBuild<?, ?> getBuild() {

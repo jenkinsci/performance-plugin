@@ -16,7 +16,7 @@ public class HttpSample implements Comparable<HttpSample> {
 		return duration;
 	}
 
-	public Date getTime() {
+	public Date getDate() {
 		return date;
 	}
 
@@ -40,12 +40,8 @@ public class HttpSample implements Comparable<HttpSample> {
 		this.successful = successful;
 	}
 
-	public void setTime(Date time) {
+	public void setDate(Date time) {
 		this.date = time;
-	}
-
-	public void setTime(long time) {
-		this.duration = time;
 	}
 
 	public void setUri(String uri) {

@@ -47,6 +47,10 @@ public class JMeterBuildAction implements Action, StaplerProxy {
 			File reportFile = JMeterPublisher.getJMeterReport(getBuild());
 			try {
 				meterReport = new JMeterReport(this, reportFile);
+				if (meterReport.size() == 0) {
+					hudsonConsoleWriter
+							.println("jmeter report analysis is empty, ensure your jtl file is filled with samples.");
+				}
 				jmeterReport = new WeakReference<JMeterReport>(meterReport);
 			} catch (IOException e) {
 				logger.warn("Failed to load " + reportFile, e);
@@ -55,12 +59,15 @@ public class JMeterBuildAction implements Action, StaplerProxy {
 					hudsonConsoleWriter.println(ex.getLocalizedMessage());
 					ex = ex.getCause();
 				} while (ex != null);
-
 			}
 		} else {
 			meterReport = jmeterReport.get();
 		}
 		return meterReport;
+	}
+
+	PrintStream getHudsonConsoleWriter() {
+		return hudsonConsoleWriter;
 	}
 
 	public Object getTarget() {

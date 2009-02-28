@@ -18,7 +18,7 @@
 				<j:forEach var="c" items="${it.uriReportMap.values()}">
 					<tr bgcolor="${h.ifThenElse(c.failed,'red',null)}">
 						<td>
-							<a href="${h.ifThenElse(nolink!=null,null,c.uri+'/')}">
+							<a href="${h.ifThenElse(nolink!=null,null,c.staplerUri+'/')}">
 								<st:out value="${c.uri}" />
 							</a>
 						</td>

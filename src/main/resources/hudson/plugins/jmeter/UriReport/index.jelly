@@ -20,7 +20,7 @@
 				<j:forEach var="c" items="${it.httpSampleList}">
 					<tr bgcolor="${h.ifThenElse(c.failed,'red',null)}">
 						<td>${c.uri}</td>
-						<td>${c.time}</td>
+						<td>${c.date}</td>
 						<td>${c.duration}</td>
 					</tr>
 				</j:forEach>
