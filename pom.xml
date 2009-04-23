@@ -10,7 +10,7 @@
 	<packaging>hpi</packaging>
 	<version>0.3-SNAPSHOT</version>
 	<name>Hudson JMeter plugin</name>
-	<url>http://hudson.gotdns.com/wiki/display/HUDSON/JMeter+Plugin</url>
+	<url>http://wiki.hudson-ci.org/display/HUDSON/JMeter+Plugin</url>
 	<dependencies>
 		<dependency>
 			<groupId>org.easymock</groupId>
