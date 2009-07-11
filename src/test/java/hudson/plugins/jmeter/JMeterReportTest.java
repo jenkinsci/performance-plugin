@@ -1,5 +1,7 @@
 package hudson.plugins.jmeter;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -7,24 +9,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.easymock.classextension.EasyMock;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 
-public class JMeterReportTest extends TestCase {
+public class JMeterReportTest {
 
 	private JMeterReport jmeterReport;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		JMeterBuildAction buildAction = EasyMock
 				.createMock(JMeterBuildAction.class);
 		jmeterReport = new JMeterReport();
 		jmeterReport.setBuildAction(buildAction);
 	}
 
+	@Test
 	public void testAddSample() throws Exception {
 		PrintStream printStream = EasyMock.createMock(PrintStream.class);
 		EasyMock.expect(jmeterReport.getBuildAction().getHudsonConsoleWriter())
@@ -54,6 +56,7 @@ public class JMeterReportTest extends TestCase {
 		assertEquals(sample1, httpSampleList.get(0));
 	}
 
+	@Test
 	public void testCountError() throws SAXException {
 		HttpSample sample1 = new HttpSample();
 		sample1.setSuccessful(false);
@@ -67,6 +70,7 @@ public class JMeterReportTest extends TestCase {
 		assertEquals(1, jmeterReport.countErrors());
 	}
 
+	@Test
 	public void testJMeterReport() throws IOException, SAXException {
 		JMeterReport jmeterReport = new JMeterReport(null, new File(
 				"src/test/resources/JMeterResults.jtl"));

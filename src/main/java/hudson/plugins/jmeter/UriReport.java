@@ -53,11 +53,19 @@ public class UriReport implements ModelObject {
 	}
 
 	public long getMax() {
-		return httpSampleList.get(size() - 1).getDuration();
+		long max = Long.MIN_VALUE;
+		for (HttpSample currentSample : httpSampleList) {
+			max = Math.max(max, currentSample.getDuration());
+		}
+		return max;
 	}
 
 	public long getMin() {
-		return httpSampleList.get(0).getDuration();
+		long min = Long.MAX_VALUE;
+		for (HttpSample currentSample : httpSampleList) {
+			min = Math.min(min, currentSample.getDuration());
+		}
+		return min;
 	}
 
 	public String getUri() {
