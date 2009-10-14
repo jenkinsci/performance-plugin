@@ -1,16 +1,18 @@
 package hudson.plugins.jmeter;
 
+import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
-import hudson.model.Descriptor;
 import hudson.model.Project;
 import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
+import hudson.tasks.Recorder;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,11 +22,12 @@ import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.StaplerRequest;
 
-public class JMeterPublisher extends Publisher {
+public class JMeterPublisher extends Recorder {
 
+	@Extension
 	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
-		protected DescriptorImpl() {
+		public DescriptorImpl() {
 			super(JMeterPublisher.class);
 		}
 
@@ -40,7 +43,7 @@ public class JMeterPublisher extends Publisher {
 
 		@Override
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-			return true;
+			return Project.class.isAssignableFrom(jobType);
 		}
 
 		@Override
@@ -53,25 +56,23 @@ public class JMeterPublisher extends Publisher {
 
 	}
 
-	public static final Descriptor<Publisher> DESCRIPTOR = new DescriptorImpl();
-
 	public static File getJMeterReport(AbstractBuild<?, ?> build) {
 		return new File(build.getRootDir(), "jmeter.xml");
 	}
 
 	private String filename;
 
-	public Descriptor<Publisher> getDescriptor() {
-		return DESCRIPTOR;
-	}
-
 	public String getFilename() {
 		return filename;
 	}
 
 	@Override
-	public Action getProjectAction(Project project) {
-		return new JMeterProjectAction(project);
+	public Action getProjectAction(AbstractProject<?,?> project) {
+		return project instanceof Project ? new JMeterProjectAction((Project)project) : null;
+	}
+
+	public BuildStepMonitor getRequiredMonitorService() {
+		return BuildStepMonitor.BUILD;
 	}
 
 	@Override
@@ -80,7 +81,7 @@ public class JMeterPublisher extends Publisher {
 		PrintStream logger = listener.getLogger();
 		logger.println("Recording JMeter reports " + getFilename());
 
-		final FilePath src = build.getProject().getWorkspace().child(
+		final FilePath src = build.getWorkspace().child(
 				getFilename());
 
 		if (!src.exists()) {

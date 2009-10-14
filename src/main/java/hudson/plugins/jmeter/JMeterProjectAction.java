@@ -154,7 +154,7 @@ public class JMeterProjectAction implements Action {
 
 	public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
 			throws IOException {
-		if (ChartUtil.awtProblem) {
+		if (ChartUtil.awtProblemCause != null) {
 			// not available. send out error message
 			response.sendRedirect2(request.getContextPath()
 					+ "/images/headless.png");
@@ -188,7 +188,7 @@ public class JMeterProjectAction implements Action {
 
 	public void doRespondingTimeGraph(StaplerRequest request,
 			StaplerResponse response) throws IOException {
-		if (ChartUtil.awtProblem) {
+		if (ChartUtil.awtProblemCause != null) {
 			// not available. send out error message
 			response.sendRedirect2(request.getContextPath()
 					+ "/images/headless.png");
