@@ -1,9 +1,8 @@
 package hudson.plugins.jmeter;
 
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.Project;
-import hudson.model.Result;
 import hudson.util.ChartUtil;
 import hudson.util.ColorPalette;
 import hudson.util.DataSetBuilder;
@@ -32,13 +31,13 @@ import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-public class JMeterProjectAction implements Action {
+public final class JMeterProjectAction implements Action {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Project<?, ?> project;
+	public final AbstractProject<?, ?> project;
 
-	public JMeterProjectAction(Project<?, ?> project) {
+	public JMeterProjectAction(AbstractProject project) {
 		this.project = project;
 	}
 
@@ -93,7 +92,7 @@ public class JMeterProjectAction implements Action {
 
 		final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot
 				.getRenderer();
-		renderer.setStroke(new BasicStroke(4.0f));
+		renderer.setBaseStroke(new BasicStroke(4.0f));
 		ColorPalette.apply(renderer);
 
 		// crop extra space around the graph
@@ -143,7 +142,7 @@ public class JMeterProjectAction implements Action {
 
 		final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot
 				.getRenderer();
-		renderer.setStroke(new BasicStroke(4.0f));
+		renderer.setBaseStroke(new BasicStroke(4.0f));
 		ColorPalette.apply(renderer);
 
 		// crop extra space around the graph
@@ -170,16 +169,18 @@ public class JMeterProjectAction implements Action {
 		for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
 			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator
 					.next();
-			if (Result.SUCCESS.equals(currentBuild.getResult())) {
-				NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(
-						currentBuild);
-				JMeterBuildAction jmeterBuildAction = currentBuild
-						.getAction(JMeterBuildAction.class);
-				JMeterReport jmeterReport = jmeterBuildAction.getJmeterReport();
-				dataSetBuilderErrors.add(((double) jmeterReport.countErrors())
-						/ jmeterReport.size() * 100, "errors", label);
-
+			NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+			JMeterBuildAction jmeterBuildAction = currentBuild
+					.getAction(JMeterBuildAction.class);
+			if (jmeterBuildAction == null) {
+				continue;
 			}
+			JMeterReport jmeterReport = jmeterBuildAction.getJmeterReport();
+			if (jmeterReport == null) {
+				continue;
+			}
+			dataSetBuilderErrors.add(jmeterReport.errorPercent(), "errors",
+					label);
 		}
 
 		ChartUtil.generateGraph(request, response,
@@ -204,18 +205,20 @@ public class JMeterProjectAction implements Action {
 		for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
 			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator
 					.next();
-			if (Result.SUCCESS.equals(currentBuild.getResult())) {
-				NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(
-						currentBuild);
-				JMeterBuildAction jmeterBuildAction = currentBuild
-						.getAction(JMeterBuildAction.class);
-				JMeterReport jmeterReport = jmeterBuildAction.getJmeterReport();
-				dataSetBuilderAverage.add(jmeterReport.getMax(), "max", label);
-				dataSetBuilderAverage.add(jmeterReport.getAverage(), "average",
-						label);
-				dataSetBuilderAverage.add(jmeterReport.getMin(), "min", label);
-
+			NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+			JMeterBuildAction jmeterBuildAction = currentBuild
+					.getAction(JMeterBuildAction.class);
+			if (jmeterBuildAction == null) {
+				continue;
 			}
+			JMeterReport jmeterReport = jmeterBuildAction.getJmeterReport();
+			if (jmeterReport == null) {
+				continue;
+			}
+			dataSetBuilderAverage.add(jmeterReport.getMax(), "max", label);
+			dataSetBuilderAverage.add(jmeterReport.getAverage(), "average",
+					label);
+			dataSetBuilderAverage.add(jmeterReport.getMin(), "min", label);
 		}
 
 		ChartUtil.generateGraph(request, response,
@@ -231,7 +234,7 @@ public class JMeterProjectAction implements Action {
 		return "graph.gif";
 	}
 
-	public Project<?, ?> getProject() {
+	public AbstractProject<?, ?> getProject() {
 		return project;
 	}
 

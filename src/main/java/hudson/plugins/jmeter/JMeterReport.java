@@ -71,6 +71,10 @@ public class JMeterReport implements ModelObject {
 		return nbError;
 	}
 
+	public double errorPercent() {
+		return ((double) countErrors()) / size() * 100;
+	}
+
 	private Digester createDigester() {
 		Digester digester = new Digester();
 		digester.setClassLoader(getClass().getClassLoader());

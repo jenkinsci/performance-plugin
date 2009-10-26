@@ -7,7 +7,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
-import hudson.model.Project;
 import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -24,7 +23,14 @@ import org.kohsuke.stapler.StaplerRequest;
 
 public class JMeterPublisher extends Recorder {
 
+	@Override
+	public BuildStepDescriptor<Publisher> getDescriptor() {
+		return DESCRIPTOR;
+	}
+
 	@Extension
+	public static final BuildStepDescriptor<Publisher> DESCRIPTOR = new DescriptorImpl();
+
 	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		public DescriptorImpl() {
@@ -43,7 +49,7 @@ public class JMeterPublisher extends Recorder {
 
 		@Override
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-			return Project.class.isAssignableFrom(jobType);
+			return true;
 		}
 
 		@Override
@@ -54,6 +60,28 @@ public class JMeterPublisher extends Recorder {
 			return jmeterPublisher;
 		}
 
+	}
+
+	private int errorUnstableThreshold = 0;
+
+	private int errorFailedThreshold = 0;
+
+	public int getErrorUnstableThreshold() {
+		return errorUnstableThreshold;
+	}
+
+	public void setErrorUnstableThreshold(int errorUnstableThreshold) {
+		this.errorUnstableThreshold = Math.max(0, Math.min(
+				errorUnstableThreshold, 100));
+	}
+
+	public int getErrorFailedThreshold() {
+		return errorFailedThreshold;
+	}
+
+	public void setErrorFailedThreshold(int errorFailedThreshold) {
+		this.errorFailedThreshold = Math.max(0, Math.min(errorFailedThreshold,
+				100));
 	}
 
 	public static File getJMeterReport(AbstractBuild<?, ?> build) {
@@ -67,8 +95,8 @@ public class JMeterPublisher extends Recorder {
 	}
 
 	@Override
-	public Action getProjectAction(AbstractProject<?,?> project) {
-		return project instanceof Project ? new JMeterProjectAction((Project)project) : null;
+	public Action getProjectAction(AbstractProject<?, ?> project) {
+		return new JMeterProjectAction(project);
 	}
 
 	public BuildStepMonitor getRequiredMonitorService() {
@@ -81,8 +109,7 @@ public class JMeterPublisher extends Recorder {
 		PrintStream logger = listener.getLogger();
 		logger.println("Recording JMeter reports " + getFilename());
 
-		final FilePath src = build.getWorkspace().child(
-				getFilename());
+		final FilePath src = build.getWorkspace().child(getFilename());
 
 		if (!src.exists()) {
 			if (build.getResult().isWorseThan(Result.UNSTABLE)) {
@@ -91,9 +118,10 @@ public class JMeterPublisher extends Recorder {
 				// so don't report an error
 				return true;
 			}
-			logger.println("JMeter file " + src
-					+ " not found. Has the report generated?");
 			build.setResult(Result.FAILURE);
+			logger.println("JMeter file " + src
+					+ " not found. Has the report generated? Setting Build to "
+					+ build.getResult().toString());
 			return true;
 		}
 
@@ -105,10 +133,33 @@ public class JMeterPublisher extends Recorder {
 		build.addAction(jmeterBuildAction);
 
 		if (jmeterBuildAction.isFailed()) {
-			logger
-					.println("JMeter report analysis failed. Setting Build to unstable.");
 			build.setResult(Result.UNSTABLE);
+			logger.println("JMeter report analysis failed. Setting Build to "
+					+ build.getResult().toString());
+			return true;
 		}
+
+		if (errorUnstableThreshold > 0 && errorUnstableThreshold < 100) {
+			logger.println("JMeter's percentage error greater or equal than "
+					+ errorUnstableThreshold + "% sets the build as "
+					+ Result.UNSTABLE.toString().toLowerCase());
+		}
+		if (errorFailedThreshold > 0 && errorFailedThreshold < 100) {
+			logger.println("JMeter's percentage error greater or equal than "
+					+ errorFailedThreshold + "% sets the build as "
+					+ Result.FAILURE.toString().toLowerCase());
+		}
+		double errorPercent = jmeterBuildAction.getJmeterReport()
+				.errorPercent();
+		if (errorFailedThreshold > 0 && errorPercent >= errorFailedThreshold) {
+			build.setResult(Result.FAILURE);
+		} else if (errorUnstableThreshold > 0
+				&& errorPercent >= errorUnstableThreshold) {
+			build.setResult(Result.UNSTABLE);
+		}  
+		logger.println("JMeter has reported a " + errorPercent
+				+ "% of errors running the tests. Setting Build to "
+				+ build.getResult().toString());
 
 		return true;
 	}

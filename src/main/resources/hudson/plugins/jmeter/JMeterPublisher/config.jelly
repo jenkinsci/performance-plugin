@@ -11,4 +11,35 @@
            ">
 		<f:textbox name="jmeter.filename" value="${instance.filename}" />
 	</f:entry>
+    <f:entry title="JMeter threshold"
+        description="
+           Specify the error percentage threshold that set the build unstable or failed (a value of 0 means: don't use this threshold).
+           ">
+           <table width="250px">
+              <thead>
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <img src="${rootURL}/images/16x16/yellow.gif" alt="100%" /> Unstable
+                  </td>
+                  <td colspan="2">
+                    <img src="${rootURL}/images/16x16/red.gif" alt="100%" /> Failed
+                  </td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="vertical-align:middle">Thresholds:</td>
+                  <td>
+                    <f:textbox name="jmeter.errorUnstableThreshold" value="${instance.errorUnstableThreshold}" /> 
+                  </td>
+                  <td> % </td>
+                  <td>
+                    <f:textbox name="jmeter.errorFailedThreshold" value="${instance.errorFailedThreshold}" />
+                  </td>
+                  <td> % </td>
+                </tr>
+              </tbody>    
+            </table>  
+    </f:entry>
 </j:jelly>
