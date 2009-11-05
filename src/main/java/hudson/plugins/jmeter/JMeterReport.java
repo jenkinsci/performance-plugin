@@ -1,7 +1,6 @@
 package hudson.plugins.jmeter;
 
 import hudson.model.AbstractBuild;
-import hudson.model.ModelObject;
 import hudson.util.IOException2;
 
 import java.io.File;
@@ -10,16 +9,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.Converter;
-import org.apache.commons.digester.Digester;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.xml.sax.Attributes; 
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
-public class JMeterReport implements ModelObject {
+public class JMeterReport extends DefaultHandler {
 
 	private JMeterBuildAction buildAction;
+	
+	private HttpSample httpSample;
 
 	JMeterBuildAction getBuildAction() {
 		return buildAction;
@@ -36,9 +40,17 @@ public class JMeterReport implements ModelObject {
 
 	JMeterReport(JMeterBuildAction buildAction, File pFile) throws IOException {
 		this.buildAction = buildAction;
-		Digester digester = createDigester();
-		try {
-			digester.parse(pFile);
+		
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setValidating(false);
+        factory.setNamespaceAware(false);
+        SAXParser parser;
+
+        try {
+			parser = factory.newSAXParser();
+			parser.parse(pFile, this);
+		} catch (ParserConfigurationException e) {
+			throw new IOException2("Failed to create parser ", e);
 		} catch (SAXException e) {
 			throw new IOException2("Failed to parse " + pFile, e);
 		}
@@ -75,34 +87,6 @@ public class JMeterReport implements ModelObject {
 		return ((double) countErrors()) / size() * 100;
 	}
 
-	private Digester createDigester() {
-		Digester digester = new Digester();
-		digester.setClassLoader(getClass().getClassLoader());
-		digester.push(this);
-		String sampleFormat2_0 = "testResults/sampleResult";
-		String sampleFormat2_1 = "testResults/httpSample";
-		digester.addObjectCreate(sampleFormat2_0, HttpSample.class);
-		digester.addObjectCreate(sampleFormat2_1, HttpSample.class);
-
-		String[] attributeNamesFormat2_0 = new String[] { "label", "timeStamp",
-				"time", "success" };
-		String[] attributeNamesFormat2_1 = new String[] { "lb", "ts", "t", "s" };
-		String[] propertyNames = new String[] { "uri", "date", "duration",
-				"successful" };
-		digester.addSetProperties(sampleFormat2_0, attributeNamesFormat2_0,
-				propertyNames);
-		digester.addSetProperties(sampleFormat2_1, attributeNamesFormat2_1,
-				propertyNames);
-		ConvertUtils.register(new Converter() {
-			public Object convert(Class type, Object value) {
-				return new Date(Long.valueOf(value.toString()));
-			}
-		}, Date.class);
-		digester.addSetNext(sampleFormat2_0, "addSample");
-		digester.addSetNext(sampleFormat2_1, "addSample");
-		return digester;
-	}
-
 	public long getAverage() {
 		long result = 0;
 		int size = size();
@@ -127,6 +111,14 @@ public class JMeterReport implements ModelObject {
 	public UriReport getDynamic(String token, StaplerRequest req,
 			StaplerResponse rsp) throws IOException {
 		return getUriReportMap().get(token);
+	}
+
+	public HttpSample getHttpSample() {
+		return httpSample;
+	}
+
+	public void setHttpSample(HttpSample httpSample) {
+		this.httpSample = httpSample;
 	}
 
 	public long getMax() {
@@ -156,5 +148,21 @@ public class JMeterReport implements ModelObject {
 		}
 		return size;
 	}
-
+	
+	/**
+	 * 2 different XML formats are taken into account during the parsing
+	 * 2_0 = "label", "timeStamp", "time", "success"
+	 * 2_1 = "lb", "ts", "t", "s"
+	 */
+	@Override
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+		if ("httpSample".equals(qName)) {
+        	HttpSample sample = new HttpSample();
+        	sample.setDate(new Date(Long.valueOf(attributes.getValue("ts")!=null?attributes.getValue("ts"):attributes.getValue("timeStamp"))));
+        	sample.setDuration(Long.valueOf(attributes.getValue("t")!=null?attributes.getValue("t"):attributes.getValue("time")));
+        	sample.setSuccessful(Boolean.valueOf(attributes.getValue("s")!=null?attributes.getValue("s"):attributes.getValue("success")));
+        	sample.setUri(attributes.getValue("lb")!=null?attributes.getValue("lb"):attributes.getValue("label"));
+        	addSample(sample);
+        }
+    }
 }
