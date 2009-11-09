@@ -48,15 +48,14 @@ public class JMeterBuildAction implements Action, StaplerProxy {
 			try {
 				meterReport = new JMeterReport(this, reportFile);
 				if (meterReport.size() == 0) {
-					hudsonConsoleWriter
-							.println("jmeter report analysis is empty, ensure your jtl file is filled with samples.");
+					logger.warn("jmeter report analysis is empty, ensure your jtl file is filled with samples.");
 				}
 				jmeterReport = new WeakReference<JMeterReport>(meterReport);
 			} catch (IOException e) {
 				logger.warn("Failed to load " + reportFile, e);
 				Throwable ex = e;
 				do {
-					hudsonConsoleWriter.println(ex.getLocalizedMessage());
+					logger.warn(ex.getLocalizedMessage());
 					ex = ex.getCause();
 				} while (ex != null);
 			}
