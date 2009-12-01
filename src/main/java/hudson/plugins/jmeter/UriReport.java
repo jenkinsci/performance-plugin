@@ -3,18 +3,22 @@ package hudson.plugins.jmeter;
 import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UriReport implements ModelObject {
+public class UriReport implements ModelObject, Comparable<UriReport> {
 
-	private final JMeterReport jmeterReport;
+	public static String END_JMETER_PARAMETER = ".endjmeterparameter";
 
 	private final List<HttpSample> httpSampleList = new ArrayList<HttpSample>();
 
-	private String uri;
+	private final JMeterReport jmeterReport;
 
 	private final String staplerUri;
+
+	private String uri;
 
 	UriReport(JMeterReport jmeterReport, String staplerUri, String uri) {
 		this.jmeterReport = jmeterReport;
@@ -24,6 +28,13 @@ public class UriReport implements ModelObject {
 
 	public void addHttpSample(HttpSample httpSample) {
 		httpSampleList.add(httpSample);
+	}
+
+	public int compareTo(UriReport uriReport) {
+		if (uriReport == this) {
+			return 0;
+		}
+		return uriReport.getUri().compareTo(this.getUri());
 	}
 
 	public int countErrors() {
@@ -48,8 +59,16 @@ public class UriReport implements ModelObject {
 		return jmeterReport.getBuild();
 	}
 
+	public String getDisplayName() {
+		return getUri();
+	}
+
 	public List<HttpSample> getHttpSampleList() {
 		return httpSampleList;
+	}
+
+	public JMeterReport getJmeterReport() {
+		return jmeterReport;
 	}
 
 	public long getMax() {
@@ -68,6 +87,10 @@ public class UriReport implements ModelObject {
 		return min;
 	}
 
+	public String getStaplerUri() {
+		return staplerUri;
+	}
+
 	public String getUri() {
 		return uri;
 	}
@@ -84,11 +107,11 @@ public class UriReport implements ModelObject {
 		return httpSampleList.size();
 	}
 
-	public String getDisplayName() {
-		return getUri();
+	public String encodeUriReport() throws UnsupportedEncodingException {
+		StringBuilder sb = new StringBuilder(120);
+		sb.append(jmeterReport.getReportFileName()).append(GraphConfigurationDetail.SEPARATOR).append(getStaplerUri())
+				.append(END_JMETER_PARAMETER);
+		return URLEncoder.encode(sb.toString(), "UTF-8");
 	}
 
-	public String getStaplerUri() {
-		return staplerUri;
-	}
 }

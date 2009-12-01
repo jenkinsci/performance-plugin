@@ -1,0 +1,33 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <l:layout xmlns:jm="/hudson/plugins/jmeter/tags">
+  <st:include it="${it.build}" page="sidepanel.jelly" />
+    <l:main-panel>
+      <j:forEach var="jmeterReport" items="${it.getJmeterListOrdered()}">
+        <h1>${jmeterReport.getReportFileName()}</h1>
+        <h2>Overall JMeter Summary</h2>
+        <table border="1">
+          <jm:captionLine />
+          <tr>
+            <td>All URIs</td>
+            <jm:summaryTable it="${jmeterReport}" />
+          </tr>
+        </table>
+        <h2>JMeter Breakdown by URI</h2>
+        <table class="sortable" border="1">
+          <jm:captionLine />
+          <j:forEach var="uriReport" items="${jmeterReport.getUriListOrdered()}">
+            <tr bgcolor="${h.ifThenElse(uriReport.failed,'red',null)}">
+              <td>
+                <a href="./uriReport/${uriReport.encodeUriReport()}">
+                  <st:out value="${uriReport.getUri()}" />
+                </a>
+              </td>
+              <jm:summaryTable it="${uriReport}" />
+            </tr>
+          </j:forEach>
+        </table>					
+      </j:forEach> 
+    </l:main-panel>
+  </l:layout>
+</j:jelly>

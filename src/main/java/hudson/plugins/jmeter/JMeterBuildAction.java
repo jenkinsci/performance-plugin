@@ -7,30 +7,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.kohsuke.stapler.StaplerProxy;
 
 public class JMeterBuildAction implements Action, StaplerProxy {
-
-	private static final Logger logger = Logger
-			.getLogger(JMeterBuildAction.class.getName());
-
 	private static final long serialVersionUID = 1L;
-
-	private transient WeakReference<JMeterReport> jmeterReport;
-
-	private transient final PrintStream hudsonConsoleWriter;
 
 	private final AbstractBuild<?, ?> build;
 
+	private transient final PrintStream hudsonConsoleWriter;
+
+	private transient WeakReference<JMeterReportMap> jmeterReportMap;
+
+	private static final Logger logger = Logger.getLogger(JMeterBuildAction.class.getName());
+	
 	public JMeterBuildAction(AbstractBuild<?, ?> pBuild, PrintStream logger) {
 		build = pBuild;
 		hudsonConsoleWriter = logger;
-	}
-
-	public AbstractBuild<?, ?> getBuild() {
-		return build;
+		jmeterReportMap = new WeakReference<JMeterReportMap>(new JMeterReportMap(this));
 	}
 
 	public String getDisplayName() {
@@ -41,43 +38,43 @@ public class JMeterBuildAction implements Action, StaplerProxy {
 		return "graph.gif";
 	}
 
-	public JMeterReport getJmeterReport() {
-		JMeterReport meterReport = null;
-		if ((jmeterReport == null) || (jmeterReport.get() == null)) {
-			File reportFile = JMeterPublisher.getJMeterReport(getBuild());
-			try {
-				meterReport = new JMeterReport(this, reportFile);
-				if (meterReport.size() == 0) {
-					logger.warn("jmeter report analysis is empty, ensure your jtl file is filled with samples.");
-				}
-				jmeterReport = new WeakReference<JMeterReport>(meterReport);
-			} catch (IOException e) {
-				logger.warn("Failed to load " + reportFile, e);
-				Throwable ex = e;
-				do {
-					logger.warn(ex.getLocalizedMessage());
-					ex = ex.getCause();
-				} while (ex != null);
-			}
-		} else {
-			meterReport = jmeterReport.get();
+	public String getUrlName() {
+		return "jmeter";
+	}
+
+	public Object getTarget() {
+		File repo = new File(build.getRootDir(), JMeterReportMap.getJMeterReportDirRelativePath());
+		List<File> pFileList = new ArrayList<File>(0);
+		for (File file : repo.listFiles()) {
+			pFileList.add(file);
 		}
-		return meterReport;
+		JMeterReportMap jmList = null;
+		try {
+			jmList = new JMeterReportMap(this, pFileList);
+		} catch (IOException e) {
+			logger.error(e);
+		}
+		return jmList;
+	}
+
+	public AbstractBuild<?, ?> getBuild() {
+		return build;
 	}
 
 	PrintStream getHudsonConsoleWriter() {
 		return hudsonConsoleWriter;
 	}
 
-	public Object getTarget() {
-		return getJmeterReport();
+	public WeakReference<JMeterReportMap> getJmeterReportMap() {
+		JMeterReportMap reportMap;
+		if(this.jmeterReportMap == null || this.jmeterReportMap.get() == null) {
+			reportMap = new JMeterReportMap(this);
+			this.jmeterReportMap = new WeakReference<JMeterReportMap>(reportMap);	
+		}
+		return this.jmeterReportMap;
 	}
 
-	public String getUrlName() {
-		return "jmeter";
-	}
-
-	public boolean isFailed() {
-		return getJmeterReport() == null;
+	public void setJmeterReportMap(WeakReference<JMeterReportMap> jmeterReportMap) {
+		this.jmeterReportMap = jmeterReportMap;
 	}
 }

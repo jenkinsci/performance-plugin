@@ -1,17 +1,22 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
-	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-	<l:layout>
-		<st:include it="${it.project}" page="sidepanel.jelly" />
-		<l:main-panel>
-			<h1>JMeter Trend</h1>
-      
-      <!-- TODO: how do I make this clickable? -->
-			<div>
-				<img src="./respondingTimeGraph?width=640&amp;height=480" width="640"
-					height="480" />
-				<img src="./errorsGraph?width=640&amp;height=480" width="640"
-					height="480" />
-			</div>
-		</l:main-panel>
-	</l:layout>
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">	
+  <l:layout>
+    <st:include it="${it.project}" page="sidepanel.jelly" />
+    <l:main-panel>
+      <h1>JMeter Trend</h1>
+      <div>
+        <a href="${from.urlName}configure">Configure...</a>
+      </div>
+      <div>
+        <j:forEach var="jmeterReport" items="${it.jmeterReportList}">
+          <br/>
+          <h1><center>${jmeterReport}</center></h1>
+          <center>
+            <img src="./respondingTimeGraph?width=300&amp;height=225&amp;jmeterReportPosition=${jmeterReport}" width="300" height="225" />
+            <img src="./errorsGraph?width=300&amp;height=225&amp;jmeterReportPosition=${jmeterReport}" width="300" height="225" />
+          </center>
+        </j:forEach>
+      </div>
+    </l:main-panel>
+  </l:layout>
 </j:jelly>

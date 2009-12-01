@@ -11,10 +11,16 @@ import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -35,24 +41,32 @@ public final class JMeterProjectAction implements Action {
 
 	private static final long serialVersionUID = 1L;
 
+	/** Logger. */
+	private static final Logger LOGGER = Logger.getLogger(JMeterProjectAction.class.getName());
+
 	public final AbstractProject<?, ?> project;
+
+	private transient List<String> jmeterReportList;
+
+	public String getDisplayName() {
+		return "JMeter trend";
+	}
+
+	public String getIconFileName() {
+		return "graph.gif";
+	}
+
+	public String getUrlName() {
+		return "jmeter";
+	}
 
 	public JMeterProjectAction(AbstractProject project) {
 		this.project = project;
 	}
 
-	private boolean checkIfGraphModified(StaplerRequest request,
-			StaplerResponse response) throws IOException {
-		AbstractBuild<?, ?> build = getProject().getLastBuild();
-		Calendar t = build.getTimestamp();
-
-		return request.checkIfModified(t, response);
-	}
-
 	private JFreeChart createErrorsChart(CategoryDataset dataset) {
 
-		final JFreeChart chart = ChartFactory.createLineChart(
-				"Percentage of errors", // chart
+		final JFreeChart chart = ChartFactory.createLineChart("Percentage of errors", // chart
 				// title
 				null, // unused
 				"%", // range axis label
@@ -90,8 +104,7 @@ public final class JMeterProjectAction implements Action {
 		rangeAxis.setUpperBound(100);
 		rangeAxis.setLowerBound(0);
 
-		final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot
-				.getRenderer();
+		final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
 		renderer.setBaseStroke(new BasicStroke(4.0f));
 		ColorPalette.apply(renderer);
 
@@ -103,8 +116,7 @@ public final class JMeterProjectAction implements Action {
 
 	private JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
 
-		final JFreeChart chart = ChartFactory.createLineChart(
-				"Responding time", // chart
+		final JFreeChart chart = ChartFactory.createLineChart("Responding time", // chart
 				// title
 				null, // unused
 				"ms", // range axis label
@@ -140,8 +152,7 @@ public final class JMeterProjectAction implements Action {
 		final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 		rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-		final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot
-				.getRenderer();
+		final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
 		renderer.setBaseStroke(new BasicStroke(4.0f));
 		ColorPalette.apply(renderer);
 
@@ -151,95 +162,223 @@ public final class JMeterProjectAction implements Action {
 		return chart;
 	}
 
-	public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
-			throws IOException {
+	public void doErrorsGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+		JMeterReportPosition jmeterReportPosition = new JMeterReportPosition();
+		request.bindParameters(jmeterReportPosition);
+		String jmeterReportNameFile = jmeterReportPosition.getJmeterReportPosition();
+		if (jmeterReportNameFile == null) {
+			if (getJmeterReportList().size() == 1) {
+				jmeterReportNameFile = getJmeterReportList().get(0);
+			} else {
+				return;
+			}
+		}
 		if (ChartUtil.awtProblemCause != null) {
 			// not available. send out error message
-			response.sendRedirect2(request.getContextPath()
-					+ "/images/headless.png");
+			response.sendRedirect2(request.getContextPath() + "/images/headless.png");
 			return;
 		}
-		if (checkIfGraphModified(request, response)) {
-			return;
-		}
-
+		// if (checkIfGraphModified(request, response)) {
+		// return;
+		// }
 		DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderErrors = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-
 		List<?> builds = getProject().getBuilds();
-		for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
-			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator
-					.next();
-			NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-			JMeterBuildAction jmeterBuildAction = currentBuild
-					.getAction(JMeterBuildAction.class);
-			if (jmeterBuildAction == null) {
-				continue;
-			}
-			JMeterReport jmeterReport = jmeterBuildAction.getJmeterReport();
-			if (jmeterReport == null) {
-				continue;
-			}
-			dataSetBuilderErrors.add(jmeterReport.errorPercent(), "errors",
-					label);
-		}
+		List<Integer> buildsLimits = getFirstAndLastBuild(request, builds);
 
-		ChartUtil.generateGraph(request, response,
-				createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
+		int nbBuildsToAnalyze = builds.size();
+		for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
+			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator.next();
+			if (nbBuildsToAnalyze <= buildsLimits.get(1) && buildsLimits.get(0) <= nbBuildsToAnalyze) {
+				NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+				JMeterBuildAction jmeterBuildAction = currentBuild.getAction(JMeterBuildAction.class);
+				if (jmeterBuildAction == null) {
+					continue;
+				}
+				JMeterReport jmeterReport = null;
+				jmeterReport = jmeterBuildAction.getJmeterReportMap().get().getJmeterReport(jmeterReportNameFile);
+				if (jmeterReport == null) {
+					nbBuildsToAnalyze--;
+					continue;
+				}
+				dataSetBuilderErrors.add(jmeterReport.errorPercent(), "errors", label);
+			}
+			nbBuildsToAnalyze--;
+		}
+		ChartUtil.generateGraph(request, response, createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
 	}
 
-	public void doRespondingTimeGraph(StaplerRequest request,
-			StaplerResponse response) throws IOException {
+	public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+		JMeterReportPosition jmeterReportPosition = new JMeterReportPosition();
+		request.bindParameters(jmeterReportPosition);
+		String jmeterReportNameFile = jmeterReportPosition.getJmeterReportPosition();
+		if (jmeterReportNameFile == null) {
+			if (getJmeterReportList().size() == 1) {
+				jmeterReportNameFile = getJmeterReportList().get(0);
+			} else {
+				return;
+			}
+		}
 		if (ChartUtil.awtProblemCause != null) {
 			// not available. send out error message
-			response.sendRedirect2(request.getContextPath()
-					+ "/images/headless.png");
+			response.sendRedirect2(request.getContextPath() + "/images/headless.png");
 			return;
 		}
-		if (checkIfGraphModified(request, response)) {
-			return;
-		}
-
 		DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-
 		List<?> builds = getProject().getBuilds();
+		List<Integer> buildsLimits = getFirstAndLastBuild(request, builds);
+
+		int nbBuildsToAnalyze = builds.size();
 		for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
-			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator
-					.next();
-			NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-			JMeterBuildAction jmeterBuildAction = currentBuild
-					.getAction(JMeterBuildAction.class);
-			if (jmeterBuildAction == null) {
-				continue;
+			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator.next();
+			if (nbBuildsToAnalyze <= buildsLimits.get(1) && buildsLimits.get(0) <= nbBuildsToAnalyze) {
+				NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+				JMeterBuildAction jmeterBuildAction = currentBuild.getAction(JMeterBuildAction.class);
+				if (jmeterBuildAction == null) {
+					continue;
+				}
+				JMeterReport jmeterReport = null;
+				jmeterReport = jmeterBuildAction.getJmeterReportMap().get().getJmeterReport(jmeterReportNameFile);
+				if (jmeterReport == null) {
+					nbBuildsToAnalyze--;
+					continue;
+				}
+				dataSetBuilderAverage.add(jmeterReport.getMax(), "max", label);
+				dataSetBuilderAverage.add(jmeterReport.getAverage(), "average", label);
+				dataSetBuilderAverage.add(jmeterReport.getMin(), "min", label);
 			}
-			JMeterReport jmeterReport = jmeterBuildAction.getJmeterReport();
-			if (jmeterReport == null) {
-				continue;
-			}
-			dataSetBuilderAverage.add(jmeterReport.getMax(), "max", label);
-			dataSetBuilderAverage.add(jmeterReport.getAverage(), "average",
-					label);
-			dataSetBuilderAverage.add(jmeterReport.getMin(), "min", label);
+			nbBuildsToAnalyze--;
 		}
-
-		ChartUtil.generateGraph(request, response,
-				createRespondingTimeChart(dataSetBuilderAverage.build()), 400,
-				200);
+		ChartUtil.generateGraph(request, response, createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
 	}
 
-	public String getDisplayName() {
-		return "JMeter trend";
-	}
-
-	public String getIconFileName() {
-		return "graph.gif";
+	/**
+	 * <p>
+	 * give a list of two Integer : the smallest build to use and the biggest.
+	 * </p>
+	 * 
+	 * @param request
+	 * @param builds
+	 * @return outList
+	 */
+	private List<Integer> getFirstAndLastBuild(StaplerRequest request, List<?> builds) {
+		List<Integer> outList = new ArrayList<Integer>(2);
+		GraphConfigurationDetail graphConf = (GraphConfigurationDetail) createUserConfiguration(request);
+		String configType = graphConf.getConfigType();
+		if (configType.compareToIgnoreCase(GraphConfigurationDetail.BUILD_CONFIG) == 0) {
+			if (graphConf.getBuildCount() <= 0) {
+				configType = GraphConfigurationDetail.NONE_CONFIG;
+			} else {
+				if (builds.size() - graphConf.getBuildCount() > 0) {
+					outList.add(builds.size() - graphConf.getBuildCount() + 1);
+				} else {
+					outList.add(1);
+				}
+				outList.add(builds.size());
+			}
+		} else if (configType.compareToIgnoreCase(GraphConfigurationDetail.DATE_CONFIG) == 0) {
+			if (GraphConfigurationDetail.DEFAULT_DATE.compareTo(graphConf.getFirstDayCount()) == 0
+					&& GraphConfigurationDetail.DEFAULT_DATE.compareTo(graphConf.getLastDayCount()) == 0) {
+				configType = GraphConfigurationDetail.NONE_CONFIG;
+			} else {
+				int firstBuild = -1;
+				int lastBuild = -1;
+				int var = builds.size();
+				GregorianCalendar firstDate = null;
+				GregorianCalendar lastDate = null;
+				try {
+					firstDate = GraphConfigurationDetail.getGregorianCalendarFromString(graphConf.getFirstDayCount());
+					lastDate = GraphConfigurationDetail.getGregorianCalendarFromString(graphConf.getLastDayCount());
+					lastDate.set(GregorianCalendar.HOUR_OF_DAY, 23);
+					lastDate.set(GregorianCalendar.MINUTE, 59);
+					lastDate.set(GregorianCalendar.SECOND, 59);
+				} catch (ParseException e) {
+					LOGGER.log(Level.SEVERE,"Error during the manage of the Calendar",e);
+				}
+				for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
+					AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator.next();
+					GregorianCalendar buildDate = new GregorianCalendar();
+					buildDate.setTime(currentBuild.getTimestamp().getTime());
+					if (firstDate.getTime().before(buildDate.getTime())) {
+						firstBuild = var;
+					}
+					if (lastBuild < 0 && lastDate.getTime().after(buildDate.getTime())) {
+						lastBuild = var;
+					}
+					var--;
+				}
+				outList.add(firstBuild);
+				outList.add(lastBuild);
+			}
+		}
+		if (configType.compareToIgnoreCase(GraphConfigurationDetail.NONE_CONFIG) == 0) {
+			outList.add(1);
+			outList.add(builds.size());
+		}
+		return outList;
 	}
 
 	public AbstractProject<?, ?> getProject() {
 		return project;
 	}
 
-	public String getUrlName() {
-		return "jmeter";
+	public List<String> getJmeterReportList() {
+		this.jmeterReportList = new ArrayList<String>(0);
+		if (this.project != null && this.project.getSomeBuildWithWorkspace() != null) {
+			File file = new File(this.project.getSomeBuildWithWorkspace().getRootDir(), JMeterReportMap
+					.getJMeterReportDirRelativePath());
+			if (file.exists()) {
+				for (File jmeterReportFile : file.listFiles()) {
+					this.jmeterReportList.add(jmeterReportFile.getName());
+				}
+			}
+		}
+		if (this.jmeterReportList != null) {
+			Collections.sort(jmeterReportList);
+		}
+		return this.jmeterReportList;
+	}
+
+	public void setJmeterReportList(List<String> jmeterReportList) {
+		this.jmeterReportList = jmeterReportList;
+	}
+
+	public boolean isTrendVisibleOnProjectDashboard() {
+		if (getJmeterReportList() != null && getJmeterReportList().size() == 1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns the graph configuration for this project.
+	 * 
+	 * @param link
+	 *            not used
+	 * @param request
+	 *            Stapler request
+	 * @param response
+	 *            Stapler response
+	 * @return the dynamic result of the analysis (detail page).
+	 */
+	public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
+		if ("configure".equals(link)) {
+			return createUserConfiguration(request);
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Creates a view to configure the trend graph for the current user.
+	 * 
+	 * @param request
+	 *            Stapler request
+	 * @return a view to configure the trend graph for the current user
+	 */
+	private Object createUserConfiguration(final StaplerRequest request) {
+		GraphConfigurationDetail graph = new GraphConfigurationDetail(project, "jmeter", request);
+		return graph;
 	}
 
 }

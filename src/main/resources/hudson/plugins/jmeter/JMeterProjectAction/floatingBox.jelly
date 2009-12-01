@@ -1,9 +1,14 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
-  <div class="test-trend-caption">
-    JMeter Trend
-  </div>
-  <div>
-    <a href="jmeter/"><img src="jmeter/respondingTimeGraph" /></a>
-    <a href="jmeter/"><img src="jmeter/errorsGraph" /></a>
-  </div>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local"  xmlns:my="myTagLib" >
+  <j:if test="${from.isTrendVisibleOnProjectDashboard()}">
+    <div class="test-trend-caption">
+      JMeter Trend
+      <br/>
+      <div>
+      </div>
+      <br/>
+      <a href="jmeter/"><img src="jmeter/respondingTimeGraph" /></a>
+      <br/>
+      <a href="jmeter/"><img src="jmeter/errorsGraph" /></a>
+    </div>	
+  </j:if>
 </j:jelly>

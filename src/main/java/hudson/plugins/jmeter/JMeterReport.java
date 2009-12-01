@@ -5,8 +5,12 @@ import hudson.util.IOException2;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -15,23 +19,17 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.xml.sax.Attributes; 
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class JMeterReport extends DefaultHandler {
+public class JMeterReport extends DefaultHandler implements Comparable<JMeterReport> {
 
 	private JMeterBuildAction buildAction;
-	
+
 	private HttpSample httpSample;
 
-	JMeterBuildAction getBuildAction() {
-		return buildAction;
-	}
-
-	void setBuildAction(JMeterBuildAction buildAction) {
-		this.buildAction = buildAction;
-	}
+	private String reportFileName = null;
 
 	private final Map<String, UriReport> uriReportMap = new HashMap<String, UriReport>();
 
@@ -40,13 +38,14 @@ public class JMeterReport extends DefaultHandler {
 
 	JMeterReport(JMeterBuildAction buildAction, File pFile) throws IOException {
 		this.buildAction = buildAction;
-		
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setValidating(false);
-        factory.setNamespaceAware(false);
-        SAXParser parser;
+		this.reportFileName = pFile.getName();
 
-        try {
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		factory.setValidating(false);
+		factory.setNamespaceAware(false);
+		SAXParser parser;
+
+		try {
 			parser = factory.newSAXParser();
 			parser.parse(pFile, this);
 		} catch (ParserConfigurationException e) {
@@ -59,13 +58,10 @@ public class JMeterReport extends DefaultHandler {
 	public void addSample(HttpSample pHttpSample) throws SAXException {
 		String uri = pHttpSample.getUri();
 		if (uri == null) {
-			buildAction
-					.getHudsonConsoleWriter()
-					.println(
-							"label cannot be empty, please ensure your jmx file specifies name properly for each http sample: skipping sample");
+			buildAction.getHudsonConsoleWriter().println(
+					"label cannot be empty, please ensure your jmx file specifies name properly for each http sample: skipping sample");
 			return;
 		}
-
 		String staplerUri = uri.replace("http:", "").replaceAll("/", "_");
 		UriReport uriReport = uriReportMap.get(staplerUri);
 		if (uriReport == null) {
@@ -73,6 +69,13 @@ public class JMeterReport extends DefaultHandler {
 			uriReportMap.put(staplerUri, uriReport);
 		}
 		uriReport.addHttpSample(pHttpSample);
+	}
+
+	public int compareTo(JMeterReport jmReport) {
+		if (this == jmReport) {
+			return 0;
+		}
+		return getReportFileName().compareTo(((JMeterReport) jmReport).getReportFileName());
 	}
 
 	public int countErrors() {
@@ -104,21 +107,20 @@ public class JMeterReport extends DefaultHandler {
 		return buildAction.getBuild();
 	}
 
+	JMeterBuildAction getBuildAction() {
+		return buildAction;
+	}
+
 	public String getDisplayName() {
 		return "JMeter";
 	}
 
-	public UriReport getDynamic(String token, StaplerRequest req,
-			StaplerResponse rsp) throws IOException {
+	public UriReport getDynamic(String token, StaplerRequest req, StaplerResponse rsp) throws IOException {
 		return getUriReportMap().get(token);
 	}
 
 	public HttpSample getHttpSample() {
 		return httpSample;
-	}
-
-	public void setHttpSample(HttpSample httpSample) {
-		this.httpSample = httpSample;
 	}
 
 	public long getMax() {
@@ -137,8 +139,31 @@ public class JMeterReport extends DefaultHandler {
 		return min;
 	}
 
+	public String getReportFileName() {
+		return reportFileName;
+	}
+
+	public List<UriReport> getUriListOrdered() {
+		Collection<UriReport> uriCollection = getUriReportMap().values();
+		List<UriReport> UriReportList = new ArrayList<UriReport>(uriCollection);
+		Collections.sort(UriReportList);
+		return UriReportList;
+	}
+
 	public Map<String, UriReport> getUriReportMap() {
 		return uriReportMap;
+	}
+
+	void setBuildAction(JMeterBuildAction buildAction) {
+		this.buildAction = buildAction;
+	}
+
+	public void setHttpSample(HttpSample httpSample) {
+		this.httpSample = httpSample;
+	}
+
+	public void setReportFileName(String reportFileName) {
+		this.reportFileName = reportFileName;
 	}
 
 	public int size() {
@@ -148,21 +173,24 @@ public class JMeterReport extends DefaultHandler {
 		}
 		return size;
 	}
-	
+
 	/**
-	 * 2 different XML formats are taken into account during the parsing
-	 * 2_0 = "label", "timeStamp", "time", "success"
-	 * 2_1 = "lb", "ts", "t", "s"
+	 * 2 different XML formats are taken into account during the parsing 2_0 =
+	 * "label", "timeStamp", "time", "success" 2_1 = "lb", "ts", "t", "s"
 	 */
 	@Override
-    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if ("httpSample".equals(qName)) {
-        	HttpSample sample = new HttpSample();
-        	sample.setDate(new Date(Long.valueOf(attributes.getValue("ts")!=null?attributes.getValue("ts"):attributes.getValue("timeStamp"))));
-        	sample.setDuration(Long.valueOf(attributes.getValue("t")!=null?attributes.getValue("t"):attributes.getValue("time")));
-        	sample.setSuccessful(Boolean.valueOf(attributes.getValue("s")!=null?attributes.getValue("s"):attributes.getValue("success")));
-        	sample.setUri(attributes.getValue("lb")!=null?attributes.getValue("lb"):attributes.getValue("label"));
-        	addSample(sample);
-        }
-    }
+			HttpSample sample = new HttpSample();
+			sample.setDate(new Date(Long.valueOf(attributes.getValue("ts") != null ? attributes.getValue("ts")
+					: attributes.getValue("timeStamp"))));
+			sample.setDuration(Long.valueOf(attributes.getValue("t") != null ? attributes.getValue("t") : attributes
+					.getValue("time")));
+			sample.setSuccessful(Boolean.valueOf(attributes.getValue("s") != null ? attributes.getValue("s")
+					: attributes.getValue("success")));
+			sample.setUri(attributes.getValue("lb") != null ? attributes.getValue("lb") : attributes.getValue("label"));
+			addSample(sample);
+		}
+	}
+
 }
