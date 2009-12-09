@@ -175,12 +175,19 @@ public class JMeterReport extends DefaultHandler implements Comparable<JMeterRep
 	}
 
 	/**
-	 * 2 different XML formats are taken into account during the parsing 2_0 =
-	 * "label", "timeStamp", "time", "success" 2_1 = "lb", "ts", "t", "s"
+	 * jMeter XML log format is in http://jakarta.apache.org/jmeter/usermanual/listeners.html
+	 * 
+	 * There are two different tags which delimit jmeter samples:
+	 *    httpSample for http samples 
+	 *    sample     for non http samples
+	 *   
+	 * There are also two different XML formats which we have to handle: 
+	 *   v2.0 = "label", "timeStamp", "time", "success" 
+	 *   v2.1 = "lb", "ts", "t", "s"
 	 */
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		if ("httpSample".equals(qName)) {
+		if ("httpSample".equalsIgnoreCase(qName) || "sample".equalsIgnoreCase(qName)) {
 			HttpSample sample = new HttpSample();
 			sample.setDate(new Date(Long.valueOf(attributes.getValue("ts") != null ? attributes.getValue("ts")
 					: attributes.getValue("timeStamp"))));
