@@ -1,6 +1,9 @@
 package hudson.plugins.jmeter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,5 +95,24 @@ public class JMeterReportTest {
 		assertEquals(new Date(1219160357663L), secondHttpSample.getDate());
 		assertFalse(secondHttpSample.isSuccessful());
 	}
+	
+    @Test 
+    public void testJMeterNonHTTPSamplesMultiThread() throws IOException, SAXException {
+        JMeterReport jmeterReport = new JMeterReport(null, new File(
+                "src/test/resources/JMeterResultsMultiThread.jtl"));
+        
+        Map<String, UriReport> uriReportMap = jmeterReport.getUriReportMap();
+        assertEquals(1, uriReportMap.size());
+        
+        String uri = "WebService(SOAP) Request";
+        UriReport report = uriReportMap.get(uri);
+        assertNotNull(report);
+        
+        int[] expectedDurations = {894, 1508, 1384, 1581, 996};
+        for (int i= 0; i < expectedDurations.length; i++) {
+            HttpSample sample = report.getHttpSampleList().get(i);
+            assertEquals(expectedDurations[i], sample.getDuration());
+        }
+    }
 
 }

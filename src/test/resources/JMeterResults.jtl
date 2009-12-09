@@ -8,6 +8,7 @@
     <failureMessage></failureMessage>
   </assertionResult>
 </httpSample>
+
 <sample time="26" lt="26" timeStamp="1219160357663" success="false" label="Logout" rc="200" rm="OK" tn="Threads serveur1 1-2" dt="text" by="188">
   <assertionResult>
     <name>OK 2000000</name>
