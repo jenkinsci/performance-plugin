@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testResults version="1.2">
+<sample t="894" lt="0" ts="1236948710884" s="true" lb="WebService(SOAP) Request" rc="200" rm="" tn="Thread Group 1-1" dt="text" by="13647"/>
+<sample t="1508" lt="0" ts="1236948716606" s="true" lb="WebService(SOAP) Request" rc="200" rm="" tn="Thread Group 1-2" dt="text" by="13647"/>
+<sample t="1384" lt="0" ts="1236948722606" s="true" lb="WebService(SOAP) Request" rc="200" rm="" tn="Thread Group 1-3" dt="text" by="13647"/>
+<sample t="1581" lt="0" ts="1236948728607" s="true" lb="WebService(SOAP) Request" rc="200" rm="" tn="Thread Group 1-4" dt="text" by="13647"/>
+<sample t="996" lt="0" ts="1236948734606" s="true" lb="WebService(SOAP) Request" rc="200" rm="" tn="Thread Group 1-5" dt="text" by="13647"/>
+
+</testResults>
