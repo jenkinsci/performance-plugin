@@ -8,12 +8,12 @@
     <failureMessage></failureMessage>
   </assertionResult>
 </httpSample>
-<httpSample t="26" lt="26" ts="1219160357663" s="false" lb="Logout" rc="200" rm="OK" tn="Threads serveur1 1-2" dt="text" by="188">
+<sample time="26" lt="26" timeStamp="1219160357663" success="false" label="Logout" rc="200" rm="OK" tn="Threads serveur1 1-2" dt="text" by="188">
   <assertionResult>
     <name>OK 2000000</name>
     <failure>false</failure>
     <error>false</error>
     <failureMessage></failureMessage>
   </assertionResult>
-</httpSample>
+</sample>
 </testResults>
