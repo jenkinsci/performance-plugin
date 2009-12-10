@@ -8,9 +8,28 @@
 	</parent>
 	<artifactId>jmeter</artifactId>
 	<packaging>hpi</packaging>
-	<version>0.4-SNAPSHOT</version>
+	<version>0.3</version>
 	<name>Hudson JMeter plugin</name>
 	<url>http://wiki.hudson-ci.org/display/HUDSON/JMeter+Plugin</url>
+
+        <developers>
+          <developer>
+            <id>vergnes</id>
+            <name>Vergnes</name>
+            <email>vergnes@dev.java.net</email>
+          </developer>
+          <developer>
+            <id>aespy</id>
+            <name>Arnaud Espy</name>
+            <email>aespy@dev.java.net</email>
+          </developer>
+          <developer>
+            <id>manuel_carrasco</id>
+            <name>Manuel Carrasco Monino</name>
+            <email>manolo@apache.org</email>
+          </developer>
+        </developers>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.easymock</groupId>
