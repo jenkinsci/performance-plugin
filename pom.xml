@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>jmeter</artifactId>
 	<packaging>hpi</packaging>
-	<version>0.3.0</version>
+	<version>0.3.1-SNAPSHOT</version>
 	<name>Hudson JMeter plugin</name>
 	<url>http://wiki.hudson-ci.org/display/HUDSON/JMeter+Plugin</url>
 
@@ -51,10 +51,4 @@
             </plugin>
         </plugins>
     </build>
-
-  <scm>
-    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/jmeter-0.3.0</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/jmeter-0.3.0</developerConnection>
-    <url>https://hudson.dev.java.net/source/browse/hudson/tags/jmeter-0.3.0</url>
-  </scm>
 </project>
