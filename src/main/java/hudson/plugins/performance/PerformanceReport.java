@@ -1,4 +1,4 @@
-package hudson.plugins.jmeter;
+package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
 import hudson.util.IOException2;
@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -23,9 +24,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class JMeterReport extends DefaultHandler implements Comparable<JMeterReport> {
+public class PerformanceReport extends DefaultHandler implements Comparable<PerformanceReport> {
 
-	private JMeterBuildAction buildAction;
+	private PerformanceBuildAction buildAction;
 
 	private HttpSample httpSample;
 
@@ -33,10 +34,10 @@ public class JMeterReport extends DefaultHandler implements Comparable<JMeterRep
 
 	private final Map<String, UriReport> uriReportMap = new HashMap<String, UriReport>();
 
-	JMeterReport() {
+	PerformanceReport() {
 	}
 
-	JMeterReport(JMeterBuildAction buildAction, File pFile) throws IOException {
+	PerformanceReport(PerformanceBuildAction buildAction, File pFile) throws IOException {
 		this.buildAction = buildAction;
 		this.reportFileName = pFile.getName();
 
@@ -71,11 +72,11 @@ public class JMeterReport extends DefaultHandler implements Comparable<JMeterRep
 		uriReport.addHttpSample(pHttpSample);
 	}
 
-	public int compareTo(JMeterReport jmReport) {
+	public int compareTo(PerformanceReport jmReport) {
 		if (this == jmReport) {
 			return 0;
 		}
-		return getReportFileName().compareTo(((JMeterReport) jmReport).getReportFileName());
+		return getReportFileName().compareTo(((PerformanceReport) jmReport).getReportFileName());
 	}
 
 	public int countErrors() {
@@ -107,12 +108,12 @@ public class JMeterReport extends DefaultHandler implements Comparable<JMeterRep
 		return buildAction.getBuild();
 	}
 
-	JMeterBuildAction getBuildAction() {
+	PerformanceBuildAction getBuildAction() {
 		return buildAction;
 	}
 
 	public String getDisplayName() {
-		return "JMeter";
+		return "Performance";
 	}
 
 	public UriReport getDynamic(String token, StaplerRequest req, StaplerResponse rsp) throws IOException {
@@ -154,7 +155,7 @@ public class JMeterReport extends DefaultHandler implements Comparable<JMeterRep
 		return uriReportMap;
 	}
 
-	void setBuildAction(JMeterBuildAction buildAction) {
+	void setBuildAction(PerformanceBuildAction buildAction) {
 		this.buildAction = buildAction;
 	}
 
@@ -175,7 +176,7 @@ public class JMeterReport extends DefaultHandler implements Comparable<JMeterRep
 	}
 
 	/**
-	 * jMeter XML log format is in http://jakarta.apache.org/jmeter/usermanual/listeners.html
+	 * Performance XML log format is in http://jakarta.apache.org/jmeter/usermanual/listeners.html
 	 * 
 	 * There are two different tags which delimit jmeter samples:
 	 *    httpSample for http samples 
@@ -184,20 +185,69 @@ public class JMeterReport extends DefaultHandler implements Comparable<JMeterRep
 	 * There are also two different XML formats which we have to handle: 
 	 *   v2.0 = "label", "timeStamp", "time", "success" 
 	 *   v2.1 = "lb", "ts", "t", "s"
+	 *   
+	 * JUnit XML format is different : tag "testcase" with attributes : "name"
+	 * and "time". If there is one error, there is an other tag, "failure" in
+	 * testcase tag.
+	 * For exemple, Junit format is used by SOAPUI.
 	 */
 	@Override
-	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		if ("httpSample".equalsIgnoreCase(qName) || "sample".equalsIgnoreCase(qName)) {
+	public void startElement(String uri, String localName, String qName,
+			Attributes attributes) throws SAXException {
+		if ("httpSample".equalsIgnoreCase(qName)
+				|| "sample".equalsIgnoreCase(qName)) {
 			HttpSample sample = new HttpSample();
-			sample.setDate(new Date(Long.valueOf(attributes.getValue("ts") != null ? attributes.getValue("ts")
-					: attributes.getValue("timeStamp"))));
-			sample.setDuration(Long.valueOf(attributes.getValue("t") != null ? attributes.getValue("t") : attributes
-					.getValue("time")));
-			sample.setSuccessful(Boolean.valueOf(attributes.getValue("s") != null ? attributes.getValue("s")
-					: attributes.getValue("success")));
-			sample.setUri(attributes.getValue("lb") != null ? attributes.getValue("lb") : attributes.getValue("label"));
+			sample
+					.setDate(new Date(
+							Long
+									.valueOf(attributes.getValue("ts") != null ? attributes
+											.getValue("ts")
+											: attributes.getValue("timeStamp"))));
+			sample.setDuration(Long
+					.valueOf(attributes.getValue("t") != null ? attributes
+							.getValue("t") : attributes.getValue("time")));
+			sample.setSuccessful(Boolean
+					.valueOf(attributes.getValue("s") != null ? attributes
+							.getValue("s") : attributes.getValue("success")));
+			sample.setUri(attributes.getValue("lb") != null ? attributes
+					.getValue("lb") : attributes.getValue("label"));
 			addSample(sample);
+		} else if ("testcase".equalsIgnoreCase(qName)) {
+			if (status != 0) {
+				addSample(currentSample);
+			}
+			status = 1;
+			currentSample = new HttpSample();
+			currentSample.setDate(new Date(0));
+			String time = attributes.getValue("time");
+			StringTokenizer st = new StringTokenizer(time, ".");
+			List<String> listTime = new ArrayList<String>(2);
+			while (st.hasMoreTokens()) {
+				listTime.add(st.nextToken());
+			}
+			currentSample.setDuration(Long.valueOf(listTime.get(0)));
+			currentSample.setSuccessful(true);
+			currentSample.setUri(attributes.getValue("name"));
+
+		} else if ("failure".equalsIgnoreCase(qName) && status != 0) {
+			currentSample.setSuccessful(false);
+			addSample(currentSample);
+			status = 0;
 		}
 	}
+
+	@Override
+	public void endElement(String uri, String localName, String qName)
+			throws SAXException {
+		if (("testsuite".compareToIgnoreCase(qName) == 0 || "testcase"
+				.compareToIgnoreCase(qName) == 0)
+				&& status != 0) {
+			addSample(currentSample);
+			status = 0;
+		}
+	}
+
+	private static HttpSample currentSample;
+	private static int status;
 
 }

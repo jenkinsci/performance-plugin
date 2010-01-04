@@ -1,4 +1,4 @@
-package hudson.plugins.jmeter;
+package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
@@ -10,18 +10,18 @@ import java.util.List;
 
 public class UriReport implements ModelObject, Comparable<UriReport> {
 
-	public static String END_JMETER_PARAMETER = ".endjmeterparameter";
+	public static String END_PERFORMANCE_PARAMETER = ".endperformanceparameter";
 
 	private final List<HttpSample> httpSampleList = new ArrayList<HttpSample>();
 
-	private final JMeterReport jmeterReport;
+	private final PerformanceReport performanceReport;
 
 	private final String staplerUri;
 
 	private String uri;
 
-	UriReport(JMeterReport jmeterReport, String staplerUri, String uri) {
-		this.jmeterReport = jmeterReport;
+	UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
+		this.performanceReport = performanceReport;
 		this.staplerUri = staplerUri;
 		setUri(uri);
 	}
@@ -56,7 +56,7 @@ public class UriReport implements ModelObject, Comparable<UriReport> {
 	}
 
 	public AbstractBuild getBuild() {
-		return jmeterReport.getBuild();
+		return performanceReport.getBuild();
 	}
 
 	public String getDisplayName() {
@@ -67,8 +67,8 @@ public class UriReport implements ModelObject, Comparable<UriReport> {
 		return httpSampleList;
 	}
 
-	public JMeterReport getJmeterReport() {
-		return jmeterReport;
+	public PerformanceReport getPerformanceReport() {
+		return performanceReport;
 	}
 
 	public long getMax() {
@@ -109,8 +109,8 @@ public class UriReport implements ModelObject, Comparable<UriReport> {
 
 	public String encodeUriReport() throws UnsupportedEncodingException {
 		StringBuilder sb = new StringBuilder(120);
-		sb.append(jmeterReport.getReportFileName()).append(GraphConfigurationDetail.SEPARATOR).append(getStaplerUri())
-				.append(END_JMETER_PARAMETER);
+		sb.append(performanceReport.getReportFileName()).append(GraphConfigurationDetail.SEPARATOR).append(getStaplerUri())
+				.append(END_PERFORMANCE_PARAMETER);
 		return URLEncoder.encode(sb.toString(), "UTF-8");
 	}
 

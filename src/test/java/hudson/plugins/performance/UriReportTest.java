@@ -1,6 +1,9 @@
-package hudson.plugins.jmeter;
+package hudson.plugins.performance;
 
 import static org.junit.Assert.*;
+
+import hudson.plugins.performance.HttpSample;
+import hudson.plugins.performance.UriReport;
 
 import java.util.Date;
 

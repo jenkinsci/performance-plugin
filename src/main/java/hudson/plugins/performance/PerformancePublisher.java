@@ -1,4 +1,4 @@
-package hudson.plugins.jmeter;
+package hudson.plugins.performance;
 
 import hudson.Extension;
 import hudson.FilePath;
@@ -27,7 +27,7 @@ import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.StaplerRequest;
 
-public class JMeterPublisher extends Recorder {
+public class PerformancePublisher extends Recorder {
 
 	@Override
 	public BuildStepDescriptor<Publisher> getDescriptor() {
@@ -40,17 +40,17 @@ public class JMeterPublisher extends Recorder {
 	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		public DescriptorImpl() {
-			super(JMeterPublisher.class);
+			super(PerformancePublisher.class);
 		}
 
 		@Override
 		public String getDisplayName() {
-			return "Publish JMeter test result report";
+			return "Publish Performance test result report";
 		}
 
 		@Override
 		public String getHelpFile() {
-			return "/plugin/jmeter/help.html";
+			return "/plugin/performance/help.html";
 		}
 
 		@Override
@@ -61,9 +61,9 @@ public class JMeterPublisher extends Recorder {
 		@Override
 		public Publisher newInstance(StaplerRequest req, JSONObject formData)
 				throws hudson.model.Descriptor.FormException {
-			JMeterPublisher jmeterPublisher = new JMeterPublisher();
-			req.bindParameters(jmeterPublisher, "jmeter.");
-			return jmeterPublisher;
+			PerformancePublisher performancePublisher = new PerformancePublisher();
+			req.bindParameters(performancePublisher, "performance.");
+			return performancePublisher;
 		}
 
 	}
@@ -74,14 +74,14 @@ public class JMeterPublisher extends Recorder {
 
 	private String filename;
 
-	public static File getJMeterReport(AbstractBuild<?, ?> build, String jmeterReportName) {
-		return new File(build.getRootDir(), JMeterReportMap
-				.getJMeterReportFileRelativePath(getJMeterReportBuildFileName(jmeterReportName)));
+	public static File getPerformanceReport(AbstractBuild<?, ?> build, String performanceReportName) {
+		return new File(build.getRootDir(), PerformanceReportMap
+				.getPerformanceReportFileRelativePath(getPerformanceReportBuildFileName(performanceReportName)));
 	}
 
 	@Override
 	public Action getProjectAction(AbstractProject<?, ?> project) {
-		return new JMeterProjectAction(project);
+		return new PerformanceProjectAction(project);
 	}
 
 	public BuildStepMonitor getRequiredMonitorService() {
@@ -90,18 +90,18 @@ public class JMeterPublisher extends Recorder {
 
 	/**
 	 * <p>
-	 * Delete the date suffix appended to the JMeter result files by the Maven
-	 * JMeter plugin
+	 * Delete the date suffix appended to the Performance result files by the Maven
+	 * Performance plugin
 	 * </p>
 	 * 
-	 * @param jmeterReportWorkspaceName
-	 * @return the name of the jmeterReport in the Build
+	 * @param performanceReportWorkspaceName
+	 * @return the name of the PerformanceReport in the Build
 	 */
-	public static String getJMeterReportBuildFileName(String jmeterReportWorkspaceName) {
-		String result = jmeterReportWorkspaceName;
-		if (jmeterReportWorkspaceName != null) {
+	public static String getPerformanceReportBuildFileName(String performanceReportWorkspaceName) {
+		String result = performanceReportWorkspaceName;
+		if (performanceReportWorkspaceName != null) {
 			Pattern p = Pattern.compile("-[0-9]*\\.xml");
-			Matcher matcher = p.matcher(jmeterReportWorkspaceName);
+			Matcher matcher = p.matcher(performanceReportWorkspaceName);
 			if (matcher.find()) {
 				result = matcher.replaceAll(".xml");
 			}
@@ -113,11 +113,11 @@ public class JMeterPublisher extends Recorder {
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
 			throws InterruptedException, IOException {
 		PrintStream logger = listener.getLogger();
-		logger.println("Recording JMeter reports " + getFilename());
+		logger.println("Recording Performance reports " + getFilename());
 		List<String> filenameList = manageFilename(filename);
 		boolean result = true;
-		JMeterBuildAction jmeterBuildAction = new JMeterBuildAction(build, logger);
-		build.addAction(jmeterBuildAction);
+		PerformanceBuildAction performanceBuildAction = new PerformanceBuildAction(build, logger);
+		build.addAction(performanceBuildAction);
 		for (String filename : filenameList) {
 			if (filename.compareTo("") != 0) {
 				final FilePath src = build.getWorkspace().child(filename);
@@ -130,22 +130,22 @@ public class JMeterPublisher extends Recorder {
 						return true;
 					}
 					build.setResult(Result.FAILURE);
-					logger.println("JMeter file " + src + " not found. Has the report generated? Setting Build to "
+					logger.println("Performance file " + src + " not found. Has the report generated? Setting Build to "
 							+ build.getResult().toString());
 					return true;
 				}
 				;
 				if (!src.isDirectory()) {
-					result = result && manageOneJMeterReport(build, src, jmeterBuildAction, logger);
+					result = result && manageOnePerformanceReport(build, src, performanceBuildAction, logger);
 				} else {
 					List<FilePath> listSrc = new ArrayList<FilePath>(0);
 					listSrc = src.list();
 					Boolean resultManage = true;
-					List<String> jmeterReportListNameFile = new ArrayList<String>(listSrc.size());
+					List<String> performanceReportListNameFile = new ArrayList<String>(listSrc.size());
 					for (FilePath filePath : listSrc) {
 						resultManage = resultManage
-								&& manageOneJMeterReport(build, filePath, jmeterBuildAction, logger);
-						jmeterReportListNameFile.add(getJMeterReportBuildFileName(filePath.getName()));
+								&& manageOnePerformanceReport(build, filePath, performanceBuildAction, logger);
+						performanceReportListNameFile.add(getPerformanceReportBuildFileName(filePath.getName()));
 					}
 
 					result = result && resultManage;
@@ -158,53 +158,53 @@ public class JMeterPublisher extends Recorder {
 
 	/**
 	 * <p>
-	 * This function is use to analyse One jmeter report and save this analyze
+	 * This function is use to analyse One Performance report and save this analyze
 	 * in global variable
 	 * </p>
 	 * 
 	 * @param build
 	 * @param src
-	 * @param jmeterBuildAction
+	 * @param performanceBuildAction
 	 * @param logger
 	 * @return boolean
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	private Boolean manageOneJMeterReport(AbstractBuild<?, ?> build, FilePath src, JMeterBuildAction jmeterBuildAction,
+	private Boolean manageOnePerformanceReport(AbstractBuild<?, ?> build, FilePath src, PerformanceBuildAction performanceBuildAction,
 			PrintStream logger) throws IOException, InterruptedException {
-		final File localReport = getJMeterReport(build, src.getName());
+		final File localReport = getPerformanceReport(build, src.getName());
 		if (!localReport.getParentFile().exists()) {
 			localReport.getParentFile().mkdirs();
 		}
 		if (src.isDirectory()) {
-			logger.println("File : "+src.getName()+" is a directory, ant not a JMeter Report");
+			logger.println("File : "+src.getName()+" is a directory, ant not a Performance Report");
 			return true;
 		}
 		src.copyTo(new FilePath(localReport));
-		if (jmeterBuildAction.getJmeterReportMap().get().isFailed(
-				(JMeterPublisher.getJMeterReportBuildFileName(src.getName())))) {
+		if (performanceBuildAction.getPerformanceReportMap().get().isFailed(
+				(PerformancePublisher.getPerformanceReportBuildFileName(src.getName())))) {
 			build.setResult(Result.UNSTABLE);
-			logger.println("JMeter report analysis failed. Setting Build to " + build.getResult().toString());
+			logger.println("Performance report analysis failed. Setting Build to " + build.getResult().toString());
 			return true;
 		}
 
 		if (errorUnstableThreshold > 0 && errorUnstableThreshold < 100) {
-			logger.println("JMeter's percentage error greater or equal than " + errorUnstableThreshold
+			logger.println("Performance's percentage error greater or equal than " + errorUnstableThreshold
 					+ "% sets the build as " + Result.UNSTABLE.toString().toLowerCase());
 		}
 		if (errorFailedThreshold > 0 && errorFailedThreshold < 100) {
-			logger.println("JMeter's percentage error greater or equal than " + errorFailedThreshold
+			logger.println("Performance's percentage error greater or equal than " + errorFailedThreshold
 					+ "% sets the build as " + Result.FAILURE.toString().toLowerCase());
 		}
-		double errorPercent = jmeterBuildAction.getJmeterReportMap().get().getJmeterReport(
-				(JMeterPublisher.getJMeterReportBuildFileName(src.getName()))).errorPercent();
+		double errorPercent = performanceBuildAction.getPerformanceReportMap().get().getPerformanceReport(
+				(PerformancePublisher.getPerformanceReportBuildFileName(src.getName()))).errorPercent();
 		if (errorFailedThreshold > 0 && errorPercent >= errorFailedThreshold) {
 			build.setResult(Result.FAILURE);
 		} else if (errorUnstableThreshold > 0 && errorPercent >= errorUnstableThreshold
 				&& build.getResult() != Result.FAILURE) {
 			build.setResult(Result.UNSTABLE);
 		}
-		logger.println("JMeter has reported a " + errorPercent + "% of errors running the tests. Setting Build to "
+		logger.println("Performance has reported a " + errorPercent + "% of errors running the tests. Setting Build to "
 				+ build.getResult().toString());
 
 		return true;

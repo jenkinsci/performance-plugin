@@ -1,4 +1,4 @@
-package hudson.plugins.jmeter;
+package hudson.plugins.performance;
 
 import java.util.List;
 

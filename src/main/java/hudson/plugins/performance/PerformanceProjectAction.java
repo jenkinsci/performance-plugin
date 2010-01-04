@@ -1,4 +1,4 @@
-package hudson.plugins.jmeter;
+package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -37,19 +37,19 @@ import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-public final class JMeterProjectAction implements Action {
+public final class PerformanceProjectAction implements Action {
 
 	private static final long serialVersionUID = 1L;
 
 	/** Logger. */
-	private static final Logger LOGGER = Logger.getLogger(JMeterProjectAction.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(PerformanceProjectAction.class.getName());
 
 	public final AbstractProject<?, ?> project;
 
-	private transient List<String> jmeterReportList;
+	private transient List<String> performanceReportList;
 
 	public String getDisplayName() {
-		return "JMeter trend";
+		return "Performance trend";
 	}
 
 	public String getIconFileName() {
@@ -57,10 +57,10 @@ public final class JMeterProjectAction implements Action {
 	}
 
 	public String getUrlName() {
-		return "jmeter";
+		return "performance";
 	}
 
-	public JMeterProjectAction(AbstractProject project) {
+	public PerformanceProjectAction(AbstractProject project) {
 		this.project = project;
 	}
 
@@ -163,12 +163,12 @@ public final class JMeterProjectAction implements Action {
 	}
 
 	public void doErrorsGraph(StaplerRequest request, StaplerResponse response) throws IOException {
-		JMeterReportPosition jmeterReportPosition = new JMeterReportPosition();
-		request.bindParameters(jmeterReportPosition);
-		String jmeterReportNameFile = jmeterReportPosition.getJmeterReportPosition();
-		if (jmeterReportNameFile == null) {
-			if (getJmeterReportList().size() == 1) {
-				jmeterReportNameFile = getJmeterReportList().get(0);
+		PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+		request.bindParameters(performanceReportPosition);
+		String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+		if (performanceReportNameFile == null) {
+			if (getPerformanceReportList().size() == 1) {
+				performanceReportNameFile = getPerformanceReportList().get(0);
 			} else {
 				return;
 			}
@@ -190,17 +190,17 @@ public final class JMeterProjectAction implements Action {
 			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator.next();
 			if (nbBuildsToAnalyze <= buildsLimits.get(1) && buildsLimits.get(0) <= nbBuildsToAnalyze) {
 				NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-				JMeterBuildAction jmeterBuildAction = currentBuild.getAction(JMeterBuildAction.class);
-				if (jmeterBuildAction == null) {
+				PerformanceBuildAction performanceBuildAction = currentBuild.getAction(PerformanceBuildAction.class);
+				if (performanceBuildAction == null) {
 					continue;
 				}
-				JMeterReport jmeterReport = null;
-				jmeterReport = jmeterBuildAction.getJmeterReportMap().get().getJmeterReport(jmeterReportNameFile);
-				if (jmeterReport == null) {
+				PerformanceReport performanceReport = null;
+				performanceReport = performanceBuildAction.getPerformanceReportMap().get().getPerformanceReport(performanceReportNameFile);
+				if (performanceReport == null) {
 					nbBuildsToAnalyze--;
 					continue;
 				}
-				dataSetBuilderErrors.add(jmeterReport.errorPercent(), "errors", label);
+				dataSetBuilderErrors.add(performanceReport.errorPercent(), "errors", label);
 			}
 			nbBuildsToAnalyze--;
 		}
@@ -208,12 +208,12 @@ public final class JMeterProjectAction implements Action {
 	}
 
 	public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
-		JMeterReportPosition jmeterReportPosition = new JMeterReportPosition();
-		request.bindParameters(jmeterReportPosition);
-		String jmeterReportNameFile = jmeterReportPosition.getJmeterReportPosition();
-		if (jmeterReportNameFile == null) {
-			if (getJmeterReportList().size() == 1) {
-				jmeterReportNameFile = getJmeterReportList().get(0);
+		PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+		request.bindParameters(performanceReportPosition);
+		String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+		if (performanceReportNameFile == null) {
+			if (getPerformanceReportList().size() == 1) {
+				performanceReportNameFile = getPerformanceReportList().get(0);
 			} else {
 				return;
 			}
@@ -232,19 +232,19 @@ public final class JMeterProjectAction implements Action {
 			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator.next();
 			if (nbBuildsToAnalyze <= buildsLimits.get(1) && buildsLimits.get(0) <= nbBuildsToAnalyze) {
 				NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-				JMeterBuildAction jmeterBuildAction = currentBuild.getAction(JMeterBuildAction.class);
-				if (jmeterBuildAction == null) {
+				PerformanceBuildAction performanceBuildAction = currentBuild.getAction(PerformanceBuildAction.class);
+				if (performanceBuildAction == null) {
 					continue;
 				}
-				JMeterReport jmeterReport = null;
-				jmeterReport = jmeterBuildAction.getJmeterReportMap().get().getJmeterReport(jmeterReportNameFile);
-				if (jmeterReport == null) {
+				PerformanceReport performanceReport = null;
+				performanceReport = performanceBuildAction.getPerformanceReportMap().get().getPerformanceReport(performanceReportNameFile);
+				if (performanceReport == null) {
 					nbBuildsToAnalyze--;
 					continue;
 				}
-				dataSetBuilderAverage.add(jmeterReport.getMax(), "max", label);
-				dataSetBuilderAverage.add(jmeterReport.getAverage(), "average", label);
-				dataSetBuilderAverage.add(jmeterReport.getMin(), "min", label);
+				dataSetBuilderAverage.add(performanceReport.getMax(), "max", label);
+				dataSetBuilderAverage.add(performanceReport.getAverage(), "average", label);
+				dataSetBuilderAverage.add(performanceReport.getMin(), "min", label);
 			}
 			nbBuildsToAnalyze--;
 		}
@@ -321,29 +321,29 @@ public final class JMeterProjectAction implements Action {
 		return project;
 	}
 
-	public List<String> getJmeterReportList() {
-		this.jmeterReportList = new ArrayList<String>(0);
+	public List<String> getPerformanceReportList() {
+		this.performanceReportList = new ArrayList<String>(0);
 		if (this.project != null && this.project.getSomeBuildWithWorkspace() != null) {
-			File file = new File(this.project.getSomeBuildWithWorkspace().getRootDir(), JMeterReportMap
-					.getJMeterReportDirRelativePath());
+			File file = new File(this.project.getSomeBuildWithWorkspace().getRootDir(), PerformanceReportMap
+					.getPerformanceReportDirRelativePath());
 			if (file.exists()) {
-				for (File jmeterReportFile : file.listFiles()) {
-					this.jmeterReportList.add(jmeterReportFile.getName());
+				for (File performanceReportFile : file.listFiles()) {
+					this.performanceReportList.add(performanceReportFile.getName());
 				}
 			}
 		}
-		if (this.jmeterReportList != null) {
-			Collections.sort(jmeterReportList);
+		if (this.performanceReportList != null) {
+			Collections.sort(performanceReportList);
 		}
-		return this.jmeterReportList;
+		return this.performanceReportList;
 	}
 
-	public void setJmeterReportList(List<String> jmeterReportList) {
-		this.jmeterReportList = jmeterReportList;
+	public void setPerformanceReportList(List<String> performanceReportList) {
+		this.performanceReportList = performanceReportList;
 	}
 
 	public boolean isTrendVisibleOnProjectDashboard() {
-		if (getJmeterReportList() != null && getJmeterReportList().size() == 1) {
+		if (getPerformanceReportList() != null && getPerformanceReportList().size() == 1) {
 			return true;
 		} else {
 			return false;
@@ -377,7 +377,7 @@ public final class JMeterProjectAction implements Action {
 	 * @return a view to configure the trend graph for the current user
 	 */
 	private Object createUserConfiguration(final StaplerRequest request) {
-		GraphConfigurationDetail graph = new GraphConfigurationDetail(project, "jmeter", request);
+		GraphConfigurationDetail graph = new GraphConfigurationDetail(project, "performance", request);
 		return graph;
 	}
 

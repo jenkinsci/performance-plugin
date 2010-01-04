@@ -1,9 +1,14 @@
-package hudson.plugins.jmeter;
+package hudson.plugins.performance;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import hudson.plugins.performance.HttpSample;
+import hudson.plugins.performance.PerformanceBuildAction;
+import hudson.plugins.performance.PerformanceReport;
+import hudson.plugins.performance.UriReport;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,41 +22,41 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-public class JMeterReportTest {
+public class PerformanceReportTest {
 
-	private JMeterReport jmeterReport;
+	private PerformanceReport performanceReport;
 
 	@Before
 	public void setUp() throws Exception {
-		JMeterBuildAction buildAction = EasyMock
-				.createMock(JMeterBuildAction.class);
-		jmeterReport = new JMeterReport();
-		jmeterReport.setBuildAction(buildAction);
+		PerformanceBuildAction buildAction = EasyMock
+				.createMock(PerformanceBuildAction.class);
+		performanceReport = new PerformanceReport();
+		performanceReport.setBuildAction(buildAction);
 	}
 
 	@Test
 	public void testAddSample() throws Exception {
 		PrintStream printStream = EasyMock.createMock(PrintStream.class);
-		EasyMock.expect(jmeterReport.getBuildAction().getHudsonConsoleWriter())
+		EasyMock.expect(performanceReport.getBuildAction().getHudsonConsoleWriter())
 				.andReturn(printStream);
 		printStream
 				.println("label cannot be empty, please ensure your jmx file specifies name properly for each http sample: skipping sample");
 		EasyMock.replay(printStream);
-		EasyMock.replay(jmeterReport.getBuildAction());
+		EasyMock.replay(performanceReport.getBuildAction());
 
 		HttpSample sample1 = new HttpSample();
-		jmeterReport.addSample(sample1);
+		performanceReport.addSample(sample1);
 
 		sample1.setUri("invalidCharacter/");
-		jmeterReport.addSample(sample1);
-		UriReport uriReport = jmeterReport.getUriReportMap().get(
+		performanceReport.addSample(sample1);
+		UriReport uriReport = performanceReport.getUriReportMap().get(
 				"invalidCharacter_");
 		assertNotNull(uriReport);
 
 		String uri = "uri";
 		sample1.setUri(uri);
-		jmeterReport.addSample(sample1);
-		Map<String, UriReport> uriReportMap = jmeterReport.getUriReportMap();
+		performanceReport.addSample(sample1);
+		Map<String, UriReport> uriReportMap = performanceReport.getUriReportMap();
 		uriReport = uriReportMap.get(uri);
 		assertNotNull(uriReport);
 		List<HttpSample> httpSampleList = uriReport.getHttpSampleList();
@@ -64,20 +69,20 @@ public class JMeterReportTest {
 		HttpSample sample1 = new HttpSample();
 		sample1.setSuccessful(false);
 		sample1.setUri("sample1");
-		jmeterReport.addSample(sample1);
+		performanceReport.addSample(sample1);
 
 		HttpSample sample2 = new HttpSample();
 		sample2.setSuccessful(true);
 		sample2.setUri("sample2");
-		jmeterReport.addSample(sample2);
-		assertEquals(1, jmeterReport.countErrors());
+		performanceReport.addSample(sample2);
+		assertEquals(1, performanceReport.countErrors());
 	}
 
 	@Test
-	public void testJMeterReport() throws IOException, SAXException {
-		JMeterReport jmeterReport = new JMeterReport(null, new File(
+	public void testPerformanceReport() throws IOException, SAXException {
+		PerformanceReport performanceReport = new PerformanceReport(null, new File(
 				"src/test/resources/JMeterResults.jtl"));
-		Map<String, UriReport> uriReportMap = jmeterReport.getUriReportMap();
+		Map<String, UriReport> uriReportMap = performanceReport.getUriReportMap();
 		assertEquals(2, uriReportMap.size());
 		String loginUri = "Login";
 		UriReport firstUriReport = uriReportMap.get(loginUri);
@@ -97,11 +102,11 @@ public class JMeterReportTest {
 	}
 	
     @Test 
-    public void testJMeterNonHTTPSamplesMultiThread() throws IOException, SAXException {
-        JMeterReport jmeterReport = new JMeterReport(null, new File(
+    public void testPerformanceNonHTTPSamplesMultiThread() throws IOException, SAXException {
+        PerformanceReport performanceReport = new PerformanceReport(null, new File(
                 "src/test/resources/JMeterResultsMultiThread.jtl"));
         
-        Map<String, UriReport> uriReportMap = jmeterReport.getUriReportMap();
+        Map<String, UriReport> uriReportMap = performanceReport.getUriReportMap();
         assertEquals(1, uriReportMap.size());
         
         String uri = "WebService(SOAP) Request";

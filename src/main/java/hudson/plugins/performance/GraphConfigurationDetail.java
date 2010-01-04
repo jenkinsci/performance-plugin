@@ -1,4 +1,4 @@
-package hudson.plugins.jmeter;
+package hudson.plugins.performance;
 
 import hudson.model.AbstractProject;
 import hudson.model.ModelObject;
@@ -144,7 +144,7 @@ public class GraphConfigurationDetail implements ModelObject {
 	}
 
 	protected void persistValue(final String value, final StaplerRequest request, final StaplerResponse response) {
-		Cookie cookie = createCookieHandler("jmeter").create(request.getAncestors(), value);
+		Cookie cookie = createCookieHandler("performance").create(request.getAncestors(), value);
 		response.addCookie(cookie);
 	}
 

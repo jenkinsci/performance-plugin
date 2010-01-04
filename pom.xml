@@ -6,11 +6,11 @@
 		<version>1.332</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>jmeter</artifactId>
+	<artifactId>performance</artifactId>
 	<packaging>hpi</packaging>
 	<version>0.3.1-SNAPSHOT</version>
-	<name>Hudson JMeter plugin</name>
-	<url>http://wiki.hudson-ci.org/display/HUDSON/JMeter+Plugin</url>
+	<name>Hudson Performance plugin</name>
+	<url>http://wiki.hudson-ci.org/display/HUDSON/Performance+Plugin</url>
 
         <developers>
           <developer>

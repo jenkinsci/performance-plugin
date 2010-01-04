@@ -4,5 +4,5 @@
   Since we don't really have anything dynamic here, let's just use static HTML. 
 -->
 <div>
-  This plugin integrates <a href="http://jakarta.apache.org/jmeter/">JMeter reports</a> to Hudson. 
+  This plugin integrates <a href="http://jakarta.apache.org/jmeter/">JMeter reports</a> and the <a href="http://www.junit.org/">JUnit reports</a> to Hudson. 
 </div>

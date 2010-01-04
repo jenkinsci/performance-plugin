@@ -4,17 +4,17 @@
 		This jelly script is used for per-project configuration. See
 		global.jelly for a general discussion about jelly script.
 	-->
-  <f:entry title="JMeter report"
+  <f:entry title="Performance report"
       description="
-           Specify the path to the JMeter report files, relative to
+           Specify the path to the Performance report files, relative to
            &lt;a href='ws/'>the workspace root&lt;/a>. The path is a 
            list of semicolon separated values pointing either to a 
            directory or a file, e.g. 
-           “target/jmeter-reports/;target/jmeter-reports/perf_continue_test1.xml”.
+           “target/performance-reports/;target/performance-reports/perf_continue_test1.xml”.
            ">
-    <f:textbox name="jmeter.filename" value="${instance.filename}" />
+    <f:textbox name="performance.filename" value="${instance.filename}" />
   </f:entry>
-  <f:entry title="JMeter threshold"
+  <f:entry title="Performance threshold"
       description="
            Specify the error percentage threshold that set the build unstable or failed (a value of 0 means: don't use this threshold).
            ">
@@ -34,11 +34,11 @@
         <tr>
           <td style="vertical-align:middle">Thresholds:</td>
           <td>
-            <f:textbox name="jmeter.errorUnstableThreshold" value="${instance.errorUnstableThreshold}" /> 
+            <f:textbox name="performance.errorUnstableThreshold" value="${instance.errorUnstableThreshold}" /> 
           </td>
           <td> % </td>
           <td>
-            <f:textbox name="jmeter.errorFailedThreshold" value="${instance.errorFailedThreshold}" />
+            <f:textbox name="performance.errorFailedThreshold" value="${instance.errorFailedThreshold}" />
           </td>
           <td> % </td>
         </tr>
