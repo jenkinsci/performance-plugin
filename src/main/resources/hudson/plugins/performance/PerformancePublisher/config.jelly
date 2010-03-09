@@ -4,35 +4,27 @@
 		This jelly script is used for per-project configuration. See
 		global.jelly for a general discussion about jelly script.
 	-->
-  <f:entry title="Performance report"
-      description="
-           Specify the path to the Performance report files, relative to
-           &lt;a href='ws/'>the workspace root&lt;/a>. The path is a 
-           list of semicolon separated values pointing either to a 
-           directory or a file, e.g. 
-           “target/performance-reports/;target/performance-reports/perf_continue_test1.xml”.
-           ">
+  <f:entry title="${%Performance report}"
+      description="${%Report.Description}">
     <f:textbox name="performance.filename" value="${instance.filename}" />
   </f:entry>
-  <f:entry title="Performance threshold"
-      description="
-           Specify the error percentage threshold that set the build unstable or failed (a value of 0 means: don't use this threshold).
-           ">
+  <f:entry title="${%Performance threshold}"
+      description="${%Threshold.Description}">
     <table width="250px">
       <thead>
         <tr>
           <td></td>
           <td colspan="2">
-            <img src="${rootURL}/images/16x16/yellow.gif" alt="100%" /> Unstable
+            <img src="${rootURL}/images/16x16/yellow.gif" alt="100%" /> ${%Unstable}
           </td>
           <td colspan="2">
-            <img src="${rootURL}/images/16x16/red.gif" alt="100%" /> Failed
+            <img src="${rootURL}/images/16x16/red.gif" alt="100%" /> ${%Failed}
           </td>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="vertical-align:middle">Thresholds:</td>
+          <td style="vertical-align:middle">${%Thresholds}:</td>
           <td>
             <f:textbox name="performance.errorUnstableThreshold" value="${instance.errorUnstableThreshold}" /> 
           </td>

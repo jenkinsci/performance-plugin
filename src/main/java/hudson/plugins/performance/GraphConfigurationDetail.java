@@ -128,7 +128,7 @@ public class GraphConfigurationDetail implements ModelObject {
 	}
 
 	public String getDisplayName() {
-		return "configure";
+                return Messages.GraphConfigurationDetail_DisplayName();
 	}
 
 	/**

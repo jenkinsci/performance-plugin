@@ -55,7 +55,7 @@ public class UriReport implements ModelObject, Comparable<UriReport> {
 		return average / size();
 	}
 
-	public AbstractBuild getBuild() {
+	public AbstractBuild<?,?> getBuild() {
 		return performanceReport.getBuild();
 	}
 

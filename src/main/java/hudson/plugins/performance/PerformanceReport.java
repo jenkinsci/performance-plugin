@@ -113,7 +113,7 @@ public class PerformanceReport extends DefaultHandler implements Comparable<Perf
 	}
 
 	public String getDisplayName() {
-		return "Performance";
+		return  Messages.Report_DisplayName();
 	}
 
 	public UriReport getDynamic(String token, StaplerRequest req, StaplerResponse rsp) throws IOException {

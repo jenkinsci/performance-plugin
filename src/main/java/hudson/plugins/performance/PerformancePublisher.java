@@ -45,7 +45,7 @@ public class PerformancePublisher extends Recorder {
 
 		@Override
 		public String getDisplayName() {
-			return "Publish Performance test result report";
+			return Messages.Publisher_DisplayName();
 		}
 
 		@Override

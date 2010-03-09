@@ -50,7 +50,7 @@ public class PerformanceReportMap implements ModelObject {
 	}
 
 	public String getDisplayName() {
-		return "Performance";
+		return Messages.Report_DisplayName();
 	}
 
 	public List<PerformanceReport> getPerformanceListOrdered() {

@@ -31,7 +31,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
 	}
 
 	public String getDisplayName() {
-		return "Performance report";
+		return Messages.BuildAction_DisplayName();
 	}
 
 	public String getIconFileName() {

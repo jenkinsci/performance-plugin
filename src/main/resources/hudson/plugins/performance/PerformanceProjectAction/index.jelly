@@ -3,9 +3,9 @@
   <l:layout>
     <st:include it="${it.project}" page="sidepanel.jelly" />
     <l:main-panel>
-      <h1>Performance Trend</h1>
+      <h1>${%Performance Trend}</h1>
       <div>
-        <a href="${from.urlName}configure">Configure...</a>
+        <a href="${from.urlName}configure">${%Configure}</a>
       </div>
       <div>
         <j:forEach var="performanceReport" items="${it.performanceReportList}">

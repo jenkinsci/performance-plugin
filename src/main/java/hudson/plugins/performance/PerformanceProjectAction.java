@@ -39,7 +39,11 @@ import org.kohsuke.stapler.StaplerResponse;
 
 public final class PerformanceProjectAction implements Action {
 
-	private static final long serialVersionUID = 1L;
+	private static final String CONFIGURE_LINK = "configure";
+
+  private static final String PLUGIN_NAME = "performance";
+
+  private static final long serialVersionUID = 1L;
 
 	/** Logger. */
 	private static final Logger LOGGER = Logger.getLogger(PerformanceProjectAction.class.getName());
@@ -49,7 +53,7 @@ public final class PerformanceProjectAction implements Action {
 	private transient List<String> performanceReportList;
 
 	public String getDisplayName() {
-		return "Performance trend";
+		return Messages.ProjectAction_DisplayName();
 	}
 
 	public String getIconFileName() {
@@ -57,7 +61,7 @@ public final class PerformanceProjectAction implements Action {
 	}
 
 	public String getUrlName() {
-		return "performance";
+		return PLUGIN_NAME;
 	}
 
 	public PerformanceProjectAction(AbstractProject project) {
@@ -66,8 +70,8 @@ public final class PerformanceProjectAction implements Action {
 
 	private JFreeChart createErrorsChart(CategoryDataset dataset) {
 
-		final JFreeChart chart = ChartFactory.createLineChart("Percentage of errors", // chart
-				// title
+		final JFreeChart chart = ChartFactory.createLineChart(
+		    Messages.ProjectAction_PercentageOfErrors(), // chart title
 				null, // unused
 				"%", // range axis label
 				dataset, // data
@@ -116,8 +120,8 @@ public final class PerformanceProjectAction implements Action {
 
 	private JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
 
-		final JFreeChart chart = ChartFactory.createLineChart("Responding time", // chart
-				// title
+		final JFreeChart chart = ChartFactory.createLineChart(
+		    Messages.ProjectAction_RespondingTime(), // charttitle
 				null, // unused
 				"ms", // range axis label
 				dataset, // data
@@ -200,7 +204,7 @@ public final class PerformanceProjectAction implements Action {
 					nbBuildsToAnalyze--;
 					continue;
 				}
-				dataSetBuilderErrors.add(performanceReport.errorPercent(), "errors", label);
+				dataSetBuilderErrors.add(performanceReport.errorPercent(), Messages.ProjectAction_Errors(), label);
 			}
 			nbBuildsToAnalyze--;
 		}
@@ -242,9 +246,9 @@ public final class PerformanceProjectAction implements Action {
 					nbBuildsToAnalyze--;
 					continue;
 				}
-				dataSetBuilderAverage.add(performanceReport.getMax(), "max", label);
-				dataSetBuilderAverage.add(performanceReport.getAverage(), "average", label);
-				dataSetBuilderAverage.add(performanceReport.getMin(), "min", label);
+				dataSetBuilderAverage.add(performanceReport.getMax(), Messages.ProjectAction_Maximum(), label);
+				dataSetBuilderAverage.add(performanceReport.getAverage(), Messages.ProjectAction_Average(), label);
+				dataSetBuilderAverage.add(performanceReport.getMin(), Messages.ProjectAction_Minimum(), label);
 			}
 			nbBuildsToAnalyze--;
 		}
@@ -362,7 +366,7 @@ public final class PerformanceProjectAction implements Action {
 	 * @return the dynamic result of the analysis (detail page).
 	 */
 	public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
-		if ("configure".equals(link)) {
+		if (CONFIGURE_LINK.equals(link)) {
 			return createUserConfiguration(request);
 		} else {
 			return null;
@@ -377,7 +381,7 @@ public final class PerformanceProjectAction implements Action {
 	 * @return a view to configure the trend graph for the current user
 	 */
 	private Object createUserConfiguration(final StaplerRequest request) {
-		GraphConfigurationDetail graph = new GraphConfigurationDetail(project, "performance", request);
+		GraphConfigurationDetail graph = new GraphConfigurationDetail(project, PLUGIN_NAME, request);
 		return graph;
 	}
 

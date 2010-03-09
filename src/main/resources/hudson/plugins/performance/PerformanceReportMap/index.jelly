@@ -5,7 +5,7 @@
     <l:main-panel>
       <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
         <h1>${performanceReport.getReportFileName()}</h1>
-        <h2>Overall Performance Summary</h2>
+        <h2>${%Overall Performance Summary}</h2>
         <table border="1">
           <jm:captionLine />
           <tr>
@@ -13,7 +13,7 @@
             <jm:summaryTable it="${performanceReport}" />
           </tr>
         </table>
-        <h2>Performance Breakdown by URI</h2>
+        <h2>${%Performance Breakdown by URI}</h2>
         <table class="sortable" border="1">
           <jm:captionLine />
           <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">

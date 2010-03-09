@@ -4,18 +4,18 @@
   <l:layout norefresh="true">
     <l:main-panel>
       <f:form method="post" action="save" name="Save">
-        <h1>${%Configure the trend graph}</h1>
+        <h1>${%Configure}</h1>
         <p>${it.description}</p>
         <j:set var="instance" value="${it}" />
         <f:entry>
           <f:block>
-            <p>Configure the trend graph of this plug-in for the current job and user. These values are persisted in a cookie, so please make sure that cookies are enabled in your browser.</p>			
+            <p>${%Configure.description}</p>			
           </f:block>
           <p>
             <f:block>
               <f:radio name="radioConfigType" value="NONE" checked="${it.configType == 'NONE'}" id="radioConfigType.none"/>
               <st:nbsp/>
-              <label for="radioConfigType.none">Show all the builds</label>
+              <label for="radioConfigType.none">${%AllBuilds}</label>
               <st:nbsp/>
             </f:block>
           </p>
@@ -23,24 +23,24 @@
             <f:block>
               <f:radio name="radioConfigType" value="DATE" checked="${it.configType == 'DATE'}" id="radioConfigType.date"/>
               <st:nbsp/>
-              <label for="radioConfigType.build">Show only the builds in the following range of dates</label>
+              <label for="radioConfigType.build">${%Range.description}</label>
             </f:block>
           </p>
           <p>
-            <f:entry title="${%first day}" description="${%format of the date : DD/MM/YYYY}">
+            <f:entry title="${%first day}" description="${%DateFormat}: DD/MM/YYYY">
               <f:textbox name="firstDayCountString" value="${it.firstDayCount}"/>
             </f:entry>
-            <f:entry title="${%last day}" description="${%format of the date : DD/MM/YYYY}">
+            <f:entry title="${%last day}" description="${%DateFormat}: DD/MM/YYYY">
               <f:textbox name="lastDayCountString" value="${it.lastDayCount}"/>
             </f:entry>
           </p>
           <f:block>
             <f:radio name="radioConfigType" value="BUILD" checked="${it.configType == 'BUILD'}" id="radioConfigType.build"/>
             <st:nbsp/>
-            <label for="radioConfigType.date">Show only the n last builds</label>
+            <label for="radioConfigType.date">${%LastBuilds}</label>
             <st:nbsp/>
           </f:block>
-          <f:entry title="${%builds}" description="${%number of the builds to show}">
+          <f:entry title="${%builds}" description="${%NumberOfBuilds}">
             <f:textbox name="buildCountString" value="${it.buildCount}"/>
           </f:entry>
           <f:entry title="">
