@@ -1,24 +1,19 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <l:layout xmlns:jm="/hudson/plugins/performance/tags">
+  <l:layout xmlns:jm="/hudson/plugins/performance/tags" css="/plugin/performance/css/style.css">
   <st:include it="${it.build}" page="sidepanel.jelly" />
     <l:main-panel>
       <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
-        <h1>${performanceReport.getReportFileName()}</h1>
-        <h2>${%Overall Performance Summary}</h2>
-        <table border="1">
+        <h2>${%Performance Breakdown by URI}: ${performanceReport.getReportFileName()}</h2>
+        <table class="sortable source" border="1">
           <jm:captionLine />
-          <tr>
-            <td>All URIs</td>
+          <tr class="bold">
+            <td class="left bold">${%All URIs}</td>
             <jm:summaryTable it="${performanceReport}" />
           </tr>
-        </table>
-        <h2>${%Performance Breakdown by URI}</h2>
-        <table class="sortable" border="1">
-          <jm:captionLine />
           <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">
-            <tr bgcolor="${h.ifThenElse(uriReport.failed,'red',null)}">
-              <td>
+            <tr class="${h.ifThenElse(uriReport.failed,'red','')}">
+              <td class="left">
                 <a href="./uriReport/${uriReport.encodeUriReport()}">
                   <st:out value="${uriReport.getUri()}" />
                 </a>

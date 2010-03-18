@@ -46,7 +46,11 @@ public class UriReport implements ModelObject, Comparable<UriReport> {
 		}
 		return nbError;
 	}
-
+	
+  public double errorPercent() {
+    return ((double) countErrors()) / size() * 100;
+  }
+  
 	public long getAverage() {
 		long average = 0;
 		for (HttpSample currentSample : httpSampleList) {

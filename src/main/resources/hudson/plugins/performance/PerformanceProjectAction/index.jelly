@@ -5,7 +5,8 @@
     <l:main-panel>
       <h1>${%Performance Trend}</h1>
       <div>
-        <a href="${from.urlName}configure">${%Configure}</a>
+        <a href="../lastBuild/performance/">${%Last Report}</a>
+        <a href="${from.urlName}configure">${%Filter trend data}</a>
       </div>
       <div>
         <j:forEach var="performanceReport" items="${it.performanceReportList}">
