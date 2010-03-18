@@ -32,6 +32,12 @@ table.source th {
     white-space: nowrap;
 }
 
+div.title {
+    background-color: #f0f0f0;
+    padding: 0px;
+    margin-top: 20px;
+}
+
 .bold {
 	font-weight: bold; 
 }
@@ -39,10 +45,12 @@ table.source th {
 .nwrap {
   white-space: nowrap;
 }
-.red {
-  color: red;
-}
-table.source .red a {
+.red, table.source .red a {
 	color: red;
+}
+.trend {
+	margin-right: 40px;
+	border: solid 1px pink;
+        margin-bottom: 20px;
 }
 

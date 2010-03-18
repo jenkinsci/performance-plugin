@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">	
-  <l:layout>
+  <l:layout css="/plugin/performance/css/style.css">
     <st:include it="${it.project}" page="sidepanel.jelly" />
     <l:main-panel>
       <h1>${%Performance Trend}</h1>
@@ -10,11 +10,10 @@
       </div>
       <div>
         <j:forEach var="performanceReport" items="${it.performanceReportList}">
-          <br/>
-          <h1><center>${performanceReport}</center></h1>
+          <div class="title"><h1><center>${%Test file}: ${performanceReport}</center></h1></div>
           <center>
-            <img src="./respondingTimeGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
-            <img src="./errorsGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
+            <img class="trend" src="./respondingTimeGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
+            <img class="trend" src="./errorsGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
           </center>
         </j:forEach>
       </div>
