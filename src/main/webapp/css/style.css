@@ -7,7 +7,6 @@ table.source {
 }
 
 table.source td {
-    font-family: courier, monospace;
     text-align: right;
     white-space: nowrap;
 }
