@@ -13,19 +13,20 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 
+import net.sf.json.JSONObject;
+
+import org.kohsuke.stapler.StaplerRequest;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import net.sf.json.JSONObject;
-
-import org.kohsuke.stapler.StaplerRequest;
 
 public class PerformancePublisher extends Recorder {
 
@@ -109,56 +110,96 @@ public class PerformancePublisher extends Recorder {
 		return result;
 	}
 
-	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-			throws InterruptedException, IOException {
-		PrintStream logger = listener.getLogger();
-		logger.println("Recording Performance reports " + getFilename());
-		List<String> filenameList = manageFilename(filename);
-		boolean result = true;
-		PerformanceBuildAction performanceBuildAction = new PerformanceBuildAction(build, logger);
-		build.addAction(performanceBuildAction);
-		for (String filename : filenameList) {
-			if (filename.compareTo("") != 0) {
-				final FilePath src = build.getWorkspace().child(filename);
+  /**
+   * look for performance reports based in the configured parameter includes.
+   * 'includes' is 
+   *   - an Ant-style pattern
+   *   - a list of files and folders separated by the characters ;:,  
+   */
+  protected static FilePath[] locatePerformanceReports(FilePath workspace,
+      String includes) throws IOException, InterruptedException {
 
-				if (!src.exists()) {
-					if (build.getResult().isWorseThan(Result.UNSTABLE)) {
-						// build has failed, so that's probably why this was not
-						// generated.
-						// so don't report an error
-						return true;
-					}
-					build.setResult(Result.FAILURE);
-					logger.println("Performance file " + src + " not found. Has the report generated? Setting Build to "
-							+ build.getResult().toString());
-					return true;
-				}
-				;
-				if (!src.isDirectory()) {
-					result = result && manageOnePerformanceReport(build, src, performanceBuildAction, logger);
-				} else {
-					List<FilePath> listSrc = new ArrayList<FilePath>(0);
-					listSrc = src.list();
-					Boolean resultManage = true;
-					List<String> performanceReportListNameFile = new ArrayList<String>(listSrc.size());
-					for (FilePath filePath : listSrc) {
-						resultManage = resultManage
-								&& manageOnePerformanceReport(build, filePath, performanceBuildAction, logger);
-						performanceReportListNameFile.add(getPerformanceReportBuildFileName(filePath.getName()));
-					}
+    // First use ant-style pattern
+    try {
+      FilePath[] ret = workspace.list(includes);
+      if (ret.length > 0) {
+        return ret;
+      }
+    } catch (Exception e) {
+    }
 
-					result = result && resultManage;
-				}
-			}
+    // If it fails, do a legacy search
+    ArrayList<FilePath> files = new ArrayList<FilePath>();
+    String parts[] = includes.split("\\s*[;:,]+\\s*");
+    for (String path : parts) {
+      FilePath src = workspace.child(path);
+      if (src.exists()) {
+        if (src.isDirectory()) {
+          files.addAll(Arrays.asList(src.list("**/*")));
+        } else {
+          files.add(src);
+        }
+      }
+    }
+    return files.toArray(new FilePath[files.size()]);
+  }
+	
+  @Override
+  public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+      throws InterruptedException, IOException {
+    PrintStream logger = listener.getLogger();
+    
+    if (filename == null || filename.length() == 0) {
+      filename = "**/*.jtl";
+    }
+    
+    logger.println("Performance: Recording reports [" + filename + "]");
+    
+    FilePath[] files = locatePerformanceReports(build.getWorkspace(), filename);
+    
+    if (files.length == 0) {
+      if (build.getResult().isWorseThan(Result.UNSTABLE)) {
+        return true;
+      }
+      build.setResult(Result.FAILURE);
+      logger.println("Performance: no files matching '" + filename + 
+          "' have been found. Has the report generated?. Setting Build to "
+          + build.getResult().toString());
+      return true;
+    }
+    
+    if (errorUnstableThreshold > 0 && errorUnstableThreshold < 100) {
+      logger.println("Performance: Percentage of errors greater or equal than " + errorUnstableThreshold
+          + "% sets the build as " + Result.UNSTABLE.toString().toLowerCase());
+    } else {
+      logger.println("Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase());
+    }
+    if (errorFailedThreshold > 0 && errorFailedThreshold < 100) {
+      logger.println("Performance: Percentage of errors greater or equal than " + errorFailedThreshold
+          + "% sets the build as " + Result.FAILURE.toString().toLowerCase());
+    } else {
+      logger.println("Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase());
+    }
 
-		}
-		return result;
-	}
+    
+    Boolean resultManage = true;
+
+    PerformanceBuildAction performanceBuildAction = new PerformanceBuildAction(build, logger);
+    build.addAction(performanceBuildAction);
+    List<String> performanceReportListNameFile = new ArrayList<String>(files.length);
+    for (FilePath filePath : files) {
+      resultManage = resultManage
+          && manageOnePerformanceReport(build, filePath, performanceBuildAction, logger);
+      performanceReportListNameFile.add(getPerformanceReportBuildFileName(filePath.getName()));
+
+    }
+
+    return resultManage;    
+  }	
 
 	/**
 	 * <p>
-	 * This function is use to analyse One Performance report and save this analyze
+	 * This function is use to analyze One Performance report and save this analyze
 	 * in global variable
 	 * </p>
 	 * 
@@ -172,30 +213,25 @@ public class PerformancePublisher extends Recorder {
 	 */
 	private Boolean manageOnePerformanceReport(AbstractBuild<?, ?> build, FilePath src, PerformanceBuildAction performanceBuildAction,
 			PrintStream logger) throws IOException, InterruptedException {
+	  
+    logger.println("Performance: Parsing report file " + src.getName());
+	  
 		final File localReport = getPerformanceReport(build, src.getName());
 		if (!localReport.getParentFile().exists()) {
 			localReport.getParentFile().mkdirs();
 		}
 		if (src.isDirectory()) {
-			logger.println("File : "+src.getName()+" is a directory, ant not a Performance Report");
+			logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
 			return true;
 		}
 		src.copyTo(new FilePath(localReport));
 		if (performanceBuildAction.getPerformanceReportMap().get().isFailed(
 				(PerformancePublisher.getPerformanceReportBuildFileName(src.getName())))) {
 			build.setResult(Result.UNSTABLE);
-			logger.println("Performance report analysis failed. Setting Build to " + build.getResult().toString());
+			logger.println("Performance: Report analysis failed. Setting Build to " + build.getResult().toString());
 			return true;
 		}
 
-		if (errorUnstableThreshold > 0 && errorUnstableThreshold < 100) {
-			logger.println("Performance's percentage error greater or equal than " + errorUnstableThreshold
-					+ "% sets the build as " + Result.UNSTABLE.toString().toLowerCase());
-		}
-		if (errorFailedThreshold > 0 && errorFailedThreshold < 100) {
-			logger.println("Performance's percentage error greater or equal than " + errorFailedThreshold
-					+ "% sets the build as " + Result.FAILURE.toString().toLowerCase());
-		}
 		double errorPercent = performanceBuildAction.getPerformanceReportMap().get().getPerformanceReport(
 				(PerformancePublisher.getPerformanceReportBuildFileName(src.getName()))).errorPercent();
 		if (errorFailedThreshold > 0 && errorPercent >= errorFailedThreshold) {
@@ -204,7 +240,7 @@ public class PerformancePublisher extends Recorder {
 				&& build.getResult() != Result.FAILURE) {
 			build.setResult(Result.UNSTABLE);
 		}
-		logger.println("Performance has reported a " + errorPercent + "% of errors running the tests. Setting Build to "
+		logger.println("Performance: Reported a " + errorPercent + "% of errors during the tests. Build status is: "
 				+ build.getResult().toString());
 
 		return true;
@@ -212,7 +248,7 @@ public class PerformancePublisher extends Recorder {
 
 	/**
 	 * <p>
-	 * Read the filename in the conf files, and transform it to a ordonned list
+	 * Read the filename in the conf files, and transform it to a ordenned list
 	 * of repository/files
 	 * </p>
 	 * 
