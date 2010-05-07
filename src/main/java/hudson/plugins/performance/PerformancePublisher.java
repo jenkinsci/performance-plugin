@@ -204,9 +204,6 @@ public class PerformancePublisher extends Recorder {
     logger.println("Performance: Parsing report file " + src.getName());
 	  
 		final File localReport = getPerformanceReport(build, src.getName());
-		if (!localReport.getParentFile().exists()) {
-			localReport.getParentFile().mkdirs();
-		}
 		if (src.isDirectory()) {
 			logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
 			return true;
