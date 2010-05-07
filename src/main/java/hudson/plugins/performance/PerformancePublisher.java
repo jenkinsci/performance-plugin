@@ -112,7 +112,7 @@ public class PerformancePublisher extends Recorder {
       if (ret.length > 0) {
         return ret;
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
     }
 
     // If it fails, do a legacy search
@@ -169,7 +169,7 @@ public class PerformancePublisher extends Recorder {
     }
 
     
-    Boolean resultManage = true;
+    boolean resultManage = true;
 
     PerformanceBuildAction performanceBuildAction = new PerformanceBuildAction(build, logger);
     build.addAction(performanceBuildAction);
@@ -198,7 +198,7 @@ public class PerformancePublisher extends Recorder {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	private Boolean manageOnePerformanceReport(AbstractBuild<?, ?> build, FilePath src, PerformanceBuildAction performanceBuildAction,
+	private boolean manageOnePerformanceReport(AbstractBuild<?, ?> build, FilePath src, PerformanceBuildAction performanceBuildAction,
 			PrintStream logger) throws IOException, InterruptedException {
 	  
     logger.println("Performance: Parsing report file " + src.getName());
