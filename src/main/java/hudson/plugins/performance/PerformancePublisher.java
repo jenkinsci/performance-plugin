@@ -29,21 +29,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PerformancePublisher extends Recorder {
-
-	@Override
-	public BuildStepDescriptor<Publisher> getDescriptor() {
-		return DESCRIPTOR;
-	}
-
 	@Extension
-	public static final BuildStepDescriptor<Publisher> DESCRIPTOR = new DescriptorImpl();
-
 	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-
-		public DescriptorImpl() {
-			super(PerformancePublisher.class);
-		}
-
 		@Override
 		public String getDisplayName() {
 			return Messages.Publisher_DisplayName();
