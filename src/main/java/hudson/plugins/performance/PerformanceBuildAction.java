@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -44,17 +44,13 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
 
 	public Object getTarget() {
 		File repo = new File(build.getRootDir(), PerformanceReportMap.getPerformanceReportDirRelativePath());
-		List<File> pFileList = new ArrayList<File>(0);
-		for (File file : repo.listFiles()) {
-			pFileList.add(file);
-		}
-		PerformanceReportMap jmList = null;
+		List<File> pFileList = Arrays.asList(repo.listFiles());
 		try {
-			jmList = new PerformanceReportMap(this, pFileList);
+			return new PerformanceReportMap(this, pFileList);
 		} catch (IOException e) {
 			logger.error(e);
+            return null;
 		}
-		return jmList;
 	}
 
 	public AbstractBuild<?, ?> getBuild() {
