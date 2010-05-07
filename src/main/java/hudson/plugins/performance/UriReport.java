@@ -8,14 +8,28 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A report about a particular tested URI.
+ *
+ * This object belongs under {@link PerformanceReport}.
+ */
 public class UriReport implements ModelObject, Comparable<UriReport> {
 
 	public static String END_PERFORMANCE_PARAMETER = ".endperformanceparameter";
 
+    /**
+     * Individual HTTP invocations to this URI and how they went.
+     */
 	private final List<HttpSample> httpSampleList = new ArrayList<HttpSample>();
 
+    /**
+     * The parent object to which this object belongs.
+     */
 	private final PerformanceReport performanceReport;
 
+    /**
+     * Escaped {@link #uri} that doesn't contain any letters that cannot be used as a token in URL.
+     */
 	private final String staplerUri;
 
 	private String uri;

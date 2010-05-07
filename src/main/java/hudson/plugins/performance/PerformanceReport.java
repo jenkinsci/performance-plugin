@@ -24,6 +24,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * Represents a single performance report, which consists of multiple {@link UriReport}s for
+ * different URLs that was tested.
+ *
+ * This object belongs under {@link PerformanceReportMap}.
+ */
 public class PerformanceReport extends DefaultHandler implements Comparable<PerformanceReport> {
 
 	private PerformanceBuildAction buildAction;
@@ -32,6 +38,9 @@ public class PerformanceReport extends DefaultHandler implements Comparable<Perf
 
 	private String reportFileName = null;
 
+    /**
+     * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
+     */
 	private final Map<String, UriReport> uriReportMap = new HashMap<String, UriReport>();
 
 	PerformanceReport() {
@@ -76,7 +85,7 @@ public class PerformanceReport extends DefaultHandler implements Comparable<Perf
 		if (this == jmReport) {
 			return 0;
 		}
-		return getReportFileName().compareTo(((PerformanceReport) jmReport).getReportFileName());
+		return getReportFileName().compareTo(jmReport.getReportFileName());
 	}
 
 	public int countErrors() {
@@ -116,7 +125,7 @@ public class PerformanceReport extends DefaultHandler implements Comparable<Perf
 		return  Messages.Report_DisplayName();
 	}
 
-	public UriReport getDynamic(String token, StaplerRequest req, StaplerResponse rsp) throws IOException {
+	public UriReport getDynamic(String token) throws IOException {
 		return getUriReportMap().get(token);
 	}
 

@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,15 +16,25 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Root object of a performance report.
+ */
 public class PerformanceReportMap implements ModelObject {
-
+    /**
+     * The {@link PerformanceBuildAction} that this report belongs to.
+     */
 	private transient PerformanceBuildAction buildAction;
+
+    /**
+     * {@link PerformanceReport}s are keyed by {@link PerformanceReport#reportFileName}
+     *
+     * Test names are arbitrary human-readable and URL-safe string that identifies an individual report.
+     */
+    private Map<String, PerformanceReport> performanceReportMap = new HashMap<String, PerformanceReport>();
 
 	private static final String PERFORMANCE_REPORTS_DIRECTORY = "performance-reports";
 
 	private static final Logger logger = Logger.getLogger(PerformanceReportMap.class.getName());
-
-	private Map<String, PerformanceReport> performanceReportMap = new HashMap<String, PerformanceReport>();
 
 	PerformanceReportMap() {
 	}
@@ -37,7 +46,8 @@ public class PerformanceReportMap implements ModelObject {
 	PerformanceReportMap(PerformanceBuildAction buildAction, List<File> pFileList) throws IOException {
 		this.buildAction = buildAction;
 		for (File pFile : pFileList) {
-			performanceReportMap.put(pFile.getName(), new PerformanceReport(buildAction, pFile));
+            PerformanceReport r = new PerformanceReport(buildAction, pFile);
+            performanceReportMap.put(r.getReportFileName(), r);
 		}
 	}
 
@@ -54,11 +64,7 @@ public class PerformanceReportMap implements ModelObject {
 	}
 
 	public List<PerformanceReport> getPerformanceListOrdered() {
-		Collection<PerformanceReport> uriCollection = getPerformanceReportMap().values();
-		List<PerformanceReport> listPerformance = new ArrayList<PerformanceReport>(uriCollection.size());
-		for (PerformanceReport performanceReport : uriCollection) {
-			listPerformance.add(performanceReport);
-		}
+        List<PerformanceReport> listPerformance = new ArrayList<PerformanceReport>(getPerformanceReportMap().values());
 		Collections.sort(listPerformance);
 		return listPerformance;
 	}
