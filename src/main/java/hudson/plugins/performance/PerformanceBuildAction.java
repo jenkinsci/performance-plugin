@@ -65,13 +65,18 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
 		return hudsonConsoleWriter;
 	}
 
-	public WeakReference<PerformanceReportMap> getPerformanceReportMap() {
+	public PerformanceReportMap getPerformanceReportMap() {
 		PerformanceReportMap reportMap;
-		if(this.performanceReportMap == null || this.performanceReportMap.get() == null) {
-			reportMap = new PerformanceReportMap(this);
-			this.performanceReportMap = new WeakReference<PerformanceReportMap>(reportMap);	
-		}
-		return this.performanceReportMap;
+        WeakReference<PerformanceReportMap> wr = this.performanceReportMap;
+        if (wr!=null) {
+            reportMap = wr.get();
+            if (reportMap!=null)
+                return reportMap;
+        }
+
+        reportMap = new PerformanceReportMap(this);
+        this.performanceReportMap = new WeakReference<PerformanceReportMap>(reportMap);
+		return reportMap;
 	}
 
 	public void setPerformanceReportMap(WeakReference<PerformanceReportMap> performanceReportMap) {

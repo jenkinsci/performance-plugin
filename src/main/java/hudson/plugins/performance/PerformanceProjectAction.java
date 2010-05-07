@@ -199,7 +199,7 @@ public final class PerformanceProjectAction implements Action {
 					continue;
 				}
 				PerformanceReport performanceReport = null;
-				performanceReport = performanceBuildAction.getPerformanceReportMap().get().getPerformanceReport(performanceReportNameFile);
+				performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
 				if (performanceReport == null) {
 					nbBuildsToAnalyze--;
 					continue;
@@ -241,7 +241,7 @@ public final class PerformanceProjectAction implements Action {
 					continue;
 				}
 				PerformanceReport performanceReport = null;
-				performanceReport = performanceBuildAction.getPerformanceReportMap().get().getPerformanceReport(performanceReportNameFile);
+				performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
 				if (performanceReport == null) {
 					nbBuildsToAnalyze--;
 					continue;

@@ -173,10 +173,11 @@ public class PerformancePublisher extends Recorder {
 
     PerformanceBuildAction performanceBuildAction = new PerformanceBuildAction(build, logger);
     build.addAction(performanceBuildAction);
+    PerformanceReportMap prm = performanceBuildAction.getPerformanceReportMap();
+
     List<String> performanceReportListNameFile = new ArrayList<String>(files.length);
     for (FilePath filePath : files) {
-      resultManage = resultManage
-          && manageOnePerformanceReport(build, filePath, performanceBuildAction, logger);
+        resultManage = resultManage && manageOnePerformanceReport(build, filePath, logger, prm);
       performanceReportListNameFile.add(getPerformanceReportBuildFileName(filePath.getName()));
 
     }
@@ -192,14 +193,13 @@ public class PerformancePublisher extends Recorder {
 	 * 
 	 * @param build
 	 * @param src
-	 * @param performanceBuildAction
 	 * @param logger
-	 * @return boolean
+     * @return boolean
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	private boolean manageOnePerformanceReport(AbstractBuild<?, ?> build, FilePath src, PerformanceBuildAction performanceBuildAction,
-			PrintStream logger) throws IOException, InterruptedException {
+	private boolean manageOnePerformanceReport(AbstractBuild<?, ?> build, FilePath src,
+                                               PrintStream logger, PerformanceReportMap reportMap) throws IOException, InterruptedException {
 	  
     logger.println("Performance: Parsing report file " + src.getName());
 	  
@@ -209,15 +209,14 @@ public class PerformancePublisher extends Recorder {
 			return true;
 		}
 		src.copyTo(new FilePath(localReport));
-		if (performanceBuildAction.getPerformanceReportMap().get().isFailed(
-				(PerformancePublisher.getPerformanceReportBuildFileName(src.getName())))) {
+        String fileName = PerformancePublisher.getPerformanceReportBuildFileName(src.getName());
+        if (reportMap.isFailed(fileName)) {
 			build.setResult(Result.UNSTABLE);
 			logger.println("Performance: Report analysis failed. Setting Build to " + build.getResult().toString());
 			return true;
 		}
 
-		double errorPercent = performanceBuildAction.getPerformanceReportMap().get().getPerformanceReport(
-				(PerformancePublisher.getPerformanceReportBuildFileName(src.getName()))).errorPercent();
+		double errorPercent = reportMap.getPerformanceReport(fileName).errorPercent();
 		if (errorFailedThreshold > 0 && errorPercent >= errorFailedThreshold) {
 			build.setResult(Result.FAILURE);
 		} else if (errorUnstableThreshold > 0 && errorPercent >= errorUnstableThreshold
