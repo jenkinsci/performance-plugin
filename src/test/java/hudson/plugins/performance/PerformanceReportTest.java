@@ -5,18 +5,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import hudson.plugins.performance.HttpSample;
-import hudson.plugins.performance.PerformanceBuildAction;
-import hudson.plugins.performance.PerformanceReport;
-import hudson.plugins.performance.UriReport;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import hudson.util.StreamTaskListener;
 import org.easymock.classextension.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,7 +77,7 @@ public class PerformanceReportTest {
 
 	@Test
 	public void testPerformanceReport() throws IOException, SAXException {
-		PerformanceReport performanceReport = new PerformanceReport(null, new File(
+		PerformanceReport performanceReport = parseOne(new File(
 				"src/test/resources/JMeterResults.jtl"));
 		Map<String, UriReport> uriReportMap = performanceReport.getUriReportMap();
 		assertEquals(2, uriReportMap.size());
@@ -100,10 +97,14 @@ public class PerformanceReportTest {
 		assertEquals(new Date(1219160357663L), secondHttpSample.getDate());
 		assertFalse(secondHttpSample.isSuccessful());
 	}
-	
+
+    private PerformanceReport parseOne(File f) throws IOException {
+        return new JMeterParser("").parse(null, Collections.singleton(f),new StreamTaskListener(System.out)).iterator().next();
+    }
+
     @Test 
     public void testPerformanceNonHTTPSamplesMultiThread() throws IOException, SAXException {
-        PerformanceReport performanceReport = new PerformanceReport(null, new File(
+        PerformanceReport performanceReport = parseOne(new File(
                 "src/test/resources/JMeterResultsMultiThread.jtl"));
         
         Map<String, UriReport> uriReportMap = performanceReport.getUriReportMap();

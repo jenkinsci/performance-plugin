@@ -2,21 +2,23 @@ package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
-import java.util.List;
-
+import hudson.util.StreamTaskListener;
 import org.apache.log4j.Logger;
 import org.kohsuke.stapler.StaplerProxy;
 
-public class PerformanceBuildAction implements Action, StaplerProxy {
-	private static final long serialVersionUID = 1L;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.ref.WeakReference;
+import java.util.List;
 
+public class PerformanceBuildAction implements Action, StaplerProxy {
 	private final AbstractBuild<?, ?> build;
+
+    /**
+     * Configured parsers used to parse reports in this build.
+     * For compatibility reasons, this can be null.
+     */
+    private final List<PerformanceReportParser> parsers;
 
 	private transient final PrintStream hudsonConsoleWriter;
 
@@ -24,11 +26,19 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
 
 	private static final Logger logger = Logger.getLogger(PerformanceBuildAction.class.getName());
 	
-	public PerformanceBuildAction(AbstractBuild<?, ?> pBuild, PrintStream logger) {
+	public PerformanceBuildAction(AbstractBuild<?, ?> pBuild, PrintStream logger, List<PerformanceReportParser> parsers) {
 		build = pBuild;
 		hudsonConsoleWriter = logger;
-		performanceReportMap = new WeakReference<PerformanceReportMap>(new PerformanceReportMap(this));
-	}
+        this.parsers = parsers;
+    }
+
+    public PerformanceReportParser getParserById(String id) {
+        if (parsers!=null)
+            for (PerformanceReportParser parser : parsers)
+                if (parser.getDescriptor().getId().equals(id))
+                    return parser;
+        return null;
+    }
 
 	public String getDisplayName() {
 		return Messages.BuildAction_DisplayName();
@@ -42,15 +52,8 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
 		return "performance";
 	}
 
-	public Object getTarget() {
-		File repo = new File(build.getRootDir(), PerformanceReportMap.getPerformanceReportDirRelativePath());
-		List<File> pFileList = Arrays.asList(repo.listFiles());
-		try {
-			return new PerformanceReportMap(this, pFileList);
-		} catch (IOException e) {
-			logger.error(e);
-            return null;
-		}
+	public PerformanceReportMap getTarget() {
+        return getPerformanceReportMap();
 	}
 
 	public AbstractBuild<?, ?> getBuild() {
@@ -62,7 +65,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
 	}
 
 	public PerformanceReportMap getPerformanceReportMap() {
-		PerformanceReportMap reportMap;
+		PerformanceReportMap reportMap = null;
         WeakReference<PerformanceReportMap> wr = this.performanceReportMap;
         if (wr!=null) {
             reportMap = wr.get();
@@ -70,7 +73,11 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
                 return reportMap;
         }
 
-        reportMap = new PerformanceReportMap(this);
+        try {
+			reportMap = new PerformanceReportMap(this, new StreamTaskListener(System.err));
+		} catch (IOException e) {
+			logger.error(e);
+		}
         this.performanceReportMap = new WeakReference<PerformanceReportMap>(reportMap);
 		return reportMap;
 	}

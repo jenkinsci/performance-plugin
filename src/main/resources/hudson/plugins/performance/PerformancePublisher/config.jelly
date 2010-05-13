@@ -1,19 +1,18 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-	<!--
-		This jelly script is used for per-project configuration. See
-		global.jelly for a general discussion about jelly script.
-	-->
   <f:entry title="${%Performance report}"
-      description="${%Report.Description}">
-    <f:textbox name="performance.filename" value="${instance.filename}" />
+      description="${%Report.Description}" field="parsers">
+    <f:hetero-list name="parsers" hasHeader="true"
+                   descriptors="${descriptor.getParserDescriptors()}"
+                   items="${instance.parsers}"
+                   addCaption="${%Add a new report}"/>
   </f:entry>
   <f:entry title="${%Performance threshold}"
       description="${%Threshold.Description}">
     <table width="250px">
       <thead>
         <tr>
-          <td></td>
+          <td/>
           <td colspan="2">
             <img src="${rootURL}/images/16x16/yellow.gif" alt="100%" /> ${%Unstable}
           </td>
@@ -26,11 +25,11 @@
         <tr>
           <td style="vertical-align:middle">${%Thresholds}:</td>
           <td>
-            <f:textbox name="performance.errorUnstableThreshold" value="${instance.errorUnstableThreshold}" /> 
+            <f:textbox field="errorUnstableThreshold" />
           </td>
           <td> % </td>
           <td>
-            <f:textbox name="performance.errorFailedThreshold" value="${instance.errorFailedThreshold}" />
+            <f:textbox field="errorFailedThreshold" />
           </td>
           <td> % </td>
         </tr>

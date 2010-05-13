@@ -4,16 +4,20 @@ import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import hudson.model.TaskListener;
 import org.apache.log4j.Logger;
 
 /**
@@ -36,20 +40,43 @@ public class PerformanceReportMap implements ModelObject {
 
 	private static final Logger logger = Logger.getLogger(PerformanceReportMap.class.getName());
 
-	PerformanceReportMap() {
+    /**
+     * Parses the reports and build a {@link PerformanceReportMap}.
+     *
+     * @throws IOException
+     *      If a report fails to parse.
+     */
+	PerformanceReportMap(PerformanceBuildAction buildAction, TaskListener listener) throws IOException {
+		this.buildAction = buildAction;
+
+        File repo = new File(getBuild().getRootDir(), PerformanceReportMap.getPerformanceReportDirRelativePath());
+
+        // files directly under the directory is for JMeter, for a compatibility reasons.
+        List<File> pFileList = Arrays.asList(repo.listFiles(new FileFilter() {
+            public boolean accept(File f) {
+                return !f.isDirectory();
+            }
+        }));
+        addAll(new JMeterParser("").parse(getBuild(),pFileList,listener));
+
+        // otherwise subdirectory name designates the parser ID.
+        for (File dir : repo.listFiles(new FileFilter() {
+            public boolean accept(File f) {
+                return f.isDirectory();
+            }
+        })) {
+            PerformanceReportParser p = buildAction.getParserById(dir.getName());
+            if (p!=null)
+                addAll(p.parse(getBuild(),Arrays.asList(dir.listFiles()),listener));
+        }
 	}
 
-	PerformanceReportMap(PerformanceBuildAction buildAction) {
-		this.buildAction = buildAction;
-	}
-
-	PerformanceReportMap(PerformanceBuildAction buildAction, List<File> pFileList) throws IOException {
-		this.buildAction = buildAction;
-		for (File pFile : pFileList) {
-            PerformanceReport r = new PerformanceReport(buildAction, pFile);
+    private void addAll(Collection<PerformanceReport> reports) {
+        for (PerformanceReport r : reports) {
+            r.setBuildAction(buildAction);
             performanceReportMap.put(r.getReportFileName(), r);
-		}
-	}
+        }
+    }
 
 	public AbstractBuild<?, ?> getBuild() {
 		return buildAction.getBuild();
@@ -82,31 +109,7 @@ public class PerformanceReportMap implements ModelObject {
 	 * @return
 	 */
 	public PerformanceReport getPerformanceReport(String performanceReportName) {
-		PerformanceReport meterReport = null;
-		if ((performanceReportMap == null) || (performanceReportMap.get(performanceReportName) == null)
-				|| (performanceReportMap.get(performanceReportName) == null)) {
-			File reportFile = new File(getBuild().getRootDir(), getPerformanceReportFileRelativePath(performanceReportName));
-			try {
-				meterReport = new PerformanceReport(buildAction, reportFile);
-				if (meterReport.size() == 0) {
-					logger.warn("Performance report analysis is empty, ensure your jtl file is filled with samples.");
-				}
-				if (performanceReportMap == null) {
-					performanceReportMap = new HashMap<String, PerformanceReport>();
-				}
-				performanceReportMap.put(performanceReportName, meterReport);
-			} catch (IOException e) {
-				logger.warn("Failed to load " + reportFile, e);
-				Throwable ex = e;
-				do {
-					logger.warn(ex.getLocalizedMessage());
-					ex = ex.getCause();
-				} while (ex != null);
-			}
-		} else {
-			meterReport = performanceReportMap.get(performanceReportName);
-		}
-		return meterReport;
+        return performanceReportMap.get(performanceReportName);
 	}
 
 	/**
