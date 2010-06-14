@@ -15,6 +15,9 @@
             <img class="trend" src="./respondingTimeGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
             <img class="trend" src="./errorsGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
           </center>
+          <center>
+            <a href="${from.urlName}trendReport?performanceReportPosition=${performanceReport}">Trend report</a>
+          </center>
         </j:forEach>
       </div>
     </l:main-panel>

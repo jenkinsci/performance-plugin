@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Parser for JMeter.
@@ -26,6 +28,9 @@ import java.util.StringTokenizer;
  * @author Kohsuke Kawaguchi
  */
 public class JMeterParser extends PerformanceReportParser {
+
+    private static final Logger logger = Logger.getLogger(JMeterParser.class.getName());
+
     @DataBoundConstructor
     public JMeterParser(String glob) {
         super(glob);
@@ -44,7 +49,6 @@ public class JMeterParser extends PerformanceReportParser {
                 SAXParser parser = factory.newSAXParser();
                 final PerformanceReport r = new PerformanceReport();
                 r.setReportFileName(f.getName());
-                result.add(r);
                 parser.parse(f, new DefaultHandler() {
                     private HttpSample currentSample;
                     private int status;
@@ -120,11 +124,15 @@ public class JMeterParser extends PerformanceReportParser {
                         }
                     }
                 });
+                result.add(r);
 
             } catch (ParserConfigurationException e) {
                 throw new IOException2("Failed to create parser ", e);
             } catch (SAXException e) {
-                throw new IOException2("Failed to parse " + f, e);
+                if (logger.isLoggable(Level.FINE))
+                    logger.log (Level.FINE, "Failed to parse " + f, e);
+                else
+                    logger.warning ("Failed to parse " + f);
             }
         }
 

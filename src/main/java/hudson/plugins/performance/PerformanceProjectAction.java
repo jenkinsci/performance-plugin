@@ -40,6 +40,7 @@ import org.kohsuke.stapler.StaplerResponse;
 public final class PerformanceProjectAction implements Action {
 
 	private static final String CONFIGURE_LINK = "configure";
+	private static final String TRENDREPORT_LINK = "trendReport";
 
   private static final String PLUGIN_NAME = "performance";
 
@@ -368,6 +369,8 @@ public final class PerformanceProjectAction implements Action {
 	public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
 		if (CONFIGURE_LINK.equals(link)) {
 			return createUserConfiguration(request);
+		} else if (TRENDREPORT_LINK.equals(link)) {
+			return createTrendReport(request);
 		} else {
 			return null;
 		}
@@ -385,4 +388,53 @@ public final class PerformanceProjectAction implements Action {
 		return graph;
 	}
 
+	/**
+	 * Creates a view to configure the trend graph for the current user.
+	 * 
+	 * @param request
+	 *            Stapler request
+	 * @return a view to configure the trend graph for the current user
+	 */
+	private Object createTrendReport(final StaplerRequest request) {
+		String filename = getTrendReportFilename(request);
+		CategoryDataset dataSet = getTrendReportData (request, filename).build();
+		TrendReportDetail report = new TrendReportDetail(project, PLUGIN_NAME, request, filename, dataSet);
+		return report;
+	}
+
+	private String getTrendReportFilename(final StaplerRequest request) {
+		PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+		request.bindParameters(performanceReportPosition);
+		return performanceReportPosition.getPerformanceReportPosition();
+	}
+
+	private DataSetBuilder getTrendReportData(final StaplerRequest request, String performanceReportNameFile) {
+
+		DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+		List<?> builds = getProject().getBuilds();
+		List<Integer> buildsLimits = getFirstAndLastBuild(request, builds);
+
+		int nbBuildsToAnalyze = builds.size();
+		for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
+			AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator.next();
+			if (nbBuildsToAnalyze <= buildsLimits.get(1) && buildsLimits.get(0) <= nbBuildsToAnalyze) {
+				NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+				PerformanceBuildAction performanceBuildAction = currentBuild.getAction(PerformanceBuildAction.class);
+				if (performanceBuildAction == null) {
+					continue;
+				}
+				PerformanceReport report = null;
+				report = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
+				if (report == null) {
+					nbBuildsToAnalyze--;
+					continue;
+				}
+				dataSet.add(report.getMax(), Messages.ProjectAction_Maximum(), label);
+				dataSet.add(report.getAverage(), Messages.ProjectAction_Average(), label);
+				dataSet.add(report.getMin(), Messages.ProjectAction_Minimum(), label);
+			}
+			nbBuildsToAnalyze--;
+		}
+		return dataSet;
+	}
 }

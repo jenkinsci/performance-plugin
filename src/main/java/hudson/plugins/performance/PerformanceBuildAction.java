@@ -3,7 +3,8 @@ package hudson.plugins.performance;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.util.StreamTaskListener;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.kohsuke.stapler.StaplerProxy;
 
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
         try {
 			reportMap = new PerformanceReportMap(this, new StreamTaskListener(System.err));
 		} catch (IOException e) {
-			logger.error(e);
+			logger.log (Level.SEVERE, "Error creating new PerformanceReportMap()", e);
 		}
         this.performanceReportMap = new WeakReference<PerformanceReportMap>(reportMap);
 		return reportMap;

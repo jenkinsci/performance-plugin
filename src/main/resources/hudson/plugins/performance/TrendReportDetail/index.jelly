@@ -1,0 +1,28 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">	
+  <l:layout css="/plugin/performance/css/style.css">
+    <l:main-panel>
+      <h1>${%Trend report}: ${it.filename}</h1>
+      <table class="sortable source" border="1">
+      <thead>
+         <tr>
+         <th>Build</th>
+         <j:forEach var="label" items="${it.columnLabels}">
+         <th>${label}</th>
+         </j:forEach>
+         </tr>
+      </thead>
+      <tbody>
+         <j:forEach var="row" items="${it.iterator}">
+         <tr>
+            <td>${row.label}</td>
+            <j:forEach var="value" items="${row.values}">
+            <td>${value}</td>
+            </j:forEach>
+         </tr>
+        </j:forEach>
+      </tbody>
+      </table>
+    </l:main-panel>
+  </l:layout>
+</j:jelly>
