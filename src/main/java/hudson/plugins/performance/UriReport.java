@@ -10,26 +10,27 @@ import java.util.List;
 
 /**
  * A report about a particular tested URI.
- *
+ * 
  * This object belongs under {@link PerformanceReport}.
  */
-public class UriReport implements ModelObject, Comparable<UriReport> {
+public class UriReport extends AbstractReport implements ModelObject, Comparable<UriReport> {
 
 	public static String END_PERFORMANCE_PARAMETER = ".endperformanceparameter";
 
-    /**
-     * Individual HTTP invocations to this URI and how they went.
-     */
+	/**
+	 * Individual HTTP invocations to this URI and how they went.
+	 */
 	private final List<HttpSample> httpSampleList = new ArrayList<HttpSample>();
 
-    /**
-     * The parent object to which this object belongs.
-     */
+	/**
+	 * The parent object to which this object belongs.
+	 */
 	private final PerformanceReport performanceReport;
 
-    /**
-     * Escaped {@link #uri} that doesn't contain any letters that cannot be used as a token in URL.
-     */
+	/**
+	 * Escaped {@link #uri} that doesn't contain any letters that cannot be used
+	 * as a token in URL.
+	 */
 	private final String staplerUri;
 
 	private String uri;
@@ -60,11 +61,11 @@ public class UriReport implements ModelObject, Comparable<UriReport> {
 		}
 		return nbError;
 	}
-	
-  public double errorPercent() {
-    return ((double) countErrors()) / size() * 100;
-  }
-  
+
+	public double errorPercent() {
+		return ((double) countErrors()) / size() * 100;
+	}
+
 	public long getAverage() {
 		long average = 0;
 		for (HttpSample currentSample : httpSampleList) {
@@ -73,7 +74,7 @@ public class UriReport implements ModelObject, Comparable<UriReport> {
 		return average / size();
 	}
 
-	public AbstractBuild<?,?> getBuild() {
+	public AbstractBuild<?, ?> getBuild() {
 		return performanceReport.getBuild();
 	}
 
@@ -127,8 +128,7 @@ public class UriReport implements ModelObject, Comparable<UriReport> {
 
 	public String encodeUriReport() throws UnsupportedEncodingException {
 		StringBuilder sb = new StringBuilder(120);
-		sb.append(performanceReport.getReportFileName()).append(GraphConfigurationDetail.SEPARATOR).append(getStaplerUri())
-				.append(END_PERFORMANCE_PARAMETER);
+		sb.append(performanceReport.getReportFileName()).append(GraphConfigurationDetail.SEPARATOR).append(getStaplerUri()).append(END_PERFORMANCE_PARAMETER);
 		return URLEncoder.encode(sb.toString(), "UTF-8");
 	}
 

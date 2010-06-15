@@ -29,7 +29,7 @@ public abstract class PerformanceReportParser implements Describable<Performance
 
     @DataBoundConstructor
     protected PerformanceReportParser(String glob) {
-        this.glob = glob;
+        this.glob = (glob == null || glob.length() == 0) ? getDefaultGlobPattern() : glob;
     }
 
     public PerformanceReportParserDescriptor getDescriptor() {
@@ -41,11 +41,17 @@ public abstract class PerformanceReportParser implements Describable<Performance
      */
     public abstract Collection<PerformanceReport> parse(AbstractBuild<?,?> build,
         Collection<File> reports, TaskListener listener) throws IOException;
+    
+    public abstract String getDefaultGlobPattern();
 
     /**
      * All registered implementations.
      */
     public static ExtensionList<PerformanceReportParser> all() {
         return Hudson.getInstance().getExtensionList(PerformanceReportParser.class);
+    }
+    
+    public String getReportName() {
+      return this.getClass().getName().replaceAll("^.*\\.(\\w+)Parser.*$", "$1");
     }
 }

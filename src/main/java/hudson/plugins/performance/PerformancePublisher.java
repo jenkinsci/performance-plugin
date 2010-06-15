@@ -38,9 +38,9 @@ public class PerformancePublisher extends Recorder {
 			return "/plugin/performance/help.html";
 		}
 
-        public List<PerformanceReportParserDescriptor> getParserDescriptors() {
-            return PerformanceReportParserDescriptor.all();
-        }
+		public List<PerformanceReportParserDescriptor> getParserDescriptors() {
+			return PerformanceReportParserDescriptor.all();
+		}
 
 		@Override
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
@@ -52,28 +52,27 @@ public class PerformancePublisher extends Recorder {
 
 	private int errorUnstableThreshold = 0;
 
-    /**
-     * @deprecated as of 1.3.
-     *      for compatibility
-     */
+	/**
+	 * @deprecated as of 1.3. for compatibility
+	 */
 	private transient String filename;
 
-    /**
-     * Configured report parseres.
-     */
-    private List<PerformanceReportParser> parsers;
+	/**
+	 * Configured report parseres.
+	 */
+	private List<PerformanceReportParser> parsers;
 
-    @DataBoundConstructor
-    public PerformancePublisher(int errorFailedThreshold, int errorUnstableThreshold, List<? extends PerformanceReportParser> parsers) {
-        this.errorFailedThreshold = errorFailedThreshold;
-        this.errorUnstableThreshold = errorUnstableThreshold;
-        if (parsers==null)  parsers=Collections.emptyList();
-        this.parsers = new ArrayList<PerformanceReportParser>(parsers);
-    }
+	@DataBoundConstructor
+	public PerformancePublisher(int errorFailedThreshold, int errorUnstableThreshold, List<? extends PerformanceReportParser> parsers) {
+		this.errorFailedThreshold = errorFailedThreshold;
+		this.errorUnstableThreshold = errorUnstableThreshold;
+		if (parsers == null)
+			parsers = Collections.emptyList();
+		this.parsers = new ArrayList<PerformanceReportParser>(parsers);
+	}
 
-    public static File getPerformanceReport(AbstractBuild<?, ?> build, String performanceReportName) {
-		return new File(build.getRootDir(), PerformanceReportMap
-				.getPerformanceReportFileRelativePath(getPerformanceReportBuildFileName(performanceReportName)));
+	public static File getPerformanceReport(AbstractBuild<?, ?> build, String performanceReportName) {
+		return new File(build.getRootDir(), PerformanceReportMap.getPerformanceReportFileRelativePath(getPerformanceReportBuildFileName(performanceReportName)));
 	}
 
 	@Override
@@ -85,14 +84,14 @@ public class PerformancePublisher extends Recorder {
 		return BuildStepMonitor.BUILD;
 	}
 
-    public List<PerformanceReportParser> getParsers() {
-        return parsers;
-    }
+	public List<PerformanceReportParser> getParsers() {
+		return parsers;
+	}
 
-    /**
+	/**
 	 * <p>
-	 * Delete the date suffix appended to the Performance result files by the Maven
-	 * Performance plugin
+	 * Delete the date suffix appended to the Performance result files by the
+	 * Maven Performance plugin
 	 * </p>
 	 * 
 	 * @param performanceReportWorkspaceName
@@ -110,123 +109,115 @@ public class PerformancePublisher extends Recorder {
 		return result;
 	}
 
-  /**
-   * look for performance reports based in the configured parameter includes.
-   * 'includes' is 
-   *   - an Ant-style pattern
-   *   - a list of files and folders separated by the characters ;:,  
-   */
-  protected static List<FilePath> locatePerformanceReports(FilePath workspace,
-      String includes) throws IOException, InterruptedException {
+	/**
+	 * look for performance reports based in the configured parameter includes.
+	 * 'includes' is - an Ant-style pattern - a list of files and folders
+	 * separated by the characters ;:,
+	 */
+	protected static List<FilePath> locatePerformanceReports(FilePath workspace, String includes) throws IOException, InterruptedException {
 
-    // First use ant-style pattern
-    try {
-      FilePath[] ret = workspace.list(includes);
-      if (ret.length > 0) {
-        return Arrays.asList(ret);
-      }
-    } catch (IOException e) {
-    }
+		// First use ant-style pattern
+		try {
+			FilePath[] ret = workspace.list(includes);
+			if (ret.length > 0) {
+				return Arrays.asList(ret);
+			}
+		} catch (IOException e) {
+		}
 
-    // If it fails, do a legacy search
-    ArrayList<FilePath> files = new ArrayList<FilePath>();
-    String parts[] = includes.split("\\s*[;:,]+\\s*");
-    for (String path : parts) {
-      FilePath src = workspace.child(path);
-      if (src.exists()) {
-        if (src.isDirectory()) {
-          files.addAll(Arrays.asList(src.list("**/*")));
-        } else {
-          files.add(src);
-        }
-      }
-    }
-    return files;
-  }
-	
-  @Override
-  public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-      throws InterruptedException, IOException {
-    PrintStream logger = listener.getLogger();
-    
-    if (errorUnstableThreshold > 0 && errorUnstableThreshold < 100) {
-      logger.println("Performance: Percentage of errors greater or equal than " + errorUnstableThreshold
-          + "% sets the build as " + Result.UNSTABLE.toString().toLowerCase());
-    } else {
-      logger.println("Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase());
-    }
-    if (errorFailedThreshold > 0 && errorFailedThreshold < 100) {
-      logger.println("Performance: Percentage of errors greater or equal than " + errorFailedThreshold
-          + "% sets the build as " + Result.FAILURE.toString().toLowerCase());
-    } else {
-      logger.println("Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase());
-    }
+		// If it fails, do a legacy search
+		ArrayList<FilePath> files = new ArrayList<FilePath>();
+		String parts[] = includes.split("\\s*[;:,]+\\s*");
+		for (String path : parts) {
+			FilePath src = workspace.child(path);
+			if (src.exists()) {
+				if (src.isDirectory()) {
+					files.addAll(Arrays.asList(src.list("**/*")));
+				} else {
+					files.add(src);
+				}
+			}
+		}
+		return files;
+	}
 
-      // add the report to the build object.
-      PerformanceBuildAction a = new PerformanceBuildAction(build, logger, parsers);
-      build.addAction(a);
+	@Override
+	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+		PrintStream logger = listener.getLogger();
 
-      for (PerformanceReportParser parser : parsers) {
-          String glob = parser.glob;
-          logger.println("Performance: Recording reports [" + glob + "]");
+		if (errorUnstableThreshold > 0 && errorUnstableThreshold < 100) {
+			logger.println("Performance: Percentage of errors greater or equal than " + errorUnstableThreshold + "% sets the build as " + Result.UNSTABLE.toString().toLowerCase());
+		} else {
+			logger.println("Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase());
+		}
+		if (errorFailedThreshold > 0 && errorFailedThreshold < 100) {
+			logger.println("Performance: Percentage of errors greater or equal than " + errorFailedThreshold + "% sets the build as " + Result.FAILURE.toString().toLowerCase());
+		} else {
+			logger.println("Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase());
+		}
 
-          List<FilePath> files = locatePerformanceReports(build.getWorkspace(), glob);
+		// add the report to the build object.
+		PerformanceBuildAction a = new PerformanceBuildAction(build, logger, parsers);
+		build.addAction(a);
 
-          if (files.isEmpty()) {
-            if (build.getResult().isWorseThan(Result.UNSTABLE)) {
-              return true;
-            }
-            build.setResult(Result.FAILURE);
-            logger.println("Performance: no files matching '" + glob +
-                "' have been found. Has the report generated?. Setting Build to "
-                + build.getResult());
-            return true;
-          }
+		for (PerformanceReportParser parser : parsers) {
+			String glob = parser.glob;
+			logger.println("Performance: Recording " + parser.getReportName() + " reports '" + glob + "'");
 
-          List<File> localReports = copyReportsToMaster(build, logger, files);
-          Collection<PerformanceReport> parsedReports = parser.parse(build, localReports, listener);
+			List<FilePath> files = locatePerformanceReports(build.getWorkspace(), glob);
 
-          // mark the build as unstable or failure depending on the outcome.
-          for (PerformanceReport r : parsedReports) {
-              r.setBuildAction(a);
-              double errorPercent = r.errorPercent();
-              if (errorFailedThreshold > 0 && errorPercent >= errorFailedThreshold) {
-                  build.setResult(Result.FAILURE);
-              } else if (errorUnstableThreshold > 0 && errorPercent >= errorUnstableThreshold) {
-                  build.setResult(Result.UNSTABLE);
-              }
-              logger.println("Performance: Reported a " + errorPercent + "% of errors during the tests. Build status is: "
-                      + build.getResult());
-          }
-      }
+			if (files.isEmpty()) {
+				if (build.getResult().isWorseThan(Result.UNSTABLE)) {
+					return true;
+				}
+				build.setResult(Result.FAILURE);
+				logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob + "' have been found. Has the report generated?. Setting Build to " + build.getResult());
+				return true;
+			}
 
-      return true;
-  }
+			List<File> localReports = copyReportsToMaster(build, logger, files);
+			Collection<PerformanceReport> parsedReports = parser.parse(build, localReports, listener);
 
-    private List<File> copyReportsToMaster(AbstractBuild<?, ?> build, PrintStream logger, List<FilePath> files) throws IOException, InterruptedException {
-        List<File> localReports = new ArrayList<File>();
-        for (FilePath src : files) {
-            final File localReport = getPerformanceReport(build, src.getName());
-            if (src.isDirectory()) {
-                logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
-                continue;
-            }
-            src.copyTo(new FilePath(localReport));
-            localReports.add(localReport);
-        }
-        return localReports;
-    }
+			// mark the build as unstable or failure depending on the outcome.
+			for (PerformanceReport r : parsedReports) {
+				r.setBuildAction(a);
+				double errorPercent = r.errorPercent();
+				if (errorFailedThreshold > 0 && errorPercent >= errorFailedThreshold) {
+					build.setResult(Result.FAILURE);
+				} else if (errorUnstableThreshold > 0 && errorPercent >= errorUnstableThreshold) {
+					build.setResult(Result.UNSTABLE);
+				}
+				logger.println("Performance: File " + r.getReportFileName() + " reported " + errorPercent + "% of errors during the tests. Build status is: " + build.getResult());
+			}
+		}
 
-    public Object readResolve() {
-        // data format migration
-        if (parsers==null)
-            parsers = new ArrayList<PerformanceReportParser>();
-        if (filename!=null) {
-            parsers.add(new JMeterParser(filename));
-            filename = null;
-        }
-        return this;
-    }
+		return true;
+	}
+
+	private List<File> copyReportsToMaster(AbstractBuild<?, ?> build, PrintStream logger, List<FilePath> files) throws IOException, InterruptedException {
+		List<File> localReports = new ArrayList<File>();
+		for (FilePath src : files) {
+			final File localReport = getPerformanceReport(build, src.getName());
+			if (src.isDirectory()) {
+				logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
+				continue;
+			}
+			src.copyTo(new FilePath(localReport));
+			localReports.add(localReport);
+		}
+		return localReports;
+	}
+
+	public Object readResolve() {
+		// data format migration
+		if (parsers == null)
+			parsers = new ArrayList<PerformanceReportParser>();
+		if (filename != null) {
+			parsers.add(new JMeterParser(filename));
+			filename = null;
+		}
+		return this;
+	}
 
 	public int getErrorFailedThreshold() {
 		return errorFailedThreshold;

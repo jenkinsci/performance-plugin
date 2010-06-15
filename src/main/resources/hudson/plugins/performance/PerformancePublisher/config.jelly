@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
   <f:entry title="${%Performance report}"
-      description="${%Report.Description}" field="parsers">
+      field="parsers">
     <f:hetero-list name="parsers" hasHeader="true"
                    descriptors="${descriptor.getParserDescriptors()}"
                    items="${instance.parsers}"

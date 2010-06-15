@@ -1,6 +1,7 @@
 package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
+
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -17,7 +18,7 @@ import java.util.Map;
  *
  * This object belongs under {@link PerformanceReportMap}.
  */
-public class PerformanceReport implements Comparable<PerformanceReport> {
+public class PerformanceReport extends AbstractReport implements Comparable<PerformanceReport> {
 
 	private PerformanceBuildAction buildAction;
 
@@ -29,10 +30,7 @@ public class PerformanceReport implements Comparable<PerformanceReport> {
      * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
      */
 	private final Map<String, UriReport> uriReportMap = new HashMap<String, UriReport>();
-
-	PerformanceReport() {
-	}
-
+	
 	public void addSample(HttpSample pHttpSample) throws SAXException {
 		String uri = pHttpSample.getUri();
 		if (uri == null) {
@@ -64,8 +62,9 @@ public class PerformanceReport implements Comparable<PerformanceReport> {
 		return nbError;
 	}
 
+	
 	public double errorPercent() {
-		return ((double) countErrors()) / size() * 100;
+		return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
 	}
 
 	public long getAverage() {
@@ -80,7 +79,7 @@ public class PerformanceReport implements Comparable<PerformanceReport> {
 		}
 		return result;
 	}
-
+	
 	public AbstractBuild<?, ?> getBuild() {
 		return buildAction.getBuild();
 	}
@@ -108,7 +107,7 @@ public class PerformanceReport implements Comparable<PerformanceReport> {
 		}
 		return max;
 	}
-
+	
 	public long getMin() {
 		long min = Long.MAX_VALUE;
 		for (UriReport currentReport : uriReportMap.values()) {

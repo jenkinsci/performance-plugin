@@ -183,9 +183,6 @@ public final class PerformanceProjectAction implements Action {
 			response.sendRedirect2(request.getContextPath() + "/images/headless.png");
 			return;
 		}
-		// if (checkIfGraphModified(request, response)) {
-		// return;
-		// }
 		DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderErrors = new DataSetBuilder<String, NumberOnlyBuildLabel>();
 		List<?> builds = getProject().getBuilds();
 		List<Integer> buildsLimits = getFirstAndLastBuild(request, builds);
@@ -199,8 +196,7 @@ public final class PerformanceProjectAction implements Action {
 				if (performanceBuildAction == null) {
 					continue;
 				}
-				PerformanceReport performanceReport = null;
-				performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
+				PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
 				if (performanceReport == null) {
 					nbBuildsToAnalyze--;
 					continue;
@@ -241,8 +237,7 @@ public final class PerformanceProjectAction implements Action {
 				if (performanceBuildAction == null) {
 					continue;
 				}
-				PerformanceReport performanceReport = null;
-				performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
+				PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
 				if (performanceReport == null) {
 					nbBuildsToAnalyze--;
 					continue;
