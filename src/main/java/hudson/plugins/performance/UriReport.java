@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class UriReport extends AbstractReport implements ModelObject, Comparable<UriReport> {
 
-	public static String END_PERFORMANCE_PARAMETER = ".endperformanceparameter";
+	public final static String END_PERFORMANCE_PARAMETER = ".endperformanceparameter";
 
 	/**
 	 * Individual HTTP invocations to this URI and how they went.
@@ -38,7 +38,7 @@ public class UriReport extends AbstractReport implements ModelObject, Comparable
 	UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
 		this.performanceReport = performanceReport;
 		this.staplerUri = staplerUri;
-		setUri(uri);
+		this.uri = uri;
 	}
 
 	public void addHttpSample(HttpSample httpSample) {

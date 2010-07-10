@@ -45,7 +45,6 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 asList(new JMeterParser("**/*.jtl"))));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
-        System.out.println(b.getLog(100));
 
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
         assertNotNull(a);

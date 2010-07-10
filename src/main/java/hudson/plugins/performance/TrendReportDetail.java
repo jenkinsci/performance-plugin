@@ -36,9 +36,6 @@ import org.jfree.data.category.CategoryDataset;
  */
 public class TrendReportDetail implements ModelObject,Iterable<TrendReportDetail.Row> {
 
-	/** Logger. */
-	private static final Logger logger = Logger.getLogger(TrendReportDetail.class.getName());
-
 	private AbstractProject<?,?> project;
 	private String filename;
 	private CategoryDataset dataSet;

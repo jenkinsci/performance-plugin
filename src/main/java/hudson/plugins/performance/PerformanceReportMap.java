@@ -38,8 +38,6 @@ public class PerformanceReportMap implements ModelObject {
 
 	private static final String PERFORMANCE_REPORTS_DIRECTORY = "performance-reports";
 
-	private static final Logger logger = Logger.getLogger(PerformanceReportMap.class.getName());
-
     /**
      * Parses the reports and build a {@link PerformanceReportMap}.
      *
@@ -57,7 +55,7 @@ public class PerformanceReportMap implements ModelObject {
                 return !f.isDirectory();
             }
         }));
-        addAll(new JMeterParser("").parse(getBuild(),pFileList,listener));
+        addAll(new JMeterParser("").parse(buildAction.getBuild(),pFileList,listener));
 
         // otherwise subdirectory name designates the parser ID.
         for (File dir : repo.listFiles(new FileFilter() {
@@ -67,7 +65,7 @@ public class PerformanceReportMap implements ModelObject {
         })) {
             PerformanceReportParser p = buildAction.getParserById(dir.getName());
             if (p!=null)
-                addAll(p.parse(getBuild(),Arrays.asList(dir.listFiles()),listener));
+                addAll(p.parse(buildAction.getBuild(),Arrays.asList(dir.listFiles()),listener));
         }
 	}
 
