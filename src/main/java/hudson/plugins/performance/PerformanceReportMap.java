@@ -49,23 +49,32 @@ public class PerformanceReportMap implements ModelObject {
 
         File repo = new File(getBuild().getRootDir(), PerformanceReportMap.getPerformanceReportDirRelativePath());
 
-        // files directly under the directory is for JMeter, for a compatibility reasons.
-        List<File> pFileList = Arrays.asList(repo.listFiles(new FileFilter() {
+        // files directly under the directory are for JMeter, for compatibility reasons.
+        File[] files = repo.listFiles(new FileFilter() {        	
             public boolean accept(File f) {
                 return !f.isDirectory();
             }
-        }));
-        addAll(new JMeterParser("").parse(buildAction.getBuild(),pFileList,listener));
-
+        });
+        // this may fail, if the build itself failed, we need to recover gracefully
+        if (files != null) {
+        	addAll(new JMeterParser("").parse(buildAction.getBuild(), Arrays.asList(files), listener));	
+        }
+        
+        
         // otherwise subdirectory name designates the parser ID.
-        for (File dir : repo.listFiles(new FileFilter() {
+        File[] dirs = repo.listFiles(new FileFilter() {
             public boolean accept(File f) {
                 return f.isDirectory();
             }
-        })) {
-            PerformanceReportParser p = buildAction.getParserById(dir.getName());
-            if (p!=null)
-                addAll(p.parse(buildAction.getBuild(),Arrays.asList(dir.listFiles()),listener));
+        });
+        // this may fail, if the build itself failed, we need to recover gracefully
+        if (dirs != null) {
+            for (File dir : dirs) {
+                PerformanceReportParser p = buildAction.getParserById(dir.getName());
+                if (p!=null) {
+            		addAll(p.parse(getBuild(), Arrays.asList(dir.listFiles()), listener));
+                }
+            }
         }
 	}
 
