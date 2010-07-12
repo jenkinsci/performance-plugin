@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>performance</artifactId>
 	<packaging>hpi</packaging>
-	<version>1.3-SNAPSHOT</version>
+	<version>1.3</version>
 	<name>Hudson Performance plugin</name>
 	<url>http://wiki.hudson-ci.org/display/HUDSON/Performance+Plugin</url>
 
@@ -51,4 +51,10 @@
             </plugin>
         </plugins>
     </build>
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/performance-1.3</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/performance-1.3</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/tags/performance-1.3</url>
+  </scm>
 </project>
