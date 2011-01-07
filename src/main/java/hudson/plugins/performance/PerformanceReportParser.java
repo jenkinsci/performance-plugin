@@ -21,37 +21,41 @@ import java.util.Collection;
  * 
  * @author Kohsuke Kawaguchi
  */
-public abstract class PerformanceReportParser implements Describable<PerformanceReportParser>, ExtensionPoint {
-    /**
-     * GLOB patterns that specify the performance report.
-     */
-    public final String glob;
+public abstract class PerformanceReportParser implements
+    Describable<PerformanceReportParser>, ExtensionPoint {
+  /**
+   * GLOB patterns that specify the performance report.
+   */
+  public final String glob;
 
-    @DataBoundConstructor
-    protected PerformanceReportParser(String glob) {
-        this.glob = (glob == null || glob.length() == 0) ? getDefaultGlobPattern() : glob;
-    }
+  @DataBoundConstructor
+  protected PerformanceReportParser(String glob) {
+    this.glob = (glob == null || glob.length() == 0) ? getDefaultGlobPattern()
+        : glob;
+  }
 
-    public PerformanceReportParserDescriptor getDescriptor() {
-        return (PerformanceReportParserDescriptor)Hudson.getInstance().getDescriptorOrDie(getClass());
-    }
+  public PerformanceReportParserDescriptor getDescriptor() {
+    return (PerformanceReportParserDescriptor) Hudson.getInstance().getDescriptorOrDie(
+        getClass());
+  }
 
-    /**
-     * Parses the specified reports into {@link PerformanceReport}s.
-     */
-    public abstract Collection<PerformanceReport> parse(AbstractBuild<?,?> build,
-        Collection<File> reports, TaskListener listener) throws IOException;
-    
-    public abstract String getDefaultGlobPattern();
+  /**
+   * Parses the specified reports into {@link PerformanceReport}s.
+   */
+  public abstract Collection<PerformanceReport> parse(
+      AbstractBuild<?, ?> build, Collection<File> reports, TaskListener listener)
+      throws IOException;
 
-    /**
-     * All registered implementations.
-     */
-    public static ExtensionList<PerformanceReportParser> all() {
-        return Hudson.getInstance().getExtensionList(PerformanceReportParser.class);
-    }
-    
-    public String getReportName() {
-      return this.getClass().getName().replaceAll("^.*\\.(\\w+)Parser.*$", "$1");
-    }
+  public abstract String getDefaultGlobPattern();
+
+  /**
+   * All registered implementations.
+   */
+  public static ExtensionList<PerformanceReportParser> all() {
+    return Hudson.getInstance().getExtensionList(PerformanceReportParser.class);
+  }
+
+  public String getReportName() {
+    return this.getClass().getName().replaceAll("^.*\\.(\\w+)Parser.*$", "$1");
+  }
 }

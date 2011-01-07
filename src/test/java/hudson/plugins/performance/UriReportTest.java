@@ -11,15 +11,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class UriReportTest {
-	
+
 	private static final long AVERAGE = 5;
 	private static final long MIN = 0;
 	private static final long MAX = 10;
 	private UriReport uriReport;
-	
+
 	@Before
 	public void setUp() {
-		uriReport= new UriReport(null, null, null);
+		uriReport = new UriReport(null, null, null);
 		HttpSample httpSample1 = new HttpSample();
 		httpSample1.setDuration(MAX);
 		Date date = new Date();
@@ -33,7 +33,7 @@ public class UriReportTest {
 		httpSample3.setDuration(MIN);
 		httpSample3.setDate(date);
 		httpSample3.setSuccessful(false);
-		uriReport.addHttpSample(httpSample1 );
+		uriReport.addHttpSample(httpSample1);
 		uriReport.addHttpSample(httpSample2);
 		uriReport.addHttpSample(httpSample3);
 	}

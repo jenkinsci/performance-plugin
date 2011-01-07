@@ -11,40 +11,40 @@ import java.util.Locale;
  */
 public abstract class AbstractReport {
 
-	private NumberFormat percentFormat;
-	private NumberFormat dataFormat;
-	
-	abstract public int countErrors();
-	
-	abstract public double errorPercent();
-	
-	public AbstractReport() {
-		if (Stapler.getCurrentRequest() != null) {
-			Locale.setDefault(Stapler.getCurrentRequest().getLocale());
-		}
-		percentFormat = new DecimalFormat("0.0");
-		dataFormat = new DecimalFormat("#,###");
-	}
+  private NumberFormat percentFormat;
+  private NumberFormat dataFormat;
 
-	public String errorPercentFormated() {
-		Stapler.getCurrentRequest().getLocale();
-		return percentFormat.format(errorPercent());
-		
-	}
+  abstract public int countErrors();
 
-	abstract public long getAverage();
-	
-	public String getAverageFormated() {
-		return dataFormat.format(getAverage());
-	}
+  abstract public double errorPercent();
 
-	abstract public long getMax();
-	
-	public String getMaxFormated(){
-		return dataFormat.format(getMax());
-	}
+  public AbstractReport() {
+    if (Stapler.getCurrentRequest() != null) {
+      Locale.setDefault(Stapler.getCurrentRequest().getLocale());
+    }
+    percentFormat = new DecimalFormat("0.0");
+    dataFormat = new DecimalFormat("#,###");
+  }
 
-	abstract public long getMin();
+  public String errorPercentFormated() {
+    Stapler.getCurrentRequest().getLocale();
+    return percentFormat.format(errorPercent());
 
-	abstract public int size();
+  }
+
+  abstract public long getAverage();
+
+  public String getAverageFormated() {
+    return dataFormat.format(getAverage());
+  }
+
+  abstract public long getMax();
+
+  public String getMaxFormated() {
+    return dataFormat.format(getMax());
+  }
+
+  abstract public long getMin();
+
+  abstract public int size();
 }
