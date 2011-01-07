@@ -1,1 +1,1 @@
-The sources for this plugin may be found at https://github.com/hudson/performance-plugin.
+The sources of this plugin are in https://github.com/hudson/performance-plugin.
