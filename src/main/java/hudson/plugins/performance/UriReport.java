@@ -6,6 +6,7 @@ import hudson.model.ModelObject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -74,6 +75,26 @@ public class UriReport extends AbstractReport implements ModelObject,
     }
     return average / size();
   }
+  
+  public long get90Line() {
+	    long result = 0;
+	    Collections.sort(httpSampleList);
+	    if (httpSampleList.size()>0){
+	    	result= httpSampleList.get((int)(httpSampleList.size() * .9)).getDuration();
+	    }
+	    return result;
+  }
+  
+  public long getMedian() {
+	    long result = 0;
+	    Collections.sort(httpSampleList);
+	    if (httpSampleList.size()>0){
+	    	result= httpSampleList.get((int)(httpSampleList.size() * .5)).getDuration();
+	    }
+	    return result;
+  }
+	  
+	  
 
   public AbstractBuild<?, ?> getBuild() {
     return performanceReport.getBuild();

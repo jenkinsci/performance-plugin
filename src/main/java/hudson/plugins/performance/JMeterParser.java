@@ -16,7 +16,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -56,7 +58,6 @@ public class JMeterParser extends PerformanceReportParser {
     factory.setValidating(false);
     factory.setNamespaceAware(false);
     PrintStream logger = listener.getLogger();
-
     for (File f : reports) {
       try {
         SAXParser parser = factory.newSAXParser();
@@ -64,6 +65,8 @@ public class JMeterParser extends PerformanceReportParser {
         r.setReportFileName(f.getName());
         logger.println("Performance: Parsing JMeter report file " + f.getName());
         parser.parse(f, new DefaultHandler() {
+          HttpSample currentSample;
+          int counter=0;
           /**
            * Performance XML log format is in
            * http://jakarta.apache.org
@@ -94,9 +97,25 @@ public class JMeterParser extends PerformanceReportParser {
                   ? attributes.getValue("s") : attributes.getValue("success")));
               sample.setUri(attributes.getValue("lb") != null
                   ? attributes.getValue("lb") : attributes.getValue("label"));
-              r.addSample(sample);
-            }
+              	  if (counter==0){
+              		  currentSample=sample;
+              	  } 
+              	  counter++;
+              }
           }
+          
+          @Override
+          public void endElement(String uri, String localName, String qName){
+        	  if (counter==1){
+					try {
+						r.addSample(currentSample);
+					} catch (SAXException e) {
+						e.printStackTrace();
+					}
+        	  }
+        	  counter--;
+          }
+          
         });
         result.add(r);
       } catch (ParserConfigurationException e) {

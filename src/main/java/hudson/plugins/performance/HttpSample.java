@@ -54,7 +54,7 @@ public class HttpSample implements Comparable<HttpSample> {
   }
 
   public int compareTo(HttpSample o) {
-    return (int) (o.getDuration() - getDuration());
+    return (int) (getDuration() - o.getDuration());
   }
 
 }

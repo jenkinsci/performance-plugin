@@ -5,8 +5,10 @@
     <th>${%URI}</th>
     <th>${%samples}</th>
     <th>${%Average} (ms)</th>
-    <th>${%Min} (ms)</th>
-    <th>${%Max} (ms)</th>
+    <th>${%Median} (ms)</th>
+    <th>${%Line90} (ms)</th>
+    <th>${%Minimun} (ms)</th>
+    <th>${%Maximun} (ms)</th>
     <th>${%Errors} (%)</th>
   </tr>
 </j:jelly>

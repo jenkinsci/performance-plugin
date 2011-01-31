@@ -250,12 +250,12 @@ public final class PerformanceProjectAction implements Action {
           nbBuildsToAnalyze--;
           continue;
         }
-        dataSetBuilderAverage.add(performanceReport.getMax(),
-            Messages.ProjectAction_Maximum(), label);
+        dataSetBuilderAverage.add(performanceReport.getMedian(),
+            Messages.ProjectAction_Median(), label);
         dataSetBuilderAverage.add(performanceReport.getAverage(),
             Messages.ProjectAction_Average(), label);
-        dataSetBuilderAverage.add(performanceReport.getMin(),
-            Messages.ProjectAction_Minimum(), label);
+        dataSetBuilderAverage.add(performanceReport.get90Line(),
+            Messages.ProjectAction_Line90(), label);
       }
       nbBuildsToAnalyze--;
     }
@@ -446,10 +446,12 @@ public final class PerformanceProjectAction implements Action {
           nbBuildsToAnalyze--;
           continue;
         }
-        dataSet.add(report.getMax(), Messages.ProjectAction_Maximum(), label);
         dataSet.add(report.getAverage(), Messages.ProjectAction_Average(),
-            label);
-        dataSet.add(report.getMin(), Messages.ProjectAction_Minimum(), label);
+                label);
+        dataSet.add(report.getMedian(), Messages.ProjectAction_Median(), label);
+        dataSet.add(report.get90Line(), Messages.ProjectAction_Line90(), label);
+        dataSet.add(report.getMin(), Messages.ProjectAction_Minimun(), label);
+        dataSet.add(report.getMax(), Messages.ProjectAction_Maximun(), label);
       }
       nbBuildsToAnalyze--;
     }

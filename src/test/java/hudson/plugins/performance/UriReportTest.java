@@ -48,15 +48,15 @@ public class UriReportTest {
 		assertEquals(AVERAGE, uriReport.getAverage());
 	}
 
-	@Test
-	public void testGetMax() {
-		assertEquals(MAX, uriReport.getMax());
-	}
+//	@Test
+//	public void testGetMax() {
+//		assertEquals(MAX, uriReport.getMax());
+//	}
 
-	@Test
-	public void testGetMin() {
-		assertEquals(MIN, uriReport.getMin());
-	}
+//	@Test
+//	public void testGetMin() {
+//		assertEquals(MIN, uriReport.getMin());
+//	}
 
 	@Test
 	public void testIsFailed() {

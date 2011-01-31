@@ -7,7 +7,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 /**
- * Abstract class for classes with size, error, min and max attributes
+ * Abstract class for classes with size, error, mean, average, 90 line, min and max attributes
  */
 public abstract class AbstractReport {
 
@@ -37,12 +37,25 @@ public abstract class AbstractReport {
   public String getAverageFormated() {
     return dataFormat.format(getAverage());
   }
+  
+  abstract public long getMedian();
+
+  public String getMeanFormated() {
+    return dataFormat.format(getMedian());
+  }
+  
+  abstract public long get90Line();
+
+  public String get90LineFormated() {
+    return dataFormat.format(get90Line());
+  }
 
   abstract public long getMax();
 
   public String getMaxFormated() {
     return dataFormat.format(getMax());
   }
+  
 
   abstract public long getMin();
 

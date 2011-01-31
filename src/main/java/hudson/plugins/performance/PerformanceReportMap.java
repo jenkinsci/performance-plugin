@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -34,7 +34,7 @@ public class PerformanceReportMap implements ModelObject {
    *
    * Test names are arbitrary human-readable and URL-safe string that identifies an individual report.
    */
-  private Map<String, PerformanceReport> performanceReportMap = new HashMap<String, PerformanceReport>();
+  private Map<String, PerformanceReport> performanceReportMap = new LinkedHashMap<String, PerformanceReport>();
 
   private static final String PERFORMANCE_REPORTS_DIRECTORY = "performance-reports";
 

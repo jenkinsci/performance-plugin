@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +30,7 @@ public class PerformanceReport extends AbstractReport implements
   /**
    * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
    */
-  private final Map<String, UriReport> uriReportMap = new HashMap<String, UriReport>();
+  private final Map<String, UriReport> uriReportMap = new LinkedHashMap<String, UriReport>();
 
   public void addSample(HttpSample pHttpSample) throws SAXException {
     String uri = pHttpSample.getUri();
@@ -75,11 +75,42 @@ public class PerformanceReport extends AbstractReport implements
       for (UriReport currentReport : uriReportMap.values()) {
         average += currentReport.getAverage() * currentReport.size();
       }
-      result = average / size;
+      double test = average/size;
+      result =(int) test;
     }
     return result;
   }
 
+  public long get90Line() {
+	    long result = 0;
+	    int size = size();
+	    if (size != 0) {
+		      long average = 0;
+		      List<HttpSample> allSamples=new ArrayList<HttpSample>();
+		      for (UriReport currentReport : uriReportMap.values()) {
+		    	  allSamples.addAll(currentReport.getHttpSampleList());
+		      }
+		      Collections.sort(allSamples);
+		      result= allSamples.get((int)(allSamples.size() * .9)).getDuration();
+		    }
+	    return result;
+  }	
+
+  public long getMedian() {
+	    long result = 0;
+	    int size = size();
+	    if (size != 0) {
+	      long average = 0;
+	      List<HttpSample> allSamples=new ArrayList<HttpSample>();
+	      for (UriReport currentReport : uriReportMap.values()) {
+	    	  allSamples.addAll(currentReport.getHttpSampleList());
+	      }
+	      Collections.sort(allSamples);
+	      result= allSamples.get((int)(allSamples.size() * .5)).getDuration();
+	    }
+	    return result;
+  }
+  
   public AbstractBuild<?, ?> getBuild() {
     return buildAction.getBuild();
   }
