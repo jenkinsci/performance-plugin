@@ -450,8 +450,8 @@ public final class PerformanceProjectAction implements Action {
                 label);
         dataSet.add(report.getMedian(), Messages.ProjectAction_Median(), label);
         dataSet.add(report.get90Line(), Messages.ProjectAction_Line90(), label);
-        dataSet.add(report.getMin(), Messages.ProjectAction_Minimun(), label);
-        dataSet.add(report.getMax(), Messages.ProjectAction_Maximun(), label);
+        //dataSet.add(report.getMin(), Messages.ProjectAction_Min(), label);
+        //dataSet.add(report.getMax(), Messages.ProjectAction_Max(), label);
       }
       nbBuildsToAnalyze--;
     }

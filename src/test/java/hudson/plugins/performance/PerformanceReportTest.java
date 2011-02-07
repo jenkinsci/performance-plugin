@@ -83,22 +83,22 @@ public class PerformanceReportTest {
 				"src/test/resources/JMeterResults.jtl"));
 		Map<String, UriReport> uriReportMap = performanceReport
 				.getUriReportMap();
-		assertEquals(1, uriReportMap.size());
-		String loginUri = "Login";
+		assertEquals(2, uriReportMap.size());
+		String loginUri = "Home";
 		UriReport firstUriReport = uriReportMap.get(loginUri);
 		HttpSample firstHttpSample = firstUriReport.getHttpSampleList().get(0);
 		assertEquals(loginUri, firstHttpSample.getUri());
-		assertEquals(31, firstHttpSample.getDuration());
-		assertEquals(new Date(1219160357175L), firstHttpSample.getDate());
+		assertEquals(14720, firstHttpSample.getDuration());
+		assertEquals(new Date(1296846793179L), firstHttpSample.getDate());
 		assertTrue(firstHttpSample.isSuccessful());
-		String logoutUri = "Logout";
-//		UriReport secondUriReport = uriReportMap.get(logoutUri);
-//		HttpSample secondHttpSample = secondUriReport.getHttpSampleList()
-//				.get(0);
-//		assertEquals(logoutUri, secondHttpSample.getUri());
-//		assertEquals(26, secondHttpSample.getDuration());
-//		assertEquals(new Date(1219160357663L), secondHttpSample.getDate());
-//		assertFalse(secondHttpSample.isSuccessful());
+		String logoutUri = "Workgroup";
+		UriReport secondUriReport = uriReportMap.get(logoutUri);
+		HttpSample secondHttpSample = secondUriReport.getHttpSampleList()
+				.get(0);
+		assertEquals(logoutUri, secondHttpSample.getUri());
+		assertEquals(278, secondHttpSample.getDuration());
+		assertEquals(new Date(1296846847952L), secondHttpSample.getDate());
+		assertTrue(secondHttpSample.isSuccessful());
 	}
 
 	private PerformanceReport parseOneJMeter(File f) throws IOException {
