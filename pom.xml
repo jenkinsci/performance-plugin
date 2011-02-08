@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.332</version>
+    <version>1.388</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>performance</artifactId>
   <packaging>hpi</packaging>
-  <version>1.6-SNAPSHOT</version>
+  <version>1.5-SNAPSHOT</version>
   <name>Jenkins Performance plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Performance+Plugin</url>
 
