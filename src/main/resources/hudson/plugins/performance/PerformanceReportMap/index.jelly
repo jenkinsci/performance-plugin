@@ -7,10 +7,6 @@
         <h2>${%Performance Breakdown by URI}: ${performanceReport.getReportFileName()}</h2>
         <table class="sortable source" border="1">
           <jm:captionLine />
-          <tr class="bold">
-            <td class="left bold">${%All URIs}</td>
-            <jm:summaryTable it="${performanceReport}" />
-          </tr>
           <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">
             <tr class="${h.ifThenElse(uriReport.failed,'red','')}">
               <td class="left">
@@ -21,6 +17,10 @@
               <jm:summaryTable it="${uriReport}" />
             </tr>
           </j:forEach>
+          <tr class="bold">
+            <td class="left bold">${%All URIs}</td>
+            <jm:summaryTable it="${performanceReport}" />
+          </tr>
         </table>					
       </j:forEach> 
     </l:main-panel>
