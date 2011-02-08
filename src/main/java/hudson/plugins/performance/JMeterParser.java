@@ -66,7 +66,8 @@ public class JMeterParser extends PerformanceReportParser {
         logger.println("Performance: Parsing JMeter report file " + f.getName());
         parser.parse(f, new DefaultHandler() {
           HttpSample currentSample;
-          int counter=0;
+          int counter = 0;
+
           /**
            * Performance XML log format is in
            * http://jakarta.apache.org
@@ -97,25 +98,25 @@ public class JMeterParser extends PerformanceReportParser {
                   ? attributes.getValue("s") : attributes.getValue("success")));
               sample.setUri(attributes.getValue("lb") != null
                   ? attributes.getValue("lb") : attributes.getValue("label"));
-              	  if (counter==0){
-              		  currentSample=sample;
-              	  } 
-              	  counter++;
+              if (counter == 0) {
+                currentSample = sample;
               }
+              counter++;
+            }
           }
-          
+
           @Override
-          public void endElement(String uri, String localName, String qName){
-        	  if (counter==1){
-					try {
-						r.addSample(currentSample);
-					} catch (SAXException e) {
-						e.printStackTrace();
-					}
-        	  }
-        	  counter--;
+          public void endElement(String uri, String localName, String qName) {
+            if (counter == 1) {
+              try {
+                r.addSample(currentSample);
+              } catch (SAXException e) {
+                e.printStackTrace();
+              }
+            }
+            counter--;
           }
-          
+
         });
         result.add(r);
       } catch (ParserConfigurationException e) {

@@ -75,42 +75,42 @@ public class PerformanceReport extends AbstractReport implements
       for (UriReport currentReport : uriReportMap.values()) {
         average += currentReport.getAverage() * currentReport.size();
       }
-      double test = average/size;
-      result =(int) test;
+      double test = average / size;
+      result = (int) test;
     }
     return result;
   }
 
   public long get90Line() {
-	    long result = 0;
-	    int size = size();
-	    if (size != 0) {
-		      long average = 0;
-		      List<HttpSample> allSamples=new ArrayList<HttpSample>();
-		      for (UriReport currentReport : uriReportMap.values()) {
-		    	  allSamples.addAll(currentReport.getHttpSampleList());
-		      }
-		      Collections.sort(allSamples);
-		      result= allSamples.get((int)(allSamples.size() * .9)).getDuration();
-		    }
-	    return result;
-  }	
+    long result = 0;
+    int size = size();
+    if (size != 0) {
+      long average = 0;
+      List<HttpSample> allSamples = new ArrayList<HttpSample>();
+      for (UriReport currentReport : uriReportMap.values()) {
+        allSamples.addAll(currentReport.getHttpSampleList());
+      }
+      Collections.sort(allSamples);
+      result = allSamples.get((int) (allSamples.size() * .9)).getDuration();
+    }
+    return result;
+  }
 
   public long getMedian() {
-	    long result = 0;
-	    int size = size();
-	    if (size != 0) {
-	      long average = 0;
-	      List<HttpSample> allSamples=new ArrayList<HttpSample>();
-	      for (UriReport currentReport : uriReportMap.values()) {
-	    	  allSamples.addAll(currentReport.getHttpSampleList());
-	      }
-	      Collections.sort(allSamples);
-	      result= allSamples.get((int)(allSamples.size() * .5)).getDuration();
-	    }
-	    return result;
+    long result = 0;
+    int size = size();
+    if (size != 0) {
+      long average = 0;
+      List<HttpSample> allSamples = new ArrayList<HttpSample>();
+      for (UriReport currentReport : uriReportMap.values()) {
+        allSamples.addAll(currentReport.getHttpSampleList());
+      }
+      Collections.sort(allSamples);
+      result = allSamples.get((int) (allSamples.size() * .5)).getDuration();
+    }
+    return result;
   }
-  
+
   public AbstractBuild<?, ?> getBuild() {
     return buildAction.getBuild();
   }
