@@ -447,7 +447,7 @@ public final class PerformanceProjectAction implements Action {
           continue;
         }
         dataSet.add(report.getAverage(), Messages.ProjectAction_Average(),
-                label);
+            label);
         dataSet.add(report.getMedian(), Messages.ProjectAction_Median(), label);
         dataSet.add(report.get90Line(), Messages.ProjectAction_Line90(), label);
         //dataSet.add(report.getMin(), Messages.ProjectAction_Min(), label);

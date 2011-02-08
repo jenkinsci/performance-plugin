@@ -37,13 +37,13 @@ public abstract class AbstractReport {
   public String getAverageFormated() {
     return dataFormat.format(getAverage());
   }
-  
+
   abstract public long getMedian();
 
   public String getMeanFormated() {
     return dataFormat.format(getMedian());
   }
-  
+
   abstract public long get90Line();
 
   public String get90LineFormated() {
@@ -55,7 +55,6 @@ public abstract class AbstractReport {
   public String getMaxFormated() {
     return dataFormat.format(getMax());
   }
-  
 
   abstract public long getMin();
 
