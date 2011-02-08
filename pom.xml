@@ -9,8 +9,8 @@
   <artifactId>performance</artifactId>
   <packaging>hpi</packaging>
   <version>1.5-SNAPSHOT</version>
-  <name>Hudson Performance plugin</name>
-  <url>http://wiki.hudson-ci.org/display/HUDSON/Performance+Plugin</url>
+  <name>Jenkins Performance plugin</name>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Performance+Plugin</url>
 
   <developers>
     <developer>
@@ -31,8 +31,8 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/hudson/performance-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:hudson/performance-plugin.git</developerConnection>
+    <connection>scm:git:git://github.com/jenkinsci/performance-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/performance-plugin.git</developerConnection>
   </scm>
 
   <dependencies>
@@ -54,8 +54,8 @@
 
   <distributionManagement>
     <repository>
-      <id>java.net-m2-repository</id>
-      <url>http://maven.hudson-labs.org:8081/content/repositories/releases/</url>
+      <id>maven.jenkins-ci.org</id>
+      <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
     </repository>
   </distributionManagement>
 
