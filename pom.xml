@@ -64,6 +64,7 @@
       <plugin>
         <groupId>com.relativitas.maven.plugins</groupId>
         <artifactId>maven-java-formatter-plugin</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
         <configuration>
           <compilerSource>1.5</compilerSource>
           <compilerCompliance>1.5</compilerCompliance>
