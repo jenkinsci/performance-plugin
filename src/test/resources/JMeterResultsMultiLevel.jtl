@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testResults version="1.2">
+<httpSample t="645" lt="644" ts="1298457003722" s="true" lb="Home" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="611">
+  <assertionResult>
+    <name>Ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+  <assertionResult>
+    <name>Otp sms</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+  <assertionResult>
+    <name>Nominal mode</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="449" lt="449" ts="1298457004512" s="true" lb="Home" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="557">
+  <assertionResult>
+    <name>Ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="372" lt="372" ts="1298457004965" s="true" lb="Home" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="506">
+  <assertionResult>
+    <name>authentication ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="342" lt="342" ts="1298457005341" s="true" lb="Workgroup" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="610">
+  <assertionResult>
+    <name>Ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+  <assertionResult>
+    <name>Otp sms</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+  <assertionResult>
+    <name>Backup mode</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="420" lt="419" ts="1298457005690" s="true" lb="Workgroup" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="557">
+  <assertionResult>
+    <name>Ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="374" lt="373" ts="1298457006113" s="true" lb="Workgroup" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="506">
+  <assertionResult>
+    <name>Authentication ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="280" lt="279" ts="1298457006490" s="true" lb="Home" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="622">
+  <assertionResult>
+    <name>Ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+  <assertionResult>
+    <name>Otp sms</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+  <assertionResult>
+    <name>Nominal mode</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="379" lt="379" ts="1298457006783" s="true" lb="Home" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="568">
+  <assertionResult>
+    <name>Ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="332" lt="332" ts="1298457007165" s="true" lb="Home" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="506">
+  <assertionResult>
+    <name>Authentication ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+<httpSample t="226" lt="226" ts="1298457007500" s="true" lb="Workgroup" rc="200" rm="OK" tn="OSS 1-1" dt="text" by="621">
+  <assertionResult>
+    <name>Ok</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+  <assertionResult>
+    <name>Otp sms</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+  <assertionResult>
+    <name>Backup mode</name>
+    <failure>false</failure>
+    <error>false</error>
+    <failureMessage></failureMessage>
+  </assertionResult>
+</httpSample>
+
+
+</testResults>

@@ -113,8 +113,9 @@ public class JMeterParser extends PerformanceReportParser {
               } catch (SAXException e) {
                 e.printStackTrace();
               }
+              counter--;
             }
-            counter--;
+            
           }
 
         });

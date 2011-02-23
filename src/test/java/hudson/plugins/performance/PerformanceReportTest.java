@@ -155,4 +155,16 @@ public class PerformanceReportTest {
 		assertEquals(new Date(0L), secondHttpSample.getDate());
 		assertFalse(secondHttpSample.isSuccessful());
 	}
+        
+
+        @Test
+	public void testPerformanceReportMultiLevel() throws IOException, SAXException {
+		PerformanceReport performanceReport = parseOneJMeter(new File(
+				"src/test/resources/JMeterResultsMultiLevel.jtl"));
+		Map<String, UriReport> uriReportMap = performanceReport
+				.getUriReportMap();
+		assertEquals(2, uriReportMap.size());
+		UriReport report = uriReportMap.get("Home");
+		assertNotNull(report);
+	}
 }
