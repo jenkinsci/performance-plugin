@@ -154,7 +154,6 @@ public class PerformanceReport extends AbstractReport implements
   public List<UriReport> getUriListOrdered() {
     Collection<UriReport> uriCollection = getUriReportMap().values();
     List<UriReport> UriReportList = new ArrayList<UriReport>(uriCollection);
-    Collections.sort(UriReportList);
     return UriReportList;
   }
 
