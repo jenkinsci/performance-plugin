@@ -107,15 +107,17 @@ public class JMeterParser extends PerformanceReportParser {
 
           @Override
           public void endElement(String uri, String localName, String qName) {
-            if (counter == 1) {
-              try {
-                r.addSample(currentSample);
-              } catch (SAXException e) {
-                e.printStackTrace();
+            if ("httpSample".equalsIgnoreCase(qName)
+                || "sample".equalsIgnoreCase(qName)) {
+              if (counter == 1) {
+                try {
+                  r.addSample(currentSample);
+                } catch (SAXException e) {
+                  e.printStackTrace();
+                }
               }
               counter--;
             }
-
           }
 
         });
