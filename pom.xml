@@ -61,8 +61,8 @@
   </distributionManagement>
 
   <build>
-<!--
     <plugins>
+<!--
       <plugin>
         <groupId>com.relativitas.maven.plugins</groupId>
         <artifactId>maven-java-formatter-plugin</artifactId>
