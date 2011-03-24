@@ -9,7 +9,7 @@
   <artifactId>performance</artifactId>
   <packaging>hpi</packaging>
   <version>1.6-SNAPSHOT</version>
-  <name>Jenkins Performance plugin</name>
+  <name>Performance plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Performance+Plugin</url>
 
   <developers>
