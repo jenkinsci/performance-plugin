@@ -446,13 +446,20 @@ public final class PerformanceProjectAction implements Action {
           nbBuildsToAnalyze--;
           continue;
         }
-        dataSet.add(Math.round(report.getAverage()), Messages.ProjectAction_Average(), label);
-        dataSet.add(Math.round(report.getMedian()), Messages.ProjectAction_Median(), label);
-        dataSet.add(Math.round(report.get90Line()), Messages.ProjectAction_Line90(), label);
-        dataSet.add(Math.round(report.getMin()), Messages.ProjectAction_Minimum(), label);
-        dataSet.add(Math.round(report.getMax()), Messages.ProjectAction_Maximum(), label);
-        dataSet.add(Math.round(report.errorPercent()), Messages.ProjectAction_PercentageOfErrors(), label);
-        dataSet.add(Math.round(report.countErrors()), Messages.ProjectAction_Errors(), label);
+        dataSet.add(Math.round(report.getAverage()),
+            Messages.ProjectAction_Average(), label);
+        dataSet.add(Math.round(report.getMedian()),
+            Messages.ProjectAction_Median(), label);
+        dataSet.add(Math.round(report.get90Line()),
+            Messages.ProjectAction_Line90(), label);
+        dataSet.add(Math.round(report.getMin()),
+            Messages.ProjectAction_Minimum(), label);
+        dataSet.add(Math.round(report.getMax()),
+            Messages.ProjectAction_Maximum(), label);
+        dataSet.add(Math.round(report.errorPercent()),
+            Messages.ProjectAction_PercentageOfErrors(), label);
+        dataSet.add(Math.round(report.countErrors()),
+            Messages.ProjectAction_Errors(), label);
       }
       nbBuildsToAnalyze--;
     }

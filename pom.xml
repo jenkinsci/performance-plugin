@@ -61,6 +61,7 @@
   </distributionManagement>
 
   <build>
+<!--
     <plugins>
       <plugin>
         <groupId>com.relativitas.maven.plugins</groupId>
@@ -76,6 +77,7 @@
           </directories>
         </configuration>
       </plugin>
+-->
     </plugins>
   </build>
 
