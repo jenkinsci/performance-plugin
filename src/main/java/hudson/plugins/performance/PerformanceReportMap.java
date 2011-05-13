@@ -174,7 +174,7 @@ public class PerformanceReportMap implements ModelObject {
     StringBuilder sb = new StringBuilder(100);
     sb.append(PERFORMANCE_REPORTS_DIRECTORY);
     for (String suffix : suffixes) {
-    	sb.append(File.separator).append(suffix);
+      sb.append(File.separator).append(suffix);
     }
     return sb.toString();
   }
