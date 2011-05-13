@@ -74,10 +74,10 @@ public class PerformancePublisher extends Recorder {
   }
 
   public static File getPerformanceReport(AbstractBuild<?, ?> build,
-      String performanceReportName) {
+      String parserDisplayName, String performanceReportName) {
     return new File(
         build.getRootDir(),
-        PerformanceReportMap.getPerformanceReportFileRelativePath(getPerformanceReportBuildFileName(performanceReportName)));
+        PerformanceReportMap.getPerformanceReportFileRelativePath(parserDisplayName, getPerformanceReportBuildFileName(performanceReportName)));
   }
 
   @Override
@@ -195,7 +195,7 @@ public class PerformancePublisher extends Recorder {
         return true;
       }
 
-      List<File> localReports = copyReportsToMaster(build, logger, files);
+      List<File> localReports = copyReportsToMaster(build, logger, files, parser.getDescriptor().getDisplayName());
       Collection<PerformanceReport> parsedReports = parser.parse(build,
           localReports, listener);
 
@@ -220,11 +220,11 @@ public class PerformancePublisher extends Recorder {
   }
 
   private List<File> copyReportsToMaster(AbstractBuild<?, ?> build,
-      PrintStream logger, List<FilePath> files) throws IOException,
+      PrintStream logger, List<FilePath> files, String parserDisplayName) throws IOException,
       InterruptedException {
     List<File> localReports = new ArrayList<File>();
     for (FilePath src : files) {
-      final File localReport = getPerformanceReport(build, src.getName());
+      final File localReport = getPerformanceReport(build, parserDisplayName, src.getName());
       if (src.isDirectory()) {
         logger.println("Performance: File '" + src.getName()
             + "' is a directory, not a Performance Report");

@@ -336,20 +336,22 @@ public final class PerformanceProjectAction implements Action {
 
   public List<String> getPerformanceReportList() {
     this.performanceReportList = new ArrayList<String>(0);
-    if (this.project != null
-        && this.project.getSomeBuildWithWorkspace() != null) {
-      File file = new File(
-          this.project.getSomeBuildWithWorkspace().getRootDir(),
-          PerformanceReportMap.getPerformanceReportDirRelativePath());
-      if (file.exists()) {
-        for (File performanceReportFile : file.listFiles()) {
-          this.performanceReportList.add(performanceReportFile.getName());
-        }
+    if (null == this.project) { return performanceReportList; }
+    if (null == this.project.getSomeBuildWithWorkspace()) { return performanceReportList; }
+    File file = new File(
+        this.project.getSomeBuildWithWorkspace().getRootDir(),
+        PerformanceReportMap.getPerformanceReportDirRelativePath());
+    if (!file.isDirectory()) { return performanceReportList; }
+    
+    for (File entry : file.listFiles()) {
+      if (entry.isDirectory()) {
+    	for (File e : entry.listFiles()) { this.performanceReportList.add(e.getName()); }
+      } else {
+    	this.performanceReportList.add(entry.getName());
       }
     }
-    if (this.performanceReportList != null) {
-      Collections.sort(performanceReportList);
-    }
+    
+    Collections.sort(performanceReportList);
     return this.performanceReportList;
   }
 

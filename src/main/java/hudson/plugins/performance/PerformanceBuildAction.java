@@ -34,10 +34,10 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
     this.parsers = parsers;
   }
 
-  public PerformanceReportParser getParserById(String id) {
+  public PerformanceReportParser getParserByDisplayName(String displayName) {
     if (parsers != null)
       for (PerformanceReportParser parser : parsers)
-        if (parser.getDescriptor().getId().equals(id))
+        if (parser.getDescriptor().getDisplayName().equals(displayName))
           return parser;
     return null;
   }

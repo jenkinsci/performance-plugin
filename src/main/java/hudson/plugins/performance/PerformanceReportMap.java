@@ -72,7 +72,7 @@ public class PerformanceReportMap implements ModelObject {
     // this may fail, if the build itself failed, we need to recover gracefully
     if (dirs != null) {
       for (File dir : dirs) {
-        PerformanceReportParser p = buildAction.getParserById(dir.getName());
+        PerformanceReportParser p = buildAction.getParserByDisplayName(dir.getName());
         if (p != null) {
           addAll(p.parse(getBuild(), Arrays.asList(dir.listFiles()), listener));
         }
@@ -162,19 +162,19 @@ public class PerformanceReportMap implements ModelObject {
   }
 
   public static String getPerformanceReportFileRelativePath(
-      String reportFileName) {
-    return getRelativePath(reportFileName);
+      String parserDisplayName, String reportFileName) {
+    return getRelativePath(parserDisplayName, reportFileName);
   }
 
   public static String getPerformanceReportDirRelativePath() {
-    return getRelativePath(null);
+    return getRelativePath();
   }
 
-  private static String getRelativePath(String reportFileName) {
+  private static String getRelativePath(String... suffixes) {
     StringBuilder sb = new StringBuilder(100);
     sb.append(PERFORMANCE_REPORTS_DIRECTORY);
-    if (reportFileName != null) {
-      sb.append("/").append(reportFileName);
+    for (String suffix : suffixes) {
+    	sb.append(File.separator).append(suffix);
     }
     return sb.toString();
   }
