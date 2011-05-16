@@ -156,8 +156,31 @@ public class PerformanceReportTest {
 		assertFalse(secondHttpSample.isSuccessful());
 	}
         
+	 @Test
+	public void testIssue5571() throws IOException, SAXException {
+	  PerformanceReport performanceReport = parseOneJUnit(new File(
+	        "src/test/resources/jUnitIssue5571.xml"));
+	    Map<String, UriReport> uriReportMap = performanceReport
+	        .getUriReportMap();
+	    assertEquals(1, uriReportMap.size());
+	    String uri = "unknown";
+	    UriReport report = uriReportMap.get(uri);
+	    HttpSample firstHttpSample = report.getHttpSampleList().get(0);
+	    assertEquals(uri, firstHttpSample.getUri());
+	    assertEquals(890, firstHttpSample.getDuration());
+	    assertEquals(new Date(0L), firstHttpSample.getDate());
+	    assertTrue(firstHttpSample.isSuccessful());
+	    
+	    HttpSample secondHttpSample = report.getHttpSampleList().get(1);
+      assertEquals(uri, secondHttpSample.getUri());
+      assertEquals(50, secondHttpSample.getDuration());
+      assertEquals(new Date(0L), secondHttpSample.getDate());
+      assertTrue(secondHttpSample.isSuccessful());
+      
+      assertEquals(33, report.getMedian());
+	}
 
-        @Test
+  @Test
 	public void testPerformanceReportMultiLevel() throws IOException, SAXException {
 		PerformanceReport performanceReport = parseOneJMeter(new File(
 				"src/test/resources/JMeterResultsMultiLevel.jtl"));
