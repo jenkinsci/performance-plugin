@@ -151,6 +151,16 @@ public class GraphConfigurationDetail implements ModelObject {
 
   protected void persistValue(final String value, final StaplerRequest request,
       final StaplerResponse response) {
+    
+    // First check for URL values
+    String buildCount = request.getParameter("buildCount");
+    if (buildCount != null) {
+        setBuildCount (Integer.parseInt(buildCount));
+        setConfigType(GraphConfigurationDetail.BUILD_CONFIG);
+        return;
+    }
+    
+    // If not found, check cookie    
     Cookie cookie = createCookieHandler("performance").create(
         request.getAncestors(), value);
     response.addCookie(cookie);
