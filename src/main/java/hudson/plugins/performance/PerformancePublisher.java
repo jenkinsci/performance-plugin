@@ -205,15 +205,20 @@ public class PerformancePublisher extends Recorder {
       for (PerformanceReport r : parsedReports) {
         r.setBuildAction(a);
         double errorPercent = r.errorPercent();
+        Result result = Result.SUCCESS;
         if (errorFailedThreshold > 0 && errorPercent >= errorFailedThreshold) {
+          result = Result.FAILURE;
           build.setResult(Result.FAILURE);
         } else if (errorUnstableThreshold > 0
-            && errorPercent >= errorUnstableThreshold) {
-          build.setResult(Result.UNSTABLE);
+            && errorPercent >= errorUnstableThreshold ) {
+          result = Result.UNSTABLE;
+        }
+        if (result.isWorseThan(build.getResult())) {
+          build.setResult(result);
         }
         logger.println("Performance: File " + r.getReportFileName()
             + " reported " + errorPercent
-            + "% of errors during the tests. Build status is: "
+            + "% of errors [" + result + "]. Build status is: "
             + build.getResult());
       }
     }
