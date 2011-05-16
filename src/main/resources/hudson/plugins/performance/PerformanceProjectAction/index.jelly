@@ -12,8 +12,12 @@
         <j:forEach var="performanceReport" items="${it.performanceReportList}">
           <div class="title"><h1><center>${%Test file}: ${performanceReport}</center></h1></div>
           <center>
-            <img class="trend" src="./respondingTimeGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
-            <img class="trend" src="./errorsGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
+            <a href="./respondingTimeGraph?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
+             <img class="trend" src="./respondingTimeGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
+            </a>
+            <a href="./errorsGraph?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport}"  title="${%Click for larger image}">
+             <img class="trend" src="./errorsGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
+            </a>
           </center>
           <center>
             <a href="${from.urlName}trendReport?performanceReportPosition=${performanceReport}">${%Trend report}</a>
