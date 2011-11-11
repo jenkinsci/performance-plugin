@@ -119,7 +119,7 @@ public final class PerformanceProjectAction implements Action {
     return chart;
   }
 
-  private JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
+  protected static JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
 
     final JFreeChart chart = ChartFactory.createLineChart(
         Messages.ProjectAction_RespondingTime(), // charttitle
