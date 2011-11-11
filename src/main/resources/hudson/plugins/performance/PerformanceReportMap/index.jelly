@@ -5,6 +5,7 @@
     <l:main-panel>
       <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
         <h2>${%Performance Breakdown by URI}: ${performanceReport.getReportFileName()}</h2>
+        <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
         <table class="sortable source" border="1">
           <jm:captionLine />
           <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">
