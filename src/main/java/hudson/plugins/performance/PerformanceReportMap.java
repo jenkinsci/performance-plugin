@@ -43,7 +43,7 @@ public class PerformanceReportMap implements ModelObject {
     private static final String PERFORMANCE_REPORTS_DIRECTORY = "performance-reports";
     
     private static AbstractBuild<?, ?> currentBuild = null;
-    
+        
     /**
      * Parses the reports and build a {@link PerformanceReportMap}.
      *
@@ -264,6 +264,7 @@ public class PerformanceReportMap implements ModelObject {
             PerformanceReportMap.currentBuild = getBuild();
         }else {
             if( PerformanceReportMap.currentBuild != getBuild() ) {
+                PerformanceReportMap.currentBuild = null;
                 return;
             }
         }
