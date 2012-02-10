@@ -12,7 +12,7 @@
             <tr class="${h.ifThenElse(uriReport.failed,'red','')}">
               <td class="left">
                 <a href="./uriReport/${uriReport.encodeUriReport()}">
-                  <st:out value="${uriReport.getUri()}" />
+                  <st:out value="${uriReport.getShortUri()}" />
                 </a>
               </td>
               <jm:summaryTable it="${uriReport}" />

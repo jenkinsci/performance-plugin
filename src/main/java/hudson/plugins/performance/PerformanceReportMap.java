@@ -41,7 +41,9 @@ public class PerformanceReportMap implements ModelObject {
      */
     private Map<String, PerformanceReport> performanceReportMap = new LinkedHashMap<String, PerformanceReport>();
     private static final String PERFORMANCE_REPORTS_DIRECTORY = "performance-reports";
-
+    
+    private static AbstractBuild<?, ?> currentBuild = null;
+    
     /**
      * Parses the reports and build a {@link PerformanceReportMap}.
      *
@@ -208,8 +210,8 @@ public class PerformanceReportMap implements ModelObject {
 
     private void parseReports(AbstractBuild<?, ?> build, TaskListener listener, PerformanceReportCollector collector, final String filename) throws IOException {
         File repo = new File(build.getRootDir(),
-                PerformanceReportMap.getPerformanceReportDirRelativePath());
-
+                PerformanceReportMap.getPerformanceReportDirRelativePath());    
+        
         // files directly under the directory are for JMeter, for compatibility reasons.
         File[] files = repo.listFiles(new FileFilter() {
 
@@ -251,8 +253,44 @@ public class PerformanceReportMap implements ModelObject {
                 }
             }
         }
+        
+        addPreviousBuildReports();
     }
-
+    
+    private void addPreviousBuildReports() {
+        
+        // Avoid parsing all builds.
+        if ( PerformanceReportMap.currentBuild == null ) {
+            PerformanceReportMap.currentBuild = getBuild();
+        }else {
+            if( PerformanceReportMap.currentBuild != getBuild() ) {
+                return;
+            }
+        }
+        
+        AbstractBuild<?, ?> previousBuild = getBuild().getPreviousBuild();
+        if ( previousBuild == null ) {
+            return;
+        }
+        
+        PerformanceBuildAction previousPerformanceAction = previousBuild.getAction(PerformanceBuildAction.class);
+        if ( previousPerformanceAction == null ) {
+            return;
+        }
+        
+        PerformanceReportMap previousPerformanceReportMap = previousPerformanceAction.getPerformanceReportMap();
+        if (previousPerformanceReportMap == null) {
+            return;
+        }
+        
+        for (Map.Entry<String, PerformanceReport> item : getPerformanceReportMap().entrySet()) {
+            PerformanceReport lastReport = previousPerformanceReportMap.getPerformanceReportMap().get( item.getKey() );
+            if ( lastReport != null ) {
+                item.getValue().setLastBuildReport( lastReport );
+            }
+        }
+    }
+    
     private interface PerformanceReportCollector {
 
         public void addAll(Collection<PerformanceReport> parse);
