@@ -93,8 +93,7 @@ public class JUnitParser extends JMeterParser {
               currentSample = new HttpSample();
               currentSample.setDate(new Date(0));
               String time = attributes.getValue("time");
-              double duration = Double.parseDouble(time);
-              currentSample.setDuration((long) (duration * 1000));
+              currentSample.setDuration(parseDuration(time));
               currentSample.setSuccessful(true);
               currentSample.setUri(attributes.getValue("name"));
             } else if ("failure".equalsIgnoreCase(qName) && status != 0) {
@@ -114,5 +113,13 @@ public class JUnitParser extends JMeterParser {
     }
 
     return result;
+  }
+  
+  /**
+   * Strips any commas from <code>time</code>, then parses it into a long.
+   */
+  long parseDuration(final String time) {
+    double duration = Double.parseDouble(time.replaceAll(",", "")); //don't want commas or else will break on parse
+    return (long) (duration * 1000);
   }
 }
