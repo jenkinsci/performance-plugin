@@ -154,7 +154,7 @@ public class PerformancePublisher extends Recorder {
       BuildListener listener) throws InterruptedException, IOException {
     PrintStream logger = listener.getLogger();
 
-    if (errorUnstableThreshold > 0 && errorUnstableThreshold < 100) {
+    if (errorUnstableThreshold >= 0 && errorUnstableThreshold <= 100) {
       logger.println("Performance: Percentage of errors greater or equal than "
           + errorUnstableThreshold + "% sets the build as "
           + Result.UNSTABLE.toString().toLowerCase());
@@ -162,7 +162,7 @@ public class PerformancePublisher extends Recorder {
       logger.println("Performance: No threshold configured for making the test "
           + Result.UNSTABLE.toString().toLowerCase());
     }
-    if (errorFailedThreshold > 0 && errorFailedThreshold < 100) {
+    if (errorFailedThreshold >= 0 && errorFailedThreshold <= 100) {
       logger.println("Performance: Percentage of errors greater or equal than "
           + errorFailedThreshold + "% sets the build as "
           + Result.FAILURE.toString().toLowerCase());
@@ -176,6 +176,7 @@ public class PerformancePublisher extends Recorder {
         parsers);
     build.addAction(a);
 
+    double thresholdTolerance = 0.00000001;
     for (PerformanceReportParser parser : parsers) {
       String glob = parser.glob;
       logger.println("Performance: Recording " + parser.getReportName()
@@ -206,11 +207,11 @@ public class PerformancePublisher extends Recorder {
         r.setBuildAction(a);
         double errorPercent = r.errorPercent();
         Result result = Result.SUCCESS;
-        if (errorFailedThreshold > 0 && errorPercent >= errorFailedThreshold) {
+        if (errorFailedThreshold >= 0 && errorPercent - errorFailedThreshold > thresholdTolerance) {
           result = Result.FAILURE;
           build.setResult(Result.FAILURE);
-        } else if (errorUnstableThreshold > 0
-            && errorPercent >= errorUnstableThreshold ) {
+        } else if (errorUnstableThreshold >= 0
+            && errorPercent - errorUnstableThreshold > thresholdTolerance) {
           result = Result.UNSTABLE;
         }
         if (result.isWorseThan(build.getResult())) {
