@@ -44,17 +44,6 @@
     </dependency>
   </dependencies>
 
-  <pluginRepositories>
-<!--
-    <pluginRepository>
-      <id>maven-java-formatter-plugin.googlecode.com</id>
-      <name>Maven2 Java Formatter Plugin repository</name>
-      <url>http://maven-java-formatter-plugin.googlecode.com/svn/maven2-repo/</url>
-      <snapshots><enabled>true</enabled></snapshots>
-    </pluginRepository>
--->
-  </pluginRepositories>
-
   <distributionManagement>
     <repository>
       <id>maven.jenkins-ci.org</id>
