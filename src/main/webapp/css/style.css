@@ -47,6 +47,10 @@ div.title {
 .red, table.source .red a {
 	color: red;
 }
+
+.green, table.source .green a {
+	color: green;
+}
 .trend {
 	margin-right: 40px;
 	border: solid 1px pink;

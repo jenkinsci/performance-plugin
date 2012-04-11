@@ -31,6 +31,8 @@ public class PerformanceReport extends AbstractReport implements
    * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
    */
   private final Map<String, UriReport> uriReportMap = new LinkedHashMap<String, UriReport>();
+  
+  private PerformanceReport lastBuildReport;
 
   public void addSample(HttpSample pHttpSample) throws SAXException {
     String uri = pHttpSample.getUri();
@@ -110,6 +112,10 @@ public class PerformanceReport extends AbstractReport implements
     }
     return result;
   }
+      
+  public String getHttpCode() {
+    return "";
+  }
 
   public AbstractBuild<?, ?> getBuild() {
     return buildAction.getBuild();
@@ -180,4 +186,49 @@ public class PerformanceReport extends AbstractReport implements
     }
     return size;
   }
+  
+  public void setLastBuildReport( PerformanceReport lastBuildReport ) {
+    Map<String, UriReport> lastBuildUriReportMap = lastBuildReport.getUriReportMap();
+    for (Map.Entry<String, UriReport> item : uriReportMap.entrySet()) {
+        UriReport lastBuildUri = lastBuildUriReportMap.get( item.getKey() );
+        if ( lastBuildUri != null ) {
+            item.getValue().addLastBuildUriReport( lastBuildUri );
+        } else {
+        }
+    }
+    this.lastBuildReport = lastBuildReport;
+  }
+  
+  public long getAverageDiff() {
+      if ( lastBuildReport == null ) {
+          return 0;
+      }
+      return getAverage() - lastBuildReport.getAverage();
+  }
+  
+  public long getMedianDiff() {
+      if ( lastBuildReport == null ) {
+          return 0;
+      }
+      return getMedian() - lastBuildReport.getMedian();
+  }
+  
+  public double getErrorPercentDiff() {
+      if ( lastBuildReport == null ) {
+          return 0;
+      }
+      return errorPercent() - lastBuildReport.errorPercent();
+  }
+  
+  public String getLastBuildHttpCodeIfChanged() {
+      return "";
+  }
+    
+  public int getSizeDiff() {
+      if ( lastBuildReport == null ) {
+          return 0;
+      }
+      return size() - lastBuildReport.size();
+  }
+
 }

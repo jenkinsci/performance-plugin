@@ -98,6 +98,8 @@ public class JMeterParser extends PerformanceReportParser {
                   ? attributes.getValue("s") : attributes.getValue("success")));
               sample.setUri(attributes.getValue("lb") != null
                   ? attributes.getValue("lb") : attributes.getValue("label"));
+              sample.setHttpCode(attributes.getValue("rc") != null && attributes.getValue("rc").length() <= 3
+                  ? attributes.getValue("rc") : "0" );
               if (counter == 0) {
                 currentSample = sample;
               }

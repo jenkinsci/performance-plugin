@@ -16,11 +16,13 @@
       <h3>${%Performance samples}</h3>
       <table class="sortable source" border="1">
         <th>${%URI}</th>
+        <th>${%Http Code}</th>
         <th>${%Time}</th>
         <th>${%Duration} (ms)</th>
         <j:forEach var="c" items="${it.httpSampleList}">
           <tr class="${h.ifThenElse(c.failed,'red','')}">
             <td class="left">${c.uri}</td>
+            <td>${c.httpCode}</td>
             <td class="center">${c.date}</td>
             <td>${c.duration} ms.</td>
           </tr>

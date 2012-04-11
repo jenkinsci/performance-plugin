@@ -5,9 +5,7 @@ import hudson.model.ModelObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * A report about a particular tested URI.
@@ -34,6 +32,8 @@ public class UriReport extends AbstractReport implements ModelObject,
    * as a token in URL.
    */
   private final String staplerUri;
+  
+  private UriReport lastBuildUriReport;
 
   private String uri;
 
@@ -82,6 +82,18 @@ public class UriReport extends AbstractReport implements ModelObject,
     if (httpSampleList.size() > 0) {
       result = httpSampleList.get((int) (httpSampleList.size() * .9)).getDuration();
     }
+    return result;
+  }
+  
+  public String getHttpCode() {
+    String result = "";
+    
+    for (HttpSample currentSample : httpSampleList) {
+      if ( !result.matches( ".*"+currentSample.getHttpCode()+".*" ) ) {
+          result += ( result.length() > 1 ) ? ","+currentSample.getHttpCode() : currentSample.getHttpCode();
+      }
+    }
+    
     return result;
   }
 
@@ -134,6 +146,13 @@ public class UriReport extends AbstractReport implements ModelObject,
     return uri;
   }
 
+  public String getShortUri() {
+    if ( uri.length() > 130 ) {
+        return uri.substring( 0, 129 );
+    }
+    return uri;
+  }
+  
   public boolean isFailed() {
     return countErrors() != 0;
   }
@@ -152,6 +171,50 @@ public class UriReport extends AbstractReport implements ModelObject,
         GraphConfigurationDetail.SEPARATOR).append(getStaplerUri()).append(
         END_PERFORMANCE_PARAMETER);
     return URLEncoder.encode(sb.toString(), "UTF-8");
+  }
+
+  public void addLastBuildUriReport( UriReport lastBuildUriReport ) {
+      this.lastBuildUriReport = lastBuildUriReport;
+  }
+  
+  public long getAverageDiff() {
+      if ( lastBuildUriReport == null ) {
+          return 0;
+      }
+      return getAverage() - lastBuildUriReport.getAverage();
+  }
+  
+  public long getMedianDiff() {
+      if ( lastBuildUriReport == null ) {
+          return 0;
+      }
+      return getMedian() - lastBuildUriReport.getMedian();
+  }
+  
+  public double getErrorPercentDiff() {
+      if ( lastBuildUriReport == null ) {
+          return 0;
+      }
+      return errorPercent() - lastBuildUriReport.errorPercent();
+  }
+  
+  public String getLastBuildHttpCodeIfChanged() {
+      if ( lastBuildUriReport == null ) {
+          return "";
+      }
+      
+      if ( lastBuildUriReport.getHttpCode().equals(getHttpCode()) ) {
+          return "";
+      }
+      
+      return lastBuildUriReport.getHttpCode();
+  }
+  
+  public int getSizeDiff() {
+      if ( lastBuildUriReport == null ) {
+          return 0;
+      }
+      return size() - lastBuildUriReport.size();
   }
 
 }

@@ -4,11 +4,17 @@
   <tr>
     <th>${%URI}</th>
     <th>${%samples}</th>
+    <th>${%samples diff}</th>
     <th>${%Average} (ms)</th>
+    <th>${%Average diff} (ms)</th>
     <th>${%Median} (ms)</th>
+    <th>${%Median diff} (ms)</th>
     <th>${%Line90} (ms)</th>
     <th>${%Minimun} (ms)</th>
     <th>${%Maximun} (ms)</th>
+    <th>${%Http Code}</th>
+    <th>${%Previous Http Code}</th>
     <th>${%Errors} (%)</th>
+    <th>${%Errors diff} (%)</th>
   </tr>
 </j:jelly>
