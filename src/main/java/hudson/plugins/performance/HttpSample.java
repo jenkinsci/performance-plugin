@@ -16,6 +16,8 @@ public class HttpSample implements Comparable<HttpSample> {
   private Date date;
 
   private String uri;
+  
+  private String httpCode = "";
 
   public long getDuration() {
     return duration;
@@ -27,6 +29,10 @@ public class HttpSample implements Comparable<HttpSample> {
 
   public String getUri() {
     return uri;
+  }
+  
+  public String getHttpCode() {
+      return httpCode;
   }
 
   public boolean isFailed() {
@@ -52,9 +58,12 @@ public class HttpSample implements Comparable<HttpSample> {
   public void setUri(String uri) {
     this.uri = uri;
   }
-
+  
+  public void setHttpCode(String httpCode) {
+    this.httpCode = httpCode;
+  }
+  
   public int compareTo(HttpSample o) {
     return (int) (getDuration() - o.getDuration());
   }
-
 }

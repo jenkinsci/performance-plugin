@@ -29,9 +29,8 @@ public abstract class AbstractReport {
   public String errorPercentFormated() {
     Stapler.getCurrentRequest().getLocale();
     return percentFormat.format(errorPercent());
-
   }
-
+  
   abstract public long getAverage();
 
   public String getAverageFormated() {
@@ -59,4 +58,16 @@ public abstract class AbstractReport {
   abstract public long getMin();
 
   abstract public int size();
+  
+  abstract public String getHttpCode();
+
+  abstract public long getAverageDiff();
+  
+  abstract public long getMedianDiff();
+  
+  abstract public double getErrorPercentDiff();
+  
+  abstract public String getLastBuildHttpCodeIfChanged();
+  
+  abstract public int getSizeDiff();
 }
