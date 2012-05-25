@@ -208,6 +208,48 @@ public class PerformanceReportMap implements ModelObject {
                 PerformanceProjectAction.createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
     }
 
+    public void doSummarizerGraph(StaplerRequest request,
+            StaplerResponse response) throws IOException {
+        String parameter = request.getParameter("performanceReportPosition");
+        AbstractBuild<?, ?> previousBuild = getBuild();
+        final Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> buildReports = new LinkedHashMap<AbstractBuild<?, ?>, Map<String, PerformanceReport>>();
+
+        while (previousBuild != null ) {
+            final AbstractBuild<?, ?> currentBuild = previousBuild;
+            parseReports(currentBuild, TaskListener.NULL, new PerformanceReportCollector() {
+
+                public void addAll(Collection<PerformanceReport> parse) {
+                    for (PerformanceReport performanceReport : parse) {
+                        if (buildReports.get(currentBuild) == null) {
+                            Map<String, PerformanceReport> map = new LinkedHashMap<String, PerformanceReport>();
+                            buildReports.put(currentBuild, map);
+                        }
+                        buildReports.get(currentBuild).put(performanceReport.getReportFileName(), performanceReport);
+                     }
+                }
+        }, parameter);
+        previousBuild = previousBuild.getPreviousBuild();
+        }
+       DataSetBuilder<NumberOnlyBuildLabel,String > dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
+       for (AbstractBuild<?, ?> currentBuild : buildReports.keySet()) {
+           NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+           PerformanceReport report = buildReports.get(currentBuild).get(parameter);
+
+           //Now we should have the data necessary to generate the graphs!
+           for (String key:report.getUriReportMap().keySet()) {
+               Long methodAvg=report.getUriReportMap().get(key).getHttpSampleList().get(0).getDuration();
+               dataSetBuilderSummarizer.add(methodAvg, label, key);
+           };
+       }
+       ChartUtil.generateGraph(request, response,
+                PerformanceProjectAction.createSummarizerChart(dataSetBuilderSummarizer.build(),"ms",Messages.ProjectAction_RespondingTime()), 400, 200);
+    }
+
+
+
+
+
+
     private void parseReports(AbstractBuild<?, ?> build, TaskListener listener, PerformanceReportCollector collector, final String filename) throws IOException {
         File repo = new File(build.getRootDir(),
                 PerformanceReportMap.getPerformanceReportDirRelativePath());    
@@ -291,9 +333,35 @@ public class PerformanceReportMap implements ModelObject {
             }
         }
     }
-    
+
     private interface PerformanceReportCollector {
 
         public void addAll(Collection<PerformanceReport> parse);
     }
+
+
+    public boolean ifSummarizerParserUsed(String filename) {
+
+      boolean b = false;
+      String  fileExt="";
+
+      List<PerformanceReportParser> list =  buildAction.getBuild().getProject().getPublishersList().get(PerformancePublisher.class).getParsers();
+
+      for ( int i=0; i < list.size(); i++) {
+           if (list.get(i).getDescriptor().getDisplayName()=="JmeterSummarizer") {
+              fileExt = list.get(i).glob;
+              String parts[] = fileExt.split("\\s*[;:,]+\\s*");
+              for (String path : parts) {
+                if (filename.endsWith(path.substring(5))) {
+                    b=true;
+                    return b;
+                }
+              }
+           }
+      }
+
+   return b;
+  }
+
+
 }

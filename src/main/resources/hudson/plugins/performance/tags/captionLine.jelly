@@ -1,6 +1,19 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:e="/hudson/plugins/performance/tags">
+
+ <j:choose>
+ <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+  <tr>
+    <th>${%URI}</th>
+    <th>${%samples}</th>
+    <th>${%Average} (ms)</th>
+    <th>${%Minimun} (ms)</th>
+    <th>${%Maximun} (ms)</th>
+    <th>${%Errors} (%)</th>
+ </tr>
+ </j:when>
+ <j:otherwise>
   <tr>
     <th>${%URI}</th>
     <th>${%samples}</th>
@@ -17,4 +30,6 @@
     <th>${%Errors} (%)</th>
     <th>${%Errors diff} (%)</th>
   </tr>
+ </j:otherwise>
+ </j:choose>
 </j:jelly>
