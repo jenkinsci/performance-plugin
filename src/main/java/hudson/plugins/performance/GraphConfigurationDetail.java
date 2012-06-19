@@ -36,7 +36,8 @@ public class GraphConfigurationDetail implements ModelObject {
   /** Logger. */
   private static final Logger LOGGER = Logger.getLogger(GraphConfigurationDetail.class.getName());
 
-  public static final String SEPARATOR = ";";
+  public static final String LEGACY_SEPARATOR = ";";
+  public static final String SEPARATOR = ":";
   /** The number of builds to consider. */
   private int buildCount;
   /** The first days to consider. */
@@ -206,7 +207,12 @@ public class GraphConfigurationDetail implements ModelObject {
       return listErrors;
     }
 
-    String[] values = StringUtils.split(value, SEPARATOR);
+    String[] values;
+    if (value.contains(LEGACY_SEPARATOR))
+        values = StringUtils.split(value, LEGACY_SEPARATOR);
+    else
+        values = StringUtils.split(value, SEPARATOR);
+
     if (values.length != 4) {
       listErrors.add(-1);
       return listErrors;
