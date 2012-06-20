@@ -63,9 +63,10 @@ public class PerformanceReportTest {
 		assertEquals(sample1, httpSampleList.get(0));
 	}
 
-	@Test
+
+/*    @Test
 	public void testCountError() throws SAXException {
-		HttpSample sample1 = new HttpSample();
+        HttpSample sample1 = new HttpSample();
 		sample1.setSuccessful(false);
 		sample1.setUri("sample1");
 		performanceReport.addSample(sample1);
@@ -76,7 +77,7 @@ public class PerformanceReportTest {
 		performanceReport.addSample(sample2);
 		assertEquals(1, performanceReport.countErrors());
 	}
-
+*/
 	@Test
 	public void testPerformanceReport() throws IOException, SAXException {
 		PerformanceReport performanceReport = parseOneJMeter(new File(

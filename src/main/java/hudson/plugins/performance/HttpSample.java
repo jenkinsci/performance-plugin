@@ -19,6 +19,16 @@ public class HttpSample implements Comparable<HttpSample> {
   
   private String httpCode = "";
 
+  // Summarizer fields
+  private long summarizerMin;
+
+  private long summarizerMax;
+
+  private float summarizerErrors;
+
+  private long summarizerSamples;
+    
+
   public long getDuration() {
     return duration;
   }
@@ -33,6 +43,22 @@ public class HttpSample implements Comparable<HttpSample> {
   
   public String getHttpCode() {
       return httpCode;
+  }
+
+  public long getSummarizerSamples() {
+    return summarizerSamples;
+  }
+
+   public long getSummarizerMin() {
+    return summarizerMin;
+  }
+
+   public long getSummarizerMax() {
+    return summarizerMax;
+  }
+
+   public float getSummarizerErrors() {
+    return summarizerErrors;
   }
 
   public boolean isFailed() {
@@ -62,7 +88,23 @@ public class HttpSample implements Comparable<HttpSample> {
   public void setHttpCode(String httpCode) {
     this.httpCode = httpCode;
   }
-  
+
+  public void setSummarizerSamples(long summarizerSamples) {
+    this.summarizerSamples = summarizerSamples;
+  }
+
+   public void setSummarizerMin(long summarizerMin) {
+    this.summarizerMin = summarizerMin;
+  }
+
+   public void setSummarizerMax(long summarizerMax) {
+    this.summarizerMax = summarizerMax;
+  }
+
+   public void setSummarizerErrors(float summarizerErrors) {
+    this.summarizerErrors= summarizerErrors;
+  }
+
   public int compareTo(HttpSample o) {
     return (int) (getDuration() - o.getDuration());
   }
