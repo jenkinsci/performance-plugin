@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.text.DecimalFormat;
 
 /**
  * Represents a single performance report, which consists of multiple {@link UriReport}s for
@@ -26,6 +27,7 @@ public class PerformanceReport extends AbstractReport implements
   private HttpSample httpSample;
 
   private String reportFileName = null;
+ 
 
   /**
    * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
@@ -48,6 +50,7 @@ public class PerformanceReport extends AbstractReport implements
       uriReportMap.put(staplerUri, uriReport);
     }
     uriReport.addHttpSample(pHttpSample);
+    
   }
 
   public int compareTo(PerformanceReport jmReport) {
@@ -60,13 +63,21 @@ public class PerformanceReport extends AbstractReport implements
   public int countErrors() {
     int nbError = 0;
     for (UriReport currentReport : uriReportMap.values()) {
-      nbError += currentReport.countErrors();
-    }
+        if (buildAction.getPerformanceReportMap().ifSummarizerParserUsed(reportFileName))  {
+            nbError += currentReport.getHttpSampleList().get(0).getSummarizerErrors();
+        } else {
+            nbError += currentReport.countErrors();
+        }
+     }
     return nbError;
   }
 
   public double errorPercent() {
-    return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
+      if (buildAction.getPerformanceReportMap().ifSummarizerParserUsed(reportFileName))  {
+            return size() == 0 ? 0 : ((double) countErrors()) / size();
+        } else {
+            return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
+        }
   }
 
   public long getAverage() {
