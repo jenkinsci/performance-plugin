@@ -2,12 +2,28 @@
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:e="/hudson/plugins/performance/tags">
 <<<<<<< HEAD
+<<<<<<< HEAD
  <j:choose>
  <j:when test="${it.ifSummarizerParserUsed(it.getReportFileName())}">
 =======
 
  <j:choose>
  <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+=======
+
+ <j:choose>
+ <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+  <tr>
+    <th>${%URI}</th>
+    <th>${%samples}</th>
+    <th>${%Average} (ms)</th>
+    <th>${%Minimun} (ms)</th>
+    <th>${%Maximun} (ms)</th>
+    <th>${%Errors} (%)</th>
+ </tr>
+ </j:when>
+ <j:otherwise>
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
   <tr>
     <th>${%URI}</th>
     <th>${%samples}</th>

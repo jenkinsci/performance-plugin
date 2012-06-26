@@ -6,6 +6,7 @@
       <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
         <h2>${%Performance Breakdown by URI}: ${performanceReport.getReportFileName()}</h2>
 <<<<<<< HEAD
+<<<<<<< HEAD
          <j:choose>
           <j:when test="${performanceReport.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
             <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="325" />
@@ -45,6 +46,8 @@
            </j:otherwise>
           </j:choose>
 =======
+=======
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
         <j:choose>
          <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
             <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="325" />
@@ -91,7 +94,10 @@
            </tr>
            </j:otherwise>
            </j:choose>
+<<<<<<< HEAD
 >>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
+=======
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
         </table>
       </j:forEach> 
     </l:main-panel>

@@ -21,10 +21,14 @@
                 <a href="./summarizerGraph?width=1500&amp;height=650&amp;summarizerReportType=${%error}&amp;performanceReportPosition=${performanceReport}"  title="${%Click for larger image}">
                 <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;summarizerReportType=${%error}&amp;performanceReportPosition=${performanceReport}" width="600" height="325" />
 <<<<<<< HEAD
+<<<<<<< HEAD
                 </a>
 =======
                  </a>
 >>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
+=======
+                 </a>
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
             </j:when>
             <j:otherwise>
                 <a href="./respondingTimeGraph?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
@@ -35,11 +39,15 @@
                 </a>
                 <center>
 <<<<<<< HEAD
+<<<<<<< HEAD
                     <a href="${from.urlName}trendReport?performanceReportPosition=${performanceReport}">${%Trend report}
                     </a>
 =======
                     <a href="${from.urlName}trendReport?performanceReportPosition=${performanceReport}">${%Trend report}</a>
 >>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
+=======
+                    <a href="${from.urlName}trendReport?performanceReportPosition=${performanceReport}">${%Trend report}</a>
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
                 </center>
             </j:otherwise>
            </j:choose>

@@ -235,10 +235,14 @@ public class PerformanceReportMap implements ModelObject {
            //Now we should have the data necessary to generate the graphs!
            for (String key:report.getUriReportMap().keySet()) {
 <<<<<<< HEAD
+<<<<<<< HEAD
                Long methodAvg=report.getUriReportMap().get(key).getAverage();
 =======
                Long methodAvg=report.getUriReportMap().get(key).getHttpSampleList().get(0).getDuration();
 >>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
+=======
+               Long methodAvg=report.getUriReportMap().get(key).getHttpSampleList().get(0).getDuration();
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
                dataSetBuilderSummarizer.add(methodAvg, label, key);
            };
        }
@@ -248,12 +252,18 @@ public class PerformanceReportMap implements ModelObject {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
 
 
 
 
+<<<<<<< HEAD
 >>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
+=======
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
     private void parseReports(AbstractBuild<?, ?> build, TaskListener listener, PerformanceReportCollector collector, final String filename) throws IOException {
         File repo = new File(build.getRootDir(),
                 PerformanceReportMap.getPerformanceReportDirRelativePath());    
@@ -345,6 +355,7 @@ public class PerformanceReportMap implements ModelObject {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   public Object getDynamic(final String link, final StaplerRequest request, final StaplerRequest response) {
     if (TRENDREPORT_LINK.equals(link)) {
        return createTrendReportGraphs(request);
@@ -369,6 +380,8 @@ public class PerformanceReportMap implements ModelObject {
     return performanceReportPosition.getPerformanceReportPosition();
   }
 =======
+=======
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
     public boolean ifSummarizerParserUsed(String filename) {
 
       boolean b = false;
@@ -393,5 +406,8 @@ public class PerformanceReportMap implements ModelObject {
   }
 
 
+<<<<<<< HEAD
 >>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
+=======
+>>>>>>> 4c3caefba927728339fe854dbd593d24de773a87
 }
