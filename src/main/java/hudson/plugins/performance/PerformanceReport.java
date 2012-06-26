@@ -28,7 +28,10 @@ public class PerformanceReport extends AbstractReport implements
 
   private String reportFileName = null;
  
+<<<<<<< HEAD
 
+=======
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
 
   /**
    * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
@@ -64,12 +67,21 @@ public class PerformanceReport extends AbstractReport implements
   public int countErrors() {
     int nbError = 0;
     for (UriReport currentReport : uriReportMap.values()) {
+<<<<<<< HEAD
         nbError += currentReport.countErrors();
+=======
+        if (buildAction.getPerformanceReportMap().ifSummarizerParserUsed(reportFileName))  {
+            nbError += currentReport.getHttpSampleList().get(0).getSummarizerErrors();
+        } else {
+            nbError += currentReport.countErrors();
+        }
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
      }
     return nbError;
   }
 
   public double errorPercent() {
+<<<<<<< HEAD
       if (ifSummarizerParserUsed(reportFileName))  {
           float nbError=0;
           for (UriReport currentReport : uriReportMap.values()) {
@@ -80,6 +92,13 @@ public class PerformanceReport extends AbstractReport implements
       } else {
             return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
       }
+=======
+      if (buildAction.getPerformanceReportMap().ifSummarizerParserUsed(reportFileName))  {
+            return size() == 0 ? 0 : ((double) countErrors()) / size();
+        } else {
+            return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
+        }
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
   }
 
   public long getAverage() {

@@ -1,8 +1,24 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:e="/hudson/plugins/performance/tags">
+<<<<<<< HEAD
  <j:choose>
  <j:when test="${it.ifSummarizerParserUsed(it.getReportFileName())}">
+=======
+
+ <j:choose>
+ <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+  <tr>
+    <th>${%URI}</th>
+    <th>${%samples}</th>
+    <th>${%Average} (ms)</th>
+    <th>${%Minimun} (ms)</th>
+    <th>${%Maximun} (ms)</th>
+    <th>${%Errors} (%)</th>
+ </tr>
+ </j:when>
+ <j:otherwise>
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
   <tr>
     <th>${%URI}</th>
     <th>${%Samples}</th>

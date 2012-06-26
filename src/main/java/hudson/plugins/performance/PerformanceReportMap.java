@@ -234,7 +234,11 @@ public class PerformanceReportMap implements ModelObject {
 
            //Now we should have the data necessary to generate the graphs!
            for (String key:report.getUriReportMap().keySet()) {
+<<<<<<< HEAD
                Long methodAvg=report.getUriReportMap().get(key).getAverage();
+=======
+               Long methodAvg=report.getUriReportMap().get(key).getHttpSampleList().get(0).getDuration();
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
                dataSetBuilderSummarizer.add(methodAvg, label, key);
            };
        }
@@ -243,6 +247,13 @@ public class PerformanceReportMap implements ModelObject {
     }
 
 
+<<<<<<< HEAD
+=======
+
+
+
+
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
     private void parseReports(AbstractBuild<?, ?> build, TaskListener listener, PerformanceReportCollector collector, final String filename) throws IOException {
         File repo = new File(build.getRootDir(),
                 PerformanceReportMap.getPerformanceReportDirRelativePath());    
@@ -333,6 +344,7 @@ public class PerformanceReportMap implements ModelObject {
     }
 
 
+<<<<<<< HEAD
   public Object getDynamic(final String link, final StaplerRequest request, final StaplerRequest response) {
     if (TRENDREPORT_LINK.equals(link)) {
        return createTrendReportGraphs(request);
@@ -356,4 +368,30 @@ public class PerformanceReportMap implements ModelObject {
     request.bindParameters(performanceReportPosition);
     return performanceReportPosition.getPerformanceReportPosition();
   }
+=======
+    public boolean ifSummarizerParserUsed(String filename) {
+
+      boolean b = false;
+      String  fileExt="";
+
+      List<PerformanceReportParser> list =  buildAction.getBuild().getProject().getPublishersList().get(PerformancePublisher.class).getParsers();
+
+      for ( int i=0; i < list.size(); i++) {
+           if (list.get(i).getDescriptor().getDisplayName()=="JmeterSummarizer") {
+              fileExt = list.get(i).glob;
+              String parts[] = fileExt.split("\\s*[;:,]+\\s*");
+              for (String path : parts) {
+                if (filename.endsWith(path.substring(5))) {
+                    b=true;
+                    return b;
+                }
+              }
+           }
+      }
+
+   return b;
+  }
+
+
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
 }

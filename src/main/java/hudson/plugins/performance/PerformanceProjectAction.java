@@ -28,7 +28,10 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.category.BarRenderer;
+<<<<<<< HEAD
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+=======
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYDataset;
@@ -36,6 +39,9 @@ import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.Stapler;
+
+
 
 
 
@@ -171,7 +177,11 @@ public final class PerformanceProjectAction implements Action {
   }
 
 
+<<<<<<< HEAD
   protected static JFreeChart createSummarizerChart (CategoryDataset dataset, String yAxis, String chartTitle) {
+=======
+    protected static JFreeChart createSummarizerChart (CategoryDataset dataset, String yAxis, String chartTitle) {
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
 
       final JFreeChart chart = ChartFactory.createBarChart(
           chartTitle, // chart title
@@ -195,18 +205,29 @@ public final class PerformanceProjectAction implements Action {
        CategoryAxis domainAxis = plot.getDomainAxis();
        domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
 
+<<<<<<< HEAD
+=======
+       final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+            rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
 
        final BarRenderer renderer = (BarRenderer) plot.getRenderer();
            renderer.setDrawBarOutline(false);
            renderer.setBaseStroke(new BasicStroke(4.0f));
            renderer.setItemMargin(0);
            renderer.setMaximumBarWidth(0.05);
+<<<<<<< HEAD
            
 
+=======
+
+        
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
       return chart;
     }
 
 
+<<<<<<< HEAD
   protected static JFreeChart createSummarizerTrend (ArrayList<XYDataset> dataset, String uri) {
 
       final JFreeChart chart = ChartFactory.createTimeSeriesChart(
@@ -248,6 +269,8 @@ public final class PerformanceProjectAction implements Action {
   }
 
 
+=======
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
   public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
       throws IOException {
     PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
@@ -348,7 +371,11 @@ public final class PerformanceProjectAction implements Action {
   public void doSummarizerGraph(StaplerRequest request,
                                 StaplerResponse response) throws IOException {
 
+<<<<<<< HEAD
       PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+=======
+        PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
       request.bindParameters(performanceReportPosition);
       String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
       if (performanceReportNameFile == null) {
@@ -382,12 +409,17 @@ public final class PerformanceProjectAction implements Action {
           PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
               performanceReportNameFile);
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
           if (performanceReport == null) {
             nbBuildsToAnalyze--;
             continue;
           }
 
           for (String key:performanceReport.getUriReportMap().keySet()) {
+<<<<<<< HEAD
               Long methodAvg=performanceReport.getUriReportMap().get(key).getAverage();
               float methodErrors= Float.valueOf(performanceReport.getUriReportMap().get(key).getSummarizerErrors());
               dataSetBuilderSummarizer.add(methodAvg, label, key);
@@ -399,6 +431,20 @@ public final class PerformanceProjectAction implements Action {
 
       String summarizerReportType = performanceReportPosition.getSummarizerReportType();
 
+=======
+            Long methodAvg=performanceReport.getUriReportMap().get(key).getHttpSampleList().get(0).getDuration();
+            float methodErrors= performanceReport.getUriReportMap().get(key).getHttpSampleList().get(0).getSummarizerErrors();
+            dataSetBuilderSummarizer.add(methodAvg, label, key);
+            dataSetBuilderSummarizerErrors.add(methodErrors, label, key);
+          };
+        }
+
+       nbBuildsToAnalyze--;
+      }
+
+      
+      String summarizerReportType = performanceReportPosition.getSummarizerReportType();
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
       if (summarizerReportType != null) {
         ChartUtil.generateGraph(request, response,
         createSummarizerChart(dataSetBuilderSummarizerErrors.build(),"%",Messages.ProjectAction_PercentageOfErrors()), 400, 200);
@@ -407,6 +453,10 @@ public final class PerformanceProjectAction implements Action {
         ChartUtil.generateGraph(request, response,
         createSummarizerChart(dataSetBuilderSummarizer.build(),"ms",Messages.ProjectAction_RespondingTime()), 400, 200);
       }
+<<<<<<< HEAD
+=======
+
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
   }
 
 
@@ -623,6 +673,7 @@ public final class PerformanceProjectAction implements Action {
     }
     return dataSet;
   }
+<<<<<<< HEAD
 
 
   public boolean ifSummarizerParserUsed(String filename) {
@@ -643,4 +694,28 @@ public final class PerformanceProjectAction implements Action {
       }
     return b;
   }
+=======
+  public boolean ifSummarizerParserUsed(String filename) {
+
+      boolean b = false;
+      String  fileExt="";
+
+      List<PerformanceReportParser> list =  project.getPublishersList().get(PerformancePublisher.class).getParsers();
+
+      for ( int i=0; i < list.size(); i++) {
+           if (list.get(i).getDescriptor().getDisplayName()=="JmeterSummarizer") {
+              fileExt = list.get(i).glob;
+              String parts[] = fileExt.split("\\s*[;:,]+\\s*");
+              for (String path : parts) {
+                if (filename.endsWith(path.substring(5))) {
+                    b=true;
+                }    
+              }
+           }
+      }
+
+   return b;
+  }
+
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
 }

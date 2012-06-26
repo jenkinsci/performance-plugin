@@ -5,6 +5,7 @@
     <l:main-panel>
       <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
         <h2>${%Performance Breakdown by URI}: ${performanceReport.getReportFileName()}</h2>
+<<<<<<< HEAD
          <j:choose>
           <j:when test="${performanceReport.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
             <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="325" />
@@ -43,6 +44,54 @@
             </tr>
            </j:otherwise>
           </j:choose>
+=======
+        <j:choose>
+         <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+            <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="325" />
+         </j:when>
+         <j:otherwise>
+            <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+         </j:otherwise>
+        </j:choose>
+        <table class="sortable source" border="1">
+          <jm:captionLine />
+          <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">
+            <tr class="${h.ifThenElse(uriReport.failed,'red','')}">
+              <td class="left">
+                <j:choose>
+                 <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+                    <a>
+                    <st:out value="${uriReport.getShortUri()}" />
+                    </a>
+                 </j:when>
+                 <j:otherwise>
+                    <a href="./uriReport/${uriReport.encodeUriReport()}">
+                    <st:out value="${uriReport.getShortUri()}" />
+                    </a>
+                 </j:otherwise>
+                </j:choose>
+              </td>
+              <j:choose>
+                <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+                        <jm:summaryTableSummarizer it="${uriReport}" />
+                </j:when>
+                <j:otherwise>
+                        <jm:summaryTable it="${uriReport}" />
+                 </j:otherwise>
+              </j:choose>
+           </tr>
+           </j:forEach>
+          <j:choose>
+          <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+          </j:when>
+          <j:otherwise>
+           <tr class="bold">
+             <td class="left bold">${%All URIs}</td>
+             <jm:summaryTable it="${performanceReport}" />
+           </tr>
+           </j:otherwise>
+           </j:choose>
+>>>>>>> caebae8b6488d0daab52b6f459245df9e77c37e9
         </table>
       </j:forEach> 
     </l:main-panel>
