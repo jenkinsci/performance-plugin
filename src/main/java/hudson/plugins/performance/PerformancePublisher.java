@@ -125,14 +125,29 @@ public class PerformancePublisher extends Recorder {
       String includes) throws IOException, InterruptedException {
 
     // First use ant-style pattern
-    try {
+    /*
+      try {
       FilePath[] ret = workspace.list(includes);
       if (ret.length > 0) {
         return Arrays.asList(ret);
       }
+    */
+    //Agoley : Possible fix, if we specify more than one result file pattern
+    try {
+      String parts[] = includes.split("\\s*[;:,]+\\s*");
+      List<FilePath> files = new ArrayList<FilePath>();
+        for (String path : parts) {
+          FilePath[] ret = workspace.list(path);
+          if (ret.length > 0) {
+             files.addAll(Arrays.asList(ret));
+          }
+      }
+     if (!files.isEmpty()) return files;
+
     } catch (IOException e) {
     }
 
+    //Agoley:  seems like this block doesn't work    
     // If it fails, do a legacy search
     ArrayList<FilePath> files = new ArrayList<FilePath>();
     String parts[] = includes.split("\\s*[;:,]+\\s*");

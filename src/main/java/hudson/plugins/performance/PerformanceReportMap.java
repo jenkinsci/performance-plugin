@@ -8,22 +8,17 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import hudson.model.TaskListener;
+import hudson.model.AbstractProject;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.DataSetBuilder;
 import java.io.FilenameFilter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+
 
 /**
  * Root object of a performance report.
@@ -41,6 +36,8 @@ public class PerformanceReportMap implements ModelObject {
      */
     private Map<String, PerformanceReport> performanceReportMap = new LinkedHashMap<String, PerformanceReport>();
     private static final String PERFORMANCE_REPORTS_DIRECTORY = "performance-reports";
+    private static final String PLUGIN_NAME = "performance";
+    private static final String TRENDREPORT_LINK = "summariserTrendReport";
     
     private static AbstractBuild<?, ?> currentBuild = null;
         
@@ -133,7 +130,7 @@ public class PerformanceReportMap implements ModelObject {
     }
 
     public String getUrlName() {
-        return "performanceReportList";
+        return PLUGIN_NAME;
     }
 
     void setBuildAction(PerformanceBuildAction buildAction) {
@@ -207,6 +204,44 @@ public class PerformanceReportMap implements ModelObject {
         ChartUtil.generateGraph(request, response,
                 PerformanceProjectAction.createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
     }
+
+    public void doSummarizerGraph(StaplerRequest request,
+            StaplerResponse response) throws IOException {
+        String parameter = request.getParameter("performanceReportPosition");
+        AbstractBuild<?, ?> previousBuild = getBuild();
+        final Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> buildReports = new LinkedHashMap<AbstractBuild<?, ?>, Map<String, PerformanceReport>>();
+
+        while (previousBuild != null ) {
+            final AbstractBuild<?, ?> currentBuild = previousBuild;
+            parseReports(currentBuild, TaskListener.NULL, new PerformanceReportCollector() {
+
+                public void addAll(Collection<PerformanceReport> parse) {
+                    for (PerformanceReport performanceReport : parse) {
+                        if (buildReports.get(currentBuild) == null) {
+                            Map<String, PerformanceReport> map = new LinkedHashMap<String, PerformanceReport>();
+                            buildReports.put(currentBuild, map);
+                        }
+                        buildReports.get(currentBuild).put(performanceReport.getReportFileName(), performanceReport);
+                     }
+                }
+        }, parameter);
+        previousBuild = previousBuild.getPreviousBuild();
+        }
+       DataSetBuilder<NumberOnlyBuildLabel,String > dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
+       for (AbstractBuild<?, ?> currentBuild : buildReports.keySet()) {
+           NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+           PerformanceReport report = buildReports.get(currentBuild).get(parameter);
+
+           //Now we should have the data necessary to generate the graphs!
+           for (String key:report.getUriReportMap().keySet()) {
+               Long methodAvg=report.getUriReportMap().get(key).getAverage();
+               dataSetBuilderSummarizer.add(methodAvg, label, key);
+           };
+       }
+       ChartUtil.generateGraph(request, response,
+                PerformanceProjectAction.createSummarizerChart(dataSetBuilderSummarizer.build(),"ms",Messages.ProjectAction_RespondingTime()), 400, 200);
+    }
+
 
     private void parseReports(AbstractBuild<?, ?> build, TaskListener listener, PerformanceReportCollector collector, final String filename) throws IOException {
         File repo = new File(build.getRootDir(),
@@ -291,9 +326,34 @@ public class PerformanceReportMap implements ModelObject {
             }
         }
     }
-    
+
     private interface PerformanceReportCollector {
 
         public void addAll(Collection<PerformanceReport> parse);
     }
+
+
+  public Object getDynamic(final String link, final StaplerRequest request, final StaplerRequest response) {
+    if (TRENDREPORT_LINK.equals(link)) {
+       return createTrendReportGraphs(request);
+    } else {
+      return null;  
+    }
+  }
+
+ public Object createTrendReportGraphs(final StaplerRequest request) {
+    String filename = getTrendReportFilename(request);
+    PerformanceReport report = performanceReportMap.get(filename);
+    AbstractBuild<?, ?> build = getBuild();
+    TrendReportGraphs  trendReport= new TrendReportGraphs(build.getProject(), build,
+        request, filename, report);
+
+    return trendReport;
+  }
+
+  private String getTrendReportFilename(final StaplerRequest request) {
+    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    request.bindParameters(performanceReportPosition);
+    return performanceReportPosition.getPerformanceReportPosition();
+  }
 }

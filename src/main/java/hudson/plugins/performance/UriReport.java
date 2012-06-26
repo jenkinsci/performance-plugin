@@ -2,10 +2,21 @@ package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
+import hudson.util.ChartUtil;
 
 import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.text.DecimalFormat;
+
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.FixedMillisecond;
+import org.jfree.data.time.RegularTimePeriod;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * A report about a particular tested URI.
@@ -216,5 +227,64 @@ public class UriReport extends AbstractReport implements ModelObject,
       }
       return size() - lastBuildUriReport.size();
   }
+
+  public long getSummarizerMax() {
+    long max =  Long.MIN_VALUE;
+    for (HttpSample currentSample : httpSampleList) {
+        max = Math.max(max, currentSample.getSummarizerMax());
+    }
+    return max;
+  }
+
+  public long getSummarizerMin() {
+    long min = Long.MAX_VALUE;
+    for (HttpSample currentSample : httpSampleList) {
+        min = Math.min(min, currentSample.getSummarizerMin());
+    }
+    return min;
+  }
+
+  public long getSummarizerSize() {
+    long size=0;
+    for (HttpSample currentSample : httpSampleList) {
+        size+=currentSample.getSummarizerSamples();
+    }
+    return size;
+  }
+
+  public String getSummarizerErrors() {
+    float nbError = 0;
+    for (HttpSample currentSample : httpSampleList) {
+        nbError+=currentSample.getSummarizerErrors();
+    }
+    return new DecimalFormat("#.##").format(nbError/getSummarizerSize()*100).replace(",", ".");     
+  }
+
+
+    public void doSummarizerTrendGraph(StaplerRequest request,
+                                StaplerResponse response) throws IOException{
+
+         ArrayList<XYDataset> dataset = new ArrayList<XYDataset> ();
+         TimeSeriesCollection resp = new TimeSeriesCollection();
+        // TimeSeriesCollection err  = new TimeSeriesCollection();
+         TimeSeries responseTime = new TimeSeries("Response Time", FixedMillisecond.class);
+        // TimeSeries errors = new TimeSeries("errors", Minute.class);
+         
+         for (int i=0; i<=this.httpSampleList.size()-1; i++) {
+             RegularTimePeriod current = new FixedMillisecond(this.httpSampleList.get(i).getDate());
+             responseTime.addOrUpdate(current,this.httpSampleList.get(i).getDuration());
+             //errors.addOrUpdate(current,report.getHttpSampleList().get(i).getSummarizerErrors());
+         }
+
+       resp.addSeries(responseTime);
+      // err.addSeries(errors);
+       dataset.add(resp);
+      // dataset.add(err);
+
+            ChartUtil.generateGraph(request, response,
+                                PerformanceProjectAction.createSummarizerTrend(dataset, uri),400, 200);
+     
+    }
+
 
 }
