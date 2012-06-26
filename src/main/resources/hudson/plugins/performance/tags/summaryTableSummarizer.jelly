@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+	xmlns:jm="/hudson/plugins/performance/tags">
+
+        <td>${it.getSummarizerSize()}</td>
+        <td>${it.getAverage()}</td>
+        <td>${it.getSummarizerMin()}</td>
+        <td>${it.getSummarizerMax()}</td>
+        <td>${it.getSummarizerErrors()}  %</td>
+
+</j:jelly>
