@@ -16,9 +16,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -58,8 +56,12 @@ public class JMeterParser extends PerformanceReportParser {
     factory.setValidating(false);
     factory.setNamespaceAware(false);
     PrintStream logger = listener.getLogger();
+
+    PerformanceSimpleCache sc= build.getProject().getAction(PerformanceProjectAction.class).simpleCache;
+
     for (File f : reports) {
       try {
+        if (sc.getCache(f.getPath()) == null )  {
         SAXParser parser = factory.newSAXParser();
         final PerformanceReport r = new PerformanceReport();
         r.setReportFileName(f.getName());
@@ -123,7 +125,10 @@ public class JMeterParser extends PerformanceReportParser {
           }
 
         });
-        result.add(r);
+         sc.putCache(f.getPath(), r);    
+        }
+        //result.add(r);
+        result.add(sc.getCache(f.getPath()));
       } catch (ParserConfigurationException e) {
         throw new IOException2("Failed to create parser ", e);
       } catch (SAXException e) {

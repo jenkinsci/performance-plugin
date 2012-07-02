@@ -11,6 +11,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Parses performance result files into {@link PerformanceReport}s.

@@ -56,6 +56,8 @@ public final class PerformanceProjectAction implements Action {
 
   private transient List<String> performanceReportList;
 
+  public PerformanceSimpleCache simpleCache;
+
   public String getDisplayName() {
     return Messages.ProjectAction_DisplayName();
   }
@@ -70,7 +72,13 @@ public final class PerformanceProjectAction implements Action {
 
   public PerformanceProjectAction(AbstractProject project) {
     this.project = project;
+    this.simpleCache= new PerformanceSimpleCache();
   }
+
+  public PerformanceSimpleCache getSimpleCache() {
+      return simpleCache;
+  }
+
 
   private JFreeChart createErrorsChart(CategoryDataset dataset) {
 

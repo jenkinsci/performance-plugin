@@ -1,16 +1,13 @@
 package hudson.plugins.performance;
 
 import hudson.Extension;
-import hudson.util.IOException2;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
@@ -25,7 +22,7 @@ import java.text.ParseException;
  */
 public class JmeterSummarizerParser extends PerformanceReportParser{
 
-    
+
     @Extension
   public static class DescriptorImpl extends PerformanceReportParserDescriptor {
     @Override
@@ -33,6 +30,7 @@ public class JmeterSummarizerParser extends PerformanceReportParser{
       return "JmeterSummarizer";
     }
   }
+
 
    @DataBoundConstructor
   public JmeterSummarizerParser(String glob) {
@@ -48,57 +46,62 @@ public class JmeterSummarizerParser extends PerformanceReportParser{
    public Collection<PerformanceReport> parse(AbstractBuild<?, ?> build,
       Collection<File> reports, TaskListener listener)  {
       List<PerformanceReport> result = new ArrayList<PerformanceReport>();
-
       PrintStream logger = listener.getLogger();
+
+      PerformanceSimpleCache sc= build.getProject().getAction(PerformanceProjectAction.class).simpleCache;
+
       for (File f : reports) {
          try {
-           final  PerformanceReport r = new PerformanceReport();
-           r.setReportFileName(f.getName());
-           logger.println("Performance: Parsing JMeterSummarizer report file " + f.getName());
+           if (sc.getCache(f.getPath()) == null )  {
 
-           Scanner s = new Scanner(f);
+               final  PerformanceReport r = new PerformanceReport();
+               r.setReportFileName(f.getName());
 
-           String key;
-           String line;
-           SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/mm/dd H:m:s"); 
-            while ( s.hasNextLine() )  {
-              line=s.nextLine().replaceAll("="," ");
+               logger.println("Performance: Parsing JMeterSummarizer report file " + f.getName());
 
-              if (line.contains ("+"))   {
-              Scanner scanner= new Scanner(line);
-              HttpSample sample = new HttpSample();
+               Scanner s = new Scanner(f);
 
-              String dateString= scanner.next()+" "+scanner.next();
+               String key;
+               String line;
+               SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/mm/dd H:m:s");
+               while ( s.hasNextLine() )  {
+                   line=s.nextLine().replaceAll("="," ");
 
-              sample.setDate(dateFormat.parse(dateString));   
+                   if (line.contains ("+"))   {
+                       Scanner scanner= new Scanner(line);
+                       HttpSample sample = new HttpSample();
 
-              scanner.findInLine("jmeter.reporters.Summariser:");
-              key=scanner.next();
-              scanner.next();
-              // set SamplesCount
-              scanner.findInLine(key);
-              sample.setSummarizerSamples(scanner.nextLong());
-              // set response time
-              scanner.findInLine("Avg:");
-              sample.setDuration(scanner.nextLong());
-              sample.setSuccessful(true);
-              // set MIN
-              scanner.findInLine("Min:");
-              sample.setSummarizerMin(scanner.nextLong());
-              // set MAX
-              scanner.findInLine("Max:");
-              sample.setSummarizerMax(scanner.nextLong());
-              // set errors count
-              scanner.findInLine("Err:");
-              sample.setSummarizerErrors(scanner.nextInt());
-              //sample.setSummarizerErrors( Float.valueOf(scanner.next().replaceAll("[()%]","")));
+                       String dateString= scanner.next()+" "+scanner.next();
 
-              sample.setUri(key);
-              r.addSample(sample);
-             }
-            }
+                       sample.setDate(dateFormat.parse(dateString));
 
-          result.add(r);
+                       scanner.findInLine("jmeter.reporters.Summariser:");
+                       key=scanner.next();
+                       scanner.next();
+                       // set SamplesCount
+                       scanner.findInLine(key);
+                       sample.setSummarizerSamples(scanner.nextLong());
+                       // set response time
+                       scanner.findInLine("Avg:");
+                       sample.setDuration(scanner.nextLong());
+                       sample.setSuccessful(true);
+                       // set MIN
+                       scanner.findInLine("Min:");
+                       sample.setSummarizerMin(scanner.nextLong());
+                       // set MAX
+                       scanner.findInLine("Max:");
+                       sample.setSummarizerMax(scanner.nextLong());
+                       // set errors count
+                       scanner.findInLine("Err:");
+                       sample.setSummarizerErrors(scanner.nextInt());
+                       //sample.setSummarizerErrors( Float.valueOf(scanner.next().replaceAll("[()%]","")));
+                       sample.setUri(key);
+                       r.addSample(sample);
+                  }
+               }
+            sc.putCache(f.getPath(), r);   
+           }
+          result.add(sc.getCache(f.getPath()));
 
          }catch (FileNotFoundException e) {
           logger.println("File not found" + e.getMessage());
