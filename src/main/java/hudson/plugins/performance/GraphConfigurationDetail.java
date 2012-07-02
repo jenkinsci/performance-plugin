@@ -56,7 +56,24 @@ public class GraphConfigurationDetail implements ModelObject {
 
   public static final String DATE_CONFIG = "DATE";
 
-  static DateFormat format = new SimpleDateFormat(DEFAULT_DATE);
+    public boolean isNone() {
+        return configType.compareToIgnoreCase(GraphConfigurationDetail.NONE_CONFIG) == 0;
+    }
+
+    public boolean isBuildCount() {
+        return configType.compareToIgnoreCase(GraphConfigurationDetail.BUILD_CONFIG) == 0;
+    }
+
+    public boolean isDate() {
+        return configType.compareToIgnoreCase(GraphConfigurationDetail.DATE_CONFIG) == 0;
+    }
+
+    public boolean isDefaultDates() {
+        return DEFAULT_DATE.compareTo(firstDayCount) == 0
+            && DEFAULT_DATE.compareTo(lastDayCount) == 0;
+    }
+
+    static DateFormat format = new SimpleDateFormat(DEFAULT_DATE);
 
   public GraphConfigurationDetail(final AbstractProject<?, ?> project,
       final String pluginName, final StaplerRequest request) {
