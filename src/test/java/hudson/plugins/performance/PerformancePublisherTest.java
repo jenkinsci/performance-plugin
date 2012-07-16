@@ -61,8 +61,6 @@ public class PerformancePublisherTest extends HudsonTestCase {
 		// poke a few random pages to verify rendering
 		WebClient wc = createWebClient();
 		wc.getPage(b, "performance");
-		wc
-				.getPage(b,
-						"performance/uriReport/test.jtl;Home.endperformanceparameter/");
+		wc.getPage(b, "performance/uriReport/test.jtl%3AHome.endperformanceparameter/");
 	}
 }
