@@ -12,16 +12,29 @@
         <j:forEach var="performanceReport" items="${it.performanceReportList}">
           <div class="title"><h1><center>${%Test file}: ${performanceReport}</center></h1></div>
           <center>
-           <j:choose>
-            <j:when test="${it.ifSummarizerParserUsed(performanceReport)}">
+          <j:choose>
+           <j:when test="${it.ifModePerformancePerTestCaseUsed()}">
+                <a href="./respondingTimeGraphPerTestCaseMode?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
+                <img class="trend" src="./respondingTimeGraphPerTestCaseMode?width=500&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
+                </a>
+                <a href="./errorsGraph?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport}"  title="${%Click for larger image}">
+                <img class="trend" src="./errorsGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
+                </a>
+                <center>
+                    <a href="${from.urlName}testsuiteReport?performanceReportPosition=${performanceReport}">${%Testcase Trend}</a>
+                </center>    
+           </j:when>
+           <j:otherwise>
+            <j:choose>
+             <j:when test="${it.ifSummarizerParserUsed(performanceReport)}">
                 <a href="./summarizerGraph?width=1500&amp;height=650&amp;performanceReportPosition=${performanceReport}"  title="${%Click for larger image}">
                 <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport}" width="600" height="325" />
                 <br></br>
                 </a>
                 <a href="./summarizerGraph?width=1500&amp;height=650&amp;summarizerReportType=${%error}&amp;performanceReportPosition=${performanceReport}"  title="${%Click for larger image}">
                 <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;summarizerReportType=${%error}&amp;performanceReportPosition=${performanceReport}" width="600" height="325" />
-                 </a>
-            </j:when>
+                </a>
+             </j:when>
             <j:otherwise>
                 <a href="./respondingTimeGraph?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
                 <img class="trend" src="./respondingTimeGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
@@ -32,7 +45,9 @@
                 <center>
                     <a href="${from.urlName}trendReport?performanceReportPosition=${performanceReport}">${%Trend report}</a>
                 </center>
-            </j:otherwise>
+             </j:otherwise>
+            </j:choose>
+           </j:otherwise>
            </j:choose>
           </center>
         </j:forEach>

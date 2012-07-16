@@ -36,4 +36,23 @@
       </tbody>    
     </table>  
   </f:entry>
+  
+  
+  <f:entry title="${%Performance display}">
+    <table width="300px">
+      <tbody>
+        <tr>
+          <td>
+            <f:checkbox name="modePerformancePerTestCase" title="Performance Per Test Case Mode" field="modePerformancePerTestCase">
+  			Display Performance Report Per Test Case
+  			</f:checkbox>
+          </td>
+          <td style="vertical-align:middle">${%Performance Per Test Case Mode}</td>
+          </tr>
+      </tbody>    
+    </table>    
+  
+  </f:entry>
+  
+  
 </j:jelly>

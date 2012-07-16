@@ -5,7 +5,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.util.*;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
-
+import hudson.plugins.performance.PerformanceReportPosition;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -41,6 +41,7 @@ public final class PerformanceProjectAction implements Action {
 
   private static final String CONFIGURE_LINK = "configure";
   private static final String TRENDREPORT_LINK = "trendReport";
+  private static final String TESTSUITE_LINK = "testsuiteReport";
 
   private static final String PLUGIN_NAME = "performance";
 
@@ -86,7 +87,7 @@ public final class PerformanceProjectAction implements Action {
     // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
 
     final LegendTitle legend = chart.getLegend();
-    legend.setPosition(RectangleEdge.RIGHT);
+    legend.setPosition(RectangleEdge.BOTTOM);
 
     chart.setBackgroundPaint(Color.white);
 
@@ -136,7 +137,7 @@ public final class PerformanceProjectAction implements Action {
     // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
 
     final LegendTitle legend = chart.getLegend();
-    legend.setPosition(RectangleEdge.RIGHT);
+    legend.setPosition(RectangleEdge.BOTTOM);
 
     chart.setBackgroundPaint(Color.white);
 
@@ -231,6 +232,11 @@ public final class PerformanceProjectAction implements Action {
     int nbBuildsToAnalyze = builds.size();
     for (AbstractBuild<?, ?> currentBuild :builds) {
       if (buildsLimits.in(nbBuildsToAnalyze)) {
+    	
+    	if (!buildsLimits.includedByStep(currentBuild.number)){
+    		continue;
+    	}  
+    	  
         NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
         PerformanceBuildAction performanceBuildAction = currentBuild.getAction(PerformanceBuildAction.class);
         if (performanceBuildAction == null) {
@@ -251,52 +257,125 @@ public final class PerformanceProjectAction implements Action {
         createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
   }
 
+  	public void doRespondingTimeGraphPerTestCaseMode(StaplerRequest request,
+  	      StaplerResponse response) throws IOException {
+  		PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+  	    request.bindParameters(performanceReportPosition);
+  	    String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+  	    if (performanceReportNameFile == null) {
+  	      if (getPerformanceReportList().size() == 1) {
+  	        performanceReportNameFile = getPerformanceReportList().get(0);
+  	      } else {
+  	        return;
+  	      }
+  	    }
+  	    if (ChartUtil.awtProblemCause != null) {
+  	      // not available. send out error message
+  	      response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+  	      return;
+  	    }
+  	    DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+  	    List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+  	    Range buildsLimits = getFirstAndLastBuild(request, builds);
+  	    
+  	    
+  	    int nbBuildsToAnalyze = builds.size();
+  	    
+  	    for (AbstractBuild<?, ?> build : builds) {
+  	       if (buildsLimits.in(nbBuildsToAnalyze)) {
+  	        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+  	        
+  	        if (!buildsLimits.includedByStep(build.number)){
+  	        	continue;
+  	        }
+  	        PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+  	        if (performanceBuildAction == null) {
+  	          continue;
+  	        }
+  	        PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
+  	            performanceReportNameFile);
+  	        if (performanceReport == null) {
+  	          nbBuildsToAnalyze--;
+  	          continue;
+  	        }
+  	        
+  	        List<HttpSample> allSamples = new ArrayList<HttpSample>();
+  	        for (UriReport currentReport : performanceReport.getUriReportMap().values()) {
+  	          allSamples.addAll(currentReport.getHttpSampleList());
+  	        }
+  	        Collections.sort(allSamples);
+  	        for(HttpSample sample : allSamples){
+  	        	if (sample.hasError()){
+  	        		// we set duration as 0 for failed tests
+  	        		dataSetBuilderAverage.add(0,
+  	                        sample.getUri(), label);
+  	        	}
+  	        	else{
+  	        	dataSetBuilderAverage.add(sample.getDuration(),
+  	                    sample.getUri(), label);
+  	        	}
+  	        }
+  	        
+  	      }
+  	      nbBuildsToAnalyze--;
+  	    }
+  	    ChartUtil.generateGraph(request, response,
+  	        createRespondingTimeChart(dataSetBuilderAverage.build()), 600, 200);
+  		
+  	}
+  
     public void doRespondingTimeGraph(StaplerRequest request,
       StaplerResponse response) throws IOException {
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
-    if (performanceReportNameFile == null) {
-      if (getPerformanceReportList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportList().get(0);
-      } else {
-        return;
-      }
-    }
-    if (ChartUtil.awtProblemCause != null) {
-      // not available. send out error message
-      response.sendRedirect2(request.getContextPath() + "/images/headless.png");
-      return;
-    }
-    DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-    List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
-    Range buildsLimits = getFirstAndLastBuild(request, builds);
-
-    int nbBuildsToAnalyze = builds.size();
-    for (AbstractBuild<?, ?> build : builds) {
-      if (buildsLimits.in(nbBuildsToAnalyze)) {
-        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
-        PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
-        if (performanceBuildAction == null) {
-          continue;
+    	PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+        request.bindParameters(performanceReportPosition);
+        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+        if (performanceReportNameFile == null) {
+          if (getPerformanceReportList().size() == 1) {
+            performanceReportNameFile = getPerformanceReportList().get(0);
+          } else {
+            return;
+          }
         }
-        PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
-            performanceReportNameFile);
-        if (performanceReport == null) {
+        if (ChartUtil.awtProblemCause != null) {
+          // not available. send out error message
+          response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+          return;
+        }
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+        Range buildsLimits = getFirstAndLastBuild(request, builds);
+
+        int nbBuildsToAnalyze = builds.size();
+        for (AbstractBuild<?, ?> build : builds) {
+          if (buildsLimits.in(nbBuildsToAnalyze)) {
+        	
+        	if (!buildsLimits.includedByStep(build.number)){
+          		continue;
+          	}  
+        	    
+            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+            PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+            if (performanceBuildAction == null) {
+              continue;
+            }
+            PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
+                performanceReportNameFile);
+            if (performanceReport == null) {
+              nbBuildsToAnalyze--;
+              continue;
+            }
+            dataSetBuilderAverage.add(performanceReport.getMedian(),
+                Messages.ProjectAction_Median(), label);
+            dataSetBuilderAverage.add(performanceReport.getAverage(),
+                Messages.ProjectAction_Average(), label);
+            dataSetBuilderAverage.add(performanceReport.get90Line(),
+                Messages.ProjectAction_Line90(), label);
+          }
           nbBuildsToAnalyze--;
           continue;
         }
-        dataSetBuilderAverage.add(performanceReport.getMedian(),
-            Messages.ProjectAction_Median(), label);
-        dataSetBuilderAverage.add(performanceReport.getAverage(),
-            Messages.ProjectAction_Average(), label);
-        dataSetBuilderAverage.add(performanceReport.get90Line(),
-            Messages.ProjectAction_Line90(), label);
-      }
-      nbBuildsToAnalyze--;
-    }
-    ChartUtil.generateGraph(request, response,
-        createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+        ChartUtil.generateGraph(request, response,
+            createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
   }
 
 
@@ -392,6 +471,12 @@ public final class PerformanceProjectAction implements Action {
           return new Range( first > 0 ? first + 1 : 1,
                             builds.size());
       }
+    } else if (graphConf.isBuildNth()){
+    	if (graphConf.getBuildStep() <= 0){
+    		return all(builds);
+    	} else {
+    		return new Range(1, builds.size(), graphConf.getBuildStep());
+    	}
     } else if (graphConf.isDate()) {
       if (graphConf.isDefaultDates()) {
           return all(builds);
@@ -428,7 +513,7 @@ public final class PerformanceProjectAction implements Action {
     throw new IllegalArgumentException("unsupported configType + " + graphConf.getConfigType());
   }
 
-  private Range all(List<?> builds) {
+  public Range all(List<?> builds) {
       return new Range(1, builds.size());
   }
 
@@ -496,6 +581,8 @@ public final class PerformanceProjectAction implements Action {
       return createUserConfiguration(request);
     } else if (TRENDREPORT_LINK.equals(link)) {
       return createTrendReport(request);
+    } else if (TESTSUITE_LINK.equals(link)) {
+    	return createTestsuiteReport(request, response); 
     } else {
       return null;
     }
@@ -529,11 +616,29 @@ public final class PerformanceProjectAction implements Action {
     return report;
   }
 
+  private Object createTestsuiteReport(final StaplerRequest request, final StaplerResponse response){
+	  String filename = getTestSuiteReportFilename(request);
+	  	    
+	  List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+	  Range buildsLimits = getFirstAndLastBuild(request, builds);
+	  
+	  TestSuiteReportDetail report = new TestSuiteReportDetail(project, PLUGIN_NAME,
+        request, filename, buildsLimits);
+	 	  
+	  return report;
+  }
+  
   private String getTrendReportFilename(final StaplerRequest request) {
     PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
     request.bindParameters(performanceReportPosition);
     return performanceReportPosition.getPerformanceReportPosition();
   }
+  
+  private String getTestSuiteReportFilename(final StaplerRequest request) {
+	    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+	    request.bindParameters(performanceReportPosition);
+	    return performanceReportPosition.getPerformanceReportPosition();
+	  }
 
   private DataSetBuilder getTrendReportData(final StaplerRequest request,
       String performanceReportNameFile) {
@@ -597,25 +702,45 @@ public final class PerformanceProjectAction implements Action {
 
    return b;
   }
+  
+  public boolean ifModePerformancePerTestCaseUsed(){
+	  return project.getPublishersList().get(PerformancePublisher.class).isModePerformancePerTestCase();
+  }
 
 
-  private static class Range {
+  public static class Range {
 
       public int first;
 
       public int last;
+      
+      public int step;
 
       private Range() {
       }
-
-      private Range(int first, int last) {
+      
+      public Range(int first, int last) {
           this.first = first;
           this.last = last;
+          this.step = 1;
+      }
+      
+      public Range(int first, int last, int step){
+    	  this(first, last);
+    	  this.step = step;
       }
 
       public boolean in(int nbBuildsToAnalyze) {
           return nbBuildsToAnalyze <= last
               && first <= nbBuildsToAnalyze;
       }
+      
+      public boolean includedByStep(int buildNumber){
+    	  if (buildNumber % step == 0) {
+    		  return true;
+    	  }
+    	  return false;
+      }
+      
   }
 }
