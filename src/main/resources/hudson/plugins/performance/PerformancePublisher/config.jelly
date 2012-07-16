@@ -47,8 +47,7 @@
   			Display Performance Report Per Test Case
   			</f:checkbox>
           </td>
-          <td style="vertical-align:middle">${%Performance Per Test Case Mode}</td>
-          </tr>
+        </tr>
       </tbody>    
     </table>    
   
