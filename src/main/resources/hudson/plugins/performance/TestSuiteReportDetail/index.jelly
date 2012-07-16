@@ -1,0 +1,20 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">	
+  <l:layout css="/plugin/performance/css/style.css">
+    <l:main-panel>
+      <h1>${%Performance Trend Per Test Case}</h1>
+      <div>
+        <j:forEach var="performanceReportTestCase" items="${it.performanceReportTestCaseList}">
+          <div class="title"><h1><center>${%Test case}: ${performanceReportTestCase}</center></h1></div>
+          <center>
+           <j:choose>
+                <a href="./respondingTimeGraphPerTestCaseMode?width=900&amp;height=550&amp;performanceReportPosition=${it.filename}&amp;performanceReportTest=${performanceReportTestCase}" title="${%Click for larger image}">
+                <img class="trend" src="./respondingTimeGraphPerTestCaseMode?width=300&amp;height=225&amp;performanceReportPosition=${it.filename}&amp;performanceReportTest=${performanceReportTestCase}" width="300" height="225" />
+                </a>
+           </j:choose>
+          </center>
+        </j:forEach>
+      </div>
+    </l:main-panel>
+  </l:layout>
+</j:jelly>
