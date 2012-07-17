@@ -18,7 +18,7 @@ import static java.util.Arrays.asList;
  */
 public class PerformancePublisherTest extends HudsonTestCase {
 	public void testConfigRoundtrip() throws Exception {
-		PerformancePublisher before = new PerformancePublisher(10, 20,
+		PerformancePublisher before = new PerformancePublisher(10, 20, false,
 				asList(new JMeterParser("**/*.jtl")));
 
 		FreeStyleProject p = createFreeStyleProject();
@@ -50,7 +50,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
 			}
 		});
 		p.getPublishersList().add(
-				new PerformancePublisher(0, 0, asList(new JMeterParser(
+				new PerformancePublisher(0, 0, false, asList(new JMeterParser(
 						"**/*.jtl"))));
 
 		FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
@@ -61,8 +61,6 @@ public class PerformancePublisherTest extends HudsonTestCase {
 		// poke a few random pages to verify rendering
 		WebClient wc = createWebClient();
 		wc.getPage(b, "performance");
-		wc
-				.getPage(b,
-						"performance/uriReport/test.jtl;Home.endperformanceparameter/");
+		wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
 	}
 }
