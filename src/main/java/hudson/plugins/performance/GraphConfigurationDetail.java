@@ -1,7 +1,9 @@
 package hudson.plugins.performance;
 
-import hudson.model.AbstractProject;
 import hudson.model.ModelObject;
+import hudson.model.AbstractProject;
+import hudson.plugins.performance.CookieHandler;
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,8 +47,13 @@ public class GraphConfigurationDetail implements ModelObject {
   private String lastDayCount;
   /** The type of config to use. */
   private String configType;
+  /** The build step to consider. */
+  private int buildStep;
+  
 
   public static final int DEFAULT_COUNT = 0;
+  
+  public static final int DEFAULT_STEP = 1; 
 
   public static final String DEFAULT_DATE = "dd/MM/yyyy";
 
@@ -55,6 +62,8 @@ public class GraphConfigurationDetail implements ModelObject {
   public static final String BUILD_CONFIG = "BUILD";
 
   public static final String DATE_CONFIG = "DATE";
+  
+  public static final String BUILDNTH_CONFIG = "BUILDNTH";
 
     public boolean isNone() {
         return configType.compareToIgnoreCase(GraphConfigurationDetail.NONE_CONFIG) == 0;
@@ -64,6 +73,10 @@ public class GraphConfigurationDetail implements ModelObject {
         return configType.compareToIgnoreCase(GraphConfigurationDetail.BUILD_CONFIG) == 0;
     }
 
+    public boolean isBuildNth(){
+    	return configType.compareToIgnoreCase(GraphConfigurationDetail.BUILDNTH_CONFIG) == 0;
+    }
+    
     public boolean isDate() {
         return configType.compareToIgnoreCase(GraphConfigurationDetail.DATE_CONFIG) == 0;
     }
@@ -128,8 +141,18 @@ public class GraphConfigurationDetail implements ModelObject {
       if (StringUtils.isNotBlank(radioConfigType)) {
         configType = formData.getString("radioConfigType");
       }
+      
+      int buildStep = DEFAULT_STEP;
+      if (formData.has("buildStepString")){
+    	  String buildStepString = formData.getString("buildStepString");
+    	  
+    	  if (StringUtils.isNotBlank(buildStepString)) {
+    		  buildStep = formData.getInt("buildStepString");
+    	  }
+      }
+      
       String value = serializeToString(configType, buildCount, firstDayCount,
-          lastDayCount);
+          lastDayCount, buildStep);
       persistValue(value, request, response);
 
     } catch (JSONException exception) {
@@ -177,6 +200,13 @@ public class GraphConfigurationDetail implements ModelObject {
         return;
     }
     
+    String buildStep = request.getParameter("buildStep");
+    if (buildStep != null) {
+        setBuildStep(Integer.parseInt(buildStep));
+        setConfigType(GraphConfigurationDetail.BUILDNTH_CONFIG);
+        return;
+    }
+    
     // If not found, check cookie    
     Cookie cookie = createCookieHandler("performance").create(
         request.getAncestors(), value);
@@ -185,9 +215,9 @@ public class GraphConfigurationDetail implements ModelObject {
 
   protected String serializeToString(final String configType,
       final int buildCount, final String firstDayCount,
-      final String lastDayCount) {
+      final String lastDayCount, final int buildStep) {
     return configType + SEPARATOR + buildCount + SEPARATOR + firstDayCount
-        + SEPARATOR + lastDayCount;
+        + SEPARATOR + lastDayCount + SEPARATOR + buildStep;
   }
 
   /**
@@ -223,13 +253,19 @@ public class GraphConfigurationDetail implements ModelObject {
       return listErrors;
     }
 
-    String[] values = StringUtils.split(value, SEPARATOR);
-    if (values.length != 4) {
+    String[] values;
+    if (value.contains(LEGACY_SEPARATOR))
+        values = StringUtils.split(value, LEGACY_SEPARATOR);
+    else
+        values = StringUtils.split(value, SEPARATOR);
+
+    if ((values.length != 4) && (values.length != 5)) {
       listErrors.add(-1);
       return listErrors;
     }
     configType = values[0];
     if (BUILD_CONFIG.compareToIgnoreCase(configType) != 0
+    	&& BUILDNTH_CONFIG.compareToIgnoreCase(configType) != 0	
         && DATE_CONFIG.compareToIgnoreCase(configType) != 0
         && NONE_CONFIG.compareToIgnoreCase(configType) != 0) {
       listErrors.add(-1);
@@ -278,6 +314,16 @@ public class GraphConfigurationDetail implements ModelObject {
       listErrors.add(2);
       listErrors.add(3);
     }
+    
+    try {
+    	if (values.length == 5){
+    		buildStep = Integer.parseInt(values[4]);
+    	}
+      } catch (JSONException e) {
+        listErrors.add(4);
+        e.printStackTrace();
+      }
+    
     // clean the error list
     if (!listErrors.isEmpty()) {
       Collections.sort(listErrors);
@@ -323,15 +369,18 @@ public class GraphConfigurationDetail implements ModelObject {
     configType = NONE_CONFIG;
     for (Integer errorNumber : initializationResult) {
       if (errorNumber == -1) {
-        buildCount = DEFAULT_COUNT;
+    	buildCount = DEFAULT_COUNT;
         firstDayCount = DEFAULT_DATE;
         lastDayCount = DEFAULT_DATE;
+        buildStep = DEFAULT_STEP;
       } else if (errorNumber == 1) {
         buildCount = DEFAULT_COUNT;
       } else if (errorNumber == 2) {
         firstDayCount = DEFAULT_DATE;
       } else if (errorNumber == 3) {
         lastDayCount = DEFAULT_DATE;
+      } else if (errorNumber == 4) {
+    	  buildStep = DEFAULT_STEP;
       }
     }
   }
@@ -363,6 +412,14 @@ public class GraphConfigurationDetail implements ModelObject {
 
   public void setBuildCount(int buildCount) {
     this.buildCount = buildCount;
+  }
+  
+  public int getBuildStep() {
+	  return buildStep;
+  }
+  
+  public void setBuildStep(int buildStep){
+	  this.buildStep = buildStep;
   }
 
   public String getFirstDayCount() {

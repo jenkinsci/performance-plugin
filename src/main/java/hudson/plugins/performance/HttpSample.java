@@ -13,6 +13,8 @@ public class HttpSample implements Serializable, Comparable<HttpSample> {
   private long duration;
 
   private boolean successful;
+  
+  private boolean errorObtained;
 
   private Date date;
 
@@ -77,6 +79,15 @@ public class HttpSample implements Serializable, Comparable<HttpSample> {
   public void setSuccessful(boolean successful) {
     this.successful = successful;
   }
+  
+  public void setErrorObtained(boolean errorObtained){
+	  this.errorObtained = errorObtained;
+  }
+  
+  public boolean hasError(){
+	  return errorObtained;
+  }
+  
 
   public void setDate(Date time) {
     this.date = time;

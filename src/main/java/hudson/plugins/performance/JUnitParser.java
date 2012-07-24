@@ -83,36 +83,40 @@ public class JUnitParser extends JMeterParser {
                     }
                 }
 
-                /**
-                * JUnit XML format is: tag "testcase" with attributes: "name" and "time".
-                * If there is one error, there is an other tag, "failure" inside testcase tag.
-                * SOAPUI uses JUnit format
-                */
-                @Override
-                public void startElement(String uri, String localName, String qName,
-                    Attributes attributes) throws SAXException {
-                    if ("testcase".equalsIgnoreCase(qName)) {
-                    if (status != 0) {
-                        r.addSample(currentSample);
-                    }
-                    status = 1;
-                    currentSample = new HttpSample();
-                    currentSample.setDate(new Date(0));
-                    String time = attributes.getValue("time");
-                    currentSample.setDuration(parseDuration(time));
-                    currentSample.setSuccessful(true);
-                    currentSample.setUri(attributes.getValue("name"));
-                    } else if ("failure".equalsIgnoreCase(qName) && status != 0) {
-                    currentSample.setSuccessful(false);
-                    r.addSample(currentSample);
-                    status = 0;
-                    }
-                    }
-                });
-                sc.serializeObject(r,f.getPath());
-                sc.putCache(f, r);
-                result.add(r);
-            }
+          /**
+           * JUnit XML format is: tag "testcase" with attributes: "name" and "time". 
+           * If there is one error, there is an other tag, "failure" inside testcase tag.
+           * SOAPUI uses JUnit format
+           */
+          @Override
+          public void startElement(String uri, String localName, String qName,
+              Attributes attributes) throws SAXException {
+            if ("testcase".equalsIgnoreCase(qName)) {
+              if (status != 0) {
+                r.addSample(currentSample);
+              }
+              status = 1;
+              currentSample = new HttpSample();
+              currentSample.setDate(new Date(0));
+              String time = attributes.getValue("time");
+              currentSample.setDuration(parseDuration(time));
+              currentSample.setSuccessful(true);
+              currentSample.setUri(attributes.getValue("name"));
+              currentSample.setErrorObtained(false);
+            } else if ("failure".equalsIgnoreCase(qName) && status != 0) {
+              currentSample.setErrorObtained(false);	
+              currentSample.setSuccessful(false);
+              r.addSample(currentSample);
+              status = 0;
+            }else if ("failure".equalsIgnoreCase(qName) && status != 0) {
+                currentSample.setErrorObtained(true);
+                r.addSample(currentSample);
+                status = 0;
+              }
+            
+          }
+        });
+        result.add(r);
       } catch (ParserConfigurationException e) {
         throw new IOException2("Failed to create parser ", e);
       } catch (SAXException e) {

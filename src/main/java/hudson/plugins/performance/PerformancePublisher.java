@@ -51,6 +51,8 @@ public class PerformancePublisher extends Recorder {
   private int errorFailedThreshold = 0;
 
   private int errorUnstableThreshold = 0;
+  
+  private boolean modePerformancePerTestCase = false;
 
   /**
    * @deprecated as of 1.3. for compatibility
@@ -58,20 +60,21 @@ public class PerformancePublisher extends Recorder {
   private transient String filename;
 
   /**
-   * Configured report parseres.
+   * Configured report parsers.
    */
   private List<PerformanceReportParser> parsers;
 
-
-  @DataBoundConstructor
+@DataBoundConstructor
   public PerformancePublisher(int errorFailedThreshold,
       int errorUnstableThreshold,
+      boolean modePerformancePerTestCase,
       List<? extends PerformanceReportParser> parsers) {
     this.errorFailedThreshold = errorFailedThreshold;
     this.errorUnstableThreshold = errorUnstableThreshold;
     if (parsers == null)
       parsers = Collections.emptyList();
     this.parsers = new ArrayList<PerformanceReportParser>(parsers);
+    this.modePerformancePerTestCase = modePerformancePerTestCase;
   }
 
   public static File getPerformanceReport(AbstractBuild<?, ?> build,
@@ -290,6 +293,18 @@ public class PerformancePublisher extends Recorder {
         100));
   }
 
+  public boolean isModePerformancePerTestCase() {
+		return modePerformancePerTestCase;
+  }
+
+  public void setModePerformancePerTestCase(boolean modePerformancePerTestCase) {
+	  this.modePerformancePerTestCase = modePerformancePerTestCase;
+  }
+	  
+  public boolean getModePerformancePerTestCase(){
+	  return modePerformancePerTestCase;
+  }
+	  
   public String getFilename() {
     return filename;
   }
