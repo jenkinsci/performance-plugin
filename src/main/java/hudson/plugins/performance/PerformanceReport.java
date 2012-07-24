@@ -5,6 +5,7 @@ import hudson.model.AbstractBuild;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,10 +20,10 @@ import java.text.DecimalFormat;
  *
  * This object belongs under {@link PerformanceReportMap}.
  */
-public class PerformanceReport extends AbstractReport implements
-    Comparable<PerformanceReport> {
+public class PerformanceReport extends AbstractReport implements Serializable,
+    Comparable<PerformanceReport>{
 
-  private PerformanceBuildAction buildAction;
+  private transient PerformanceBuildAction buildAction;
 
   private HttpSample httpSample;
 
@@ -247,23 +248,9 @@ public class PerformanceReport extends AbstractReport implements
 
     
   public boolean ifSummarizerParserUsed(String filename) {
-      boolean b = false;
-      String  fileExt;
-      List<PerformanceReportParser> list =  buildAction.getBuild().getProject().getPublishersList().get(PerformancePublisher.class).getParsers();
 
-      for ( int i=0; i < list.size(); i++) {
-          if (list.get(i).getDescriptor().getDisplayName()=="JmeterSummarizer") {
-              fileExt = list.get(i).glob;
-              String parts[] = fileExt.split("\\s*[;:,]+\\s*");
-              for (String path : parts) {
-                  if (filename.endsWith(path.substring(5))) {
-                      b=true;
-                      return b;
-                  }
-              }
-          }
-      }
-    return b;
+    return buildAction.getBuild().getProject().getAction(PerformanceProjectAction.class).ifSummarizerParserUsed(filename);   
+
   }
 
 

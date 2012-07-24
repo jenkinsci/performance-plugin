@@ -8,10 +8,9 @@ import hudson.model.Hudson;
 import hudson.model.TaskListener;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Collection;
-import java.util.Map;
+
 
 /**
  * Parses performance result files into {@link PerformanceReport}s.
@@ -28,6 +27,8 @@ public abstract class PerformanceReportParser implements
    * GLOB patterns that specify the performance report.
    */
   public final String glob;
+  public static final PerformanceSimpleCache simpleCache = null;
+
 
   @DataBoundConstructor
   protected PerformanceReportParser(String glob) {
@@ -59,4 +60,12 @@ public abstract class PerformanceReportParser implements
   public String getReportName() {
     return this.getClass().getName().replaceAll("^.*\\.(\\w+)Parser.*$", "$1");
   }
+
+  public PerformanceSimpleCache getSimpleCache() {
+     if (this.simpleCache == null) {
+         return new PerformanceSimpleCache();
+     }
+  return  simpleCache;
+  }
+
 }

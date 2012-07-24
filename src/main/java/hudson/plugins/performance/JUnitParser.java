@@ -56,54 +56,63 @@ public class JUnitParser extends JMeterParser {
     factory.setValidating(false);
     factory.setNamespaceAware(false);
     PrintStream logger = listener.getLogger();
+    PerformanceSimpleCache sc= super.getSimpleCache();
 
     for (File f : reports) {
       try {
-        SAXParser parser = factory.newSAXParser();
-        final PerformanceReport r = new PerformanceReport();
-        r.setReportFileName(f.getName());
-        logger.println("Performance: Parsing JUnit report file " + f.getName());
-        parser.parse(f, new DefaultHandler() {
-          private HttpSample currentSample;
-          private int status;
+          final PerformanceReport cachedReport = sc.getReportFromCache(sc, f, logger);
+            if ( cachedReport != null) {
+                cachedReport.setReportFileName(f.getName());
+                result.add(cachedReport);
+            } else {
+                SAXParser parser = factory.newSAXParser();
+                final PerformanceReport r = new PerformanceReport();
+                r.setReportFileName(f.getName());
+                logger.println("Performance: Parsing JUnit report file " + f.getName());
+                parser.parse(f, new DefaultHandler() {
+                private HttpSample currentSample;
+                private int status;
 
-          @Override
-          public void endElement(String uri, String localName, String qName)
-              throws SAXException {
-            if (("testsuite".equalsIgnoreCase(qName) || "testcase".equalsIgnoreCase(qName))
-                && status != 0) {
-              r.addSample(currentSample);
-              status = 0;
-            }
-          }
+                @Override
+                public void endElement(String uri, String localName, String qName)
+                    throws SAXException {
+                    if (("testsuite".equalsIgnoreCase(qName) || "testcase".equalsIgnoreCase(qName))
+                        && status != 0) {
+                    r.addSample(currentSample);
+                    status = 0;
+                    }
+                }
 
-          /**
-           * JUnit XML format is: tag "testcase" with attributes: "name" and "time". 
-           * If there is one error, there is an other tag, "failure" inside testcase tag.
-           * SOAPUI uses JUnit format
-           */
-          @Override
-          public void startElement(String uri, String localName, String qName,
-              Attributes attributes) throws SAXException {
-            if ("testcase".equalsIgnoreCase(qName)) {
-              if (status != 0) {
-                r.addSample(currentSample);
-              }
-              status = 1;
-              currentSample = new HttpSample();
-              currentSample.setDate(new Date(0));
-              String time = attributes.getValue("time");
-              currentSample.setDuration(parseDuration(time));
-              currentSample.setSuccessful(true);
-              currentSample.setUri(attributes.getValue("name"));
-            } else if ("failure".equalsIgnoreCase(qName) && status != 0) {
-              currentSample.setSuccessful(false);
-              r.addSample(currentSample);
-              status = 0;
+                /**
+                * JUnit XML format is: tag "testcase" with attributes: "name" and "time".
+                * If there is one error, there is an other tag, "failure" inside testcase tag.
+                * SOAPUI uses JUnit format
+                */
+                @Override
+                public void startElement(String uri, String localName, String qName,
+                    Attributes attributes) throws SAXException {
+                    if ("testcase".equalsIgnoreCase(qName)) {
+                    if (status != 0) {
+                        r.addSample(currentSample);
+                    }
+                    status = 1;
+                    currentSample = new HttpSample();
+                    currentSample.setDate(new Date(0));
+                    String time = attributes.getValue("time");
+                    currentSample.setDuration(parseDuration(time));
+                    currentSample.setSuccessful(true);
+                    currentSample.setUri(attributes.getValue("name"));
+                    } else if ("failure".equalsIgnoreCase(qName) && status != 0) {
+                    currentSample.setSuccessful(false);
+                    r.addSample(currentSample);
+                    status = 0;
+                    }
+                    }
+                });
+                sc.serializeObject(r,f.getPath());
+                sc.putCache(f, r);
+                result.add(r);
             }
-          }
-        });
-        result.add(r);
       } catch (ParserConfigurationException e) {
         throw new IOException2("Failed to create parser ", e);
       } catch (SAXException e) {

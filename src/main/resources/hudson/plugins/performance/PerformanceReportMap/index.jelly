@@ -13,7 +13,7 @@
             <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
           </j:otherwise>
          </j:choose>
-        <a href="./summariserTrendReport?performanceReportPosition=${performanceReport.getReportFileName()}">${% Response time trends for build: }"${it.build}" </a>
+        <a href="./trendReport?performanceReportPosition=${performanceReport.getReportFileName()}">${% Response time trends for build: }"${it.build}" </a>
         <table class="sortable source" border="1">
          <jm:captionLine it="${performanceReport}"/>
          <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">

@@ -37,7 +37,7 @@ public class PerformanceReportMap implements ModelObject {
     private Map<String, PerformanceReport> performanceReportMap = new LinkedHashMap<String, PerformanceReport>();
     private static final String PERFORMANCE_REPORTS_DIRECTORY = "performance-reports";
     private static final String PLUGIN_NAME = "performance";
-    private static final String TRENDREPORT_LINK = "summariserTrendReport";
+    private static final String TRENDREPORT_LINK = "trendReport";
     
     private static AbstractBuild<?, ?> currentBuild = null;
         
@@ -251,7 +251,7 @@ public class PerformanceReportMap implements ModelObject {
         File[] files = repo.listFiles(new FileFilter() {
 
             public boolean accept(File f) {
-                return !f.isDirectory();
+                return !f.isDirectory() && !f.getName().contains(".serialized");
             }
         });
         // this may fail, if the build itself failed, we need to recover gracefully
@@ -275,7 +275,7 @@ public class PerformanceReportMap implements ModelObject {
                     File[] listFiles = dir.listFiles(new FilenameFilter() {
 
                         public boolean accept(File dir, String name) {
-                            if(filename == null){
+                            if (filename == null && !name.contains(".serialized") ){
                                 return true;
                             }
                             if (name.equals(filename)) {
@@ -345,6 +345,7 @@ public class PerformanceReportMap implements ModelObject {
     String filename = getTrendReportFilename(request);
     PerformanceReport report = performanceReportMap.get(filename);
     AbstractBuild<?, ?> build = getBuild();
+
     TrendReportGraphs  trendReport= new TrendReportGraphs(build.getProject(), build,
         request, filename, report);
 

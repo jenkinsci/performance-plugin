@@ -3,6 +3,7 @@ package hudson.plugins.performance;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.Hudson;
 import hudson.util.*;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 
@@ -55,8 +56,6 @@ public final class PerformanceProjectAction implements Action {
 
   private transient List<String> performanceReportList;
 
-  public PerformanceSimpleCache simpleCache;
-
   public String getDisplayName() {
     return Messages.ProjectAction_DisplayName();
   }
@@ -71,11 +70,6 @@ public final class PerformanceProjectAction implements Action {
 
   public PerformanceProjectAction(AbstractProject project) {
     this.project = project;
-    this.simpleCache= new PerformanceSimpleCache();
-  }
-
-  public PerformanceSimpleCache getSimpleCache() {
-      return simpleCache;
   }
 
 
@@ -96,7 +90,6 @@ public final class PerformanceProjectAction implements Action {
 
     final LegendTitle legend = chart.getLegend();
     legend.setPosition(RectangleEdge.RIGHT);
-
     chart.setBackgroundPaint(Color.white);
 
     final CategoryPlot plot = chart.getCategoryPlot();
@@ -499,10 +492,14 @@ public final class PerformanceProjectAction implements Action {
     for (File entry : file.listFiles()) {
       if (entry.isDirectory()) {
         for (File e : entry.listFiles()) {
-          this.performanceReportList.add(e.getName());
+            if (!e.getName().contains(".serialized"))  {
+                this.performanceReportList.add(e.getName());
+            }
         }
       } else {
-        this.performanceReportList.add(entry.getName());
+          if (!entry.getName().contains(".serialized")) {
+              this.performanceReportList.add(entry.getName());
+          }
       }
         
     }
@@ -625,17 +622,20 @@ public final class PerformanceProjectAction implements Action {
 
 
   public boolean ifSummarizerParserUsed(String filename) {
+
       boolean b = false;
       String  fileExt;
+
       List<PerformanceReportParser> list =  project.getPublishersList().get(PerformancePublisher.class).getParsers();
 
       for ( int i=0; i < list.size(); i++) {
-          if (list.get(i).getDescriptor().getDisplayName()=="JmeterSummarizer") {
+          if (list.get(i).getDescriptor().getDisplayName().equals("JmeterSummarizer")) {
               fileExt = list.get(i).glob;
               String parts[] = fileExt.split("\\s*[;:,]+\\s*");
               for (String path : parts) {
                   if (filename.endsWith(path.substring(5))) {
                       b=true;
+                      return b;
                   }
               }
           }

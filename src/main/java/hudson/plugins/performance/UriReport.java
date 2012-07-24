@@ -6,6 +6,7 @@ import hudson.util.ChartUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URLEncoder;
 import java.util.*;
 import java.text.DecimalFormat;
@@ -23,7 +24,7 @@ import org.kohsuke.stapler.StaplerResponse;
  * 
  * This object belongs under {@link PerformanceReport}.
  */
-public class UriReport extends AbstractReport implements ModelObject,
+public class UriReport extends AbstractReport implements  Serializable, ModelObject,
     Comparable<UriReport> {
 
   public final static String END_PERFORMANCE_PARAMETER = ".endperformanceparameter";
