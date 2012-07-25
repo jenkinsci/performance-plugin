@@ -3,6 +3,7 @@ package hudson.plugins.performance;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.Hudson;
 import hudson.util.*;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.plugins.performance.PerformanceReportPosition;
@@ -12,29 +13,30 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.CategoryLabelPositions;
-import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.*;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+
+
+
 
 
 public final class PerformanceProjectAction implements Action {
@@ -70,6 +72,7 @@ public final class PerformanceProjectAction implements Action {
   public PerformanceProjectAction(AbstractProject project) {
     this.project = project;
   }
+
 
   private JFreeChart createErrorsChart(CategoryDataset dataset) {
 
@@ -170,7 +173,7 @@ public final class PerformanceProjectAction implements Action {
   }
 
 
-    protected static JFreeChart createSummarizerChart (CategoryDataset dataset, String yAxis, String chartTitle) {
+  protected static JFreeChart createSummarizerChart (CategoryDataset dataset, String yAxis, String chartTitle) {
 
       final JFreeChart chart = ChartFactory.createBarChart(
           chartTitle, // chart title
@@ -194,18 +197,57 @@ public final class PerformanceProjectAction implements Action {
        CategoryAxis domainAxis = plot.getDomainAxis();
        domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
 
-       final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-            rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
        final BarRenderer renderer = (BarRenderer) plot.getRenderer();
            renderer.setDrawBarOutline(false);
            renderer.setBaseStroke(new BasicStroke(4.0f));
            renderer.setItemMargin(0);
            renderer.setMaximumBarWidth(0.05);
+           
 
-        
       return chart;
     }
+
+
+  protected static JFreeChart createSummarizerTrend (ArrayList<XYDataset> dataset, String uri) {
+
+      final JFreeChart chart = ChartFactory.createTimeSeriesChart(
+            uri  ,
+            "Time",
+            "Response Time",
+            dataset.get(0),
+            true,
+            true,
+            false);
+      chart.setBackgroundPaint(Color.white);
+
+      final XYPlot plot = chart.getXYPlot();
+      plot.setBackgroundPaint(Color.white);
+      plot.setDomainGridlinePaint(Color.black);
+      plot.setRangeGridlinePaint(Color.black);
+
+      plot.setDomainCrosshairVisible(true);
+      plot.setRangeCrosshairVisible(true);
+
+/*    final NumberAxis axis2 = new NumberAxis("Errors");
+      axis2.isAutoRange();
+      axis2.setLowerBound(0);
+      plot.setRangeAxis(1, axis2);
+      plot.setDataset(1, dataset.get(1));
+      plot.mapDatasetToRangeAxis(1, 1);
+
+      final StandardXYItemRenderer renderer2 = new StandardXYItemRenderer();
+      renderer2.setSeriesPaint(0, Color.black);
+      plot.setRenderer(1, renderer2);
+*/
+      final DateAxis axis = (DateAxis) plot.getDomainAxis();
+      axis.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
+
+      final XYItemRenderer renderer =  plot.getRenderer();
+      renderer.setSeriesPaint(0, ColorPalette.RED);
+
+      return chart;
+  }
 
 
   public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
@@ -382,7 +424,7 @@ public final class PerformanceProjectAction implements Action {
   public void doSummarizerGraph(StaplerRequest request,
                                 StaplerResponse response) throws IOException {
 
-        PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+      PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
       request.bindParameters(performanceReportPosition);
       String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
       if (performanceReportNameFile == null) {
@@ -415,25 +457,23 @@ public final class PerformanceProjectAction implements Action {
           PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
               performanceReportNameFile);
 
-
           if (performanceReport == null) {
             nbBuildsToAnalyze--;
             continue;
           }
 
           for (String key:performanceReport.getUriReportMap().keySet()) {
-            Long methodAvg=performanceReport.getUriReportMap().get(key).getHttpSampleList().get(0).getDuration();
-            float methodErrors= performanceReport.getUriReportMap().get(key).getHttpSampleList().get(0).getSummarizerErrors();
-            dataSetBuilderSummarizer.add(methodAvg, label, key);
-            dataSetBuilderSummarizerErrors.add(methodErrors, label, key);
+              Long methodAvg=performanceReport.getUriReportMap().get(key).getAverage();
+              float methodErrors= Float.valueOf(performanceReport.getUriReportMap().get(key).getSummarizerErrors());
+              dataSetBuilderSummarizer.add(methodAvg, label, key);
+              dataSetBuilderSummarizerErrors.add(methodErrors, label, key);
           };
         }
-
        nbBuildsToAnalyze--;
       }
 
-      
       String summarizerReportType = performanceReportPosition.getSummarizerReportType();
+
       if (summarizerReportType != null) {
         ChartUtil.generateGraph(request, response,
         createSummarizerChart(dataSetBuilderSummarizerErrors.build(),"%",Messages.ProjectAction_PercentageOfErrors()), 400, 200);
@@ -442,7 +482,6 @@ public final class PerformanceProjectAction implements Action {
         ChartUtil.generateGraph(request, response,
         createSummarizerChart(dataSetBuilderSummarizer.build(),"ms",Messages.ProjectAction_RespondingTime()), 400, 200);
       }
-
   }
 
 
@@ -455,6 +494,7 @@ public final class PerformanceProjectAction implements Action {
    * @param builds
    * @return outList
    */
+
   private Range getFirstAndLastBuild(StaplerRequest request, List<?> builds) {
     Range range = new Range();
     GraphConfigurationDetail graphConf = (GraphConfigurationDetail) createUserConfiguration(request);
@@ -538,10 +578,14 @@ public final class PerformanceProjectAction implements Action {
     for (File entry : file.listFiles()) {
       if (entry.isDirectory()) {
         for (File e : entry.listFiles()) {
-          this.performanceReportList.add(e.getName());
+            if (!e.getName().contains(".serialized"))  {
+                this.performanceReportList.add(e.getName());
+            }
         }
       } else {
-        this.performanceReportList.add(entry.getName());
+          if (!entry.getName().contains(".serialized")) {
+              this.performanceReportList.add(entry.getName());
+          }
       }
         
     }
@@ -681,26 +725,13 @@ public final class PerformanceProjectAction implements Action {
     }
     return dataSet;
   }
+
+
   public boolean ifSummarizerParserUsed(String filename) {
 
-      boolean b = false;
-      String  fileExt="";
-
-      List<PerformanceReportParser> list =  project.getPublishersList().get(PerformancePublisher.class).getParsers();
-
-      for ( int i=0; i < list.size(); i++) {
-           if (list.get(i).getDescriptor().getDisplayName()=="JmeterSummarizer") {
-              fileExt = list.get(i).glob;
-              String parts[] = fileExt.split("\\s*[;:,]+\\s*");
-              for (String path : parts) {
-                if (filename.endsWith(path.substring(5))) {
-                    b=true;
-                }    
-              }
-           }
-      }
-
-   return b;
+ return this.getProject().getBuilds().getLastBuild().
+         getAction(PerformanceBuildAction.class).getPerformanceReportMap().
+         getPerformanceReport(filename).ifSummarizerParserUsed(filename);
   }
   
   public boolean ifModePerformancePerTestCaseUsed(){
@@ -743,4 +774,5 @@ public final class PerformanceProjectAction implements Action {
       }
       
   }
+
 }

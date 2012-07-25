@@ -27,6 +27,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
 
   private static final Logger logger = Logger.getLogger(PerformanceBuildAction.class.getName());
 
+
   public PerformanceBuildAction(AbstractBuild<?, ?> pBuild, PrintStream logger,
       List<PerformanceReportParser> parsers) {
     build = pBuild;

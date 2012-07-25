@@ -4,29 +4,57 @@
     <st:include it="${it.build}" page="sidepanel.jelly" />
     <l:main-panel>
       <h1>${it.performanceReport.getReportFileName()}</h1>
+        <a href="./summarizerTrendGraph?width=1500&amp;height=650&amp;performanceReportPosition=${performanceReport}"  title="${%Click for larger image}">
+        <img class="trend" src="./summarizerTrendGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport}" width="600" height="325" />
+        </a>
+        <br></br>
       <strong class="uri">URI: ${it.uri}</strong>
-      <h3>${%Performance Summary}</h3>
       <table border="1" class="source">
-        <jm:captionLine />
+        <jm:captionLine it="${it.performanceReport}"/>
         <tr>
           <td class="left">${it.uri}</td>
-          <jm:summaryTable it="${it}" />
+            <j:choose>
+              <j:when test="${it.getPerformanceReport().ifSummarizerParserUsed(it.getPerformanceReport().getReportFileName())}">
+                <jm:summaryTableSummarizer it="${it}" />
+              </j:when>
+              <j:otherwise>
+                <jm:summaryTable it="${it}" />
+              </j:otherwise>
+            </j:choose>
         </tr>
       </table>
       <h3>${%Performance samples}</h3>
       <table class="sortable source" border="1">
-        <th>${%URI}</th>
-        <th>${%Http Code}</th>
-        <th>${%Time}</th>
-        <th>${%Duration} (ms)</th>
-        <j:forEach var="c" items="${it.httpSampleList}">
-          <tr class="${h.ifThenElse(c.failed,'red','')}">
-            <td class="left">${c.uri}</td>
-            <td>${c.httpCode}</td>
-            <td class="center">${c.date}</td>
-            <td>${c.duration} ms.</td>
-          </tr>
-        </j:forEach>
+        <j:choose>
+          <j:when test="${it.getPerformanceReport().ifSummarizerParserUsed(it.getPerformanceReport().getReportFileName())}">
+            <th>${%URI}</th>
+            <th>${%Samples}</th>
+            <th>${%Time}</th>
+            <th>${% Avg Response Time} (ms)</th>
+            <j:forEach var="c" items="${it.httpSampleList}">
+                <tr>
+                <td class="left">${c.uri}</td>
+                <td>${c.summarizerSamples}</td>
+                <td class="center">${c.date}</td>
+                <td>${c.duration} ms.</td>
+                </tr>
+            </j:forEach>
+          </j:when>
+          <j:otherwise>
+            <th>${%URI}</th>
+            <th>${%Http Code}</th>
+            <th>${%Time}</th>
+            <th>${%Duration} (ms)</th>
+            <j:forEach var="c" items="${it.httpSampleList}">
+                <tr class="${h.ifThenElse(c.failed,'red','')}">
+                <td class="left">${c.uri}</td>
+                <td>${c.httpCode}</td>
+                <td class="center">${c.date}</td>
+                <td>${c.duration} ms.</td>
+                </tr>
+            </j:forEach>
+          </j:otherwise>
+        </j:choose>
       </table>
     </l:main-panel>
   </l:layout>

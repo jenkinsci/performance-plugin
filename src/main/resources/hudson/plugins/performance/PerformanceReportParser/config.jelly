@@ -3,4 +3,13 @@
   <f:entry title="${%Report files}" field="glob">
     <f:textbox />
   </f:entry>
-</j:jelly>
+  <j:choose>
+    <j:when test="${descriptor.getDisplayName().equals('JmeterSummarizer')}">   
+      <f:entry title="${%Summariser Date Format}"  field="logDateFormat">
+        <f:textbox/>
+      </f:entry>
+    </j:when>
+    <j:otherwise>
+    </j:otherwise>
+  </j:choose>
+  </j:jelly>

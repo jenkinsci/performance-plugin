@@ -2,10 +2,10 @@
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:jm="/hudson/plugins/performance/tags">
 
-        <td>${it.httpSampleList.get(0).getSummarizerSamples()}</td>
+        <td>${it.getSummarizerSize()}</td>
         <td>${it.getAverage()}</td>
-        <td>${it.httpSampleList.get(0).getSummarizerMin()}</td>
-        <td>${it.httpSampleList.get(0).getSummarizerMax()}</td>
-        <td>${it.httpSampleList.get(0).getSummarizerErrors()}</td>
+        <td>${it.getSummarizerMin()}</td>
+        <td>${it.getSummarizerMax()}</td>
+        <td>${it.getSummarizerErrors()}  %</td>
 
 </j:jelly>

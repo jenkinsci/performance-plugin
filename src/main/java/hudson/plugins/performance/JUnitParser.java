@@ -59,23 +59,23 @@ public class JUnitParser extends JMeterParser {
 
     for (File f : reports) {
       try {
-        SAXParser parser = factory.newSAXParser();
-        final PerformanceReport r = new PerformanceReport();
-        r.setReportFileName(f.getName());
-        logger.println("Performance: Parsing JUnit report file " + f.getName());
-        parser.parse(f, new DefaultHandler() {
-          private HttpSample currentSample;
-          private int status;
+                SAXParser parser = factory.newSAXParser();
+                final PerformanceReport r = new PerformanceReport();
+                r.setReportFileName(f.getName());
+                logger.println("Performance: Parsing JUnit report file " + f.getName());
+                parser.parse(f, new DefaultHandler() {
+                private HttpSample currentSample;
+                private int status;
 
-          @Override
-          public void endElement(String uri, String localName, String qName)
-              throws SAXException {
-            if (("testsuite".equalsIgnoreCase(qName) || "testcase".equalsIgnoreCase(qName))
-                && status != 0) {
-              r.addSample(currentSample);
-              status = 0;
-            }
-          }
+                @Override
+                public void endElement(String uri, String localName, String qName)
+                    throws SAXException {
+                    if (("testsuite".equalsIgnoreCase(qName) || "testcase".equalsIgnoreCase(qName))
+                        && status != 0) {
+                    r.addSample(currentSample);
+                    status = 0;
+                    }
+                }
 
           /**
            * JUnit XML format is: tag "testcase" with attributes: "name" and "time". 

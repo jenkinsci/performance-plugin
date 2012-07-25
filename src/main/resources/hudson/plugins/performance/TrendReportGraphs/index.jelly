@@ -1,0 +1,34 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">	
+  <l:layout xmlns:jm="/hudson/plugins/performance/tags"  css="/plugin/performance/css/style.css">
+    <l:main-panel>
+      <h1>${%Trend report}: ${it.filename}</h1>
+      <j:forEach var="URI" items="${it.getUris()}">
+        <h1>${%URI}: ${URI}</h1>
+          <a href="./respondingTimeGraph?width=1500&amp;height=650&amp;performanceReportPosition=${it.filename}&amp;summarizerTrendUri=${URI}" title="${%Click for larger image}">
+          <img class="trend" src="./respondingTimeGraph?width=600&amp;height=325&amp;performanceReportPosition=${it.filename}&amp;summarizerTrendUri=${URI}" width="600" height="325" />
+          </a>
+        <br></br>
+        <table border="1" class="source">
+          <jm:captionLine it="${it.getPerformanceReport()}"/>
+          <strong class="uri">${%URI}: ${URI}</strong>
+         <tr>
+          <td class="left">
+              <a href="./uriReport/${it.getUriReport(URI).encodeUriReport()}">
+              <st:out value="${it.getUriReport(URI).getShortUri()}" />
+              </a>
+          </td>
+          <j:choose>
+            <j:when test="${it.getUriReport(URI).getPerformanceReport().ifSummarizerParserUsed(it.getPerformanceReport().getReportFileName())}">
+              <jm:summaryTableSummarizer it="${it.getUriReport(URI)}" />
+            </j:when>
+            <j:otherwise>
+              <jm:summaryTable it="${it.getUriReport(URI)}" />
+            </j:otherwise>
+          </j:choose>
+         </tr>
+        </table>
+      </j:forEach>
+    </l:main-panel>
+  </l:layout>
+</j:jelly>
