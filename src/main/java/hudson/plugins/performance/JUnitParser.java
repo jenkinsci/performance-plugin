@@ -56,15 +56,9 @@ public class JUnitParser extends JMeterParser {
     factory.setValidating(false);
     factory.setNamespaceAware(false);
     PrintStream logger = listener.getLogger();
-    PerformanceSimpleCache sc= super.getSimpleCache();
 
     for (File f : reports) {
       try {
-          final PerformanceReport cachedReport = sc.getReportFromCache(sc, f, logger);
-            if ( cachedReport != null) {
-                cachedReport.setReportFileName(f.getName());
-                result.add(cachedReport);
-            } else {
                 SAXParser parser = factory.newSAXParser();
                 final PerformanceReport r = new PerformanceReport();
                 r.setReportFileName(f.getName());

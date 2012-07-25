@@ -54,15 +54,9 @@ public class JmeterSummarizerParser extends PerformanceReportParser{
      Collection<File> reports, TaskListener listener)  {
      List<PerformanceReport> result = new ArrayList<PerformanceReport>();
      PrintStream logger = listener.getLogger();
-     PerformanceSimpleCache sc= super.getSimpleCache();
 
      for (File f : reports) {
          try {
-             final PerformanceReport cachedReport = sc.getReportFromCache(sc, f, logger);
-             if ( cachedReport != null) {
-                 cachedReport.setReportFileName(f.getName());
-                 result.add(cachedReport);
-             } else {
                  final PerformanceReport r = new PerformanceReport();
                  r.setReportFileName(f.getName());
                  r.setReportFileName(f.getName());
@@ -100,10 +94,7 @@ public class JmeterSummarizerParser extends PerformanceReportParser{
                          r.addSample(sample);
                      }
                  }
-                sc.serializeObject(r,f.getPath());
-                sc.putCache(f,r);
                 result.add(r); 
-             }
          } catch (FileNotFoundException e) {
              logger.println("File not found" + e.getMessage());
          } catch (SAXException e) {

@@ -729,24 +729,9 @@ public final class PerformanceProjectAction implements Action {
 
   public boolean ifSummarizerParserUsed(String filename) {
 
-      boolean b = false;
-      String  fileExt;
-
-      List<PerformanceReportParser> list =  project.getPublishersList().get(PerformancePublisher.class).getParsers();
-
-      for ( int i=0; i < list.size(); i++) {
-          if (list.get(i).getDescriptor().getDisplayName().equals("JmeterSummarizer")) {
-              fileExt = list.get(i).glob;
-              String parts[] = fileExt.split("\\s*[;:,]+\\s*");
-              for (String path : parts) {
-                  if (filename.endsWith(path.substring(5))) {
-                      b=true;
-                      return b;
-                  }
-              }
-          }
-      }
-    return b;
+ return this.getProject().getBuilds().getLastBuild().
+         getAction(PerformanceBuildAction.class).getPerformanceReportMap().
+         getPerformanceReport(filename).ifSummarizerParserUsed(filename);
   }
   
   public boolean ifModePerformancePerTestCaseUsed(){

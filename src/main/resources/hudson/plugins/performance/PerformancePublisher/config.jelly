@@ -5,8 +5,7 @@
     <f:hetero-list name="parsers" hasHeader="true"
                    descriptors="${descriptor.getParserDescriptors()}"
                    items="${instance.parsers}"
-                   addCaption="${%Add a new report}"
-                   targetType="${instance.parsers}" />
+                   addCaption="${%Add a new report}"/>
   </f:entry>
   <f:entry title="${%Performance threshold}"
       description="${%Threshold.Description}">

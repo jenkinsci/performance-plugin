@@ -56,16 +56,9 @@ public class JMeterParser extends PerformanceReportParser {
     factory.setValidating(false);
     factory.setNamespaceAware(false);
     PrintStream logger = listener.getLogger();
-    PerformanceSimpleCache sc= super.getSimpleCache();;
-
 
     for (File f : reports) {
       try {
-          final PerformanceReport cachedReport = sc.getReportFromCache(sc, f, logger);
-            if ( cachedReport != null) {
-                cachedReport.setReportFileName(f.getName());
-                result.add(cachedReport);
-            } else {
                 SAXParser parser = factory.newSAXParser();
                 final PerformanceReport r = new PerformanceReport();
                 r.setReportFileName(f.getName());
@@ -128,10 +121,7 @@ public class JMeterParser extends PerformanceReportParser {
                     }
                 }
                 });
-                sc.serializeObject(r,f.getPath());
-                sc.putCache(f, r);
                 result.add(r);
-            }
       } catch (ParserConfigurationException e) {
         throw new IOException2("Failed to create parser ", e);
       } catch (SAXException e) {
