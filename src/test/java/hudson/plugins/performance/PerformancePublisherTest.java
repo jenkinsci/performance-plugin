@@ -16,7 +16,7 @@ import static java.util.Arrays.asList;
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PerformancePublisherTest extends HudsonTestCase {
+  public class PerformancePublisherTest extends HudsonTestCase {
 	public void testConfigRoundtrip() throws Exception {
 		PerformancePublisher before = new PerformancePublisher(10, 20, false,
 				asList(new JMeterParser("**/*.jtl")));
@@ -37,7 +37,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
 				.get(0).getClass());
 	}
 
-/*	public void testBuild() throws Exception {
+  public void testBuild() throws Exception {
 		FreeStyleProject p = createFreeStyleProject();
 		p.getBuildersList().add(new TestBuilder() {
 			@Override
@@ -48,19 +48,12 @@ public class PerformancePublisherTest extends HudsonTestCase {
 						getClass().getResource("/JMeterResults.jtl"));
 				return true;
 			}
+		});
 		p.getPublishersList().add(
-<<<<<<< HEAD
-				new PerformancePublisher(0, 0, asList(new JMeterParser(
-						"**/ //*.jtl"))));
-||||||| merged common ancestors
-				new PerformancePublisher(0, 0, asList(new JMeterParser(
-						"**/*.jtl"))));
-=======
 				new PerformancePublisher(0, 0, false, asList(new JMeterParser(
 						"**/*.jtl"))));
->>>>>>> upstream/master
 
-/*		FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+		FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
 
 		PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
 		assertNotNull(a);
@@ -70,5 +63,4 @@ public class PerformancePublisherTest extends HudsonTestCase {
 		wc.getPage(b, "performance");
 		wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
 	}
-*/
 }
