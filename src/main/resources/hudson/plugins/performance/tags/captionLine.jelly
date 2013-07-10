@@ -8,8 +8,8 @@
     <th>${%URI}</th>
     <th>${%samples}</th>
     <th>${%Average} (ms)</th>
-    <th>${%Minimun} (ms)</th>
-    <th>${%Maximun} (ms)</th>
+    <th>${%Minimum} (ms)</th>
+    <th>${%Maximum} (ms)</th>
     <th>${%Errors} (%)</th>
  </tr>
  </j:when>
@@ -23,8 +23,8 @@
     <th>${%Median} (ms)</th>
     <th>${%Median diff} (ms)</th>
     <th>${%Line90} (ms)</th>
-    <th>${%Minimun} (ms)</th>
-    <th>${%Maximun} (ms)</th>
+    <th>${%Minimum} (ms)</th>
+    <th>${%Maximum} (ms)</th>
     <th>${%Http Code}</th>
     <th>${%Previous Http Code}</th>
     <th>${%Errors} (%)</th>
