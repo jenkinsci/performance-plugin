@@ -65,14 +65,14 @@ public class JMeterCsvParser extends PerformanceReportParser {
         
         public FormValidation doCheckDelimiter(@QueryParameter String delimiter){
             if(delimiter == null || delimiter.isEmpty()) {
-                return FormValidation.error("Delimier can't be empty");
+                return FormValidation.error(Messages.CsvParser_validation_delimiterEmpty());
             }
             return FormValidation.ok();
         }
 
         public FormValidation doCheckPattern(@QueryParameter String pattern){
             if( pattern == null || pattern.isEmpty()) {
-                FormValidation.error("Pattern is required");
+                FormValidation.error(Messages.CsvParser_validation_patternEmpty());
             }
             Set<String> missing = new HashSet<String>();
             validatePresent(missing, pattern, "timestamp");
@@ -88,7 +88,7 @@ public class JMeterCsvParser extends PerformanceReportParser {
                     builder.append(field + ", ");
                 }
                 builder.setLength(builder.length() -2);
-                return FormValidation.error("Missing required fields: " + builder.toString());
+                return FormValidation.error(Messages.CsvParser_validation_MissingFields() + ": " + builder.toString());
             }
         }
 
