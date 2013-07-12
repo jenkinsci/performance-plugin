@@ -36,7 +36,7 @@ public class JMeterCsvParser extends PerformanceReportParser {
         super(glob);
         this.skipFirstLine = skipFirstLine;
         this.delimiter = delimiter;
-        String[] fields = pattern.split(",");
+        String[] fields = pattern.split(delimiter);
         for(int i = 0; i < fields.length; i++) {
             String field = fields[i];
             if("timestamp".equals(field)) {
