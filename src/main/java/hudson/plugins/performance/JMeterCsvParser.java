@@ -114,7 +114,7 @@ public class JMeterCsvParser extends PerformanceReportParser {
         for (File f : reports) {
             final PerformanceReport r = new PerformanceReport();
             r.setReportFileName(f.getName());
-            logger.println("Performance: Parsing JMeter report file " + f.getAbsolutePath());
+            logger.println("Performance: Parsing JMeter report file " + f.getName());
             BufferedReader reader = new BufferedReader(new FileReader(f));
             try {
                 String line = reader.readLine();
