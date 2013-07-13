@@ -8,22 +8,17 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import hudson.model.TaskListener;
+import hudson.model.AbstractProject;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.DataSetBuilder;
 import java.io.FilenameFilter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+
 
 /**
  * Root object of a performance report.
@@ -41,6 +36,8 @@ public class PerformanceReportMap implements ModelObject {
      */
     private Map<String, PerformanceReport> performanceReportMap = new LinkedHashMap<String, PerformanceReport>();
     private static final String PERFORMANCE_REPORTS_DIRECTORY = "performance-reports";
+    private static final String PLUGIN_NAME = "performance";
+    private static final String TRENDREPORT_LINK = "trendReport";
     
     private static AbstractBuild<?, ?> currentBuild = null;
         
@@ -133,7 +130,7 @@ public class PerformanceReportMap implements ModelObject {
     }
 
     public String getUrlName() {
-        return "performanceReportList";
+        return PLUGIN_NAME;
     }
 
     void setBuildAction(PerformanceBuildAction buildAction) {
@@ -237,17 +234,13 @@ public class PerformanceReportMap implements ModelObject {
 
            //Now we should have the data necessary to generate the graphs!
            for (String key:report.getUriReportMap().keySet()) {
-               Long methodAvg=report.getUriReportMap().get(key).getHttpSampleList().get(0).getDuration();
+               Long methodAvg=report.getUriReportMap().get(key).getAverage();
                dataSetBuilderSummarizer.add(methodAvg, label, key);
            };
        }
        ChartUtil.generateGraph(request, response,
                 PerformanceProjectAction.createSummarizerChart(dataSetBuilderSummarizer.build(),"ms",Messages.ProjectAction_RespondingTime()), 400, 200);
     }
-
-
-
-
 
 
     private void parseReports(AbstractBuild<?, ?> build, TaskListener listener, PerformanceReportCollector collector, final String filename) throws IOException {
@@ -258,7 +251,7 @@ public class PerformanceReportMap implements ModelObject {
         File[] files = repo.listFiles(new FileFilter() {
 
             public boolean accept(File f) {
-                return !f.isDirectory();
+                return !f.isDirectory() && !f.getName().contains(".serialized");
             }
         });
         // this may fail, if the build itself failed, we need to recover gracefully
@@ -282,7 +275,7 @@ public class PerformanceReportMap implements ModelObject {
                     File[] listFiles = dir.listFiles(new FilenameFilter() {
 
                         public boolean accept(File dir, String name) {
-                            if(filename == null){
+                            if (filename == null && !name.contains(".serialized") ){
                                 return true;
                             }
                             if (name.equals(filename)) {
@@ -340,28 +333,28 @@ public class PerformanceReportMap implements ModelObject {
     }
 
 
-    public boolean ifSummarizerParserUsed(String filename) {
-
-      boolean b = false;
-      String  fileExt="";
-
-      List<PerformanceReportParser> list =  buildAction.getBuild().getProject().getPublishersList().get(PerformancePublisher.class).getParsers();
-
-      for ( int i=0; i < list.size(); i++) {
-           if (list.get(i).getDescriptor().getDisplayName()=="JmeterSummarizer") {
-              fileExt = list.get(i).glob;
-              String parts[] = fileExt.split("\\s*[;:,]+\\s*");
-              for (String path : parts) {
-                if (filename.endsWith(path.substring(5))) {
-                    b=true;
-                    return b;
-                }
-              }
-           }
-      }
-
-   return b;
+  public Object getDynamic(final String link, final StaplerRequest request, final StaplerRequest response) {
+    if (TRENDREPORT_LINK.equals(link)) {
+       return createTrendReportGraphs(request);
+    } else {
+      return null;  
+    }
   }
 
+ public Object createTrendReportGraphs(final StaplerRequest request) {
+    String filename = getTrendReportFilename(request);
+    PerformanceReport report = performanceReportMap.get(filename);
+    AbstractBuild<?, ?> build = getBuild();
 
+    TrendReportGraphs  trendReport= new TrendReportGraphs(build.getProject(), build,
+        request, filename, report);
+
+    return trendReport;
+  }
+
+  private String getTrendReportFilename(final StaplerRequest request) {
+    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    request.bindParameters(performanceReportPosition);
+    return performanceReportPosition.getPerformanceReportPosition();
+  }
 }

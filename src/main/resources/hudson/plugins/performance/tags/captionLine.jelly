@@ -1,30 +1,29 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:e="/hudson/plugins/performance/tags">
-
  <j:choose>
- <j:when test="${it.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+ <j:when test="${it.ifSummarizerParserUsed(it.getReportFileName())}">
   <tr>
     <th>${%URI}</th>
-    <th>${%samples}</th>
+    <th>${%Samples}</th>
     <th>${%Average} (ms)</th>
-    <th>${%Minimun} (ms)</th>
-    <th>${%Maximun} (ms)</th>
+    <th>${%Minimum} (ms)</th>
+    <th>${%Maximum} (ms)</th>
     <th>${%Errors} (%)</th>
  </tr>
  </j:when>
  <j:otherwise>
   <tr>
     <th>${%URI}</th>
-    <th>${%samples}</th>
-    <th>${%samples diff}</th>
+    <th>${%Samples}</th>
+    <th>${%Samples diff}</th>
     <th>${%Average} (ms)</th>
     <th>${%Average diff} (ms)</th>
     <th>${%Median} (ms)</th>
     <th>${%Median diff} (ms)</th>
     <th>${%Line90} (ms)</th>
-    <th>${%Minimun} (ms)</th>
-    <th>${%Maximun} (ms)</th>
+    <th>${%Minimum} (ms)</th>
+    <th>${%Maximum} (ms)</th>
     <th>${%Http Code}</th>
     <th>${%Previous Http Code}</th>
     <th>${%Errors} (%)</th>

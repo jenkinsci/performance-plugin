@@ -1,13 +1,14 @@
 package hudson.plugins.performance;
 
 import java.util.Date;
+import java.io.Serializable;
 
 /**
  * Information about a particular HTTP request and how that went.
  *
  * This object belongs under {@link UriReport}.
  */
-public class HttpSample implements Comparable<HttpSample> {
+public class HttpSample implements Serializable, Comparable<HttpSample> {
 
   private long duration;
 

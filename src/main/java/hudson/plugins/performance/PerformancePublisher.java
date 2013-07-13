@@ -63,8 +63,7 @@ public class PerformancePublisher extends Recorder {
    * Configured report parsers.
    */
   private List<PerformanceReportParser> parsers;
-  
-  
+
 @DataBoundConstructor
   public PerformancePublisher(int errorFailedThreshold,
       int errorUnstableThreshold,
@@ -98,6 +97,7 @@ public class PerformancePublisher extends Recorder {
   public List<PerformanceReportParser> getParsers() {
     return parsers;
   }
+
 
   /**
    * <p>

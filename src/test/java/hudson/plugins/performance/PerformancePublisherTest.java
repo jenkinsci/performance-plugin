@@ -16,7 +16,7 @@ import static java.util.Arrays.asList;
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PerformancePublisherTest extends HudsonTestCase {
+  public class PerformancePublisherTest extends HudsonTestCase {
 	public void testConfigRoundtrip() throws Exception {
 		PerformancePublisher before = new PerformancePublisher(10, 20, false,
 				asList(new JMeterParser("**/*.jtl")));
@@ -37,7 +37,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
 				.get(0).getClass());
 	}
 
-	public void testBuild() throws Exception {
+  public void testBuild() throws Exception {
 		FreeStyleProject p = createFreeStyleProject();
 		p.getBuildersList().add(new TestBuilder() {
 			@Override

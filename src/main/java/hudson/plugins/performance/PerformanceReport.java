@@ -5,6 +5,7 @@ import hudson.model.AbstractBuild;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,15 +20,16 @@ import java.text.DecimalFormat;
  *
  * This object belongs under {@link PerformanceReportMap}.
  */
-public class PerformanceReport extends AbstractReport implements
-    Comparable<PerformanceReport> {
+public class PerformanceReport extends AbstractReport implements Serializable,
+    Comparable<PerformanceReport>{
 
-  private PerformanceBuildAction buildAction;
+  private transient PerformanceBuildAction buildAction;
 
   private HttpSample httpSample;
 
   private String reportFileName = null;
  
+
 
   /**
    * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
@@ -63,21 +65,22 @@ public class PerformanceReport extends AbstractReport implements
   public int countErrors() {
     int nbError = 0;
     for (UriReport currentReport : uriReportMap.values()) {
-        if (buildAction.getPerformanceReportMap().ifSummarizerParserUsed(reportFileName))  {
-            nbError += currentReport.getHttpSampleList().get(0).getSummarizerErrors();
-        } else {
-            nbError += currentReport.countErrors();
-        }
+        nbError += currentReport.countErrors();
      }
     return nbError;
   }
 
   public double errorPercent() {
-      if (buildAction.getPerformanceReportMap().ifSummarizerParserUsed(reportFileName))  {
-            return size() == 0 ? 0 : ((double) countErrors()) / size();
-        } else {
+      if (ifSummarizerParserUsed(reportFileName))  {
+          float nbError=0;
+          for (UriReport currentReport : uriReportMap.values()) {
+              nbError+=Float.valueOf(currentReport.getSummarizerErrors());
+          }
+          return (double) nbError/uriReportMap.size();
+
+      } else {
             return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
-        }
+      }
   }
 
   public long getAverage() {
@@ -94,6 +97,7 @@ public class PerformanceReport extends AbstractReport implements
     return result;
   }
 
+    
   public long get90Line() {
     long result = 0;
     int size = size();
@@ -241,5 +245,29 @@ public class PerformanceReport extends AbstractReport implements
       }
       return size() - lastBuildReport.size();
   }
+
+    
+  public boolean ifSummarizerParserUsed(String filename) {
+
+      boolean b = false;
+      String  fileExt;
+
+      List<PerformanceReportParser> list =  buildAction.getBuild().getProject().getPublishersList().get(PerformancePublisher.class).getParsers();
+
+      for ( int i=0; i < list.size(); i++) {
+          if (list.get(i).getDescriptor().getDisplayName().equals("JmeterSummarizer")) {
+              fileExt = list.get(i).glob;
+              String parts[] = fileExt.split("\\s*[;:,]+\\s*");
+              for (String path : parts) {
+                  if (filename.endsWith(path.substring(5))) {
+                      b=true;
+                      return b;
+                  }
+              }
+          }
+      }
+    return b;
+  }
+
 
 }
