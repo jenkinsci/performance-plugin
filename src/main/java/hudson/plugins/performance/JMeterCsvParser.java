@@ -147,7 +147,8 @@ public class JMeterCsvParser extends PerformanceReportParser {
      */
     private HttpSample getSample(String line) {
         HttpSample sample = new HttpSample();
-        String[] values = line.split(delimiter);
+        final String commasNotInsideQuotes = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
+        String[] values = line.split(commasNotInsideQuotes);
         sample.setDate(new Date(Long.valueOf(values[timestampIdx])));
         sample.setDuration(Long.valueOf(values[elapsedIdx]));
         sample.setHttpCode(values[responseCodeIdx]);
