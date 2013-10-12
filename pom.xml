@@ -3,8 +3,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.447</version>
-    <relativePath />
+    <version>1.480</version>
   </parent>
 
   <artifactId>performance</artifactId>
@@ -74,12 +73,17 @@
   </build>
 
 
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
+  <repositories>
+    <repository>
+      <id>jgit-repository</id>
+      <name>Eclipse JGit Repository</name>
+      <url>https://repo.eclipse.org/content/groups/releases/</url>
+    </repository>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>http://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
 
     <pluginRepositories>
         <pluginRepository>
