@@ -39,7 +39,7 @@
            <j:otherwise>
             <tr class="bold">
               <td class="left bold">${%All URIs}</td>
-              <jm:summaryTable it="${uriReport}" />
+              <jm:summaryTable it="${performanceReport}" />
             </tr>
            </j:otherwise>
           </j:choose>

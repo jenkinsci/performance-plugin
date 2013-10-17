@@ -28,6 +28,8 @@
     <th>${%Previous Http Code}</th>
     <th>${%Errors} (%)</th>
     <th>${%Errors diff} (%)</th>
+    <th>${%Average} (KB)</th>
+    <th>${%Total} (KB)</th>
   </tr>
  </j:otherwise>
  </j:choose>

@@ -6,6 +6,8 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -83,6 +85,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
       }
   }
 
+  
+  
   public long getAverage() {
     long result = 0;
     int size = size();
@@ -98,6 +102,21 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   }
 
     
+  public double getAverageSizeInKb() { 
+	  double result = 0;
+	    int size = size();
+	    if (size != 0) {
+	      long average = 0;
+	      for (UriReport currentReport : uriReportMap.values()) {
+	        average += currentReport.getAverageSizeInKb() * currentReport.size();
+	      }
+	      result =  average / (double)size;
+	    }
+	    return roundTwoDecimals(result);
+  }
+  
+
+  
   public long get90Line() {
     long result = 0;
     int size = size();
@@ -158,6 +177,17 @@ public class PerformanceReport extends AbstractReport implements Serializable,
       max = Math.max(currentReport.getMax(), max);
     }
     return max;
+  }
+  
+  public double getTotalTrafficInKb() { 
+	  double result = 0;
+	    int size = size();
+	    if (size != 0) {
+	      for (UriReport currentReport : uriReportMap.values()) {
+	    	  result += currentReport.getTotalTrafficInKb();
+	      }
+	    }
+	    return roundTwoDecimals(result);
   }
 
   public long getMin() {
@@ -269,5 +299,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     return b;
   }
 
-
+  private double roundTwoDecimals(double d) {
+      DecimalFormat twoDForm = new DecimalFormat("#.##");
+	  return Double.valueOf(twoDForm.format(d));
+	}
 }

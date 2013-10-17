@@ -720,6 +720,10 @@ public final class PerformanceProjectAction implements Action {
             Messages.ProjectAction_PercentageOfErrors(), label);
         dataSet.add(Math.round(report.countErrors()),
             Messages.ProjectAction_Errors(), label);
+        dataSet.add(report.getTotalTrafficInKb(),
+        		Messages.ProjectAction_TotalTrafficKB(),label); 
+        dataSet.add(report.getAverageSizeInKb(),
+        		Messages.ProjectAction_AverageKB(),label); 
       }
       nbBuildsToAnalyze--;
     }

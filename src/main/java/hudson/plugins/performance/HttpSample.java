@@ -5,119 +5,131 @@ import java.io.Serializable;
 
 /**
  * Information about a particular HTTP request and how that went.
- *
+ * 
  * This object belongs under {@link UriReport}.
  */
 public class HttpSample implements Serializable, Comparable<HttpSample> {
 
-  private long duration;
+	private long duration;
 
-  private boolean successful;
-  
-  private boolean errorObtained;
+	private boolean successful;
 
-  private Date date;
+	private boolean errorObtained;
 
-  private String uri;
-  
-  private String httpCode = "";
+	private Date date;
 
-  // Summarizer fields
-  private long summarizerMin;
+	private String uri;
 
-  private long summarizerMax;
+	private String httpCode = "";
 
-  private float summarizerErrors;
+	private double sizeInKb;
 
-  private long summarizerSamples;
-    
+	// Summarizer fields
+	private long summarizerMin;
 
-  public long getDuration() {
-    return duration;
-  }
+	private long summarizerMax;
 
-  public Date getDate() {
-    return date;
-  }
+	private float summarizerErrors;
 
-  public String getUri() {
-    return uri;
-  }
-  
-  public String getHttpCode() {
-      return httpCode;
-  }
+	private long summarizerSamples;
 
-  public long getSummarizerSamples() {
-    return summarizerSamples;
-  }
+	public long getDuration() {
+		return duration;
+	}
 
-   public long getSummarizerMin() {
-    return summarizerMin;
-  }
+	public Date getDate() {
+		return date;
+	}
 
-   public long getSummarizerMax() {
-    return summarizerMax;
-  }
+	public String getUri() {
+		return uri;
+	}
 
-   public float getSummarizerErrors() {
-    return summarizerErrors;
-  }
+	public String getHttpCode() {
+		return httpCode;
+	}
 
-  public boolean isFailed() {
-    return !isSuccessful();
-  }
+	public long getSummarizerSamples() {
+		return summarizerSamples;
+	}
 
-  public boolean isSuccessful() {
-    return successful;
-  }
+	public long getSummarizerMin() {
+		return summarizerMin;
+	}
 
-  public void setDuration(long duration) {
-    this.duration = duration;
-  }
+	public long getSummarizerMax() {
+		return summarizerMax;
+	}
 
-  public void setSuccessful(boolean successful) {
-    this.successful = successful;
-  }
-  
-  public void setErrorObtained(boolean errorObtained){
-	  this.errorObtained = errorObtained;
-  }
-  
-  public boolean hasError(){
-	  return errorObtained;
-  }
-  
+	public float getSummarizerErrors() {
+		return summarizerErrors;
+	}
 
-  public void setDate(Date time) {
-    this.date = time;
-  }
+	public boolean isFailed() {
+		return !isSuccessful();
+	}
 
-  public void setUri(String uri) {
-    this.uri = uri;
-  }
-  
-  public void setHttpCode(String httpCode) {
-    this.httpCode = httpCode;
-  }
+	public boolean isSuccessful() {
+		return successful;
+	}
 
-  public void setSummarizerSamples(long summarizerSamples) {
-    this.summarizerSamples = summarizerSamples;
-  }
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
 
-   public void setSummarizerMin(long summarizerMin) {
-    this.summarizerMin = summarizerMin;
-  }
+	public void setSuccessful(boolean successful) {
+		this.successful = successful;
+	}
 
-   public void setSummarizerMax(long summarizerMax) {
-    this.summarizerMax = summarizerMax;
-  }
+	public void setErrorObtained(boolean errorObtained) {
+		this.errorObtained = errorObtained;
+	}
 
-   public void setSummarizerErrors(float summarizerErrors) {
-    this.summarizerErrors= summarizerErrors;
-  }
+	public boolean hasError() {
+		return errorObtained;
+	}
 
-  public int compareTo(HttpSample o) {
-    return (int) (getDuration() - o.getDuration());
-  }
+	public void setDate(Date time) {
+		this.date = time;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+
+	public void setHttpCode(String httpCode) {
+		this.httpCode = httpCode;
+	}
+
+	public void setSummarizerSamples(long summarizerSamples) {
+		this.summarizerSamples = summarizerSamples;
+	}
+
+	public void setSummarizerMin(long summarizerMin) {
+		this.summarizerMin = summarizerMin;
+	}
+
+	public void setSummarizerMax(long summarizerMax) {
+		this.summarizerMax = summarizerMax;
+	}
+
+	public void setSummarizerErrors(float summarizerErrors) {
+		this.summarizerErrors = summarizerErrors;
+	}
+
+	public int compareTo(HttpSample o) {
+		return (int) (getDuration() - o.getDuration());
+	}
+
+	public double getSizeInKb() {
+		return sizeInKb;
+	}
+
+	public void setSizeInKb(double d) {
+		this.sizeInKb = d;
+	}
+
+	public boolean isErrorObtained() {
+		return errorObtained;
+	}
 }
