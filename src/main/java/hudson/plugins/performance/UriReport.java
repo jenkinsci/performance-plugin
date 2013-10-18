@@ -87,6 +87,14 @@ public class UriReport extends AbstractReport implements  Serializable, ModelObj
     }
     return average / size();
   }
+  
+  public double getAverageSizeInKb(){ 
+	  double average = 0 ; 
+	  for (HttpSample currentSample : httpSampleList) {
+	      average += currentSample.getSizeInKb();
+	    }
+	    return roundTwoDecimals(average / size());
+  }
 
   public long get90Line() {
     long result = 0;
@@ -140,6 +148,14 @@ public class UriReport extends AbstractReport implements  Serializable, ModelObj
       max = Math.max(max, currentSample.getDuration());
     }
     return max;
+  }
+  
+  public double getTotalTrafficInKb(){ 
+	  double traffic = 0 ; 
+	  for (HttpSample currentSample : httpSampleList) {
+		  traffic += currentSample.getSizeInKb();
+	    }
+	    return roundTwoDecimals(traffic);
   }
 
   public long getMin() {
@@ -287,5 +303,9 @@ public class UriReport extends AbstractReport implements  Serializable, ModelObj
      
     }
 
+    private double roundTwoDecimals(double d) {
+        DecimalFormat twoDForm = new DecimalFormat("#.##");
+  	  return Double.valueOf(twoDForm.format(d));
+  	}
 
 }

@@ -14,4 +14,6 @@
   <td>${it.getLastBuildHttpCodeIfChanged()}</td>
   <td>${it.errorPercent()} %</td>
   <td class="${h.ifThenElse(it.getErrorPercentDiff()>0,'red','green')}">${it.getErrorPercentDiff()} %</td>
+  <td>${it.getAverageSizeInKb()}</td>
+  <td>${it.getTotalTrafficInKb()}</td>
 </j:jelly>
