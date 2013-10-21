@@ -62,7 +62,6 @@ public class JUnitParser extends JMeterParser {
                 SAXParser parser = factory.newSAXParser();
                 final PerformanceReport r = new PerformanceReport();
                 r.setReportFileName(f.getName());
-                logger.println("Performance: Parsing JUnit report file " + f.getName());
                 parser.parse(f, new DefaultHandler() {
                 private HttpSample currentSample;
                 private int status;
