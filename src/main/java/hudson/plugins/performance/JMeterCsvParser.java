@@ -23,19 +23,21 @@ import org.xml.sax.SAXException;
 
 public class JMeterCsvParser extends PerformanceReportParser {
 
-    private final boolean skipFirstLine;
-    private final String delimiter;
-    private int timestampIdx = -1;
-    private int elapsedIdx = -1;
-    private int responseCodeIdx = -1;
-    private int successIdx = -1;
-    private int urlIdx = -1;
+    public final boolean skipFirstLine;
+    public final String delimiter;
+    public int timestampIdx = -1;
+    public int elapsedIdx = -1;
+    public int responseCodeIdx = -1;
+    public int successIdx = -1;
+    public int urlIdx = -1;
+    public final String pattern;
 
     @DataBoundConstructor
     public JMeterCsvParser(String glob, String pattern, String delimiter, Boolean skipFirstLine) throws Exception {
         super(glob);
         this.skipFirstLine = skipFirstLine;
         this.delimiter = delimiter;
+        this.pattern = pattern;
         String[] fields = pattern.split(delimiter);
         for(int i = 0; i < fields.length; i++) {
             String field = fields[i];
@@ -103,6 +105,11 @@ public class JMeterCsvParser extends PerformanceReportParser {
     @Override
     public String getDefaultGlobPattern() {
         return "**/*.csv";
+    }
+    
+    //This may be unneccesary. I tried many things getting the pattern to show up correctly in the UI and this was one of them.
+    public String getDefaultPattern() {
+        return "timestamp,elapsed,responseCode,threadName,success,failureMessage,grpThreads,allThreads,URL,Latency,SampleCount,ErrorCount";
     }
 
     @Override
