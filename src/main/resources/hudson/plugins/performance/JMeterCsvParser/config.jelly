@@ -4,12 +4,12 @@
     <f:textbox/>
   </f:entry>
   <f:entry title="${%csv.pattern}" field="pattern" description="${%csv.pattern.description}">
-    <f:textbox value="${%csv.pattern.default}" />
+    <f:textbox default="${%csv.pattern.default}"/>
   </f:entry>
   <f:entry title="${%csv.pattern.delimiter}" field="delimiter">
-    <f:textbox value="${%csv.pattern.delimiter.default}" />
+    <f:textbox default="${%csv.pattern.delimiter.default}" />
   </f:entry>
   <f:entry title="${%csv.skipFirstLine}" field="skipFirstLine" description="${%csv.skipFirstLine.description}">
-    <f:checkbox checked="true" />
+    <f:checkbox default="true" />
   </f:entry>
 </j:jelly>
