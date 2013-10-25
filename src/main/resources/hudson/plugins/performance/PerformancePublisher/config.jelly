@@ -7,8 +7,7 @@
                    items="${instance.parsers}"
                    addCaption="${%Add a new report}"/>
   </f:entry>
-  <f:entry title="${%Performance threshold}"
-      description="${%Threshold.Description}">
+  <f:entry title="${%Performance threshold}" description="${%Threshold.Description}">
     <table width="250px">
       <thead>
         <tr>
@@ -34,9 +33,22 @@
           <td> % </td>
         </tr>
       </tbody>    
-    </table>  
+    </table>
   </f:entry>
   
+  	<f:advanced>
+  		<f:entry title="${%Average response time threshold}" field="errorUnstableResponseTimeThreshold">
+		  	<table>
+		      <tbody>
+		        <tr>
+		          <td>
+		            <f:textarea style="width:600px;height:100px;"/>
+		          </td>
+		         </tr>
+		      </tbody>    
+		    </table>    
+    	</f:entry>
+	</f:advanced> 
   
   <f:entry title="${%Performance display}">
     <table width="300px">
@@ -50,8 +62,11 @@
         </tr>
       </tbody>    
     </table>    
-  
   </f:entry>
+  
+  
+  
+   
   
   
 </j:jelly>

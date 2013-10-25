@@ -12,6 +12,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +55,11 @@ public class PerformancePublisher extends Recorder {
 
   private int errorUnstableThreshold = 0;
   
-  private boolean modePerformancePerTestCase = false;
+  private String errorUnstableResponseTimeThreshold = "";
+  
+ 
+
+private boolean modePerformancePerTestCase = false;
 
   /**
    * @deprecated as of 1.3. for compatibility
@@ -67,14 +74,20 @@ public class PerformancePublisher extends Recorder {
 @DataBoundConstructor
   public PerformancePublisher(int errorFailedThreshold,
       int errorUnstableThreshold,
+      String errorUnstableResponseTimeThreshold,
       boolean modePerformancePerTestCase,
       List<? extends PerformanceReportParser> parsers) {
+
     this.errorFailedThreshold = errorFailedThreshold;
     this.errorUnstableThreshold = errorUnstableThreshold;
+    this.errorUnstableResponseTimeThreshold = errorUnstableResponseTimeThreshold;
     if (parsers == null)
       parsers = Collections.emptyList();
     this.parsers = new ArrayList<PerformanceReportParser>(parsers);
     this.modePerformancePerTestCase = modePerformancePerTestCase;
+    
+    
+    
   }
 
   public static File getPerformanceReport(AbstractBuild<?, ?> build,
@@ -174,6 +187,20 @@ public class PerformancePublisher extends Recorder {
       BuildListener listener) throws InterruptedException, IOException {
     PrintStream logger = listener.getLogger();
 
+    HashMap<String, String> responseTimeThresholdMap = null;
+    
+    if (!"".equals(this.errorUnstableResponseTimeThreshold) && this.errorUnstableResponseTimeThreshold != null){
+    	responseTimeThresholdMap = new HashMap<String, String>();
+    	String[] lines = this.errorUnstableResponseTimeThreshold.split("\n");
+    	for (String line : lines) {
+    		String[] components = line.split(":");
+    		if (components.length == 2){
+        		logger.println("Setting threshold: " + components[0] +":"+ components[1]);
+    			responseTimeThresholdMap.put(components[0], components[1]);
+    		}
+    	}
+    }
+    
     if (errorUnstableThreshold >= 0 && errorUnstableThreshold <= 100) {
       logger.println("Performance: Percentage of errors greater or equal than "
           + errorUnstableThreshold + "% sets the build as "
@@ -234,6 +261,25 @@ public class PerformancePublisher extends Recorder {
             && errorPercent - errorUnstableThreshold > thresholdTolerance) {
           result = Result.UNSTABLE;
         }
+     
+        long average = r.getAverage();
+        logger.println(r.getReportFileName() + " has an average of: "+ Long.toString(average));
+        
+        try {
+	        if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(r.getReportFileName()) != null){
+	        	if (Long.parseLong(responseTimeThresholdMap.get(r.getReportFileName())) <= average){
+	                logger.println("UNSTABLE: " + r.getReportFileName() + " has exceeded the threshold of ["+Long.parseLong(responseTimeThresholdMap.get(r.getReportFileName()))+"] with the time of ["+Long.toString(average)+"]");
+	
+	                result = Result.UNSTABLE;
+	        	}
+	        }
+        } catch (NumberFormatException nfe){
+        	logger.println("ERROR: Threshold set to a non-number [" + responseTimeThresholdMap.get(r.getReportFileName()) + "]");
+        	result = Result.FAILURE;
+            build.setResult(Result.FAILURE);
+        	
+        }
+        
         if (result.isWorseThan(build.getResult())) {
           build.setResult(result);
         }
@@ -293,6 +339,14 @@ public class PerformancePublisher extends Recorder {
         100));
   }
 
+  public String getErrorUnstableResponseTimeThreshold(){
+	  return this.errorUnstableResponseTimeThreshold;
+  }
+  
+  public void setErrorUnstableResponseTimeThreshold(String errorUnstableResponseTimeThreshold){
+	  this.errorUnstableResponseTimeThreshold = errorUnstableResponseTimeThreshold;
+  }
+  
   public boolean isModePerformancePerTestCase() {
 		return modePerformancePerTestCase;
   }
@@ -300,7 +354,7 @@ public class PerformancePublisher extends Recorder {
   public void setModePerformancePerTestCase(boolean modePerformancePerTestCase) {
 	  this.modePerformancePerTestCase = modePerformancePerTestCase;
   }
-	  
+  
   public boolean getModePerformancePerTestCase(){
 	  return modePerformancePerTestCase;
   }
