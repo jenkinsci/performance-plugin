@@ -182,13 +182,6 @@ public PerformancePublisher(int errorFailedThreshold,
         parsers = Collections.emptyList();
     this.parsers = new ArrayList<PerformanceReportParser>(parsers);
     this.modePerformancePerTestCase = modePerformancePerTestCase;
-
-    File f = new File(parsers.get(0).glob);
-    String path = f.getParent();
-
-    xmlDir = path;
-    xmlfile = new File(xmlDir+"/dashBoard.xml");
-
 }
 
 //----------------------------------------------------------------------------//
@@ -294,6 +287,20 @@ public PerformancePublisher(int errorFailedThreshold,
     PrintStream logger = listener.getLogger();
     double thresholdTolerance = 0.00000001;
     Result result = Result.SUCCESS;
+
+    try
+    {
+      xmlDir = build.getRootDir().getAbsolutePath();
+
+      xmlfile = new File(xmlDir+"/dashBoard.xml");
+
+      logger.println("Trying to create the consolidated xml file at : "+xmlDir+"/dashBoard.xml");
+
+    }
+    catch(Exception e)
+    {
+      e.printStackTrace();
+    }
 
 
     //------------------ For absolute error/unstable threshold ------------------//
@@ -446,6 +453,7 @@ public PerformancePublisher(int errorFailedThreshold,
                 }
             }
 
+            logger.println("Adding to the dashBoard.xml file");
             for (int i = 0; i < curruriList.size(); i++)
             {
                 avg += "\t<"+curruriList.get(i).getStaplerUri()+">\n";
@@ -471,7 +479,7 @@ public PerformancePublisher(int errorFailedThreshold,
 
             avg += "</average>\n";
             med += "</median>\n";
-            perct += "</percentile>";
+            perct += "</percentile>\n";
 
             bw.write(unstable+"\n");
             bw.write(failed+"\n");
@@ -484,6 +492,7 @@ public PerformancePublisher(int errorFailedThreshold,
             bw.write(perct);
 
             bw.write("</results>");
+            logger.println("Closing the dashBoard.xml file");
 
             bw.close();
             fw.close();
@@ -629,6 +638,7 @@ public PerformancePublisher(int errorFailedThreshold,
                 String failedLabel = null, unStableLabel = null;
                 double relativeDiff=0, relativeDiffPercent=0;
 
+                logger.println("Adding to the dashBoard.xml file");
                 logger.print("\nComparison between build no. - "+prevBuild.number+" and "+build.number +" based upon ");
 
 
@@ -655,7 +665,6 @@ public PerformancePublisher(int errorFailedThreshold,
                     logger.println("PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURI90%\t\tCurrentBuildURI90%\tRelativeDiff\tRelativeDiffPercentage ");
                     logger.println("====================================================================================================================================");
                 }
-
 
                 for (int i = 0; i < prevuriList.size(); i++)
                 {
@@ -799,6 +808,7 @@ public PerformancePublisher(int errorFailedThreshold,
             bw.write(inside+"\n");
 
             bw.write("</results>");
+            logger.println("Closing the dashBoard.xml file");
 
             bw.close();
             fw.close();

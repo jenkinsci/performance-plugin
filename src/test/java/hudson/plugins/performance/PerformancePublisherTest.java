@@ -98,7 +98,7 @@ import static java.util.Arrays.asList;
                 new PerformancePublisher(0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, asList(new JMeterParser(
                         "**/*.jtl"))));
 
-        FreeStyleBuild b = assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+        FreeStyleBuild b = assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
 
         try
