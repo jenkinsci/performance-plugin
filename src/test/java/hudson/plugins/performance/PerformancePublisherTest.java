@@ -19,8 +19,7 @@ import static java.util.Arrays.asList;
 /**
  * @author Kohsuke Kawaguchi
  */
-  public class PerformancePublisherTest extends HudsonTestCase
-{
+  public class PerformancePublisherTest extends HudsonTestCase{
     public void testConfigRoundtrip() throws Exception {
         PerformancePublisher before = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,false,
                 asList(new JMeterParser("**/*.jtl")));
@@ -28,8 +27,7 @@ import static java.util.Arrays.asList;
         FreeStyleProject p = createFreeStyleProject();
         p.getPublishersList().add(before);
 
-        try
-        {
+        try{
             submit(createWebClient().getPage(p, "configure")
                     .getFormByName("config"));
             PerformancePublisher after = p.getPublishersList().get(
@@ -42,14 +40,13 @@ import static java.util.Arrays.asList;
             assertEquals(before.getParsers().get(0).getClass(), after.getParsers()
                     .get(0).getClass());
         }
-        catch(Exception e)
-        {
+        catch(Exception e){
             e.printStackTrace();
         }
     }
 
     public void testBuild() throws Exception {
-		FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = createFreeStyleProject();
 		p.getBuildersList().add(new TestBuilder() {
 			@Override
 			public boolean perform(AbstractBuild<?, ?> build,
@@ -60,24 +57,21 @@ import static java.util.Arrays.asList;
 				return true;
 			}
 		});
-      p.getPublishersList().add(
-              new PerformancePublisher(0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, asList(new JMeterParser(
-                      "**/*.jtl"))));
+        p.getPublishersList().add(
+                new PerformancePublisher(0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, asList(new JMeterParser(
+                        "**/*.jtl"))));
 
 		FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
 		PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
 
-		try
-        {
-            //assertNotNull(a);
-
-            // poke a few random pages to verify rendering
-            WebClient wc = createWebClient();
-		    wc.getPage(b, "performance");
-		    wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
+        try{
+          //assertNotNull(a);
+          // poke a few random pages to verify rendering
+          WebClient wc = createWebClient();
+		  wc.getPage(b, "performance");
+		  wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
         }
-        catch(Exception e)
-        {
+        catch(Exception e){
             e.printStackTrace();
         }
 	}
@@ -101,17 +95,15 @@ import static java.util.Arrays.asList;
         FreeStyleBuild b = assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
 
-        try
-        {
-            //assertNotNull(a);
+        try{
+          //assertNotNull(a);
 
-            // poke a few random pages to verify rendering
-            WebClient wc = createWebClient();
-            wc.getPage(b, "performance");
-            wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
+          // poke a few random pages to verify rendering
+          WebClient wc = createWebClient();
+          wc.getPage(b, "performance");
+          wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
         }
-        catch(Exception e)
-        {
+        catch(Exception e){
             e.printStackTrace();
         }
     }
@@ -135,8 +127,7 @@ import static java.util.Arrays.asList;
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
 
-        try
-        {
+        try{
             //assertNotNull(a);
 
             // poke a few random pages to verify rendering
@@ -144,10 +135,8 @@ import static java.util.Arrays.asList;
             wc.getPage(b, "performance");
             wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
         }
-        catch(Exception e)
-        {
+        catch(Exception e){
             e.printStackTrace();
         }
-
     }
 }
