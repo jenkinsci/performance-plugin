@@ -7,66 +7,129 @@
                    items="${instance.parsers}"
                    addCaption="${%Add a new report}"/>
   </f:entry>
-  <f:entry title="${%Performance threshold}" description="${%Threshold.Description}">
-    <table width="250px">
-      <thead>
-        <tr>
-          <td/>
-          <td colspan="2">
-            <img src="${rootURL}/images/16x16/yellow.gif" alt="100%" /> ${%Unstable}
-          </td>
-          <td colspan="2">
-            <img src="${rootURL}/images/16x16/red.gif" alt="100%" /> ${%Failed}
-          </td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style="vertical-align:middle">${%Thresholds}:</td>
-          <td>
-            <f:textbox field="errorUnstableThreshold" />
-          </td>
-          <td> % </td>
-          <td>
-            <f:textbox field="errorFailedThreshold" />
-          </td>
-          <td> % </td>
-        </tr>
-      </tbody>    
-    </table>
+  <f:entry title="Select mode:   ">
+    <f:booleanRadio name="modeOfThreshold" field="modeOfThreshold" true="Relative Threshold" false="Error Threshold" />
   </f:entry>
-  
-  	<f:advanced>
-  		<f:entry title="${%Average response time threshold}" field="errorUnstableResponseTimeThreshold">
-		  	<table>
-		      <tbody>
-		        <tr>
-		          <td>
-		            <f:textarea style="width:600px;height:100px;"/>
-		          </td>
-		         </tr>
-		      </tbody>    
-		    </table>    
-    	</f:entry>
-	</f:advanced> 
-  
+
+  <f:block>
+    <f:entry title="Use Error thresholds on single build:   ">
+      <table width="500px">
+        <tr>
+          <td>
+            <label>${%Unstable}</label>
+          </td>
+          <td>
+            <f:textbox field="errorUnstableThreshold"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label>${%Failed}</label>
+          </td>
+          <td>
+            <f:textbox field="errorFailedThreshold"/>
+          </td>
+        </tr>
+      </table>
+    </f:entry>
+
+    <f:advanced>
+      <f:entry title="${%Average response time threshold}" field="errorUnstableResponseTimeThreshold">
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <f:textarea style="width:600px;height:100px;"/>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </f:entry>
+    </f:advanced>
+
+    <f:entry title="Use Relative thresholds for build comparison:   ">
+      <table width="500px" cellspacing="5">
+        <tr>
+          <td width="25%">
+            <label> </label>
+          </td>
+          <td width="20%" align="center">
+            <label>(-)</label>
+          </td>
+          <td width="20%" align="center">
+            <label>(+)</label>
+          </td>
+        </tr>
+        <tr>
+          <td width="25%">
+            <label>Unstable % Range</label>
+          </td>
+          <td>
+            <f:textbox field="relativeUnstableThresholdNegative"/>
+          </td>
+          <td>
+            <f:textbox field="relativeUnstableThresholdPositive"/>
+          </td>
+        </tr>
+        <tr>
+          <td width="25%">
+            <label>Failed % Range</label>
+          </td>
+          <td>
+            <f:textbox field="relativeFailedThresholdNegative"/>
+          </td>
+          <td>
+            <f:textbox field="relativeFailedThresholdPositive"/>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <table>
+              <tr>
+                <td width="80%">
+                  <f:booleanRadio name="compareBuildPrevious" field="compareBuildPrevious" true="Compare with previous Build" false="Compare with Build number" />
+                </td>
+                <td width="20%">
+                  <f:textbox field="nthBuildNumber"/>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td width="25%">
+            <label>${%Compare based on}</label>
+          </td>
+          <td colspan="2">
+            <table>
+              <tr>
+                <f:entry field="comparisonType" name="comparisonType">
+                  <f:select name="comparisonType">
+                    <option value="ART">Average Response Time</option>
+                    <option value="MRT">Median Response Time</option>
+                    <option value="PRT">90% ResponseTime</option>
+                  </f:select>
+                </f:entry>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </f:entry>
+  </f:block>
+
   <f:entry title="${%Performance display}">
     <table width="300px">
       <tbody>
         <tr>
           <td>
-            <f:checkbox name="modePerformancePerTestCase" title="Performance Per Test Case Mode" field="modePerformancePerTestCase">
-  			Display Performance Report Per Test Case
-  			</f:checkbox>
+            <f:checkbox name="modePerformancePerTestCase" title="Performance Per Test Case Mode" field="modePerformancePerTestCase" checked="true">
+    		  Display Performance Report Per Test Case
+    		</f:checkbox>
           </td>
         </tr>
-      </tbody>    
-    </table>    
+      </tbody>
+    </table>
   </f:entry>
-  
-  
-  
-   
-  
-  
+
 </j:jelly>
