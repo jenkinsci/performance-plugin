@@ -27,6 +27,8 @@ import org.kohsuke.stapler.StaplerResponse;
 public class UriReport extends AbstractReport implements  Serializable, ModelObject,
     Comparable<UriReport> {
 
+  private static final long serialVersionUID = 6377220939528230222L;
+
   public final static String END_PERFORMANCE_PARAMETER = ".endperformanceparameter";
 
   /**

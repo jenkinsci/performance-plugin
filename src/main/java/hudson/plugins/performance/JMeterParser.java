@@ -10,13 +10,22 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -28,6 +37,9 @@ import javax.xml.parsers.SAXParserFactory;
  * @author Kohsuke Kawaguchi
  */
 public class JMeterParser extends PerformanceReportParser {
+
+  private static final Logger LOGGER = Logger.getLogger(JMeterParser.class.getName());
+  private static final Cache<String, PerformanceReport> cache = CacheBuilder.newBuilder().maximumSize(100).build();
 
   @Extension
   public static class DescriptorImpl extends PerformanceReportParserDescriptor {
@@ -59,10 +71,31 @@ public class JMeterParser extends PerformanceReportParser {
 
     for (File f : reports) {
       try {
+                String fser = f.getPath() + ".serialized";
+                  ObjectInputStream in = null;
+                synchronized (JMeterParser.class) {
+                  try {
+                    PerformanceReport r = cache.getIfPresent(fser);
+                    if (r == null) {
+                      in = new ObjectInputStream(new FileInputStream(fser));
+                      r = (PerformanceReport) in.readObject();
+                    }
+                    result.add(r);
+                    continue;
+                  } catch (FileNotFoundException fne) {
+                    // That's OK
+                  } catch (Exception unknown) {
+                    LOGGER.warning("Deserialization failed. " + unknown);
+                  } finally {
+                    if (in != null) {
+                      in.close();
+                    }
+                  }
+                }
                 SAXParser parser = factory.newSAXParser();
                 final PerformanceReport r = new PerformanceReport();
                 r.setReportFileName(f.getName());
-                logger.println("Performance: Parsing JMeter report file " + f.getName());
+                logger.println("Performance: Parsing JMeter report file " + f.getPath());
                 parser.parse(f, new DefaultHandler() {
                 HttpSample currentSample;
                 int counter = 0;
@@ -123,6 +156,21 @@ public class JMeterParser extends PerformanceReportParser {
                 }
                 });
                 result.add(r);
+                ObjectOutputStream out = null;
+                synchronized(JMeterParser.class) {
+                  try {
+                    cache.put(fser, r);
+                    out = new ObjectOutputStream(new FileOutputStream(fser));
+                    out.writeObject(r);
+                  } catch (Exception unknown) {
+                    LOGGER.warning("Serialization failed. " + unknown);
+                  } finally {
+                    if (out != null) {
+                      out.close();
+                    }
+                  }
+                }
+
       } catch (ParserConfigurationException e) {
         throw new IOException2("Failed to create parser ", e);
       } catch (SAXException e) {

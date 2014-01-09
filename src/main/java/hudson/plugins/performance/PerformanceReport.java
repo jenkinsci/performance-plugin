@@ -25,6 +25,8 @@ import java.text.DecimalFormat;
 public class PerformanceReport extends AbstractReport implements Serializable,
     Comparable<PerformanceReport>{
 
+  private static final long serialVersionUID = -1422875677867003355L;
+
   private transient PerformanceBuildAction buildAction;
 
   private HttpSample httpSample;
