@@ -27,8 +27,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
   private transient PerformanceBuildAction buildAction;
 
-  private HttpSample httpSample;
-
   private String reportFileName = null;
  
 
@@ -165,10 +163,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     return getUriReportMap().get(token);
   }
 
-  public HttpSample getHttpSample() {
-    return httpSample;
-  }
-
   public long getMax() {
     long max = Long.MIN_VALUE;
     for (UriReport currentReport : uriReportMap.values()) {
@@ -212,10 +206,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
   void setBuildAction(PerformanceBuildAction buildAction) {
     this.buildAction = buildAction;
-  }
-
-  public void setHttpSample(HttpSample httpSample) {
-    this.httpSample = httpSample;
   }
 
   public void setReportFileName(String reportFileName) {
