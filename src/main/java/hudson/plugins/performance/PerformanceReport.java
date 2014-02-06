@@ -6,8 +6,6 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -123,7 +121,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     long result = 0;
     int size = size();
     if (size != 0) {
-      long average = 0;
       List<HttpSample> allSamples = new ArrayList<HttpSample>();
       for (UriReport currentReport : uriReportMap.values()) {
         allSamples.addAll(currentReport.getHttpSampleList());
@@ -138,7 +135,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     long result = 0;
     int size = size();
     if (size != 0) {
-      long average = 0;
       List<HttpSample> allSamples = new ArrayList<HttpSample>();
       for (UriReport currentReport : uriReportMap.values()) {
         allSamples.addAll(currentReport.getHttpSampleList());
