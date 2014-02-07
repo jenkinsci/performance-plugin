@@ -13,11 +13,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class WrkSummarizerParserTest {
-  
+
   private WrkSummarizerParser parser;
   private PrintStream logger;
   private TaskListener listener;
-  
+
   @Before
   public void before() {
     parser = new WrkSummarizerParser(null);
@@ -29,9 +29,10 @@ public class WrkSummarizerParserTest {
   public void testParseResultsWithMilliSecondResponseTimes() {
     List<File> files = new ArrayList<File>(1);
     files.add(new File(getClass().getResource("/WrkResultsQuick.wrk").getFile()));
-    
+
     try {
-      Collection<PerformanceReport> reports = parser.parse(null, files, listener);
+      Collection<PerformanceReport> reports = parser.parse(null, files,
+          listener);
       assertFalse(reports.isEmpty());
       for (PerformanceReport report : reports) {
         // should not have average time >= 1s
@@ -41,12 +42,12 @@ public class WrkSummarizerParserTest {
       fail(e.getMessage());
     }
   }
-  
+
   @Test
   public void testParseResultsWithSecondResponseTimes() {
     List<File> files = new ArrayList<File>(1);
     files.add(new File(getClass().getResource("/WrkResultsLong.wrk").getFile()));
-    
+
     try {
       Collection<PerformanceReport> reports = parser.parse(null, files, listener);
       assertFalse(reports.isEmpty());
@@ -58,12 +59,12 @@ public class WrkSummarizerParserTest {
       fail(e.getMessage());
     }
   }
-  
+
   @Test
   public void testParseWithLatencyDistributionBuckets() {
     List<File> files = new ArrayList<File>(1);
-    files.add(new File(getClass().getResource("/WrkResultsWithLatencyFlag.wrk").getFile()));
-    
+    files.add(new File(getClass().getResource("/WrkResultsWithLatencyFlag.wrk") .getFile()));
+
     try {
       Collection<PerformanceReport> reports = parser.parse(null, files, listener);
       assertFalse(reports.isEmpty());
@@ -71,7 +72,7 @@ public class WrkSummarizerParserTest {
       fail(e.getMessage());
     }
   }
-  
+
   @Test
   public void testParseTimeMeasurements() {
     // milliseconds
@@ -85,8 +86,8 @@ public class WrkSummarizerParserTest {
     assertEquals(5, parser.getTime("5s", logger, WrkSummarizerParser.TimeUnit.SECOND));
     assertEquals(5 * 60, parser.getTime("5m", logger, WrkSummarizerParser.TimeUnit.SECOND));
     assertEquals(60 * 60, parser.getTime("1h", logger, WrkSummarizerParser.TimeUnit.SECOND));
-    
-    // minute 
+
+    // minute
     assertEquals(0, parser.getTime("5ms", logger, WrkSummarizerParser.TimeUnit.MINUTE));
     assertEquals((int) Math.floor(5 / 60.0), parser.getTime("5s", logger, WrkSummarizerParser.TimeUnit.MINUTE));
     assertEquals((int) Math.floor((5 * 60) / 60.0), parser.getTime("5m", logger, WrkSummarizerParser.TimeUnit.MINUTE));
