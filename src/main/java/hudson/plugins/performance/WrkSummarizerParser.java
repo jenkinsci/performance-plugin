@@ -1,11 +1,13 @@
 package hudson.plugins.performance;
 
+import hudson.Extension;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 
 import java.io.*;
 import java.util.*;
 
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.SAXException;
 
 /**
@@ -44,8 +46,18 @@ public class WrkSummarizerParser extends PerformanceReportParser {
 	  TimeUnit(int factor) { this.factor = factor; }
 	  public int getFactor() { return this.factor; }
 	}
+	
+  @Extension
+  public static class DescriptorImpl extends PerformanceReportParserDescriptor {
+    @Override
+    public String getDisplayName() {
+      return "wrk";
+    }
+  }
+  
 
-	protected WrkSummarizerParser(String glob) {
+  @DataBoundConstructor
+	public WrkSummarizerParser(String glob) {
 		super(glob);
 	}
 

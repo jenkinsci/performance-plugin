@@ -10,13 +10,21 @@
   Default Values are:
 </p>
 <ul>
-    <li>JMeter reports: **/*.jtl
-    <li>JMeter Summariser reports: **/*.log *
-    <li>JUnit report:   **/TEST-*.xml
+    <li>JMeter reports: **/*.jtl</li>
+    <li>JMeter Summariser reports: **/*.log *</li>
+    <li>JUnit report:   **/TEST-*.xml</li>
+    <li>wrk report:  **/*.wrk  **</li>
 </ul>
+
 <ul>
 * By default jmeter writes summariser statistics to jmeter.log. To enable logging
 summariser statistics to separate log file add the property to jmeter.properties file to #Logging Configuration block : "log_file.jmeter.reporters.Summariser=filename.log"
+</ul>
+
+<ul>
+** By default wrk does not write output files. You'll
+   need to redirect the STDOUT output for a file as in
+   <pre>wrk [options] [url] > results.wrk</pre>
 </ul>
 
 </div>
