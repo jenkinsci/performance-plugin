@@ -1,0 +1,13 @@
+Running 1s test @ http://www.google.com
+  1 threads and 1 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    42.28ms    3.67ms  46.51ms   66.67%
+    Req/Sec    16.33      7.51    25.00     66.67%
+  Latency Distribution
+     50%   40.25ms
+     75%   46.51ms
+     90%   46.51ms
+     99%   46.51ms
+  18 requests in 1.01s, 852.59KB read
+Requests/sec:     17.81
+Transfer/sec:    843.38KB
