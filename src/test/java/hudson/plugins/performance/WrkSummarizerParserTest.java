@@ -72,6 +72,25 @@ public class WrkSummarizerParserTest {
       fail(e.getMessage());
     }
   }
+  
+  @Test
+  public void testParseWithErrors() {
+    List<File> files = new ArrayList<File>(1);
+    files.add(new File(getClass().getResource("/WrkResultsWithErrors.wrk") .getFile()));
+
+    try {
+      Collection<PerformanceReport> reports = parser.parse(null, files, listener);
+      assertFalse(reports.isEmpty());
+      
+      // NOTE: uncomment once this is intentionally supported. Currently some
+      //       refactoring is needed with summarized reports.
+      // for(PerformanceReport report: reports) {
+      //   assertTrue(report.countErrors() > 0);
+      // }
+    } catch (Exception e) {
+      fail(e.getMessage());
+    }
+  }
 
   @Test
   public void testParseTimeMeasurements() {
