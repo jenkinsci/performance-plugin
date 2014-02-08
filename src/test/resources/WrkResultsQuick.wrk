@@ -1,0 +1,8 @@
+Running 5s test @ http://www.google.com
+  8 threads and 16 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    78.27ms   31.11ms 235.54ms   90.05%
+    Req/Sec    25.44      6.03    38.00     69.63%
+  1045 requests in 5.08s, 46.03MB read
+Requests/sec:    205.68
+Transfer/sec:      9.06MB

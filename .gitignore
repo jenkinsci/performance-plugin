@@ -6,3 +6,4 @@ target
 .classpath
 .project
 .settings/
+src/test/resources/*.jtl.serialized

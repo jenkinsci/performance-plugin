@@ -1,0 +1,9 @@
+Running 1s test @ http://httpstat.us/500
+  1 threads and 1 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    78.43ms   55.33us  78.48ms   66.67%
+    Req/Sec    11.00      0.00    11.00    100.00%
+  12 requests in 1.03s, 5.66KB read
+  Non-2xx or 3xx responses: 12
+Requests/sec:     11.63
+Transfer/sec:      5.48KB
