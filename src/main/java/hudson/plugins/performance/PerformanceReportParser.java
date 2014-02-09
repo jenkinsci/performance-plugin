@@ -11,11 +11,11 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.*;
 import java.util.Collection;
 
-
 /**
- * Parses performance result files into {@link PerformanceReport}s.
- * This object is persisted with {@link PerformancePublisher} into the project configuration.
- *
+ * Parses performance result files into {@link PerformanceReport}s. This object
+ * is persisted with {@link PerformancePublisher} into the project
+ * configuration.
+ * 
  * <p>
  * Subtypes can define additional parser-specific parameters as instance fields.
  * 
@@ -27,7 +27,6 @@ public abstract class PerformanceReportParser implements
    * GLOB patterns that specify the performance report.
    */
   public final String glob;
-  
 
   @DataBoundConstructor
   protected PerformanceReportParser(String glob) {
@@ -36,8 +35,8 @@ public abstract class PerformanceReportParser implements
   }
 
   public PerformanceReportParserDescriptor getDescriptor() {
-    return (PerformanceReportParserDescriptor) Hudson.getInstance().getDescriptorOrDie(
-        getClass());
+    return (PerformanceReportParserDescriptor) Hudson.getInstance()
+        .getDescriptorOrDie(getClass());
   }
 
   /**

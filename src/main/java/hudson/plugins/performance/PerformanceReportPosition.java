@@ -10,11 +10,11 @@ public class PerformanceReportPosition {
   }
 
   public String getSummarizerReportType() {
-        return summarizerReportType;
+    return summarizerReportType;
   }
 
   public String getSummarizerTrendUri() {
-        return summarizerTrendUri;
+    return summarizerTrendUri;
   }
 
   public void setPerformanceReportPosition(String performanceReportPosition) {

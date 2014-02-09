@@ -24,7 +24,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 /**
  * Parser for JUnit.
- *
+ * 
  * @author Manuel Carrasco
  */
 public class JUnitParser extends JMeterParser {
@@ -59,27 +59,27 @@ public class JUnitParser extends JMeterParser {
 
     for (File f : reports) {
       try {
-                SAXParser parser = factory.newSAXParser();
-                final PerformanceReport r = new PerformanceReport();
-                r.setReportFileName(f.getName());
-                parser.parse(f, new DefaultHandler() {
-                private HttpSample currentSample;
-                private int status;
+        SAXParser parser = factory.newSAXParser();
+        final PerformanceReport r = new PerformanceReport();
+        r.setReportFileName(f.getName());
+        parser.parse(f, new DefaultHandler() {
+          private HttpSample currentSample;
+          private int status;
 
-                @Override
-                public void endElement(String uri, String localName, String qName)
-                    throws SAXException {
-                    if (("testsuite".equalsIgnoreCase(qName) || "testcase".equalsIgnoreCase(qName))
-                        && status != 0) {
-                    r.addSample(currentSample);
-                    status = 0;
-                    }
-                }
+          @Override
+          public void endElement(String uri, String localName, String qName)
+              throws SAXException {
+            if (("testsuite".equalsIgnoreCase(qName) || "testcase"
+                .equalsIgnoreCase(qName)) && status != 0) {
+              r.addSample(currentSample);
+              status = 0;
+            }
+          }
 
           /**
-           * JUnit XML format is: tag "testcase" with attributes: "name" and "time". 
-           * If there is one error, there is an other tag, "failure" inside testcase tag.
-           * SOAPUI uses JUnit format
+           * JUnit XML format is: tag "testcase" with attributes: "name" and
+           * "time". If there is one error, there is an other tag, "failure"
+           * inside testcase tag. SOAPUI uses JUnit format
            */
           @Override
           public void startElement(String uri, String localName, String qName,
@@ -97,16 +97,16 @@ public class JUnitParser extends JMeterParser {
               currentSample.setUri(attributes.getValue("name"));
               currentSample.setErrorObtained(false);
             } else if ("failure".equalsIgnoreCase(qName) && status != 0) {
-              currentSample.setErrorObtained(false);	
+              currentSample.setErrorObtained(false);
               currentSample.setSuccessful(false);
               r.addSample(currentSample);
               status = 0;
-            }else if ("failure".equalsIgnoreCase(qName) && status != 0) {
-                currentSample.setErrorObtained(true);
-                r.addSample(currentSample);
-                status = 0;
-              }
-            
+            } else if ("failure".equalsIgnoreCase(qName) && status != 0) {
+              currentSample.setErrorObtained(true);
+              r.addSample(currentSample);
+              status = 0;
+            }
+
           }
         });
         result.add(r);
@@ -120,12 +120,17 @@ public class JUnitParser extends JMeterParser {
 
     return result;
   }
-  
+
   /**
    * Strips any commas from <code>time</code>, then parses it into a long.
    */
   long parseDuration(final String time) {
-    double duration = Double.parseDouble(time.replaceAll(",", "")); //don't want commas or else will break on parse
+    double duration = Double.parseDouble(time.replaceAll(",", "")); // don't
+                                                                    // want
+                                                                    // commas or
+                                                                    // else will
+                                                                    // break on
+                                                                    // parse
     return (long) (duration * 1000);
   }
 }
