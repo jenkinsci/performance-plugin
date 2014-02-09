@@ -49,8 +49,6 @@ public class PerformancePublisher extends Recorder {
        */
     public ListBoxModel doFillComparisonTypeItems() {
       ListBoxModel items = new ListBoxModel();
-      HashMap<String, String> listOpt= new HashMap<String, String>();
-
 
       //getting the user selected value
       String temp = getOptionType();
@@ -159,7 +157,7 @@ public class PerformancePublisher extends Recorder {
 
     this.nthBuildNumber = nthBuildNumber;
     this.configType = comparisonType;
-    this.optionType = comparisonType;
+    PerformancePublisher.optionType = comparisonType;
     this.modeOfThreshold = modeOfThreshold;
     this.compareBuildPrevious = compareBuildPrevious;
 
@@ -532,9 +530,7 @@ public class PerformancePublisher extends Recorder {
 
           for (PerformanceReport r : parsedReports) {
             r.setBuildAction(a);
-            double errorPercent = r.errorPercent();
-
-            //uri list is the list of labels in the current jmeter results file
+            // URI list is the list of labels in the current JMeter results file
             curruriList = r.getUriListOrdered();
           }
         }
