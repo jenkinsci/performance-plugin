@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-import java.sql.Time;
 
 /**
  * Parses JMeter Summarized results
@@ -58,43 +57,51 @@ public class JmeterSummarizerParser extends PerformanceReportParser {
     PrintStream logger = listener.getLogger();
 
     for (File f : reports) {
+      Scanner s = null;
       try {
         final PerformanceReport r = new PerformanceReport();
         r.setReportFileName(f.getName());
         r.setReportFileName(f.getName());
-        logger.println("Performance: Parsing JMeterSummarizer report file " + f.getName());
-        Scanner s = new Scanner(f);
+
+        s = new Scanner(f);
         String key;
         String line;
         SimpleDateFormat dateFormat = new SimpleDateFormat(logDateFormat);
+
+        logger.println("Performance: Parsing JMeterSummarizer report file " + f.getName());
         while (s.hasNextLine()) {
           line = s.nextLine().replaceAll("=", " ");
           if (line.contains("+")) {
-            Scanner scanner = new Scanner(line);
-            Pattern delimiter = scanner.delimiter();
-            scanner.useDelimiter("INFO"); // as jmeter logs INFO mode
-            HttpSample sample = new HttpSample();
-            String dateString = scanner.next();
-            sample.setDate(dateFormat.parse(dateString));
-            scanner.findInLine("jmeter.reporters.Summariser:");
-            scanner.useDelimiter("\\+");
-            key = scanner.next().trim();
-            scanner.useDelimiter(delimiter);
-            scanner.next();
-            sample.setSummarizerSamples(scanner.nextLong()); // set SamplesCount
-            scanner.findInLine("Avg:"); // set response time
-            sample.setDuration(scanner.nextLong());
-            sample.setSuccessful(true);
-            scanner.findInLine("Min:"); // set MIN
-            sample.setSummarizerMin(scanner.nextLong());
-            scanner.findInLine("Max:"); // set MAX
-            sample.setSummarizerMax(scanner.nextLong());
-            scanner.findInLine("Err:"); // set errors count
-            sample.setSummarizerErrors(scanner.nextInt());
-            // sample.setSummarizerErrors(
-            // Float.valueOf(scanner.next().replaceAll("[()%]","")));
-            sample.setUri(key);
-            r.addSample(sample);
+            Scanner scanner = null;
+            try {
+                    scanner = new Scanner(line);
+                    Pattern delimiter = scanner.delimiter();
+                    scanner.useDelimiter("INFO"); // as jmeter logs INFO mode
+                    HttpSample sample = new HttpSample();
+                    String dateString = scanner.next();
+                    sample.setDate(dateFormat.parse(dateString));
+                    scanner.findInLine("jmeter.reporters.Summariser:");
+                    scanner.useDelimiter("\\+");
+                    key = scanner.next().trim();
+                    scanner.useDelimiter(delimiter);
+                    scanner.next();
+                    sample.setSummarizerSamples(scanner.nextLong()); // set SamplesCount
+                    scanner.findInLine("Avg:"); // set response time
+                    sample.setDuration(scanner.nextLong());
+                    sample.setSuccessful(true);
+                    scanner.findInLine("Min:"); // set MIN
+                    sample.setSummarizerMin(scanner.nextLong());
+                    scanner.findInLine("Max:"); // set MAX
+                    sample.setSummarizerMax(scanner.nextLong());
+                    scanner.findInLine("Err:"); // set errors count
+                    sample.setSummarizerErrors(scanner.nextInt());
+                    // sample.setSummarizerErrors(
+                    // Float.valueOf(scanner.next().replaceAll("[()%]","")));
+                    sample.setUri(key);
+                    r.addSample(sample);
+            } finally {
+              if (scanner != null) scanner.close();
+            }
           }
         }
         result.add(r);
@@ -104,8 +111,8 @@ public class JmeterSummarizerParser extends PerformanceReportParser {
         logger.println(e.getMessage());
       } catch (ParseException e) {
         logger.println(e.getMessage());
-      } catch (IOException e) {
-        logger.println(e.getMessage());
+      } finally {
+        if (s != null) s.close();
       }
     }
     return result;
