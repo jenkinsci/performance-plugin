@@ -42,6 +42,7 @@ public final class PerformanceProjectAction implements Action {
 
   private static final String PLUGIN_NAME = "performance";
 
+  @SuppressWarnings("unused")
   private static final long serialVersionUID = 1L;
 
   /** Logger. */
@@ -498,7 +499,6 @@ public final class PerformanceProjectAction implements Action {
    */
 
   private Range getFirstAndLastBuild(StaplerRequest request, List<?> builds) {
-    Range range = new Range();
     GraphConfigurationDetail graphConf = (GraphConfigurationDetail) createUserConfiguration(request);
 
     if (graphConf.isNone()) {
@@ -691,7 +691,7 @@ public final class PerformanceProjectAction implements Action {
     return performanceReportPosition.getPerformanceReportPosition();
   }
 
-  private DataSetBuilder getTrendReportData(final StaplerRequest request,
+  private DataSetBuilder<String, NumberOnlyBuildLabel> getTrendReportData(final StaplerRequest request,
       String performanceReportNameFile) {
 
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<String, NumberOnlyBuildLabel>();
@@ -757,9 +757,6 @@ public final class PerformanceProjectAction implements Action {
     public int last;
 
     public int step;
-
-    private Range() {
-    }
 
     public Range(int first, int last) {
       this.first = first;
