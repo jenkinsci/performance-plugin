@@ -77,8 +77,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
     }
 
     try {
-      reportMap = new PerformanceReportMap(this, new StreamTaskListener(
-          System.err));
+      reportMap = new PerformanceReportMap(this, StreamTaskListener.fromStderr());
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Error creating new PerformanceReportMap()", e);
     }
