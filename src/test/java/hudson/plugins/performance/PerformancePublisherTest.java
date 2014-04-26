@@ -8,6 +8,7 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.performance.PerformancePublisher;
 
+import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
@@ -138,5 +139,43 @@ import static java.util.Arrays.asList;
         catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    @Bug(22011)
+    public void testBuildUnstableAverageResponseTimeRelativeThreshold() throws Exception {
+        FreeStyleProject p = createFreeStyleProject();
+
+        p.getPublishersList().add(
+                new PerformancePublisher(0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, true, asList(new JUnitParser(
+                        "**/*.xml"))));
+        // fisrt build
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("test1.xml").copyFrom(
+                        getClass().getResource("/TEST-JUnitResults-relative-thrashould.xml"));
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+
+
+        // second build with high time
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("test2.xml").copyFrom(
+                        getClass().getResource("/TEST-JUnitResults-relative-thrashould-2.xml"));
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
+
     }
 }
