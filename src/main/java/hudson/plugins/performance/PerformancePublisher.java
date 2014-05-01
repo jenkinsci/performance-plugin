@@ -563,6 +563,12 @@ public class PerformancePublisher extends Recorder {
           prevBuild = getnthBuild(build, listener);
         }
 
+        buildNo += "</buildNum>\n";
+        relative += buildNo + unstable + failed;
+        relative += "</relativeDefinition>";
+
+        bw.write(relative+"\n");
+
         List<UriReport> prevuriList = null;
 
         if (prevBuild != null) {
@@ -739,20 +745,15 @@ public class PerformancePublisher extends Recorder {
           perct += "</percentile>";
 
           inside += avg + med + perct;
-
-          buildNo += "</buildNum>\n";
-          relative += buildNo + unstable + failed;
-          relative += "</relativeDefinition>";
-
-          bw.write(relative+"\n");
           bw.write(inside+"\n");
 
-          bw.write("</results>");
 
-          bw.close();
-          fw.close();
 
         }
+        bw.write("</results>");
+        bw.close();
+        fw.close();
+
       } catch (Exception e){
       }
     }
