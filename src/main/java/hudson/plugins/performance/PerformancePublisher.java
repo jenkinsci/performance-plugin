@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PerformancePublisher extends Recorder {
+
   @Extension
   public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
     @Override
@@ -81,8 +82,6 @@ public class PerformancePublisher extends Recorder {
 
   private String errorUnstableResponseTimeThreshold = "";
 
-
-
   private double relativeFailedThresholdPositive = 0;
 
   private double relativeFailedThresholdNegative = 0;
@@ -129,9 +128,10 @@ public class PerformancePublisher extends Recorder {
    */
   private List<PerformanceReportParser> parsers;
 
+  private boolean modeThroughput;
 
 
-@DataBoundConstructor
+  @DataBoundConstructor
   public PerformancePublisher(int errorFailedThreshold,
                             int errorUnstableThreshold,
                             String errorUnstableResponseTimeThreshold,
@@ -1008,6 +1008,13 @@ public class PerformancePublisher extends Recorder {
     return modeRelativeThresholds;
   }
 
+  public boolean isModeThroughput() {
+    return modeThroughput;
+  }
+
+  public void setModeThroughput(boolean modeThroughput) {
+    this.modeThroughput = modeThroughput;
+  }
 
 }
 
