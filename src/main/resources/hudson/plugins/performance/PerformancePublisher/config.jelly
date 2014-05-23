@@ -1,7 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:entry title="${%Performance report}"
-      field="parsers">
+  <f:entry title="${%Performance report}" field="parsers">
     <f:hetero-list name="parsers" hasHeader="true"
                    descriptors="${descriptor.getParserDescriptors()}"
                    items="${instance.parsers}"
@@ -130,7 +129,7 @@
         </tr>
         <tr>
           <td>
-            <f:checkbox name="modeThroughput" title="Throughput instead of Response Time" field="modeThroughput" checked="false">
+            <f:checkbox name="modeThroughput" title="Throughput instead of Response Time" field="modeThroughput">
     		  Display Performance Report with Throughput instead of Response Time
     		</f:checkbox>
           </td>

@@ -144,7 +144,8 @@ public class PerformancePublisher extends Recorder {
                             String comparisonType,
                             boolean modeOfThreshold,
                             boolean compareBuildPrevious,
-                            List<? extends PerformanceReportParser> parsers) {
+                            List<? extends PerformanceReportParser> parsers,
+                            boolean modeThroughput) {
 
     this.errorFailedThreshold = errorFailedThreshold;
     this.errorUnstableThreshold = errorUnstableThreshold;
@@ -165,10 +166,8 @@ public class PerformancePublisher extends Recorder {
         parsers = Collections.emptyList();
     this.parsers = new ArrayList<PerformanceReportParser>(parsers);
     this.modePerformancePerTestCase = modePerformancePerTestCase;
+    this.modeThroughput = modeThroughput;
   }
-
-
-
 
   public static File getPerformanceReport(AbstractBuild<?, ?> build,
       String parserDisplayName, String performanceReportName) {
