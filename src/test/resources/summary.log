@@ -1,0 +1,15 @@
+2014/05/22 14:50:15 INFO  - jmeter.util.JMeterUtils: Setting Locale to en_US 
+2014/05/22 14:50:15 WARN  - jmeter.JMeter: LogLevel: DEBUG 
+2014/05/22 14:50:15 INFO  - jmeter.JMeter: Copyright (c) 1998-2013 The Apache Software Foundation 
+2014/05/22 14:50:15 INFO  - jmeter.JMeter: Version 2.10 r1533061 
+2014/05/22 14:50:15 INFO  - jmeter.JMeter: java.version=1.6.0_27 
+2014/05/22 14:50:15 INFO  - jmeter.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM 
+2014/05/22 14:50:15 INFO  - jmeter.JMeter: os.name=Linux 
+2014/05/22 14:50:16 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for application/xhtml+xml is  
+2014/05/22 14:50:16 INFO  - Some random line with a plus (+) in it shouldn't break the summariser parsing
+2014/05/22 14:50:16 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for application/xml is  
+2014/05/22 14:50:16 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for text/xml is  
+2014/05/22 14:51:00 INFO  - jmeter.reporters.Summariser: Generate Summary Results +    186 in    43s =    4.3/s Avg:   536 Min:     5 Max:  4617 Err:     0 (0.00%) Active: 5 Started: 5 Finished: 0 
+2014/05/22 14:53:54 INFO  - jmeter.engine.StandardJMeterEngine: Notifying test listeners of end of test 
+2014/05/22 14:53:54 INFO  - jmeter.reporters.Summariser: Generate Summary Results +   1069 in   175s =    6.1/s Avg:   295 Min:    33 Max:  5628 Err:     0 (0.00%) Active: 0 Started: 5 Finished: 5 
+2014/05/22 14:53:54 INFO  - jmeter.reporters.Summariser: Generate Summary Results =   1255 in   217s =    5.8/s Avg:   330 Min:     5 Max:  5628 Err:     0 (0.00%) 
