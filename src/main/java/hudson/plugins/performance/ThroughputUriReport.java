@@ -14,11 +14,7 @@ public class ThroughputUriReport {
 
     public long getAverage() {
         final List<HttpSample> httpSamples = uriReport.getHttpSampleList();
-
-        if (httpSamples.isEmpty()) return 0L;
-
         final long durationInSeconds = calculateTestingDuration(httpSamples);
-
         return httpSamples.size() / durationInSeconds;
     }
 
