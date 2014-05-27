@@ -4,6 +4,8 @@ import java.util.List;
 
 public class ThroughputReport {
 
+    private static final int MILLISECONDS_IN_SECOND = 1000;
+
     private final PerformanceReport performanceReport;
 
     public ThroughputReport(PerformanceReport performanceReport) {
@@ -20,30 +22,36 @@ public class ThroughputReport {
         return sumThroughput;
     }
 
-    private long getUriAverage(UriReport uriReport) {
+    private long getUriAverage(final UriReport uriReport) {
         final List<HttpSample> httpSamples = uriReport.getHttpSampleList();
 
         if (httpSamples.isEmpty()) return 0L;
 
-        final long testStartTime = testStartTime(httpSamples);
-        final long testFinishTime = testFinishTime(httpSamples);
-        final long durationInSeconds = (testFinishTime - testStartTime) / 1000;
+        final long durationInSeconds = calculateTestingDuration(httpSamples);
 
         return httpSamples.size() / durationInSeconds;
     }
 
-    private long testStartTime(List<HttpSample> httpSamples) {
+    private long calculateTestingDuration(final List<HttpSample> httpSamples) {
+        final long testStartTime = testingStartTime(httpSamples);
+        final long testFinishTime = testingFinishTime(httpSamples);
+        final long testingDuration = (testFinishTime - testStartTime) / MILLISECONDS_IN_SECOND;
+        return Math.max(testingDuration, 1);
+    }
+
+    private long testingStartTime(final List<HttpSample> httpSamples) {
         long min = -1;
-        for (HttpSample httpSample : httpSamples) {
+        for (final HttpSample httpSample : httpSamples) {
             if (min < 0 || min > httpSample.getDate().getTime()) min = httpSample.getDate().getTime();
         }
         return min;
     }
 
-    private long testFinishTime(List<HttpSample> httpSamples) {
+    private long testingFinishTime(final List<HttpSample> httpSamples) {
         long max = 0;
-        for (HttpSample httpSample : httpSamples) {
-            if (max < httpSample.getDate().getTime()) max = httpSample.getDate().getTime();
+        for (final HttpSample httpSample : httpSamples) {
+            if (max < httpSample.getDate().getTime() + httpSample.getDuration())
+                max = httpSample.getDate().getTime() + httpSample.getDuration();
         }
         return max;
     }
