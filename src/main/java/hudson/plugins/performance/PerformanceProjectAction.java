@@ -5,7 +5,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.util.*;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
-import hudson.plugins.performance.PerformanceReportPosition;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -169,12 +168,12 @@ public final class PerformanceProjectAction implements Action {
     return chart;
   }
 
-  protected static JFreeChart createThroughputChart(CategoryDataset dataset) {
+  protected static JFreeChart createThroughputChart(final CategoryDataset dataset) {
 
     final JFreeChart chart = ChartFactory.createLineChart(
         Messages.ProjectAction_Throughput(), // chart title
         null, // unused
-        "Requests Per Second", // range axis label
+        Messages.ProjectAction_RequestsPerSeconds(), // range axis label
         dataset, // data
         PlotOrientation.VERTICAL, // orientation
         true, // include legend
@@ -477,7 +476,7 @@ public final class PerformanceProjectAction implements Action {
             return;
         }
 
-        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
         final List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
         final Range buildsLimits = getFirstAndLastBuild(request, builds);
 
@@ -503,15 +502,13 @@ public final class PerformanceProjectAction implements Action {
 
                 final ThroughputReport throughputReport = new ThroughputReport(performanceReport);
                 final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
-// todo               dataSetBuilderAverage.add(throughputReport.getMedian(), Messages.ProjectAction_Median(), label);
-                dataSetBuilderAverage.add(throughputReport.getAverage(), Messages.ProjectAction_Average(), label);
-// todo               dataSetBuilderAverage.add(throughputReport.get90Line(), Messages.ProjectAction_Line90(), label);
+                dataSetBuilder.add(throughputReport.get(), Messages.ProjectAction_RequestsPerSeconds(), label);
             }
             nbBuildsToAnalyze--;
         }
 
         ChartUtil.generateGraph(request, response,
-                createThroughputChart(dataSetBuilderAverage.build()), 400, 200);
+                createThroughputChart(dataSetBuilder.build()), 400, 200);
     }
 
   public void doSummarizerGraph(StaplerRequest request, StaplerResponse response)

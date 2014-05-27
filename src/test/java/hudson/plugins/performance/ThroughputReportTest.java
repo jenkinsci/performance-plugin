@@ -13,7 +13,7 @@ public class ThroughputReportTest {
 
     @Test
     public void shouldReturnZeroIfNoUri() {
-        Assert.assertEquals(0, throughputReport.getAverage());
+        Assert.assertEquals(0, throughputReport.get());
     }
 
     @Test
@@ -33,7 +33,7 @@ public class ThroughputReportTest {
         performanceReport.getUriReportMap().put(uriReport1.getUri(), uriReport1);
         performanceReport.getUriReportMap().put(uriReport2.getUri(), uriReport2);
 
-        Assert.assertEquals(2, throughputReport.getAverage());
+        Assert.assertEquals(2, throughputReport.get());
     }
 
 }

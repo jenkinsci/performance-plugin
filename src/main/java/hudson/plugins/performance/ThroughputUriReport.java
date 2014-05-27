@@ -12,7 +12,7 @@ public class ThroughputUriReport {
         this.uriReport = uriReport;
     }
 
-    public long getAverage() {
+    public long get() {
         final List<HttpSample> httpSamples = uriReport.getHttpSampleList();
         final long durationInSeconds = calculateTestingDuration(httpSamples);
         return httpSamples.size() / durationInSeconds;

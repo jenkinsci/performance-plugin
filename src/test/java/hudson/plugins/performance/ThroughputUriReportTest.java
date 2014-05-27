@@ -14,7 +14,7 @@ public class ThroughputUriReportTest {
 
     @Test
     public void shouldReturnZeroForAverageIfNoHttpSamples() {
-        Assert.assertEquals(0, throughputUriReport.getAverage());
+        Assert.assertEquals(0, throughputUriReport.get());
     }
 
     @Test
@@ -25,7 +25,7 @@ public class ThroughputUriReportTest {
 
         uriReport.addHttpSample(httpSample1);
 
-        Assert.assertEquals(1, throughputUriReport.getAverage());
+        Assert.assertEquals(1, throughputUriReport.get());
     }
 
     @Test
@@ -36,7 +36,7 @@ public class ThroughputUriReportTest {
 
         uriReport.addHttpSample(httpSample1);
 
-        Assert.assertEquals(0, throughputUriReport.getAverage());
+        Assert.assertEquals(0, throughputUriReport.get());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ThroughputUriReportTest {
         uriReport.addHttpSample(httpSample1);
         uriReport.addHttpSample(httpSample2);
 
-        Assert.assertEquals(2, throughputUriReport.getAverage());
+        Assert.assertEquals(2, throughputUriReport.get());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class ThroughputUriReportTest {
         uriReport.addHttpSample(httpSample1);
         uriReport.addHttpSample(httpSample2);
 
-        Assert.assertEquals(2, throughputUriReport.getAverage());
+        Assert.assertEquals(2, throughputUriReport.get());
     }
 
 }
