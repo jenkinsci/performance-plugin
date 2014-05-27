@@ -279,19 +279,30 @@ public final class PerformanceProjectAction implements Action {
     return chart;
   }
 
+    private String getPerformanceReportNameFile(StaplerRequest request) {
+        PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+        request.bindParameters(performanceReportPosition);
+        return getPerformanceReportNameFile(performanceReportPosition);
+    }
+
+    private String getPerformanceReportNameFile(final PerformanceReportPosition performanceReportPosition) {
+        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+        if (performanceReportNameFile == null) {
+            if (getPerformanceReportList().size() == 1) {
+                performanceReportNameFile = getPerformanceReportList().get(0);
+            }
+        }
+        return performanceReportNameFile;
+    }
+
+  @SuppressWarnings("UnusedDeclaration")
   public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
       throws IOException {
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition
-        .getPerformanceReportPosition();
+    final String performanceReportNameFile = getPerformanceReportNameFile(request);
     if (performanceReportNameFile == null) {
-      if (getPerformanceReportList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportList().get(0);
-      } else {
         return;
-      }
     }
+
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
       response.sendRedirect2(request.getContextPath() + "/images/headless.png");
@@ -331,19 +342,14 @@ public final class PerformanceProjectAction implements Action {
         createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
   }
 
-  public void doRespondingTimeGraphPerTestCaseMode(StaplerRequest request,
-      StaplerResponse response) throws IOException {
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition
-        .getPerformanceReportPosition();
-    if (performanceReportNameFile == null) {
-      if (getPerformanceReportList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportList().get(0);
-      } else {
-        return;
+  @SuppressWarnings("UnusedDeclaration")
+  public void doRespondingTimeGraphPerTestCaseMode(
+          StaplerRequest request, StaplerResponse response) throws IOException {
+      final String performanceReportNameFile = getPerformanceReportNameFile(request);
+      if (performanceReportNameFile == null) {
+          return;
       }
-    }
+
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
       response.sendRedirect2(request.getContextPath() + "/images/headless.png");
@@ -399,19 +405,13 @@ public final class PerformanceProjectAction implements Action {
 
   }
 
-  public void doRespondingTimeGraph(StaplerRequest request,
-      StaplerResponse response) throws IOException {
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition
-        .getPerformanceReportPosition();
-    if (performanceReportNameFile == null) {
-      if (getPerformanceReportList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportList().get(0);
-      } else {
-        return;
+  @SuppressWarnings("UnusedDeclaration")
+  public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+      final String performanceReportNameFile = getPerformanceReportNameFile(request);
+      if (performanceReportNameFile == null) {
+          return;
       }
-    }
+
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
       response.sendRedirect2(request.getContextPath() + "/images/headless.png");
@@ -458,16 +458,9 @@ public final class PerformanceProjectAction implements Action {
 
     @SuppressWarnings("UnusedDeclaration")
     public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
-        final PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-        request.bindParameters(performanceReportPosition);
-
-        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+        final String performanceReportNameFile = getPerformanceReportNameFile(request);
         if (performanceReportNameFile == null) {
-            if (getPerformanceReportList().size() == 1) {
-                performanceReportNameFile = getPerformanceReportList().get(0);
-            } else {
-                return;
-            }
+            return;
         }
 
         if (ChartUtil.awtProblemCause != null) {
@@ -511,20 +504,12 @@ public final class PerformanceProjectAction implements Action {
                 createThroughputChart(dataSetBuilder.build()), 400, 200);
     }
 
-  public void doSummarizerGraph(StaplerRequest request, StaplerResponse response)
-      throws IOException {
+  @SuppressWarnings("UnusedDeclaration")
+  public void doSummarizerGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+      final PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+      request.bindParameters(performanceReportPosition);
+      final String performanceReportNameFile = getPerformanceReportNameFile(performanceReportPosition);
 
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition
-        .getPerformanceReportPosition();
-    if (performanceReportNameFile == null) {
-      if (getPerformanceReportList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportList().get(0);
-      } else {
-        return;
-      }
-    }
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
       // response.sendRedirect2(request.getContextPath() +
