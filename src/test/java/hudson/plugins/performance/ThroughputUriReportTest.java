@@ -13,12 +13,12 @@ public class ThroughputUriReportTest {
     private ThroughputUriReport throughputUriReport = new ThroughputUriReport(uriReport);
 
     @Test
-    public void shouldReturnZeroIfNoHttpSamples() {
+    public void shouldReturnZeroAverageIfNoHttpSamples() {
         Assert.assertEquals(0, throughputUriReport.getAverage());
     }
 
     @Test
-    public void shouldCalculatePerSecondThroughputEvenIfOneHttpSample() {
+    public void shouldCalculateAveragePerSecondEvenIfOneHttpSample() {
         HttpSample httpSample1 = new HttpSample();
         httpSample1.setDate(new Date());
         httpSample1.setDuration(1000);
@@ -29,7 +29,7 @@ public class ThroughputUriReportTest {
     }
 
     @Test
-    public void shouldReturnZeroThroughputWhenAllRequestsExecutesMoreSecond() {
+    public void shouldReturnZeroAverageWhenAllRequestsExecutesMoreSecond() {
         HttpSample httpSample1 = new HttpSample();
         httpSample1.setDate(new Date());
         httpSample1.setDuration(10000);
@@ -40,7 +40,7 @@ public class ThroughputUriReportTest {
     }
 
     @Test
-    public void shouldReturnCountOfRequestIfAllProcessedLessThanOneSecond() {
+    public void shouldReturnCountOfRequestForAverageIfAllProcessedLessThanOneSecond() {
         HttpSample httpSample1 = new HttpSample();
         httpSample1.setDate(new Date());
 
@@ -54,7 +54,7 @@ public class ThroughputUriReportTest {
     }
 
     @Test
-    public void shouldReturnAverageThroughput() {
+    public void shouldReturnAverage() {
         long time = System.currentTimeMillis();
 
         // 0 sec - first request  - 1 sec
