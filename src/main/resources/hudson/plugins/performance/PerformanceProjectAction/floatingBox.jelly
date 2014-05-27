@@ -7,19 +7,14 @@
       </div>
       <br/>
 
-      <j:choose>
-        <j:when test="${from.ifModeThroughputUsed()}">
-          <a href="performance/"><img src="performance/throughputTimeGraph"/></a>
-          <br/>
-          <a href="performance/"><img src="performance/errorsGraph"/></a>
-        </j:when>
+      <j:if test="${from.ifModeThroughputUsed()}">
+        <a href="performance/"><img src="performance/throughputGraph"/></a>
+        <br/>
+      </j:if>
 
-        <j:otherwise>
-          <a href="performance/"><img src="performance/respondingTimeGraph"/></a>
-          <br/>
-          <a href="performance/"><img src="performance/errorsGraph"/></a>
-        </j:otherwise>
-      </j:choose>
+      <a href="performance/"><img src="performance/respondingTimeGraph"/></a>
+      <br/>
+      <a href="performance/"><img src="performance/errorsGraph"/></a>
     </div>
   </j:if>
 </j:jelly>

@@ -129,8 +129,8 @@
         </tr>
         <tr>
           <td>
-            <f:checkbox name="modeThroughput" title="Throughput instead of Response Time" field="modeThroughput">
-    		  Display Performance Report with Throughput instead of Response Time
+            <f:checkbox name="modeThroughput" title="Show Throughput Chart" field="modeThroughput">
+    		  Display Performance Report with Throughput (requests per second)
     		</f:checkbox>
           </td>
         </tr>

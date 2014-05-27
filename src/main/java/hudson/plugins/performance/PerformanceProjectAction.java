@@ -457,7 +457,8 @@ public final class PerformanceProjectAction implements Action {
         createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
   }
 
-    public void doThroughputTimeGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
+    @SuppressWarnings("UnusedDeclaration")
+    public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
         final PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
 
