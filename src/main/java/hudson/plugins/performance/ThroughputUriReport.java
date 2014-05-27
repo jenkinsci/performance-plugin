@@ -2,6 +2,9 @@ package hudson.plugins.performance;
 
 import java.util.List;
 
+/**
+ * @author Artem Stasiuk (artem.stasuk@gmail.com)
+ */
 public class ThroughputUriReport {
 
     private static final int MILLISECONDS_IN_SECOND = 1000;

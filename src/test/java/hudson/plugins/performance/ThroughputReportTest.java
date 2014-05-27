@@ -5,6 +5,9 @@ import org.junit.Test;
 
 import java.util.Date;
 
+/**
+ * @author Artem Stasiuk (artem.stasuk@gmail.com)
+ */
 public class ThroughputReportTest {
 
     private PerformanceReport performanceReport = new PerformanceReport();
