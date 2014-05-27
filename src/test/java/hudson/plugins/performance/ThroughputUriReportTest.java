@@ -13,7 +13,7 @@ public class ThroughputUriReportTest {
     private ThroughputUriReport throughputUriReport = new ThroughputUriReport(uriReport);
 
     @Test
-    public void shouldReturnZeroAverageIfNoHttpSamples() {
+    public void shouldReturnZeroForAverageIfNoHttpSamples() {
         Assert.assertEquals(0, throughputUriReport.getAverage());
     }
 
