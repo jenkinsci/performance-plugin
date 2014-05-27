@@ -8,7 +8,7 @@ public class ThroughputReport {
 
     private final PerformanceReport performanceReport;
 
-    public ThroughputReport(PerformanceReport performanceReport) {
+    public ThroughputReport(final PerformanceReport performanceReport) {
         this.performanceReport = performanceReport;
     }
 

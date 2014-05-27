@@ -169,6 +169,51 @@ public final class PerformanceProjectAction implements Action {
     return chart;
   }
 
+  protected static JFreeChart createThroughputChart(CategoryDataset dataset) {
+
+    final JFreeChart chart = ChartFactory.createLineChart(
+        Messages.ProjectAction_Throughput(), // chart title
+        null, // unused
+        "Requests Per Second", // range axis label
+        dataset, // data
+        PlotOrientation.VERTICAL, // orientation
+        true, // include legend
+        true, // tooltips
+        false // urls
+    );
+
+    final LegendTitle legend = chart.getLegend();
+    legend.setPosition(RectangleEdge.BOTTOM);
+
+    chart.setBackgroundPaint(Color.white);
+
+    final CategoryPlot plot = chart.getCategoryPlot();
+
+    plot.setBackgroundPaint(Color.WHITE);
+    plot.setOutlinePaint(null);
+    plot.setRangeGridlinesVisible(true);
+    plot.setRangeGridlinePaint(Color.black);
+
+    CategoryAxis domainAxis = new ShiftedCategoryAxis(null);
+    plot.setDomainAxis(domainAxis);
+    domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
+    domainAxis.setLowerMargin(0.0);
+    domainAxis.setUpperMargin(0.0);
+    domainAxis.setCategoryMargin(0.0);
+
+    final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+    rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+
+    final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
+    renderer.setBaseStroke(new BasicStroke(4.0f));
+    ColorPalette.apply(renderer);
+
+    // crop extra space around the graph
+    plot.setInsets(new RectangleInsets(5.0, 0, 0, 5.0));
+
+    return chart;
+  }
+
   protected static JFreeChart createSummarizerChart(CategoryDataset dataset,
       String yAxis, String chartTitle) {
 
@@ -443,7 +488,6 @@ public final class PerformanceProjectAction implements Action {
                     continue;
                 }
 
-                final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
                 final PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
                 if (performanceBuildAction == null) {
                     continue;
@@ -457,6 +501,7 @@ public final class PerformanceProjectAction implements Action {
                 }
 
                 final ThroughputReport throughputReport = new ThroughputReport(performanceReport);
+                final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
 // todo               dataSetBuilderAverage.add(throughputReport.getMedian(), Messages.ProjectAction_Median(), label);
                 dataSetBuilderAverage.add(throughputReport.getAverage(), Messages.ProjectAction_Average(), label);
 // todo               dataSetBuilderAverage.add(throughputReport.get90Line(), Messages.ProjectAction_Line90(), label);
@@ -465,7 +510,7 @@ public final class PerformanceProjectAction implements Action {
         }
 
         ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+                createThroughputChart(dataSetBuilderAverage.build()), 400, 200);
     }
 
   public void doSummarizerGraph(StaplerRequest request, StaplerResponse response)
