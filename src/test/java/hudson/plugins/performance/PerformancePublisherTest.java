@@ -6,13 +6,11 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.plugins.performance.PerformancePublisher;
 
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
-import java.util.List;
 
 import static java.util.Arrays.asList;
 
