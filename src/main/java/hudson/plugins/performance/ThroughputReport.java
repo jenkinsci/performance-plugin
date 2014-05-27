@@ -33,9 +33,9 @@ public class ThroughputReport {
     }
 
     private long calculateTestingDuration(final List<HttpSample> httpSamples) {
-        final long testStartTime = testingStartTime(httpSamples);
-        final long testFinishTime = testingFinishTime(httpSamples);
-        final long testingDuration = (testFinishTime - testStartTime) / MILLISECONDS_IN_SECOND;
+        final long testingStartTime = testingStartTime(httpSamples);
+        final long testingFinishTime = testingFinishTime(httpSamples);
+        final long testingDuration = (testingFinishTime - testingStartTime) / MILLISECONDS_IN_SECOND;
         return Math.max(testingDuration, 1);
     }
 
