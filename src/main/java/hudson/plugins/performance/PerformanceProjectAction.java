@@ -222,7 +222,7 @@ public final class PerformanceProjectAction implements Action {
      * final NumberAxis axis2 = new NumberAxis("Errors"); axis2.isAutoRange();
      * axis2.setLowerBound(0); plot.setRangeAxis(1, axis2); plot.setDataset(1,
      * dataset.get(1)); plot.mapDatasetToRangeAxis(1, 1);
-     * 
+     *
      * final StandardXYItemRenderer renderer2 = new StandardXYItemRenderer();
      * renderer2.setSeriesPaint(0, Color.black); plot.setRenderer(1, renderer2);
      */
@@ -336,16 +336,15 @@ public final class PerformanceProjectAction implements Action {
             .values()) {
           allSamples.addAll(currentReport.getHttpSampleList());
         }
-        Collections.sort(allSamples);
-        for (HttpSample sample : allSamples) {
-          if (sample.hasError()) {
-            // we set duration as 0 for failed tests
-            dataSetBuilderAverage.add(0, sample.getUri(), label);
-          } else {
-            dataSetBuilderAverage.add(sample.getDuration(), sample.getUri(),
-                label);
+        List<UriReport> uriListOrdered = performanceReport.getUriListOrdered();
+          for (UriReport uriReport : uriListOrdered) {
+              if (uriReport.isFailed()) {
+                  // we set duration as 0 for failed tests
+                  dataSetBuilderAverage.add(0, uriReport.getUri(), label);
+              } else {
+                  dataSetBuilderAverage.add(uriReport.getAverage(), uriReport.getUri(), label);
+              }
           }
-        }
 
       }
       nbBuildsToAnalyze--;
@@ -492,7 +491,7 @@ public final class PerformanceProjectAction implements Action {
    * <p>
    * give a list of two Integer : the smallest build to use and the biggest.
    * </p>
-   * 
+   *
    * @param request
    * @param builds
    * @return outList
@@ -616,7 +615,7 @@ public final class PerformanceProjectAction implements Action {
 
   /**
    * Returns the graph configuration for this project.
-   * 
+   *
    * @param link
    *          not used
    * @param request
@@ -640,7 +639,7 @@ public final class PerformanceProjectAction implements Action {
 
   /**
    * Creates a view to configure the trend graph for the current user.
-   * 
+   *
    * @param request
    *          Stapler request
    * @return a view to configure the trend graph for the current user
@@ -653,7 +652,7 @@ public final class PerformanceProjectAction implements Action {
 
   /**
    * Creates a view to configure the trend graph for the current user.
-   * 
+   *
    * @param request
    *          Stapler request
    * @return a view to configure the trend graph for the current user

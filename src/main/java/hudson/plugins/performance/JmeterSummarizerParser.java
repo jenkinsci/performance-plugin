@@ -14,7 +14,7 @@ import java.text.ParseException;
 
 /**
  * Parses JMeter Summarized results
- * 
+ *
  * @author Agoley
  */
 public class JmeterSummarizerParser extends PerformanceReportParser {
@@ -71,7 +71,7 @@ public class JmeterSummarizerParser extends PerformanceReportParser {
         logger.println("Performance: Parsing JMeterSummarizer report file " + f.getName());
         while (s.hasNextLine()) {
           line = s.nextLine().replaceAll("=", " ");
-          if (line.contains("+")) {
+          if (line.contains("+") && line.contains("jmeter.reporters.Summariser:")) {
             Scanner scanner = null;
             try {
                     scanner = new Scanner(line);
