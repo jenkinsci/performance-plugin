@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite failures="0" time="0.100" errors="0" skipped="0" tests="1" name="hudson.plugins.performance.UriReportTest">
+  <testcase time="0.100" classname="hudson.plugins.performance.UriReportTest" name="testCountErrors"/>
+</testsuite>
