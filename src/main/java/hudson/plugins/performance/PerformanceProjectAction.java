@@ -5,7 +5,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.util.*;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
-import hudson.plugins.performance.PerformanceReportPosition;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -169,6 +168,51 @@ public final class PerformanceProjectAction implements Action {
     return chart;
   }
 
+  protected static JFreeChart createThroughputChart(final CategoryDataset dataset) {
+
+    final JFreeChart chart = ChartFactory.createLineChart(
+        Messages.ProjectAction_Throughput(), // chart title
+        null, // unused
+        Messages.ProjectAction_RequestsPerSeconds(), // range axis label
+        dataset, // data
+        PlotOrientation.VERTICAL, // orientation
+        true, // include legend
+        true, // tooltips
+        false // urls
+    );
+
+    final LegendTitle legend = chart.getLegend();
+    legend.setPosition(RectangleEdge.BOTTOM);
+
+    chart.setBackgroundPaint(Color.white);
+
+    final CategoryPlot plot = chart.getCategoryPlot();
+
+    plot.setBackgroundPaint(Color.WHITE);
+    plot.setOutlinePaint(null);
+    plot.setRangeGridlinesVisible(true);
+    plot.setRangeGridlinePaint(Color.black);
+
+    CategoryAxis domainAxis = new ShiftedCategoryAxis(null);
+    plot.setDomainAxis(domainAxis);
+    domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
+    domainAxis.setLowerMargin(0.0);
+    domainAxis.setUpperMargin(0.0);
+    domainAxis.setCategoryMargin(0.0);
+
+    final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+    rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+
+    final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
+    renderer.setBaseStroke(new BasicStroke(4.0f));
+    ColorPalette.apply(renderer);
+
+    // crop extra space around the graph
+    plot.setInsets(new RectangleInsets(5.0, 0, 0, 5.0));
+
+    return chart;
+  }
+
   protected static JFreeChart createSummarizerChart(CategoryDataset dataset,
       String yAxis, String chartTitle) {
 
@@ -235,19 +279,30 @@ public final class PerformanceProjectAction implements Action {
     return chart;
   }
 
+    private String getPerformanceReportNameFile(StaplerRequest request) {
+        PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+        request.bindParameters(performanceReportPosition);
+        return getPerformanceReportNameFile(performanceReportPosition);
+    }
+
+    private String getPerformanceReportNameFile(final PerformanceReportPosition performanceReportPosition) {
+        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+        if (performanceReportNameFile == null) {
+            if (getPerformanceReportList().size() == 1) {
+                performanceReportNameFile = getPerformanceReportList().get(0);
+            }
+        }
+        return performanceReportNameFile;
+    }
+
+  @SuppressWarnings("UnusedDeclaration")
   public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
       throws IOException {
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition
-        .getPerformanceReportPosition();
+    final String performanceReportNameFile = getPerformanceReportNameFile(request);
     if (performanceReportNameFile == null) {
-      if (getPerformanceReportList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportList().get(0);
-      } else {
         return;
-      }
     }
+
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
       response.sendRedirect2(request.getContextPath() + "/images/headless.png");
@@ -287,19 +342,14 @@ public final class PerformanceProjectAction implements Action {
         createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
   }
 
-  public void doRespondingTimeGraphPerTestCaseMode(StaplerRequest request,
-      StaplerResponse response) throws IOException {
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition
-        .getPerformanceReportPosition();
-    if (performanceReportNameFile == null) {
-      if (getPerformanceReportList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportList().get(0);
-      } else {
-        return;
+  @SuppressWarnings("UnusedDeclaration")
+  public void doRespondingTimeGraphPerTestCaseMode(
+          StaplerRequest request, StaplerResponse response) throws IOException {
+      final String performanceReportNameFile = getPerformanceReportNameFile(request);
+      if (performanceReportNameFile == null) {
+          return;
       }
-    }
+
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
       response.sendRedirect2(request.getContextPath() + "/images/headless.png");
@@ -354,19 +404,13 @@ public final class PerformanceProjectAction implements Action {
 
   }
 
-  public void doRespondingTimeGraph(StaplerRequest request,
-      StaplerResponse response) throws IOException {
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition
-        .getPerformanceReportPosition();
-    if (performanceReportNameFile == null) {
-      if (getPerformanceReportList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportList().get(0);
-      } else {
-        return;
+  @SuppressWarnings("UnusedDeclaration")
+  public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+      final String performanceReportNameFile = getPerformanceReportNameFile(request);
+      if (performanceReportNameFile == null) {
+          return;
       }
-    }
+
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
       response.sendRedirect2(request.getContextPath() + "/images/headless.png");
@@ -411,20 +455,60 @@ public final class PerformanceProjectAction implements Action {
         createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
   }
 
-  public void doSummarizerGraph(StaplerRequest request, StaplerResponse response)
-      throws IOException {
+    @SuppressWarnings("UnusedDeclaration")
+    public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
+        final String performanceReportNameFile = getPerformanceReportNameFile(request);
+        if (performanceReportNameFile == null) {
+            return;
+        }
 
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition
-        .getPerformanceReportPosition();
-    if (performanceReportNameFile == null) {
-      if (getPerformanceReportList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportList().get(0);
-      } else {
-        return;
-      }
+        if (ChartUtil.awtProblemCause != null) {
+            // not available. send out error message
+            response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+            return;
+        }
+
+        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        final List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+        final Range buildsLimits = getFirstAndLastBuild(request, builds);
+
+        int nbBuildsToAnalyze = builds.size();
+        for (final AbstractBuild<?, ?> build : builds) {
+            if (buildsLimits.in(nbBuildsToAnalyze)) {
+
+                if (!buildsLimits.includedByStep(build.number)) {
+                    continue;
+                }
+
+                final PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+                if (performanceBuildAction == null) {
+                    continue;
+                }
+
+                final PerformanceReport performanceReport = performanceBuildAction
+                        .getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
+                if (performanceReport == null) {
+                    nbBuildsToAnalyze--;
+                    continue;
+                }
+
+                final ThroughputReport throughputReport = new ThroughputReport(performanceReport);
+                final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+                dataSetBuilder.add(throughputReport.get(), Messages.ProjectAction_RequestsPerSeconds(), label);
+            }
+            nbBuildsToAnalyze--;
+        }
+
+        ChartUtil.generateGraph(request, response,
+                createThroughputChart(dataSetBuilder.build()), 400, 200);
     }
+
+  @SuppressWarnings("UnusedDeclaration")
+  public void doSummarizerGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+      final PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+      request.bindParameters(performanceReportPosition);
+      final String performanceReportNameFile = getPerformanceReportNameFile(performanceReportPosition);
+
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
       // response.sendRedirect2(request.getContextPath() +
@@ -496,7 +580,6 @@ public final class PerformanceProjectAction implements Action {
    * @param builds
    * @return outList
    */
-
   private Range getFirstAndLastBuild(StaplerRequest request, List<?> builds) {
     GraphConfigurationDetail graphConf = (GraphConfigurationDetail) createUserConfiguration(request);
 
@@ -745,8 +828,11 @@ public final class PerformanceProjectAction implements Action {
   }
 
   public boolean ifModePerformancePerTestCaseUsed() {
-    return project.getPublishersList().get(PerformancePublisher.class)
-        .isModePerformancePerTestCase();
+    return project.getPublishersList().get(PerformancePublisher.class).isModePerformancePerTestCase();
+  }
+
+  public boolean ifModeThroughputUsed() {
+    return project.getPublishersList().get(PerformancePublisher.class).isModeThroughput();
   }
 
   public static class Range {

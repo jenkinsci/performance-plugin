@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PerformancePublisher extends Recorder {
+
   @Extension
   public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
     @Override
@@ -81,8 +82,6 @@ public class PerformancePublisher extends Recorder {
 
   private String errorUnstableResponseTimeThreshold = "";
 
-
-
   private double relativeFailedThresholdPositive = 0;
 
   private double relativeFailedThresholdNegative = 0;
@@ -129,9 +128,10 @@ public class PerformancePublisher extends Recorder {
    */
   private List<PerformanceReportParser> parsers;
 
+  private boolean modeThroughput;
 
 
-@DataBoundConstructor
+  @DataBoundConstructor
   public PerformancePublisher(int errorFailedThreshold,
                             int errorUnstableThreshold,
                             String errorUnstableResponseTimeThreshold,
@@ -144,7 +144,8 @@ public class PerformancePublisher extends Recorder {
                             String comparisonType,
                             boolean modeOfThreshold,
                             boolean compareBuildPrevious,
-                            List<? extends PerformanceReportParser> parsers) {
+                            List<? extends PerformanceReportParser> parsers,
+                            boolean modeThroughput) {
 
     this.errorFailedThreshold = errorFailedThreshold;
     this.errorUnstableThreshold = errorUnstableThreshold;
@@ -165,10 +166,8 @@ public class PerformancePublisher extends Recorder {
         parsers = Collections.emptyList();
     this.parsers = new ArrayList<PerformanceReportParser>(parsers);
     this.modePerformancePerTestCase = modePerformancePerTestCase;
+    this.modeThroughput = modeThroughput;
   }
-
-
-
 
   public static File getPerformanceReport(AbstractBuild<?, ?> build,
       String parserDisplayName, String performanceReportName) {
@@ -1008,6 +1007,13 @@ public class PerformancePublisher extends Recorder {
     return modeRelativeThresholds;
   }
 
+  public boolean isModeThroughput() {
+    return modeThroughput;
+  }
+
+  public void setModeThroughput(boolean modeThroughput) {
+    this.modeThroughput = modeThroughput;
+  }
 
 }
 
