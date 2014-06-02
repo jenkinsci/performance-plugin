@@ -146,7 +146,7 @@ import static java.util.Arrays.asList;
         p.getPublishersList().add(
                 new PerformancePublisher(0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, true, asList(new JUnitParser(
                         "**/*.xml")), false));
-        // fisrt build
+        // first build
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
