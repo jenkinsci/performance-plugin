@@ -141,14 +141,14 @@ public class IagoParserTest extends HudsonTestCase {
     IagoParser parser = new IagoParser(null, "400,500", ",");
     
     //Line to parse
-    String line = "INF [20140611-21:34:01.224] stats: {\"400\":40,\"500\":44,\"client\\/request_latency_ms_average\":3,\"client\\/request_latency_ms_count\":85,\"client\\/request_latency_ms_maximum\":105,\"client\\/request_latency_ms_minimum\":1,\"client\\/request_latency_ms_p50\":2,\"client\\/request_latency_ms_p90\":4,\"client\\/request_latency_ms_p95\":4,\"client\\/request_latency_ms_p99\":105,\"client\\/request_latency_ms_p999\":105,\"client\\/request_latency_ms_p9999\":105,\"client\\/request_latency_ms_sum\":276,\"client\\/requests\":85,\"client\\/sent_bytes\":11919,\"client\\/socket_unwritable_ms\":0,\"client\\/socket_writable_ms\":207,\"client\\/success\":84}";
+    String line = "INF [20140611-21:34:01.224] stats: {\"400\":30,\"500\":44,\"client\\/request_latency_ms_average\":3,\"client\\/request_latency_ms_count\":85,\"client\\/request_latency_ms_maximum\":105,\"client\\/request_latency_ms_minimum\":1,\"client\\/request_latency_ms_p50\":2,\"client\\/request_latency_ms_p90\":4,\"client\\/request_latency_ms_p95\":4,\"client\\/request_latency_ms_p99\":105,\"client\\/request_latency_ms_p999\":105,\"client\\/request_latency_ms_p9999\":105,\"client\\/request_latency_ms_sum\":276,\"client\\/requests\":85,\"client\\/sent_bytes\":11919,\"client\\/socket_unwritable_ms\":0,\"client\\/socket_writable_ms\":207,\"client\\/success\":84}";
     String key = "TEST";
     
     HttpSample sample = parser.getSample(line, key);    
     Assert.assertEquals(105, sample.getSummarizerMax());
     Assert.assertEquals(1, sample.getSummarizerMin());
     Assert.assertEquals(85, sample.getSummarizerSamples());
-    Assert.assertEquals((float)85.0, sample.getSummarizerErrors());
+    Assert.assertEquals((float)75.0, sample.getSummarizerErrors());
     Assert.assertEquals(3, sample.getDuration());
     Assert.assertEquals(key, sample.getUri());
   }
@@ -157,14 +157,14 @@ public class IagoParserTest extends HudsonTestCase {
     IagoParser parser = new IagoParser(null, "4[0-9]+,5[0-9]+", ",");
     
     //Line to parse
-    String line = "INF [20140611-21:34:01.224] stats: {\"400\":40,\"500\":44,\"client\\/request_latency_ms_average\":3,\"client\\/request_latency_ms_count\":85,\"client\\/request_latency_ms_maximum\":105,\"client\\/request_latency_ms_minimum\":1,\"client\\/request_latency_ms_p50\":2,\"client\\/request_latency_ms_p90\":4,\"client\\/request_latency_ms_p95\":4,\"client\\/request_latency_ms_p99\":105,\"client\\/request_latency_ms_p999\":105,\"client\\/request_latency_ms_p9999\":105,\"client\\/request_latency_ms_sum\":276,\"client\\/requests\":85,\"client\\/sent_bytes\":11919,\"client\\/socket_unwritable_ms\":0,\"client\\/socket_writable_ms\":207,\"client\\/success\":84}";
+    String line = "INF [20140611-21:34:01.224] stats: {\"400\":30,\"500\":44,\"client\\/request_latency_ms_average\":3,\"client\\/request_latency_ms_count\":85,\"client\\/request_latency_ms_maximum\":105,\"client\\/request_latency_ms_minimum\":1,\"client\\/request_latency_ms_p50\":2,\"client\\/request_latency_ms_p90\":4,\"client\\/request_latency_ms_p95\":4,\"client\\/request_latency_ms_p99\":105,\"client\\/request_latency_ms_p999\":105,\"client\\/request_latency_ms_p9999\":105,\"client\\/request_latency_ms_sum\":276,\"client\\/requests\":85,\"client\\/sent_bytes\":11919,\"client\\/socket_unwritable_ms\":0,\"client\\/socket_writable_ms\":207,\"client\\/success\":84}";
     String key = "TEST";
     
     HttpSample sample = parser.getSample(line, key);    
     Assert.assertEquals(105, sample.getSummarizerMax());
     Assert.assertEquals(1, sample.getSummarizerMin());
     Assert.assertEquals(85, sample.getSummarizerSamples());
-    Assert.assertEquals((float)85.0, sample.getSummarizerErrors());
+    Assert.assertEquals((float)75.0, sample.getSummarizerErrors());
     Assert.assertEquals(3, sample.getDuration());
     Assert.assertEquals(key, sample.getUri());
   }
