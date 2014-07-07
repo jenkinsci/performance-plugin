@@ -29,7 +29,7 @@ import java.text.ParseException;
 import javax.xml.bind.ValidationException;
 
 /**
- * Parses Iago results as dumped by the server
+ * Parses Iago results as dumped by the server.
  *
  * @author jwstric2
  */
@@ -55,21 +55,10 @@ public class IagoParser extends PerformanceReportParser {
     this.statsDateFormat = getStatsDateFormat();
     this.delimiter = delimiter;
     this.pattern = pattern;
-    patterns = parsePattern(pattern, delimiter);
+    patterns = pattern.split(delimiter);
     
   }
 
-  private String[] parsePattern(String pattern, String delimiter) {
-    String[] patternSplit = pattern.split(delimiter);
-    List<String> fields = new LinkedList<String>();
-    for (int i = 0; i < patternSplit.length; i++) {
-      String field = patternSplit[i];
-      fields.add(field);
-    }
-    return fields.toArray(new String[fields.size()]);
-
-  }
-  
   @Override
   public String getDefaultGlobPattern() {
     //Normally just a parrot server result file; if using multiple
@@ -190,6 +179,7 @@ public class IagoParser extends PerformanceReportParser {
   }
   
   protected static class Stats {
+    
     @SerializedName("client/request_latency_ms_minimum")
     private long clientRequestLatencyMsMinimum = 0;
     @SerializedName("client/request_latency_ms_maximum")
@@ -284,9 +274,10 @@ public class IagoParser extends PerformanceReportParser {
   /**
    * 
    * A Stats Deserializer to verify during deserialization that 
-   * all needed stats are available for the IagoParser
+   * all needed stats are available for the IagoParser and handle
+   * any special error fields that a user specified
    *
-   * @author jonatstr
+   * @author jwstric2
    *
    */
   private static class StatsDeserializer implements JsonDeserializer<Stats>
