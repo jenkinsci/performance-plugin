@@ -5,6 +5,7 @@
 -->
 <div>
   This plugin integrates <a href="http://jakarta.apache.org/jmeter/">JMeter reports</a>,
-  <a href="http://www.junit.org/">JUnit reports</a>, and
-  <a href="http://github.com/wk/wrk">wrk output</a> into Hudson. 
+  <a href="http://www.junit.org/">JUnit reports</a>, 
+  <a href="http://github.com/wk/wrk">wrk output</a>,
+  and <a href="http://twitter.github.io/iago/"></a>Iago reports into Hudson. 
 </div>
