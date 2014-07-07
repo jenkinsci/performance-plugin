@@ -7,6 +7,8 @@ import hudson.model.TaskListener;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.SAXException;
 
+import sun.util.logging.resources.logging;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -29,11 +31,14 @@ import javax.xml.bind.ValidationException;
 /**
  * Parses Iago results as dumped by the server
  *
- * @author jonatstr
+ * @author jwstric2
  */
 public class IagoParser extends PerformanceReportParser {
-
-  public final String statsDateFormat;
+  
+  private String statsDateFormat;
+  private String delimiter;
+  private String pattern;
+  private String[] patterns;	
   
   @Extension
   public static class DescriptorImpl extends PerformanceReportParserDescriptor {
@@ -41,14 +46,30 @@ public class IagoParser extends PerformanceReportParser {
     public String getDisplayName() {
       return "Iago";
     }
+        
   }
 
   @DataBoundConstructor
-  public IagoParser(String glob) {
+  public IagoParser(String glob, String pattern, String delimiter) {
     super(glob);
     this.statsDateFormat = getStatsDateFormat();
+    this.delimiter = delimiter;
+    this.pattern = pattern;
+    patterns = parsePattern(pattern, delimiter);
+    
   }
 
+  private String[] parsePattern(String pattern, String delimiter) {
+    String[] patternSplit = pattern.split(delimiter);
+    List<String> fields = new LinkedList<String>();
+    for (int i = 0; i < patternSplit.length; i++) {
+      String field = patternSplit[i];
+      fields.add(field);
+    }
+    return fields.toArray(new String[fields.size()]);
+
+  }
+  
   @Override
   public String getDefaultGlobPattern() {
     //Normally just a parrot server result file; if using multiple
@@ -67,17 +88,21 @@ public class IagoParser extends PerformanceReportParser {
       Collection<File> reports, TaskListener listener) throws IOException {
     List<PerformanceReport> result = new ArrayList<PerformanceReport>();
     PrintStream logger = listener.getLogger();
-   
+
+    logger.println(String.format("Performance: Parsing Iago files with user params delimiter==%s and validation errors==%s", this.delimiter, Arrays.toString(this.patterns)));
+    
     for (File f : reports) {
       final PerformanceReport r = new PerformanceReport();
       r.setReportFileName(f.getName());
       
-      logger.println("Performance: Parsing Iago report file " + f.getName());
+      logger.println("Performance: Parsing Iago report file " + f.getName());     
       BufferedReader reader = new BufferedReader(new FileReader(f));
       String line = "";
       try {
         line = reader.readLine();
         while (line != null) {
+          logger.println("Parsing line " + line);
+
           HttpSample sample = this.getSample(line, f.getName());
           String nextLine = reader.readLine();
           if (sample != null) {
@@ -123,7 +148,7 @@ public class IagoParser extends PerformanceReportParser {
   protected HttpSample getSample(String line, String key) throws ParseException, ValidationException {
     
     HttpSample sample = new HttpSample();
-    Pattern pattern = Pattern.compile("INF \\[(.+)\\] stats: (.+)");
+    Pattern pattern = Pattern.compile("^INF \\[(.+)\\] stats: (\\{.+\\})$");
     Matcher matcher = pattern.matcher(line);
         
     //Should have group count of 2, the date and the stats json
@@ -140,7 +165,7 @@ public class IagoParser extends PerformanceReportParser {
 
     //Now we need to parse the stats json
     GsonBuilder gsonBuilder = new GsonBuilder();
-    StatsDeserializer deserializer = new StatsDeserializer();
+    StatsDeserializer deserializer = new StatsDeserializer(this.patterns);
     gsonBuilder.registerTypeAdapter(Stats.class, deserializer);
     Gson gson = gsonBuilder.create();    
     
@@ -158,69 +183,100 @@ public class IagoParser extends PerformanceReportParser {
     sample.setSuccessful(true);
     sample.setSummarizerMin(statsObject.getClientRequestLatencyMsMinimum());
     sample.setSummarizerMax(statsObject.getClientRequestLatencyMsMaximum());
-    sample.setSummarizerErrors(statsObject.getClientRequests() - statsObject.getClientSuccess());
+    sample.setSummarizerErrors((statsObject.getClientRequests() - statsObject.getClientSuccess()) + statsObject.getSumValidationErrors());
     sample.setUri(key);
-    
-    
     
     return sample;
   }
   
   protected static class Stats {
     @SerializedName("client/request_latency_ms_minimum")
-    private Long clientRequestLatencyMsMinimum = null;
+    private long clientRequestLatencyMsMinimum = 0;
     @SerializedName("client/request_latency_ms_maximum")
-    private Long clientRequestLatencyMsMaximum = null;
+    private long clientRequestLatencyMsMaximum = 0;
     @SerializedName("client/request_latency_ms_average")
-    private Long clientRequestLatencyMsAverage = null;
+    private long clientRequestLatencyMsAverage = 0;
     @SerializedName("client/sent_bytes")
-    private Long clientSendBytes = null;
+    private long clientSendBytes = 0;
     @SerializedName("client/requests")
-    private Long clientRequests = null;
+    private long clientRequests = 0;
     @SerializedName("client/success")
-    private Long clientSuccess = null;
+    private long clientSuccess = 0;
     
-    public Long getClientRequestLatencyMsMinimum() {
+    //User defined validation errors
+    private transient Dictionary<String, Long> validationErrors = new Hashtable<String,Long>();
+        
+    public Stats() {
+    	
+    }
+    
+    public long getClientRequestLatencyMsMinimum() {
       return clientRequestLatencyMsMinimum;
     }
+    
     public void setClientRequestLatencyMsMinimum(
-        Long clientRequestLatencyMsMinimum) {
+        long clientRequestLatencyMsMinimum) {
       this.clientRequestLatencyMsMinimum = clientRequestLatencyMsMinimum;
     }
-    public Long getClientRequestLatencyMsMaximum() {
+    
+    public long getClientRequestLatencyMsMaximum() {
       return clientRequestLatencyMsMaximum;
     }
+    
     public void setClientRequestLatencyMsMaximum(
-        Long clientRequestLatencyMsMaximum) {
+        long clientRequestLatencyMsMaximum) {
       this.clientRequestLatencyMsMaximum = clientRequestLatencyMsMaximum;
     }
-    public Long getClientRequestLatencyMsAverage() {
+    
+    public long getClientRequestLatencyMsAverage() {
       return clientRequestLatencyMsAverage;
     }
+    
     public void setClientRequestLatencyMsAverage(
-        Long clientRequestLatencyMsAverage) {
+        long clientRequestLatencyMsAverage) {
       this.clientRequestLatencyMsAverage = clientRequestLatencyMsAverage;
     }
-    public Long getClientSendBytes() {
+    
+    public long getClientSendBytes() {
       return clientSendBytes;
     }
-    public void setClientSendBytes(Long clientSendBytes) {
+    
+    public void setClientSendBytes(long clientSendBytes) {
       this.clientSendBytes = clientSendBytes;
     }
-    public Long getClientRequests() {
+    
+    public long getClientRequests() {
       return clientRequests;
     }
-    public void setClientRequests(Long clientRequests) {
+    
+    public void setClientRequests(long clientRequests) {
       this.clientRequests = clientRequests;
     }
-    public Long getClientSuccess() {
+    
+    public long getClientSuccess() {
       return clientSuccess;
     }
-    public void setClientSuccess(Long clientSuccess) {
+
+    public void setClientSuccess(long clientSuccess) {
       this.clientSuccess = clientSuccess;
     }
+
+    public void addValidationError(String name, long value) {
+    	synchronized (validationErrors) {
+    		this.validationErrors.put(name, new Long(value));
+    	}
+    }
     
-    
+    public long getSumValidationErrors() {
+    	long sumValidationErrors = 0;
+    	synchronized (validationErrors) {
+	    	Enumeration<String> keys = validationErrors.keys();
+	    	while(keys.hasMoreElements()) {
+	    		sumValidationErrors += validationErrors.get(keys.nextElement());	    		
+	    	}
+    	}
+    	return sumValidationErrors;
+    }
     
   }
   
@@ -235,26 +291,57 @@ public class IagoParser extends PerformanceReportParser {
    */
   private static class StatsDeserializer implements JsonDeserializer<Stats>
   {
-    static final List<String> requiredFields = 
-        new ArrayList<String>(Arrays.asList(
+
+	  private String[] errorFields; 
+	  
+	  public StatsDeserializer(String[] errorFields) {
+		  this.errorFields = errorFields;
+	  }
+	  
+	  private static final String[] requiredFields = new String[] {
             "client/request_latency_ms_minimum", 
             "client/request_latency_ms_maximum", 
             "client/request_latency_ms_average",
             "client/sent_bytes",
             "client/requests",
-            "client/success"));
+            "client/success"};
 
     public Stats deserialize(JsonElement json, Type typeOfT,
-        JsonDeserializationContext context) throws JsonParseException {
+      JsonDeserializationContext context) throws JsonParseException {
+      
       JsonObject jsonObject = (JsonObject) json;
-      for (String fieldName : requiredFields)
-      {
-        if (jsonObject.get(fieldName) == null)
-        {
+      Stats statsObj = null;
+      
+      //First, check we have all our required fields ..
+      for (String fieldName : requiredFields) {
+        if (jsonObject.get(fieldName) == null) {
           throw new JsonParseException("Required Field Not Found: " + fieldName);
         }
       }
-      return new Gson().fromJson(json, Stats.class);    
+      
+      statsObj = new Gson().fromJson(json, Stats.class);
+
+      //If user requested errors then add them in
+      for (String fieldName: this.errorFields) {
+      	Set<Map.Entry<String, JsonElement>> elementSet = jsonObject.entrySet();
+      	Iterator<Map.Entry<String, JsonElement>> elementSetIt = elementSet.iterator();
+      	while (elementSetIt.hasNext()) {
+      	  Map.Entry<String, JsonElement> nextElement = elementSetIt.next();
+      	  String key = nextElement.getKey();
+      	  if (key.matches(fieldName)) {
+            JsonElement element = nextElement.getValue();
+            
+            //Element is not null and is a base primitive
+            if (element != null && element.isJsonPrimitive()) {
+              long fieldValue = element.getAsLong();
+              statsObj.addValidationError(fieldName, fieldValue);
+            }
+            break;
+      	  }
+      	}      	
+      }
+      
+      return statsObj;
     }
     
   }
