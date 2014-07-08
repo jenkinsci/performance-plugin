@@ -282,7 +282,11 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             return true;
           }
         }
+      } else if (list.get(i).getDescriptor().getDisplayName()
+        .equals("Iago")) {
+        return true;
       }
+      
     }
     return false;
   }
