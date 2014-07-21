@@ -35,10 +35,10 @@ import javax.xml.bind.ValidationException;
  */
 public class IagoParser extends PerformanceReportParser {
   
-  private String statsDateFormat;
-  private String delimiter;
-  private String pattern;
-  private String[] patterns;	
+  public String statsDateFormat;
+  public String delimiter;
+  public String pattern;
+  public String[] patterns;	
   
   @Extension
   public static class DescriptorImpl extends PerformanceReportParserDescriptor {
