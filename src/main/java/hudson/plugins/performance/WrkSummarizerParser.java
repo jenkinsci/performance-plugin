@@ -17,7 +17,7 @@ import org.xml.sax.SAXException;
  * Note that Wrk does not produce request-level data, and can only be processed
  * in it's summarized form (unless extended to do otherwise).
  * 
- * @author John Murray <me@johnmurray.io>
+ * @author John Murray me@johnmurray.io
  */
 public class WrkSummarizerParser extends PerformanceReportParser {
 
