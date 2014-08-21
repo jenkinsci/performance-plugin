@@ -8,7 +8,7 @@
 
   <artifactId>performance</artifactId>
   <packaging>hpi</packaging>
-  <version>1.11-SNAPSHOT</version>
+  <version>1.12-SNAPSHOT</version>
   <name>Performance plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Performance+Plugin</url>
 
