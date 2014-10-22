@@ -191,4 +191,11 @@ public class PerformanceReportTest {
 		UriReport report = uriReportMap.get("Home");
 		assertNotNull(report);
 	}
+
+    @Test
+    public void testGetUriListOrdered() throws IOException, SAXException {
+        PerformanceReport performanceReport = parseOneJMeter(new File("src/test/resources/JMeterResultsRandomUri.jtl"));
+        List<UriReport> uriReports = performanceReport.getUriListOrdered();
+        assertEquals("Ant", uriReports.get(0).getUri());
+    }
 }

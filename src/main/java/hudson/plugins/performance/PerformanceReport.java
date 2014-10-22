@@ -191,8 +191,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
   public List<UriReport> getUriListOrdered() {
     Collection<UriReport> uriCollection = getUriReportMap().values();
-    List<UriReport> UriReportList = new ArrayList<UriReport>(uriCollection);
-    return UriReportList;
+    List<UriReport> uriReportList = new ArrayList<UriReport>(uriCollection);
+    Collections.sort(uriReportList, Collections.reverseOrder());
+    return uriReportList;
   }
 
   public Map<String, UriReport> getUriReportMap() {
