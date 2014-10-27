@@ -7,3 +7,4 @@ target
 .project
 .settings/
 src/test/resources/*.jtl.serialized
+/work/
