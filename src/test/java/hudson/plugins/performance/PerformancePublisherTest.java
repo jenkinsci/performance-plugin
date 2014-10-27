@@ -76,8 +76,40 @@ import static java.util.Arrays.asList;
         }
 	}
 
+    public void testBuildWithParameters () throws Exception{
+        FreeStyleProject p = createFreeStyleProject("JobTest");
+		p.getBuildersList().add(new TestBuilder() {
+			@Override
+			public boolean perform(AbstractBuild<?, ?> build,
+					Launcher launcher, BuildListener listener)
+					throws InterruptedException, IOException {
+				build.getWorkspace().child("JobTest/test.jtl").copyFrom(
+						getClass().getResource("/JMeterResults.jtl"));
+				return true;
+			}
+		});
+        p.getPublishersList().add(
+                new PerformancePublisher(0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, asList(new JMeterParser(
+                        "${JOB_NAME}/*.jtl")),false));
+
+		FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+		PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
+
+        try{
+          //assertNotNull(a);
+          // poke a few random pages to verify rendering
+          WebClient wc = createWebClient();
+		  wc.getPage(b, "performance");
+		  wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        
+    }
+    
     public void testBuildUnstableResponseThreshold() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = createFreeStyleProject("TestJob");
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,

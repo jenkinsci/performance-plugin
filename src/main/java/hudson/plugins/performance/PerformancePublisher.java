@@ -1,14 +1,17 @@
 package hudson.plugins.performance;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
+import hudson.util.VariableResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
@@ -232,6 +235,8 @@ public class PerformancePublisher extends Recorder {
     //Agoley : Possible fix, if we specify more than one result file pattern
     try {
       String parts[] = includes.split("\\s*[;:,]+\\s*");
+      
+      
       List<FilePath> files = new ArrayList<FilePath>();
         for (String path : parts) {
           FilePath[] ret = workspace.list(path);
@@ -258,6 +263,11 @@ public class PerformancePublisher extends Recorder {
         }
       }
     }
+    if (!files.isEmpty()) return files;
+    
+    //give up and just try direct matching on string
+    File directFile = new File(includes); 
+    if(directFile.exists()) files.add(new FilePath(directFile));
     return files;
   }
 
@@ -317,6 +327,10 @@ public class PerformancePublisher extends Recorder {
         for (PerformanceReportParser parser : parsers) {
 
           String glob = parser.glob;
+          //Replace any runtime environment variables such as ${sample_var}
+          EnvVars env = build.getEnvironment(listener);
+          glob = Util.replaceMacro(glob, env);
+		
           logger.println("Performance: Recording " + parser.getReportName() + " reports '" + glob + "'");
 
           List<FilePath> files = locatePerformanceReports(build.getWorkspace(), glob);
