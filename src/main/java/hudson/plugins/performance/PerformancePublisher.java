@@ -278,7 +278,7 @@ public class PerformancePublisher extends Recorder {
     PrintStream logger = listener.getLogger();
     double thresholdTolerance = 0.00000001;
     Result result = Result.SUCCESS;
-
+    EnvVars env = build.getEnvironment(listener);
 
     //For absolute error/unstable threshold..
     if (!modeOfThreshold) {
@@ -328,9 +328,7 @@ public class PerformancePublisher extends Recorder {
 
           String glob = parser.glob;
           //Replace any runtime environment variables such as ${sample_var}
-          EnvVars env = build.getEnvironment(listener);
-          glob = Util.replaceMacro(glob, env);
-		
+          glob = env.expand(glob);
           logger.println("Performance: Recording " + parser.getReportName() + " reports '" + glob + "'");
 
           List<FilePath> files = locatePerformanceReports(build.getWorkspace(), glob);
@@ -522,6 +520,7 @@ public class PerformancePublisher extends Recorder {
 
         for (PerformanceReportParser parser : parsers) {
           String glob = parser.glob;
+          glob = env.expand(glob);
           name = glob;
           List<FilePath> files = locatePerformanceReports(build.getWorkspace(), glob);
 
