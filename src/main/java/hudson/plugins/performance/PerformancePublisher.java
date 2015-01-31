@@ -186,7 +186,7 @@ public class PerformancePublisher extends Recorder {
   }
 
   public BuildStepMonitor getRequiredMonitorService() {
-    return BuildStepMonitor.BUILD;
+    return BuildStepMonitor.NONE;
   }
 
   public List<PerformanceReportParser> getParsers() {

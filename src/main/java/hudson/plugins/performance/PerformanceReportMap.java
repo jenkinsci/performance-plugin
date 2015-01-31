@@ -195,7 +195,7 @@ public class PerformanceReportMap implements ModelObject {
               }
             }
           }, parameter);
-      previousBuild = previousBuild.getPreviousBuild();
+      previousBuild = previousBuild.getPreviousCompletedBuild();
     }
     // Now we should have the data necessary to generate the graphs!
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
@@ -231,7 +231,7 @@ public class PerformanceReportMap implements ModelObject {
               }
             }
           }, parameter);
-      previousBuild = previousBuild.getPreviousBuild();
+      previousBuild = previousBuild.getPreviousCompletedBuild();
     }
     DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
     for (AbstractBuild<?, ?> currentBuild : buildReports.keySet()) {
@@ -317,7 +317,7 @@ public class PerformanceReportMap implements ModelObject {
       }
     }
 
-    AbstractBuild<?, ?> previousBuild = getBuild().getPreviousBuild();
+    AbstractBuild<?, ?> previousBuild = getBuild().getPreviousCompletedBuild();
     if (previousBuild == null) {
       return;
     }
