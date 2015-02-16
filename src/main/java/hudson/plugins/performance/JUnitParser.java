@@ -94,7 +94,7 @@ public class JUnitParser extends JMeterParser {
               String time = attributes.getValue("time");
               currentSample.setDuration(parseDuration(time));
               currentSample.setSuccessful(true);
-              currentSample.setUri(attributes.getValue("name"));
+              currentSample.setUri(attributes.getValue("classname") + "." + attributes.getValue("name"));
               currentSample.setErrorObtained(false);
             } else if ("failure".equalsIgnoreCase(qName) && status != 0) {
               currentSample.setErrorObtained(false);
