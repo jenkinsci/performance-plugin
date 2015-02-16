@@ -13,6 +13,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -77,7 +79,7 @@ public class JMeterParser extends PerformanceReportParser {
           try {
             PerformanceReport r = cache.getIfPresent(fser);
             if (r == null) {
-              in = new ObjectInputStream(new FileInputStream(fser));
+              in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fser)));
               r = (PerformanceReport) in.readObject();
             }
             result.add(r);
@@ -160,7 +162,7 @@ public class JMeterParser extends PerformanceReportParser {
         synchronized (JMeterParser.class) {
           try {
             cache.put(fser, r);
-            out = new ObjectOutputStream(new FileOutputStream(fser));
+            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(fser)));
             out.writeObject(r);
           } catch (Exception unknown) {
             LOGGER.warning("Serialization failed. " + unknown);
