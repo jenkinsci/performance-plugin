@@ -140,10 +140,9 @@ public class PerformanceReportTest {
 		assertEquals(5, uriReportMap.size());
 		String firstUri = "hudson.plugins.performance.UriReportTest.testGetMin";
 		UriReport firstUriReport = uriReportMap.get(firstUri);
-		HttpSample firstHttpSample = firstUriReport.getHttpSampleList().get(0);
-		assertEquals(firstUri, firstHttpSample.getUri());
-		assertEquals(31, firstHttpSample.getDuration());
-		assertEquals(new Date(0L), firstHttpSample.getDate());
+		assertEquals(firstUri, firstUriReport.getUri());
+		assertEquals(31, firstUriReport.getDurations().get(0).longValue());
+		assertEquals(0L, firstUriReport.getStart().getTime());
 		assertFalse(firstUriReport.isFailed());
 		String lastUri = "hudson.plugins.performance.UriReportTest.testGetMax";
 		UriReport secondUriReport = uriReportMap.get(lastUri);
