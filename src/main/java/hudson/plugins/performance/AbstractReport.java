@@ -2,6 +2,7 @@ package hudson.plugins.performance;
 
 import org.kohsuke.stapler.Stapler;
 
+import java.text.DecimalFormatSymbols;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -11,17 +12,18 @@ import java.util.Locale;
  */
 public abstract class AbstractReport {
 
-  private final NumberFormat percentFormat = new DecimalFormat("0.0");
-  private final NumberFormat dataFormat = new DecimalFormat("#,###");
+  private final NumberFormat percentFormat;
+  private final NumberFormat dataFormat;
 
   abstract public int countErrors();
 
   abstract public double errorPercent();
 
   public AbstractReport() {
-    if (Stapler.getCurrentRequest() != null) {
-      Locale.setDefault(Stapler.getCurrentRequest().getLocale());
-    }
+    final Locale useThisLocale = ( Stapler.getCurrentRequest() != null ) ? Stapler.getCurrentRequest().getLocale() : Locale.getDefault();
+
+    percentFormat = new DecimalFormat("0.0", DecimalFormatSymbols.getInstance( useThisLocale ));
+    dataFormat = new DecimalFormat("#,###", DecimalFormatSymbols.getInstance( useThisLocale ));
   }
 
   public String errorPercentFormated() {
@@ -30,7 +32,7 @@ public abstract class AbstractReport {
       return percentFormat.format(errorPercent());
     }
   }
-  
+
   abstract public long getAverage();
 
   public String getAverageFormated() {
@@ -66,16 +68,16 @@ public abstract class AbstractReport {
   abstract public long getMin();
 
   abstract public int size();
-  
+
   abstract public String getHttpCode();
 
   abstract public long getAverageDiff();
-  
+
   abstract public long getMedianDiff();
-  
+
   abstract public double getErrorPercentDiff();
-  
+
   abstract public String getLastBuildHttpCodeIfChanged();
-  
+
   abstract public int getSizeDiff();
 }

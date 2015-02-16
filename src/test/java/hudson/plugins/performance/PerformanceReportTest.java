@@ -138,13 +138,14 @@ public class PerformanceReportTest {
 		Map<String, UriReport> uriReportMap = performanceReport
 				.getUriReportMap();
 		assertEquals(5, uriReportMap.size());
-		String firstUri = "testGetMin";
+		String firstUri = "hudson.plugins.performance.UriReportTest.testGetMin";
 		UriReport firstUriReport = uriReportMap.get(firstUri);
-		assertEquals(firstUri, firstUriReport.getUri());
-		assertEquals(31, firstUriReport.getDurations().get(0).longValue());
-		assertEquals(0L, firstUriReport.getStart().getTime());
+		HttpSample firstHttpSample = firstUriReport.getHttpSampleList().get(0);
+		assertEquals(firstUri, firstHttpSample.getUri());
+		assertEquals(31, firstHttpSample.getDuration());
+		assertEquals(new Date(0L), firstHttpSample.getDate());
 		assertFalse(firstUriReport.isFailed());
-		String lastUri = "testGetMax";
+		String lastUri = "hudson.plugins.performance.UriReportTest.testGetMax";
 		UriReport secondUriReport = uriReportMap.get(lastUri);
 		assertEquals(lastUri, secondUriReport.getUri());
 		assertEquals(26, secondUriReport.getDurations().get(0).longValue());
@@ -159,7 +160,7 @@ public class PerformanceReportTest {
 	    Map<String, UriReport> uriReportMap = performanceReport
 	        .getUriReportMap();
 	    assertEquals(1, uriReportMap.size());
-	    String uri = "unknown";
+	    String uri = "junit.framework.JUnit4TestCaseFacade.unknown";
 	    UriReport report = uriReportMap.get(uri);
 	    assertEquals(uri, report.getUri());
 	    assertEquals(890, report.getDurations().get(0).longValue());
