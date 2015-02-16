@@ -11,7 +11,6 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
-import hudson.util.VariableResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
@@ -567,7 +566,7 @@ public class PerformancePublisher extends Recorder {
         bw.write("<results>\n");
 
         // getting previous build/nth previous build..
-        AbstractBuild prevBuild = null;
+        AbstractBuild<?,?> prevBuild = null;
 
         if(compareBuildPrevious){
           buildNo += "previous";
@@ -882,15 +881,14 @@ public class PerformancePublisher extends Recorder {
      */
 
     // @psingh5 -
-  public AbstractBuild getnthBuild(AbstractBuild build, BuildListener listener)
+  public AbstractBuild<?,?> getnthBuild(AbstractBuild<?,?> build, BuildListener listener)
           throws IOException {
-    PrintStream logger = listener.getLogger();
-    AbstractBuild nthBuild = build;
+    AbstractBuild<?,?> nthBuild = build;
 
     int nextBuildNumber = build.number - nthBuildNumber;
 
     for (int i = 1; i <= nextBuildNumber; i++) {
-      nthBuild = (AbstractBuild) nthBuild.getPreviousBuild();
+      nthBuild = (AbstractBuild<?,?>) nthBuild.getPreviousBuild();
       if (nthBuild == null)
         return null;
     }
@@ -906,12 +904,11 @@ public class PerformancePublisher extends Recorder {
      * @throws IOException
      */
 
-  public AbstractBuild getPrevBuild(AbstractBuild build, BuildListener listener)
+  public AbstractBuild<?,?> getPrevBuild(AbstractBuild<?,?> build, BuildListener listener)
           throws IOException {
-    PrintStream logger = listener.getLogger();
-    AbstractBuild nthBuild = build;
+    AbstractBuild<?,?> nthBuild = build;
 
-    nthBuild = (AbstractBuild) nthBuild.getPreviousBuild();
+    nthBuild = (AbstractBuild<?,?>) nthBuild.getPreviousBuild();
     if (nthBuild == null) {
       return null;
     } else {

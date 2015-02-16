@@ -1,21 +1,22 @@
 package hudson.plugins.performance;
 
-import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
 import hudson.util.ChartUtil;
 
-import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URLEncoder;
-import java.util.*;
-import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.time.TimeSeries;
+import org.apache.commons.lang.StringUtils;
 import org.jfree.data.time.FixedMillisecond;
-import org.jfree.data.time.RegularTimePeriod;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -24,22 +25,12 @@ import org.kohsuke.stapler.StaplerResponse;
  * 
  * This object belongs under {@link PerformanceReport}.
  */
-public class UriReport extends AbstractReport implements  Serializable, ModelObject,
+public class UriReport extends AbstractReport implements Serializable, ModelObject,
     Comparable<UriReport> {
 
-  private static final long serialVersionUID = 6377220939528230222L;
+  private static final long serialVersionUID = -5269155428479638524L;
 
   public final static String END_PERFORMANCE_PARAMETER = ".endperformanceparameter";
-
-  /**
-   * Individual HTTP invocations to this URI and how they went.
-   */
-  private final List<HttpSample> httpSampleList = new ArrayList<HttpSample>();
-
-  /**
-   * The parent object to which this object belongs.
-   */
-  private final PerformanceReport performanceReport;
 
   /**
    * Escaped {@link #uri} that doesn't contain any letters that cannot be used
@@ -50,15 +41,88 @@ public class UriReport extends AbstractReport implements  Serializable, ModelObj
   private UriReport lastBuildUriReport;
 
   private String uri;
+  
+  /**
+   * The amount of http samples that are not successful.
+   */
+  private int nbError = 0;
 
-  UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
-    this.performanceReport = performanceReport;
+  /**
+   * A list that contains the date and duration (in milliseconds) of all individual samples.
+   */
+  private final List<Sample> samples = new ArrayList<Sample>(); // retain insertion order.
+
+  /**
+   * A lazy cache of all duration values in {@link #samples}, insertion order (same as {@link #samples} 
+   */
+  private transient List<Long> durationsIO = new ArrayList<Long>();
+
+  /**
+   * A lazy cache of all duration values in {@link #samples}, ordered by duration. 
+   */
+  private transient List<Long> durationsSortedBySize = new ArrayList<Long>();
+
+  /**
+   * Indicates if the collection {@link #durationsSortedBySize} is in a sorted state.
+   */
+  private transient boolean isSorted = false;
+  
+  /**
+   * The duration of all samples combined, in milliseconds.
+   */
+  private long totalDuration = 0; // note that this is the sum of all elements in #durations, but need not be recalculated every time.
+
+  /**
+   * The set of (unique) HTTP status codes from all samples. 
+   */
+  private Set<String> httpCodes = new HashSet<String>();
+
+  /**
+   * The sum of summarizerSample values from all samples;
+   */
+  private long summarizerSize = 0;
+  
+  /**
+   * The sum of summarizerErrors values from all samples;
+   */
+  private float summarizerErrors = 0;
+  
+  /**
+   * The point in time of the start of the oldest sample.
+   */
+  private Date start = null;
+
+  /**
+   * The point in time of the end of the youngest sample.
+   */
+  private Date end = null;
+
+  UriReport(String staplerUri, String uri) {
     this.staplerUri = staplerUri;
     this.uri = uri;
   }
 
-  public void addHttpSample(HttpSample httpSample) {
-    httpSampleList.add(httpSample);
+  public void addHttpSample(HttpSample sample) {
+    if (!sample.isSuccessful()) {
+      nbError++;
+    }
+    synchronized (samples) {
+      if (samples.add(new Sample(sample.getDate(), sample.getDuration()))) {
+        isSorted = false;
+      }
+    }
+    totalDuration += sample.getDuration();
+    httpCodes.add(sample.getHttpCode()); // The Set implementation will ensure that no duplicates will be saved.
+    summarizerSize += sample.getSummarizerSamples();
+    summarizerErrors += sample.getSummarizerErrors();
+    
+    if (start == null || sample.getDate().before( start )) {
+      start = sample.getDate();
+    }
+    Date finish = new Date(sample.getDate().getTime() + sample.getDuration());
+    if (end == null || finish.after(end)) {
+        end = finish;
+    }
   }
 
   public int compareTo(UriReport uriReport) {
@@ -69,12 +133,6 @@ public class UriReport extends AbstractReport implements  Serializable, ModelObj
   }
 
   public int countErrors() {
-    int nbError = 0;
-    for (HttpSample currentSample : httpSampleList) {
-      if (!currentSample.isSuccessful()) {
-        nbError++;
-      }
-    }
     return nbError;
   }
 
@@ -83,89 +141,83 @@ public class UriReport extends AbstractReport implements  Serializable, ModelObj
   }
 
   public long getAverage() {
-    long average = 0;
-    for (HttpSample currentSample : httpSampleList) {
-      average += currentSample.getDuration();
-    }
-    return average / size();
-  }
-  
-  public double getAverageSizeInKb(){ 
-	  double average = 0 ; 
-	  for (HttpSample currentSample : httpSampleList) {
-	      average += currentSample.getSizeInKb();
-	    }
-	    return roundTwoDecimals(average / size());
+    return totalDuration / size();
   }
 
-  public long get90Line() {
-    long result = 0;
-    Collections.sort(httpSampleList);
-    if (httpSampleList.size() > 0) {
-      result = httpSampleList.get((int) (httpSampleList.size() * .9)).getDuration();
+  private long getDurationAt(double percentage) {
+    if (percentage < 0 || percentage > 1) {
+      throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 1 (inclusive)");
     }
-    return result;
+    
+    synchronized (samples) {
+      final List<Long> durations = getSortedDuration();
+
+      if (durations.isEmpty()) {
+        return 0;
+      }
+      
+      return durations.get((int) (samples.size() * percentage));
+    }    
+  }
+  
+  public long get90Line() {
+    return getDurationAt(0.9);
   }
   
   public String getHttpCode() {
-    String result = "";
-    
-    for (HttpSample currentSample : httpSampleList) {
-      if ( !result.matches( ".*"+currentSample.getHttpCode()+".*" ) ) {
-          result += ( result.length() > 1 ) ? ","+currentSample.getHttpCode() : currentSample.getHttpCode();
-      }
-    }
-    
-    return result;
+    return StringUtils.join(httpCodes, ',');
   }
 
   public long getMedian() {
-    long result = 0;
-    Collections.sort(httpSampleList);
-    if (httpSampleList.size() > 0) {
-      result = httpSampleList.get((int) (httpSampleList.size() * .5)).getDuration();
-    }
-    return result;
-  }
-
-  public AbstractBuild<?, ?> getBuild() {
-    return performanceReport.getBuild();
+    return getDurationAt(0.5);
   }
 
   public String getDisplayName() {
     return getUri();
   }
 
-  public List<HttpSample> getHttpSampleList() {
-    return httpSampleList;
-  }
+  protected List<Long> getSortedDuration() {
+    synchronized (samples) {
+      if (!isSorted || durationsSortedBySize == null || durationsSortedBySize.size() != samples.size()) {
+        
+        durationsSortedBySize = new ArrayList<Long>(samples.size());
+        for (Sample sample : samples) {
+          durationsSortedBySize.add(sample.duration);
+        }
+        Collections.sort(durationsSortedBySize);
+        isSorted = true;
+      }
 
-  public PerformanceReport getPerformanceReport() {
-    return performanceReport;
+      return durationsSortedBySize;
+    }
+  }
+  
+  public List<Long> getDurations() {
+    synchronized (samples) {
+      if (durationsIO == null || durationsIO.size() != samples.size()) {        
+        durationsIO = new ArrayList<Long>(samples.size());
+        for (Sample sample : samples) {
+          durationsIO.add(sample.duration);
+        }
+      }
+      return durationsIO;
+    }
   }
 
   public long getMax() {
-    long max = Long.MIN_VALUE;
-    for (HttpSample currentSample : httpSampleList) {
-      max = Math.max(max, currentSample.getDuration());
+    final List<Long> durations = getSortedDuration();
+    if (durations.isEmpty()) {
+      return 0;
     }
-    return max;
-  }
-  
-  public double getTotalTrafficInKb(){ 
-	  double traffic = 0 ; 
-	  for (HttpSample currentSample : httpSampleList) {
-		  traffic += currentSample.getSizeInKb();
-	    }
-	    return roundTwoDecimals(traffic);
+    return durations.get(durations.size()-1);
   }
 
   public long getMin() {
-    long min = Long.MAX_VALUE;
-    for (HttpSample currentSample : httpSampleList) {
-      min = Math.min(min, currentSample.getDuration());
+    final List<Long> durations = getSortedDuration();
+    if (durations.isEmpty()) {
+      return 0;
     }
-    return min;
+    return durations.get(0);
   }
 
   public String getStaplerUri() {
@@ -176,31 +228,14 @@ public class UriReport extends AbstractReport implements  Serializable, ModelObj
     return uri;
   }
 
-  public String getShortUri() {
-    if ( uri.length() > 130 ) {
-        return uri.substring( 0, 129 );
-    }
-    return uri;
-  }
-  
   public boolean isFailed() {
     return countErrors() != 0;
   }
 
-  public void setUri(String uri) {
-    this.uri = uri;
-  }
-
   public int size() {
-    return httpSampleList.size();
-  }
-
-  public String encodeUriReport() throws UnsupportedEncodingException {
-    StringBuilder sb = new StringBuilder(120);
-    sb.append(performanceReport.getReportFileName()).append(
-        GraphConfigurationDetail.SEPARATOR).append(getStaplerUri()).append(
-        END_PERFORMANCE_PARAMETER);
-    return URLEncoder.encode(sb.toString(), "UTF-8");
+    synchronized (samples) {
+      return samples.size();
+    }
   }
 
   public void addLastBuildUriReport( UriReport lastBuildUriReport ) {
@@ -247,67 +282,57 @@ public class UriReport extends AbstractReport implements  Serializable, ModelObj
       return size() - lastBuildUriReport.size();
   }
 
-  public long getSummarizerMax() {
-    long max =  Long.MIN_VALUE;
-    for (HttpSample currentSample : httpSampleList) {
-        max = Math.max(max, currentSample.getSummarizerMax());
-    }
-    return max;
+  public float getSummarizerErrors() {    
+    return summarizerErrors/summarizerSize*100;     
   }
 
-  public long getSummarizerMin() {
-    long min = Long.MAX_VALUE;
-    for (HttpSample currentSample : httpSampleList) {
-        min = Math.min(min, currentSample.getSummarizerMin());
+  public void doSummarizerTrendGraph(StaplerRequest request,StaplerResponse response) throws IOException {    
+    TimeSeries responseTimes = new TimeSeries("Response Time", FixedMillisecond.class);
+    synchronized (samples) {
+      for (Sample sample : samples) {
+        responseTimes.addOrUpdate(new FixedMillisecond(sample.date),sample.duration);
+      }
     }
-    return min;
+
+    TimeSeriesCollection resp = new TimeSeriesCollection();
+    resp.addSeries(responseTimes);
+    
+    ArrayList<XYDataset> dataset = new ArrayList<XYDataset>();
+    dataset.add(resp);
+
+    ChartUtil.generateGraph(request, response,
+                        PerformanceProjectAction.createSummarizerTrend(dataset, uri),400, 200);
   }
 
-  public long getSummarizerSize() {
-    long size=0;
-    for (HttpSample currentSample : httpSampleList) {
-        size+=currentSample.getSummarizerSamples();
-    }
-    return size;
+  public Date getStart() {
+    return start;
   }
-
-  public String getSummarizerErrors() {
-    float nbError = 0;
-    for (HttpSample currentSample : httpSampleList) {
-        nbError+=currentSample.getSummarizerErrors();
-    }
-    return new DecimalFormat("#.##").format(nbError/getSummarizerSize()*100).replace(",", ".");     
+  
+  public Date getEnd() {
+    return end;
   }
-
-
-    public void doSummarizerTrendGraph(StaplerRequest request,
-                                StaplerResponse response) throws IOException{
-
-         ArrayList<XYDataset> dataset = new ArrayList<XYDataset> ();
-         TimeSeriesCollection resp = new TimeSeriesCollection();
-        // TimeSeriesCollection err  = new TimeSeriesCollection();
-         TimeSeries responseTime = new TimeSeries("Response Time", FixedMillisecond.class);
-        // TimeSeries errors = new TimeSeries("errors", Minute.class);
-         
-         for (int i=0; i<=this.httpSampleList.size()-1; i++) {
-             RegularTimePeriod current = new FixedMillisecond(this.httpSampleList.get(i).getDate());
-             responseTime.addOrUpdate(current,this.httpSampleList.get(i).getDuration());
-             //errors.addOrUpdate(current,report.getHttpSampleList().get(i).getSummarizerErrors());
-         }
-
-       resp.addSeries(responseTime);
-      // err.addSeries(errors);
-       dataset.add(resp);
-      // dataset.add(err);
-
-            ChartUtil.generateGraph(request, response,
-                                PerformanceProjectAction.createSummarizerTrend(dataset, uri),400, 200);
-     
+  
+  public static class Sample implements Serializable, Comparable<Sample> {
+    
+    private static final long serialVersionUID = 4458431861223813407L;
+    
+    final Date date;
+    final long duration;
+    
+    public Sample(Date date, long duration) {
+      this.date = date;
+      this.duration = duration;
     }
 
-    private double roundTwoDecimals(double d) {
-        DecimalFormat twoDForm = new DecimalFormat("#.##");
-  	  return Double.valueOf(twoDForm.format(d));
-  	}
-
+    /** Compare first based on duration, next on date. */
+    public int compareTo(Sample other) {
+      if (this == other) return 0;
+      if (this.duration < other.duration) return -1; 
+      if (this.duration > other.duration) return 1;
+      if (this.date == null || other.date == null) return 0;
+      if (this.date.before(other.date)) return -1;
+      if (this.date.after(other.date)) return 1;
+      return 0;
+    }
+  }
 }

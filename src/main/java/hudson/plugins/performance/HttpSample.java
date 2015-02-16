@@ -10,9 +10,9 @@ import java.io.Serializable;
  */
 public class HttpSample implements Serializable, Comparable<HttpSample> {
 
-  private static final long serialVersionUID = -1980997520755400556L;
+  private static final long serialVersionUID = -3531990216789038711L;
 
-	private long duration;
+  private long duration;
 
 	private boolean successful;
 

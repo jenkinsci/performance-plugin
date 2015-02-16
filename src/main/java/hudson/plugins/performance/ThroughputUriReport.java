@@ -1,7 +1,5 @@
 package hudson.plugins.performance;
 
-import java.util.List;
-
 /**
  * @author Artem Stasiuk (artem.stasuk@gmail.com)
  */
@@ -16,33 +14,18 @@ public class ThroughputUriReport {
     }
 
     public long get() {
-        final List<HttpSample> httpSamples = uriReport.getHttpSampleList();
-        final long durationInSeconds = calculateTestingDuration(httpSamples);
-        return httpSamples.size() / durationInSeconds;
-    }
-
-    private long calculateTestingDuration(final List<HttpSample> httpSamples) {
-        final long testingStartTime = testingStartTime(httpSamples);
-        final long testingFinishTime = testingFinishTime(httpSamples);
-        final long testingDuration = (testingFinishTime - testingStartTime) / MILLISECONDS_IN_SECOND;
-        return Math.max(testingDuration, 1);
-    }
-
-    private long testingStartTime(final List<HttpSample> httpSamples) {
-        long min = -1;
-        for (final HttpSample httpSample : httpSamples) {
-            if (min < 0 || min > httpSample.getDate().getTime()) min = httpSample.getDate().getTime();
+        if (uriReport.size() == 0) {
+          return 0;
         }
-        return min;
-    }
-
-    private long testingFinishTime(final List<HttpSample> httpSamples) {
-        long max = 0;
-        for (final HttpSample httpSample : httpSamples) {
-            if (max < httpSample.getDate().getTime() + httpSample.getDuration())
-                max = httpSample.getDate().getTime() + httpSample.getDuration();
+        
+        long end = uriReport.getEnd().getTime();
+        long start = uriReport.getStart().getTime();
+        final long duration = end - start;
+        
+        if (duration == 0) {
+          return uriReport.size(); // more than zero requests should always take at least some time. If that didn't get logged, this is the most suitable alternative.
         }
-        return max;
+        
+        return uriReport.size() / (duration / MILLISECONDS_IN_SECOND);
     }
-
 }

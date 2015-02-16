@@ -94,21 +94,11 @@ public class TestSuiteReportDetail implements ModelObject {
           continue;
         }
 
-        List<HttpSample> allSamples = new ArrayList<HttpSample>();
-        for (UriReport currentReport : performanceReport.getUriReportMap()
-            .values()) {
-          allSamples.addAll(currentReport.getHttpSampleList());
-        }
-        Collections.sort(allSamples);
-        for (HttpSample sample : allSamples) {
-          if (sample.getUri().equals(testUri)) {
-            if (sample.hasError()) {
-              // we set duration as 0 for tests failed because of errors
-              dataSetBuilderAverage.add(0, sample.getUri(), label);
-            } else {
-              dataSetBuilderAverage.add(sample.getDuration(), sample.getUri(),
-                  label);
-            }
+        String testStaplerUri = PerformanceReport.asStaplerURI(testUri);
+        UriReport reportForTestUri = performanceReport.getUriReportMap().get(testStaplerUri);
+        if (reportForTestUri != null) {
+          for (Long duration : reportForTestUri.getDurations()) {
+            dataSetBuilderAverage.add(duration, testUri, label);
           }
         }
       }
@@ -189,15 +179,9 @@ public class TestSuiteReportDetail implements ModelObject {
         continue;
       }
 
-      List<HttpSample> allSamples = new ArrayList<HttpSample>();
-      for (UriReport currentReport : performanceReport.getUriReportMap()
-          .values()) {
-        allSamples.addAll(currentReport.getHttpSampleList());
-      }
-      Collections.sort(allSamples);
-      for (HttpSample sample : allSamples) {
-        if (!performanceReportTestCaseList.contains(sample.getUri())) {
-          performanceReportTestCaseList.add(sample.getUri());
+      for (UriReport currentReport : performanceReport.getUriReportMap().values()) {
+        if (!performanceReportTestCaseList.contains(currentReport.getUri())) {
+          performanceReportTestCaseList.add(currentReport.getUri());
         }
       }
     }

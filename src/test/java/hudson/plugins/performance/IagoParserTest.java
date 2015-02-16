@@ -259,7 +259,7 @@ public class IagoParserTest extends HudsonTestCase {
   
     float nbError = 0;
     for (UriReport currentReport : report.getUriReportMap().values()) {
-      nbError += Float.valueOf(currentReport.getSummarizerErrors());      
+      nbError += currentReport.getSummarizerErrors();      
     }
 
     double errorPercent = ((double) nbError) / report.getUriReportMap().size();

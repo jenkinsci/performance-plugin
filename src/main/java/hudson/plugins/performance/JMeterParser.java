@@ -13,6 +13,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,7 +42,7 @@ import javax.xml.parsers.SAXParserFactory;
 public class JMeterParser extends PerformanceReportParser {
 
   private static final Logger LOGGER = Logger.getLogger(JMeterParser.class.getName());
-  private static final Cache<String, PerformanceReport> cache = CacheBuilder.newBuilder().maximumSize(100).build();
+  private static final Cache<String, PerformanceReport> cache = CacheBuilder.newBuilder().maximumSize(1000).build();
 
   @Extension
   public static class DescriptorImpl extends PerformanceReportParserDescriptor {
@@ -77,15 +80,16 @@ public class JMeterParser extends PerformanceReportParser {
           try {
             PerformanceReport r = cache.getIfPresent(fser);
             if (r == null) {
-              in = new ObjectInputStream(new FileInputStream(fser));
+              in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fser)));
               r = (PerformanceReport) in.readObject();
+              cache.put(fser, r);
             }
             result.add(r);
             continue;
           } catch (FileNotFoundException fne) {
             // That's OK
           } catch (Exception unknown) {
-            LOGGER.warning("Deserialization failed. " + unknown);
+            LOGGER.log(Level.WARNING, "Reading serialized PerformanceReport instance from file '" + fser + "' failed.", unknown);
           } finally {
             if (in != null) {
               in.close();
@@ -160,10 +164,10 @@ public class JMeterParser extends PerformanceReportParser {
         synchronized (JMeterParser.class) {
           try {
             cache.put(fser, r);
-            out = new ObjectOutputStream(new FileOutputStream(fser));
+            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(fser)));
             out.writeObject(r);
           } catch (Exception unknown) {
-            LOGGER.warning("Serialization failed. " + unknown);
+            LOGGER.log(Level.WARNING, "Saving serialized PerformanceReport instance to file '" + fser + "' failed.", unknown);
           } finally {
             if (out != null) {
               out.close();
