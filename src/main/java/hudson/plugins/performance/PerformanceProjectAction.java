@@ -64,7 +64,7 @@ public final class PerformanceProjectAction implements Action {
     return PLUGIN_NAME;
   }
 
-  public PerformanceProjectAction(AbstractProject project) {
+  public PerformanceProjectAction(AbstractProject<?, ?> project) {
     this.project = project;
   }
 
@@ -295,7 +295,6 @@ public final class PerformanceProjectAction implements Action {
         return performanceReportNameFile;
     }
 
-  @SuppressWarnings("UnusedDeclaration")
   public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
       throws IOException {
     final String performanceReportNameFile = getPerformanceReportNameFile(request);
@@ -342,7 +341,6 @@ public final class PerformanceProjectAction implements Action {
         createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
   }
 
-  @SuppressWarnings("UnusedDeclaration")
   public void doRespondingTimeGraphPerTestCaseMode(
           StaplerRequest request, StaplerResponse response) throws IOException {
       final String performanceReportNameFile = getPerformanceReportNameFile(request);
@@ -381,11 +379,6 @@ public final class PerformanceProjectAction implements Action {
           continue;
         }
 
-        List<HttpSample> allSamples = new ArrayList<HttpSample>();
-        for (UriReport currentReport : performanceReport.getUriReportMap()
-            .values()) {
-          allSamples.addAll(currentReport.getHttpSampleList());
-        }
         List<UriReport> uriListOrdered = performanceReport.getUriListOrdered();
           for (UriReport uriReport : uriListOrdered) {
               if (uriReport.isFailed()) {
@@ -404,7 +397,6 @@ public final class PerformanceProjectAction implements Action {
 
   }
 
-  @SuppressWarnings("UnusedDeclaration")
   public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
       final String performanceReportNameFile = getPerformanceReportNameFile(request);
       if (performanceReportNameFile == null) {
@@ -455,7 +447,6 @@ public final class PerformanceProjectAction implements Action {
         createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
   }
 
-    @SuppressWarnings("UnusedDeclaration")
     public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
         final String performanceReportNameFile = getPerformanceReportNameFile(request);
         if (performanceReportNameFile == null) {
@@ -503,7 +494,6 @@ public final class PerformanceProjectAction implements Action {
                 createThroughputChart(dataSetBuilder.build()), 400, 200);
     }
 
-  @SuppressWarnings("UnusedDeclaration")
   public void doSummarizerGraph(StaplerRequest request, StaplerResponse response) throws IOException {
       final PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
       request.bindParameters(performanceReportPosition);
@@ -540,15 +530,12 @@ public final class PerformanceProjectAction implements Action {
           continue;
         }
 
-        for (String key : performanceReport.getUriReportMap().keySet()) {
-          Long methodAvg = performanceReport.getUriReportMap().get(key)
-              .getAverage();
-          float methodErrors = Float.valueOf(performanceReport
-              .getUriReportMap().get(key).getSummarizerErrors());
-          dataSetBuilderSummarizer.add(methodAvg, label, key);
-          dataSetBuilderSummarizerErrors.add(methodErrors, label, key);
+        for (Map.Entry<String, UriReport> entry : performanceReport.getUriReportMap().entrySet()) {
+          Long methodAvg = entry.getValue().getAverage();
+          float methodErrors = entry.getValue().getSummarizerErrors();
+          dataSetBuilderSummarizer.add(methodAvg, label, entry.getKey());
+          dataSetBuilderSummarizerErrors.add(methodErrors, label, entry.getKey());
         }
-        ;
       }
       nbBuildsToAnalyze--;
     }
@@ -666,12 +653,12 @@ public final class PerformanceProjectAction implements Action {
     for (File entry : file.listFiles()) {
       if (entry.isDirectory()) {
         for (File e : entry.listFiles()) {
-          if (!e.getName().contains(".serialized")) {
+          if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
             this.performanceReportList.add(e.getName());
           }
         }
       } else {
-        if (!entry.getName().contains(".serialized")) {
+        if (!entry.getName().endsWith(".serialized") && !entry.getName().endsWith(".serialized-v2")) {
           this.performanceReportList.add(entry.getName());
         }
       }
@@ -714,7 +701,7 @@ public final class PerformanceProjectAction implements Action {
     } else if (TRENDREPORT_LINK.equals(link)) {
       return createTrendReport(request);
     } else if (TESTSUITE_LINK.equals(link)) {
-      return createTestsuiteReport(request, response);
+      return createTestsuiteReport(request);
     } else {
       return null;
     }
@@ -748,8 +735,7 @@ public final class PerformanceProjectAction implements Action {
     return report;
   }
 
-  private Object createTestsuiteReport(final StaplerRequest request,
-      final StaplerResponse response) {
+  private Object createTestsuiteReport(final StaplerRequest request) {
     String filename = getTestSuiteReportFilename(request);
 
     List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();

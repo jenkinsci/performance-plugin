@@ -51,9 +51,7 @@ public class TrendReportGraphs implements ModelObject {
     PerformanceReport report = getPerformanceReport();
 
     if (report != null) {
-      for (String uri : report.getUriReportMap().keySet()) {
-        uriList.add(uri);
-      }
+      uriList.addAll(report.getUriReportMap().keySet());
     }
     return uriList;
   }

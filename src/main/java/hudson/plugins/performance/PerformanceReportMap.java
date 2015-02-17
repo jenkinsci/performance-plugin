@@ -264,7 +264,7 @@ public class PerformanceReportMap implements ModelObject {
     File[] files = repo.listFiles(new FileFilter() {
 
       public boolean accept(File f) {
-        return !f.isDirectory() && !f.getName().contains(".serialized");
+        return !f.isDirectory() && !f.getName().endsWith(".serialized");
       }
     });
     // this may fail, if the build itself failed, we need to recover gracefully
@@ -288,7 +288,7 @@ public class PerformanceReportMap implements ModelObject {
           File[] listFiles = dir.listFiles(new FilenameFilter() {
 
             public boolean accept(File dir, String name) {
-              if (filename == null && !name.contains(".serialized")) {
+              if (filename == null && !name.endsWith(".serialized")) {
                 return true;
               }
               if (name.equals(filename)) {
@@ -297,7 +297,12 @@ public class PerformanceReportMap implements ModelObject {
               return false;
             }
           });
-          collector.addAll(p.parse(build, Arrays.asList(listFiles), listener));
+          try {
+            collector.addAll(p.parse(build, Arrays.asList(listFiles), listener));
+          } catch (IOException ex) {
+            listener.getLogger().println("Unable to process directory '"+ dir+"'.");
+            ex.printStackTrace(listener.getLogger());
+          }
         }
       }
     }

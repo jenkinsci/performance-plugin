@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -41,7 +42,7 @@ import javax.xml.parsers.SAXParserFactory;
 public class JMeterParser extends PerformanceReportParser {
 
   private static final Logger LOGGER = Logger.getLogger(JMeterParser.class.getName());
-  private static final Cache<String, PerformanceReport> cache = CacheBuilder.newBuilder().maximumSize(100).build();
+  private static final Cache<String, PerformanceReport> cache = CacheBuilder.newBuilder().maximumSize(1000).build();
 
   @Extension
   public static class DescriptorImpl extends PerformanceReportParserDescriptor {
@@ -81,13 +82,14 @@ public class JMeterParser extends PerformanceReportParser {
             if (r == null) {
               in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fser)));
               r = (PerformanceReport) in.readObject();
+              cache.put(fser, r);
             }
             result.add(r);
             continue;
           } catch (FileNotFoundException fne) {
             // That's OK
           } catch (Exception unknown) {
-            LOGGER.warning("Deserialization failed. " + unknown);
+            LOGGER.log(Level.WARNING, "Reading serialized PerformanceReport instance from file '" + fser + "' failed.", unknown);
           } finally {
             if (in != null) {
               in.close();
@@ -165,7 +167,7 @@ public class JMeterParser extends PerformanceReportParser {
             out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(fser)));
             out.writeObject(r);
           } catch (Exception unknown) {
-            LOGGER.warning("Serialization failed. " + unknown);
+            LOGGER.log(Level.WARNING, "Saving serialized PerformanceReport instance to file '" + fser + "' failed.", unknown);
           } finally {
             if (out != null) {
               out.close();

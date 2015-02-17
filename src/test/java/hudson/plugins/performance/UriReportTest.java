@@ -1,12 +1,16 @@
 package hudson.plugins.performance;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import hudson.plugins.performance.UriReport.Sample;
 
-import hudson.plugins.performance.HttpSample;
-import hudson.plugins.performance.UriReport;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,7 +23,7 @@ public class UriReportTest {
 
 	@Before
 	public void setUp() {
-		uriReport = new UriReport(null, null, null);
+		uriReport = new UriReport(null, null);
 		HttpSample httpSample1 = new HttpSample();
 		httpSample1.setDuration(MAX);
 		Date date = new Date();
@@ -63,4 +67,79 @@ public class UriReportTest {
 		assertTrue(uriReport.isFailed());
 	}
 
+	/**
+	 * Same dates, different duration. Shortest duration should be ordered first.
+	 */
+	@Test
+	public void testCompareSameDateDifferentDuration() {
+	  // setup fixture
+    final List<Sample> samples = new ArrayList<Sample>();
+	  samples.add( new Sample( new Date(1), 2) );
+    samples.add( new Sample( new Date(1), 1) );
+    
+	  // execute system under test
+    Collections.sort(samples);
+	  
+	  // verify result
+    final Iterator<Sample> iter = samples.iterator();
+    assertEquals(1, iter.next().duration );
+    assertEquals(2, iter.next().duration );
+	}
+	
+  /**
+   * Different dates, same duration. Oldest date should be ordered first.
+   */
+  @Test
+  public void testCompareDifferentDateSameDuration() {
+    // setup fixture
+    final List<Sample> samples = new ArrayList<Sample>();
+    samples.add( new Sample( new Date(2), 1) );
+    samples.add( new Sample( new Date(1), 1) );
+    
+    // execute system under test
+    Collections.sort(samples);
+    
+    // verify result
+    final Iterator<Sample> iter = samples.iterator();
+    assertEquals(1, iter.next().date.getTime() );
+    assertEquals(2, iter.next().date.getTime() );
+  }
+  
+  /**
+   * Different dates, different duration. Shortest duration should be ordered first.
+   */
+  @Test
+  public void testCompareDifferentDateDifferentDuration() {
+    // setup fixture
+    final List<Sample> samples = new ArrayList<Sample>();
+    samples.add( new Sample( new Date(1), 2) );
+    samples.add( new Sample( new Date(2), 1) );
+    
+    // execute system under test
+    Collections.sort(samples);
+    
+    // verify result
+    final Iterator<Sample> iter = samples.iterator();
+    assertEquals(1, iter.next().duration );
+    assertEquals(2, iter.next().duration );
+  }
+  
+  /**
+   * Null dates. Ordering is unspecified, but should not cause exceptions.
+   */
+  @Test
+  public void testCompareNullDateSameDuration() {
+    // setup fixture
+    final List<Sample> samples = new ArrayList<Sample>();
+    samples.add( new Sample( null, 1) );
+    samples.add( new Sample( null, 1) );
+    
+    try {
+      // execute system under test
+      Collections.sort(samples);
+    } catch (NullPointerException e) {
+      // verify result
+      Assert.fail("A NullPointerException was thrown (which should not have happened).");
+    }
+  }
 }

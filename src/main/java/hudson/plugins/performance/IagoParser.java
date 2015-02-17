@@ -7,8 +7,6 @@ import hudson.model.TaskListener;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.SAXException;
 
-import sun.util.logging.resources.logging;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;

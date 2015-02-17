@@ -2,17 +2,16 @@ package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
 
-import org.xml.sax.SAXException;
-
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.text.DecimalFormat;
+
+import org.xml.sax.SAXException;
 
 /**
  * Represents a single performance report, which consists of multiple
@@ -23,7 +22,7 @@ import java.text.DecimalFormat;
 public class PerformanceReport extends AbstractReport implements Serializable,
     Comparable<PerformanceReport> {
 
-  private static final long serialVersionUID = -1422875677867003355L;
+  private static final long serialVersionUID = 675698410989941826L;
 
   private transient PerformanceBuildAction buildAction;
 
@@ -36,6 +35,56 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
   private PerformanceReport lastBuildReport;
 
+  /**
+   * A lazy cache of all duration values of all HTTP samples in all UriReports, ordered by duration. 
+   */
+  private transient List<Long> durationsSortedBySize = null;
+  
+  /**
+   * A lazy cache of all UriReports, reverse-ordered.
+   */
+  private transient List<UriReport> uriReportsOrdered = null;
+
+  /**
+   * The amount of http samples that are not successful.
+   */
+  private int nbError = 0;
+  
+  /**
+   * The sum of summarizerErrors values from all samples;
+   */
+  private float summarizerErrors = 0;
+  
+  /**
+   * The amount of samples in all uriReports combined.
+   */
+  private int size;
+  
+  /**
+   * The duration of all samples combined, in milliseconds.
+   */
+  private long totalDuration = 0;
+
+  /**
+   * The size of all samples combined, in kilobytes.
+   */
+  private double totalSizeInKB = 0;
+  
+  /**
+   * The longest duration from all samples, or Long.MIN_VALUE when no samples where processed.
+   */
+  private long max = Long.MIN_VALUE;
+
+  /**
+   * The shortest duration from all samples, or Long.MAX_VALUE when no samples where processed.
+   */
+  private long min = Long.MAX_VALUE;
+  
+
+  public static String asStaplerURI(String uri) {
+    return uri.replace("http:", "").replaceAll("/", "_");
+  }
+  
   public void addSample(HttpSample pHttpSample) throws SAXException {
     String uri = pHttpSample.getUri();
     if (uri == null) {
@@ -45,14 +94,29 @@ public class PerformanceReport extends AbstractReport implements Serializable,
               + "name properly for each http sample: skipping sample");
       return;
     }
-    String staplerUri = uri.replace("http:", "").replaceAll("/", "_");
-    UriReport uriReport = uriReportMap.get(staplerUri);
-    if (uriReport == null) {
-      uriReport = new UriReport(this, staplerUri, uri);
-      uriReportMap.put(staplerUri, uriReport);
-    }
-    uriReport.addHttpSample(pHttpSample);
+    String staplerUri = PerformanceReport.asStaplerURI(uri);
+    synchronized (uriReportMap) {
+      UriReport uriReport = uriReportMap.get(staplerUri);
+      if (uriReport == null) {
+        uriReport = new UriReport(staplerUri, uri);
+        uriReportMap.put(staplerUri, uriReport);
+      }
+      uriReport.addHttpSample(pHttpSample);
 
+      // reset the lazy loaded caches.
+      durationsSortedBySize = null;
+      uriReportsOrdered = null;
+    }
+    
+    if (!pHttpSample.isSuccessful()) {
+      nbError++;
+    }
+    summarizerErrors += pHttpSample.getSummarizerErrors();
+    size++;
+    totalDuration += pHttpSample.getDuration();
+    totalSizeInKB += pHttpSample.getSizeInKb();
+    max = Math.max(pHttpSample.getDuration(), max);
+    min = Math.min(pHttpSample.getDuration(), min);
   }
 
   public int compareTo(PerformanceReport jmReport) {
@@ -63,79 +127,60 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   }
 
   public int countErrors() {
-    int nbError = 0;
-    for (UriReport currentReport : uriReportMap.values()) {
-      nbError += currentReport.countErrors();
-    }
     return nbError;
   }
 
   public double errorPercent() {
     if (ifSummarizerParserUsed(reportFileName)) {
-      float nbError = 0;
-      for (UriReport currentReport : uriReportMap.values()) {
-        nbError += Float.valueOf(currentReport.getSummarizerErrors());
-      }
-      return (double) nbError / uriReportMap.size();
-
+      if (uriReportMap.size() == 0) return 0;
+      return summarizerErrors / uriReportMap.size();
     } else {
       return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
     }
   }
 
   public long getAverage() {
-    long result = 0;
-    int size = size();
-    if (size != 0) {
-      long average = 0;
-      for (UriReport currentReport : uriReportMap.values()) {
-        average += currentReport.getAverage() * currentReport.size();
-      }
-      double test = average / size;
-      result = (int) test;
+    if (size == 0) {
+      return 0;
     }
-    return result;
+    
+    return totalDuration / size;
   }
 
   public double getAverageSizeInKb() {
-    double result = 0;
-    int size = size();
-    if (size != 0) {
-      long average = 0;
-      for (UriReport currentReport : uriReportMap.values()) {
-        average += currentReport.getAverageSizeInKb() * currentReport.size();
-      }
-      result = average / (double) size;
+    if (size == 0) {
+      return 0;
     }
-    return roundTwoDecimals(result);
+    return roundTwoDecimals(totalSizeInKB / size);
   }
 
-  public long get90Line() {
-    long result = 0;
-    int size = size();
-    if (size != 0) {
-      List<HttpSample> allSamples = new ArrayList<HttpSample>();
-      for (UriReport currentReport : uriReportMap.values()) {
-        allSamples.addAll(currentReport.getHttpSampleList());
-      }
-      Collections.sort(allSamples);
-      result = allSamples.get((int) (allSamples.size() * .9)).getDuration();
+  private long getDurationAt(double percentage) {
+    if (percentage < 0 || percentage > 1) {
+      throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 1 (inclusive)");
     }
-    return result;
+
+    if (size == 0) {
+      return 0;
+    }
+    
+    synchronized (uriReportMap) {
+      if (durationsSortedBySize == null) {
+        durationsSortedBySize = new ArrayList<Long>();
+        for (UriReport currentReport : uriReportMap.values()) {
+          durationsSortedBySize.addAll(currentReport.getDurations());
+        }
+        Collections.sort(durationsSortedBySize);
+      }
+      return durationsSortedBySize.get((int) (durationsSortedBySize.size() * percentage));
+    }
+  }
+   
+  public long get90Line() {
+    return getDurationAt(.9);
   }
 
   public long getMedian() {
-    long result = 0;
-    int size = size();
-    if (size != 0) {
-      List<HttpSample> allSamples = new ArrayList<HttpSample>();
-      for (UriReport currentReport : uriReportMap.values()) {
-        allSamples.addAll(currentReport.getHttpSampleList());
-      }
-      Collections.sort(allSamples);
-      result = allSamples.get((int) (allSamples.size() * .5)).getDuration();
-    }
-    return result;
+    return getDurationAt(.5);
   }
 
   public String getHttpCode() {
@@ -159,29 +204,14 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   }
 
   public long getMax() {
-    long max = Long.MIN_VALUE;
-    for (UriReport currentReport : uriReportMap.values()) {
-      max = Math.max(currentReport.getMax(), max);
-    }
     return max;
   }
 
   public double getTotalTrafficInKb() {
-    double result = 0;
-    int size = size();
-    if (size != 0) {
-      for (UriReport currentReport : uriReportMap.values()) {
-        result += currentReport.getTotalTrafficInKb();
-      }
-    }
-    return roundTwoDecimals(result);
+    return roundTwoDecimals(totalSizeInKB);
   }
 
   public long getMin() {
-    long min = Long.MAX_VALUE;
-    for (UriReport currentReport : uriReportMap.values()) {
-      min = Math.min(currentReport.getMin(), min);
-    }
     return min;
   }
 
@@ -190,10 +220,13 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   }
 
   public List<UriReport> getUriListOrdered() {
-    Collection<UriReport> uriCollection = getUriReportMap().values();
-    List<UriReport> uriReportList = new ArrayList<UriReport>(uriCollection);
-    Collections.sort(uriReportList, Collections.reverseOrder());
-    return uriReportList;
+    synchronized (uriReportMap) {
+      if (uriReportsOrdered == null) {
+        uriReportsOrdered = new ArrayList<UriReport>(uriReportMap.values());
+        Collections.sort(uriReportsOrdered, Collections.reverseOrder());
+      }
+      return uriReportsOrdered;
+    }
   }
 
   public Map<String, UriReport> getUriReportMap() {
@@ -209,10 +242,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   }
 
   public int size() {
-    int size = 0;
-    for (UriReport currentReport : uriReportMap.values()) {
-      size += currentReport.size();
-    }
     return size;
   }
 
@@ -223,7 +252,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
       UriReport lastBuildUri = lastBuildUriReportMap.get(item.getKey());
       if (lastBuildUri != null) {
         item.getValue().addLastBuildUriReport(lastBuildUri);
-      } else {
       }
     }
     this.lastBuildReport = lastBuildReport;
@@ -292,7 +320,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     return false;
   }
 
-  private double roundTwoDecimals(double d) {
+  private static double roundTwoDecimals(double d) {
     DecimalFormat twoDForm = new DecimalFormat("#.##");
     return Double.valueOf(twoDForm.format(d));
   }

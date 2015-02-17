@@ -12,8 +12,8 @@ import java.util.Locale;
  */
 public abstract class AbstractReport {
 
-  private NumberFormat percentFormat;
-  private NumberFormat dataFormat;
+  private final NumberFormat percentFormat;
+  private final NumberFormat dataFormat;
 
   abstract public int countErrors();
 
@@ -28,46 +28,56 @@ public abstract class AbstractReport {
 
   public String errorPercentFormated() {
     Stapler.getCurrentRequest().getLocale();
-    return percentFormat.format(errorPercent());
+    synchronized (percentFormat) {
+      return percentFormat.format(errorPercent());
+    }
   }
-  
+
   abstract public long getAverage();
 
   public String getAverageFormated() {
-    return dataFormat.format(getAverage());
+    synchronized (dataFormat) {
+      return dataFormat.format(getAverage());
+    }
   }
 
   abstract public long getMedian();
 
   public String getMeanFormated() {
-    return dataFormat.format(getMedian());
+    synchronized (dataFormat) {
+      return dataFormat.format(getMedian());
+    }
   }
 
   abstract public long get90Line();
 
   public String get90LineFormated() {
-    return dataFormat.format(get90Line());
+    synchronized (dataFormat) {
+      return dataFormat.format(get90Line());
+    }
   }
 
   abstract public long getMax();
 
   public String getMaxFormated() {
-    return dataFormat.format(getMax());
+    synchronized (dataFormat) {
+      return dataFormat.format(getMax());
+    }
   }
 
   abstract public long getMin();
 
   abstract public int size();
-  
+
   abstract public String getHttpCode();
 
   abstract public long getAverageDiff();
-  
+
   abstract public long getMedianDiff();
-  
+
   abstract public double getErrorPercentDiff();
-  
+
   abstract public String getLastBuildHttpCodeIfChanged();
-  
+
   abstract public int getSizeDiff();
 }
