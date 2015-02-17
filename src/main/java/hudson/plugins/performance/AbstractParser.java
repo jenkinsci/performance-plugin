@@ -85,7 +85,7 @@ public abstract class AbstractParser extends PerformanceReportParser
    * @throws Throwable
    *           On any exception.
    */
-  abstract PerformanceReport parse(File reportFile) throws Throwable;
+  abstract PerformanceReport parse(File reportFile) throws Exception;
   
   /**
    * Returns a PerformanceReport instance for the provided report file, based on

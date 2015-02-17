@@ -1,0 +1,3 @@
+1393227741256,1425,GET /ordermgmt/login - Login Page,200,OK,Thread Group 1-1,text,true,3478,1016
+1393227742815,59,GET /ordermgmt/inventory,200,OK,Thread Group 1-1,text,true,3100,38
+1393227743132,2204,GET /ordermgmt/pre-logout,200,OK,Thread Group 1-1,text,true,19714,25

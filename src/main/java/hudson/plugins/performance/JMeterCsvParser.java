@@ -110,7 +110,7 @@ public class JMeterCsvParser extends AbstractParser {
   }
 
   @Override
-  PerformanceReport parse(File reportFile) throws Throwable {
+  PerformanceReport parse(File reportFile) throws Exception {
     final PerformanceReport report = new PerformanceReport();
     report.setReportFileName(reportFile.getName());
     

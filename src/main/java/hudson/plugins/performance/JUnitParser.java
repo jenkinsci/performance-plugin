@@ -39,7 +39,7 @@ public class JUnitParser extends AbstractParser {
   }
 
   @Override
-  PerformanceReport parse(File reportFile) throws Throwable {
+  PerformanceReport parse(File reportFile) throws Exception {
 
     final SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setValidating(false);

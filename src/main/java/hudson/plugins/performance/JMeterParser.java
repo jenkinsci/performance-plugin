@@ -2,7 +2,10 @@ package hudson.plugins.performance;
 
 import hudson.Extension;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Date;
 
 import javax.xml.parsers.SAXParserFactory;
@@ -37,7 +40,48 @@ public class JMeterParser extends AbstractParser {
     return "**/*.jtl";
   }
 
-  PerformanceReport parse(File reportFile) throws Throwable {
+  PerformanceReport parse(File reportFile) throws Exception
+  {
+    // JMeter stores either CSV or XML in .JTL files.
+    final boolean isXml = isXmlFile(reportFile);
+    
+    if (isXml) {
+      return parseXml(reportFile);
+    } else {
+      return parseCsv(reportFile);
+    }
+  }
+  
+  /**
+   * Utility method that checks if the provided file has XML content.
+   * 
+   * This implementation looks for the first non-empty file. If an XML prolog appears there, this method returns <code>true</code>, otherwise <code>false</code> is returned.
+   * 
+   * @param file File from which the content is to e analyzed. Cannot be null.
+   * @return <code>true</code> if the file content has been determined to be XML, otherwise <code>false</code>.
+   */
+  public static boolean isXmlFile(File file) throws IOException {
+    BufferedReader reader = null;
+    try {
+      reader = new BufferedReader(new FileReader(file));
+      String firstLine;
+      while ((firstLine = reader.readLine()) != null ) {
+        if (firstLine.trim().length() == 0) continue; // skip empty lines.
+        return firstLine != null && firstLine.toLowerCase().trim().startsWith("<?xml ");
+      }
+      return false;
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+  }
+  
+  /**
+   * A delegate for {@link #parse(File)} that can process XML data.
+   */
+  PerformanceReport parseXml(File reportFile) throws Exception 
+  {
     final SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setValidating(false);
     factory.setNamespaceAware(false);
@@ -139,4 +183,14 @@ public class JMeterParser extends AbstractParser {
     
     return report;
   }
+  
+  /**
+   * A delegate for {@link #parse(File)} that can process CSV data.
+   */
+  PerformanceReport parseCsv(File reportFile) throws Exception {
+    // TODO The arguments in this constructor should be configurable.
+    final JMeterCsvParser delegate = new JMeterCsvParser(this.glob, "timestamp,elapsed,URL,responseCode,success", ",", false);
+    return delegate.parse(reportFile);
+  }
+
 }

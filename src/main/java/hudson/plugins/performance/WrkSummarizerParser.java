@@ -70,7 +70,7 @@ public class WrkSummarizerParser extends AbstractParser {
   }
 
   @Override
-  PerformanceReport parse(File reportFile) throws Throwable 
+  PerformanceReport parse(File reportFile) throws Exception 
   {
     final PerformanceReport r = new PerformanceReport();
     r.setReportFileName(reportFile.getName());
