@@ -1,19 +1,19 @@
 package hudson.plugins.performance;
 
-import org.kohsuke.stapler.Stapler;
-
-import java.text.DecimalFormatSymbols;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+
+import org.kohsuke.stapler.Stapler;
 
 /**
  * Abstract class for classes with size, error, mean, average, 90 line, min and max attributes
  */
 public abstract class AbstractReport {
 
-  private final NumberFormat percentFormat;
-  private final NumberFormat dataFormat;
+  protected final DecimalFormat percentFormat;
+  protected final DecimalFormat dataFormat; // three decimals
+  protected final DecimalFormat twoDForm; // two decimals
 
   abstract public int countErrors();
 
@@ -24,6 +24,7 @@ public abstract class AbstractReport {
 
     percentFormat = new DecimalFormat("0.0", DecimalFormatSymbols.getInstance( useThisLocale ));
     dataFormat = new DecimalFormat("#,###", DecimalFormatSymbols.getInstance( useThisLocale ));
+    twoDForm = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance( useThisLocale ));
   }
 
   public String errorPercentFormated() {
