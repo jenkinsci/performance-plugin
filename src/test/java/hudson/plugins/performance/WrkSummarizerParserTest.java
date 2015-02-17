@@ -1,13 +1,16 @@
 package hudson.plugins.performance;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import hudson.model.TaskListener;
 import hudson.util.StreamTaskListener;
 
 import java.io.File;
-import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,13 +18,11 @@ import org.junit.Test;
 public class WrkSummarizerParserTest {
 
   private WrkSummarizerParser parser;
-  private PrintStream logger;
   private TaskListener listener;
 
   @Before
   public void before() {
     parser = new WrkSummarizerParser(null);
-    logger = System.out;
     listener = new StreamTaskListener((java.io.OutputStream) System.out);
   }
 
@@ -95,27 +96,27 @@ public class WrkSummarizerParserTest {
   @Test
   public void testParseTimeMeasurements() {
     // milliseconds
-    assertEquals(5, parser.getTime("5ms", logger, WrkSummarizerParser.TimeUnit.MILLISECOND));
-    assertEquals(5000, parser.getTime("5s", logger, WrkSummarizerParser.TimeUnit.MILLISECOND));
-    assertEquals(5000 * 60, parser.getTime("5m", logger, WrkSummarizerParser.TimeUnit.MILLISECOND));
-    assertEquals(1000 * 60 * 60, parser.getTime("1h", logger, WrkSummarizerParser.TimeUnit.MILLISECOND));
+    assertEquals(5, parser.getTime("5ms", WrkSummarizerParser.TimeUnit.MILLISECOND));
+    assertEquals(5000, parser.getTime("5s", WrkSummarizerParser.TimeUnit.MILLISECOND));
+    assertEquals(5000 * 60, parser.getTime("5m", WrkSummarizerParser.TimeUnit.MILLISECOND));
+    assertEquals(1000 * 60 * 60, parser.getTime("1h", WrkSummarizerParser.TimeUnit.MILLISECOND));
 
     // seconds
-    assertEquals(1, parser.getTime("1005ms", logger, WrkSummarizerParser.TimeUnit.SECOND));
-    assertEquals(5, parser.getTime("5s", logger, WrkSummarizerParser.TimeUnit.SECOND));
-    assertEquals(5 * 60, parser.getTime("5m", logger, WrkSummarizerParser.TimeUnit.SECOND));
-    assertEquals(60 * 60, parser.getTime("1h", logger, WrkSummarizerParser.TimeUnit.SECOND));
+    assertEquals(1, parser.getTime("1005ms", WrkSummarizerParser.TimeUnit.SECOND));
+    assertEquals(5, parser.getTime("5s", WrkSummarizerParser.TimeUnit.SECOND));
+    assertEquals(5 * 60, parser.getTime("5m", WrkSummarizerParser.TimeUnit.SECOND));
+    assertEquals(60 * 60, parser.getTime("1h", WrkSummarizerParser.TimeUnit.SECOND));
 
     // minute
-    assertEquals(0, parser.getTime("5ms", logger, WrkSummarizerParser.TimeUnit.MINUTE));
-    assertEquals((int) Math.floor(5 / 60.0), parser.getTime("5s", logger, WrkSummarizerParser.TimeUnit.MINUTE));
-    assertEquals((int) Math.floor((5 * 60) / 60.0), parser.getTime("5m", logger, WrkSummarizerParser.TimeUnit.MINUTE));
-    assertEquals((int) Math.floor((60 * 60) / 60.0), parser.getTime("1h", logger, WrkSummarizerParser.TimeUnit.MINUTE));
+    assertEquals(0, parser.getTime("5ms", WrkSummarizerParser.TimeUnit.MINUTE));
+    assertEquals((int) Math.floor(5 / 60.0), parser.getTime("5s", WrkSummarizerParser.TimeUnit.MINUTE));
+    assertEquals((int) Math.floor((5 * 60) / 60.0), parser.getTime("5m", WrkSummarizerParser.TimeUnit.MINUTE));
+    assertEquals((int) Math.floor((60 * 60) / 60.0), parser.getTime("1h", WrkSummarizerParser.TimeUnit.MINUTE));
 
     // hour
-    assertEquals(0, parser.getTime("5ms", logger, WrkSummarizerParser.TimeUnit.HOUR));
-    assertEquals((int) Math.floor(5 / (60.0 * 60.0)), parser.getTime("5s", logger, WrkSummarizerParser.TimeUnit.HOUR));
-    assertEquals((int) Math.floor((5 * 60) / (60.0 * 60.0)), parser.getTime("5m", logger, WrkSummarizerParser.TimeUnit.HOUR));
-    assertEquals((int) Math.floor((60 * 60) / (60.0 * 60.0)), parser.getTime("1h", logger, WrkSummarizerParser.TimeUnit.HOUR));
+    assertEquals(0, parser.getTime("5ms", WrkSummarizerParser.TimeUnit.HOUR));
+    assertEquals((int) Math.floor(5 / (60.0 * 60.0)), parser.getTime("5s", WrkSummarizerParser.TimeUnit.HOUR));
+    assertEquals((int) Math.floor((5 * 60) / (60.0 * 60.0)), parser.getTime("5m", WrkSummarizerParser.TimeUnit.HOUR));
+    assertEquals((int) Math.floor((60 * 60) / (60.0 * 60.0)), parser.getTime("1h", WrkSummarizerParser.TimeUnit.HOUR));
   }
 }

@@ -1,27 +1,20 @@
 package hudson.plugins.performance;
 
 import hudson.Extension;
-import hudson.model.TaskListener;
-import hudson.model.AbstractBuild;
 import hudson.util.FormValidation;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.xml.sax.SAXException;
 
-public class JMeterCsvParser extends PerformanceReportParser {
+public class JMeterCsvParser extends AbstractParser {
 
   public final boolean skipFirstLine;
   public final String delimiter;
@@ -33,8 +26,7 @@ public class JMeterCsvParser extends PerformanceReportParser {
   public final String pattern;
 
   @DataBoundConstructor
-  public JMeterCsvParser(String glob, String pattern, String delimiter,
-      Boolean skipFirstLine) throws Exception {
+  public JMeterCsvParser(String glob, String pattern, String delimiter, Boolean skipFirstLine) throws Exception {
     super(glob);
     this.skipFirstLine = skipFirstLine;
     this.delimiter = delimiter;
@@ -111,59 +103,54 @@ public class JMeterCsvParser extends PerformanceReportParser {
     return "**/*.csv";
   }
 
-  // This may be unneccesary. I tried many things getting the pattern to show up
+  // This may be unnecessary. I tried many things getting the pattern to show up
   // correctly in the UI and this was one of them.
   public String getDefaultPattern() {
     return "timestamp,elapsed,responseCode,threadName,success,failureMessage,grpThreads,allThreads,URL,Latency,SampleCount,ErrorCount";
   }
 
   @Override
-  public Collection<PerformanceReport> parse(AbstractBuild<?, ?> build,
-      Collection<File> reports, TaskListener listener) throws IOException {
-    List<PerformanceReport> result = new ArrayList<PerformanceReport>();
-
-    PrintStream logger = listener.getLogger();
-    for (File f : reports) {
-      final PerformanceReport r = new PerformanceReport();
-      r.setReportFileName(f.getName());
-      logger.println("Performance: Parsing JMeter report file " + f.getName());
-      BufferedReader reader = new BufferedReader(new FileReader(f));
-      try {
-        String line = reader.readLine();
-        if (line != null && skipFirstLine) {
-          logger.println("Performance: Skipping first line");
-          line = reader.readLine();
-        }
-        while (line != null) {
-          HttpSample sample = getSample(line);
-          if (sample != null) {
-            try {
-              r.addSample(sample);
-            } catch (SAXException e) {
-              throw new RuntimeException("Unnable to add sample for line "
-                  + line, e);
-            }
-          }
-          line = reader.readLine();
-        }
-      } finally {
-        if (reader != null)
-          reader.close();
+  PerformanceReport parse(File reportFile) throws Throwable {
+    final PerformanceReport report = new PerformanceReport();
+    report.setReportFileName(reportFile.getName());
+    
+    final BufferedReader reader = new BufferedReader(new FileReader(reportFile));
+    try {
+      String line = reader.readLine();
+      if (line != null && skipFirstLine) {
+        line = reader.readLine();
       }
-      result.add(r);
+      while (line != null) {
+        final HttpSample sample = getSample(line);
+        if (sample != null) {
+          try {
+            report.addSample(sample);
+          } catch (SAXException e) {
+            throw new RuntimeException("Error parsing file '"+ reportFile +"': Unable to add sample for line " + line, e);
+          }
+        }
+        line = reader.readLine();
+      }
+      
+      return report;
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
     }
-    return result;
   }
 
   /**
+   * Parses a single HttpSample instance from a single CSV line.
+   * 
    * @param line
-   *          file line with the provided pattern
-   * @return
+   *          file line with the provided pattern (cannot be null).
+   * @return An sample instance (never null).
    */
   private HttpSample getSample(String line) {
-    HttpSample sample = new HttpSample();
+    final HttpSample sample = new HttpSample();
     final String commasNotInsideQuotes = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
-    String[] values = line.split(commasNotInsideQuotes);
+    final String[] values = line.split(commasNotInsideQuotes);
     sample.setDate(new Date(Long.valueOf(values[timestampIdx])));
     sample.setDuration(Long.valueOf(values[elapsedIdx]));
     sample.setHttpCode(values[responseCodeIdx]);
@@ -171,5 +158,4 @@ public class JMeterCsvParser extends PerformanceReportParser {
     sample.setUri(values[urlIdx]);
     return sample;
   }
-
 }
