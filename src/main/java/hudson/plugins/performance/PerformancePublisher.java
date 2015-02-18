@@ -569,7 +569,7 @@ public class PerformancePublisher extends Recorder {
 
         if(compareBuildPrevious){
           buildNo += "previous";
-          prevBuild = getPrevBuild(build, listener);
+          prevBuild = build.getPreviousSuccessfulBuild();
         } else {
           buildNo += nthBuildNumber;
           prevBuild = getnthBuild(build, listener);
@@ -893,29 +893,6 @@ public class PerformancePublisher extends Recorder {
     }
     return (nthBuildNumber == 0) ? null : nthBuild;
   }
-
-
-    /**
-     *   Gets the previous build...
-     * @param build
-     * @param listener
-     * @return  build object
-     * @throws IOException
-     */
-
-  public AbstractBuild<?,?> getPrevBuild(AbstractBuild<?,?> build, BuildListener listener)
-          throws IOException {
-    AbstractBuild<?,?> nthBuild = build;
-
-    nthBuild = (AbstractBuild<?,?>) nthBuild.getPreviousBuild();
-    if (nthBuild == null) {
-      return null;
-    } else {
-      return nthBuild;
-    }
-
-  }
-
 
   private List<File> getExistingReports(AbstractBuild<?, ?> build, PrintStream logger, String parserDisplayName)
           throws IOException, InterruptedException {
