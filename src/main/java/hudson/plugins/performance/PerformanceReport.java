@@ -320,8 +320,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     return false;
   }
 
-  private static double roundTwoDecimals(double d) {
-    DecimalFormat twoDForm = new DecimalFormat("#.##");
-    return Double.valueOf(twoDForm.format(d));
+  private double roundTwoDecimals(double d) {
+    synchronized (twoDForm) {
+      return Double.valueOf(twoDForm.format(d));
+    }
   }
 }

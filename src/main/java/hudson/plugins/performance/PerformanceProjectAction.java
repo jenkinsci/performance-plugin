@@ -380,15 +380,9 @@ public final class PerformanceProjectAction implements Action {
         }
 
         List<UriReport> uriListOrdered = performanceReport.getUriListOrdered();
-          for (UriReport uriReport : uriListOrdered) {
-              if (uriReport.isFailed()) {
-                  // we set duration as 0 for failed tests
-                  dataSetBuilderAverage.add(0, uriReport.getUri(), label);
-              } else {
-                  dataSetBuilderAverage.add(uriReport.getAverage(), uriReport.getUri(), label);
-              }
-          }
-
+        for (UriReport uriReport : uriListOrdered) {
+          dataSetBuilderAverage.add(uriReport.getAverage(), uriReport.getUri(), label);
+        }
       }
       nbBuildsToAnalyze--;
     }

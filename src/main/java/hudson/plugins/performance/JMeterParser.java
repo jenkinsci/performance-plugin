@@ -1,49 +1,27 @@
 package hudson.plugins.performance;
 
 import hudson.Extension;
-import hudson.model.AbstractBuild;
-import hudson.model.TaskListener;
-import hudson.util.IOException2;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Date;
+
+import javax.xml.parsers.SAXParserFactory;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 /**
  * Parser for JMeter.
  *
  * @author Kohsuke Kawaguchi
  */
-public class JMeterParser extends PerformanceReportParser {
-
-  private static final Logger LOGGER = Logger.getLogger(JMeterParser.class.getName());
-  private static final Cache<String, PerformanceReport> cache = CacheBuilder.newBuilder().maximumSize(1000).build();
-
+public class JMeterParser extends AbstractParser {
+  
   @Extension
   public static class DescriptorImpl extends PerformanceReportParserDescriptor {
     @Override
@@ -62,126 +40,157 @@ public class JMeterParser extends PerformanceReportParser {
     return "**/*.jtl";
   }
 
-  @Override
-  public Collection<PerformanceReport> parse(AbstractBuild<?, ?> build,
-                                             Collection<File> reports, TaskListener listener) throws IOException {
-    List<PerformanceReport> result = new ArrayList<PerformanceReport>();
-
-    SAXParserFactory factory = SAXParserFactory.newInstance();
-    factory.setValidating(false);
-    factory.setNamespaceAware(false);
-    PrintStream logger = listener.getLogger();
-
-    for (File f : reports) {
-      try {
-        String fser = f.getPath() + ".serialized";
-        ObjectInputStream in = null;
-        synchronized (JMeterParser.class) {
-          try {
-            PerformanceReport r = cache.getIfPresent(fser);
-            if (r == null) {
-              in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fser)));
-              r = (PerformanceReport) in.readObject();
-              cache.put(fser, r);
-            }
-            result.add(r);
-            continue;
-          } catch (FileNotFoundException fne) {
-            // That's OK
-          } catch (Exception unknown) {
-            LOGGER.log(Level.WARNING, "Reading serialized PerformanceReport instance from file '" + fser + "' failed.", unknown);
-          } finally {
-            if (in != null) {
-              in.close();
-            }
-          }
-        }
-        SAXParser parser = factory.newSAXParser();
-        final PerformanceReport r = new PerformanceReport();
-        r.setReportFileName(f.getName());
-        logger.println("Performance: Parsing JMeter report file " + f.getPath());
-        parser.parse(f, new DefaultHandler() {
-          HttpSample currentSample;
-          int counter = 0;
-
-          /**
-           * Performance XML log format is in
-           * http://jakarta.apache.org
-           * /jmeter/usermanual/listeners.html
-           *
-           * There are two different tags which delimit jmeter
-           * samples: httpSample for http samples sample for non http
-           * samples
-           *
-           * There are also two different XML formats which we have to
-           * handle: v2.0 = "label", "timeStamp", "time", "success"
-           * v2.1 = "lb", "ts", "t", "s"
-           *
-           */
-          @Override
-          public void startElement(String uri, String localName, String qName,
-                                   Attributes attributes) throws SAXException {
-            if ("httpSample".equalsIgnoreCase(qName)
-              || "sample".equalsIgnoreCase(qName)) {
-              HttpSample sample = new HttpSample();
-              sample.setDate(new Date(
-                Long.valueOf(attributes.getValue("ts") != null
-                  ? attributes.getValue("ts")
-                  : attributes.getValue("timeStamp"))));
-              sample.setDuration(Long.valueOf(attributes.getValue("t") != null
-                ? attributes.getValue("t") : attributes.getValue("time")));
-              sample.setSuccessful(Boolean.valueOf(attributes.getValue("s") != null
-                ? attributes.getValue("s") : attributes.getValue("success")));
-              sample.setUri(attributes.getValue("lb") != null
-                ? attributes.getValue("lb") : attributes.getValue("label"));
-              sample.setHttpCode(attributes.getValue("rc") != null && attributes.getValue("rc").length() <= 3
-                ? attributes.getValue("rc") : "0");
-              sample.setSizeInKb(attributes.getValue("by") != null ? Double.valueOf(attributes.getValue("by")) / 1024d : 0d);
-              if (counter == 0) {
-                currentSample = sample;
-              }
-              counter++;
-            }
-          }
-
-          @Override
-          public void endElement(String uri, String localName, String qName) {
-            if ("httpSample".equalsIgnoreCase(qName)
-              || "sample".equalsIgnoreCase(qName)) {
-              if (counter == 1) {
-                try {
-                  r.addSample(currentSample);
-                } catch (SAXException e) {
-                  e.printStackTrace();
-                }
-              }
-              counter--;
-            }
-          }
-        });
-        result.add(r);
-        ObjectOutputStream out = null;
-        synchronized (JMeterParser.class) {
-          try {
-            cache.put(fser, r);
-            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(fser)));
-            out.writeObject(r);
-          } catch (Exception unknown) {
-            LOGGER.log(Level.WARNING, "Saving serialized PerformanceReport instance to file '" + fser + "' failed.", unknown);
-          } finally {
-            if (out != null) {
-              out.close();
-            }
-          }
-        }
-
-      } catch (ParserConfigurationException e) {
-        throw new IOException2("Failed to create parser ", e);
-      } catch (SAXException e) {
-        logger.println("Performance: Failed to parse " + f + ": "
-          + e.getMessage());
+  PerformanceReport parse(File reportFile) throws Exception
+  {
+    // JMeter stores either CSV or XML in .JTL files.
+    final boolean isXml = isXmlFile(reportFile);
+    
+    if (isXml) {
+      return parseXml(reportFile);
+    } else {
+      return parseCsv(reportFile);
+    }
+  }
+  
+  /**
+   * Utility method that checks if the provided file has XML content.
+   * 
+   * This implementation looks for the first non-empty file. If an XML prolog appears there, this method returns <code>true</code>, otherwise <code>false</code> is returned.
+   * 
+   * @param file File from which the content is to e analyzed. Cannot be null.
+   * @return <code>true</code> if the file content has been determined to be XML, otherwise <code>false</code>.
+   */
+  public static boolean isXmlFile(File file) throws IOException {
+    BufferedReader reader = null;
+    try {
+      reader = new BufferedReader(new FileReader(file));
+      String firstLine;
+      while ((firstLine = reader.readLine()) != null ) {
+        if (firstLine.trim().length() == 0) continue; // skip empty lines.
+        return firstLine != null && firstLine.toLowerCase().trim().startsWith("<?xml ");
+      }
+      return false;
+    } finally {
+      if (reader != null) {
+        reader.close();
       }
     }
-    return result;
   }
+  
+  /**
+   * A delegate for {@link #parse(File)} that can process XML data.
+   */
+  PerformanceReport parseXml(File reportFile) throws Exception 
+  {
+    final SAXParserFactory factory = SAXParserFactory.newInstance();
+    factory.setValidating(false);
+    factory.setNamespaceAware(false);
+    
+    final PerformanceReport report = new PerformanceReport();
+    report.setReportFileName(reportFile.getName());
+
+    factory.newSAXParser().parse(reportFile, new DefaultHandler() {
+      HttpSample currentSample;
+      int counter = 0;
+
+      /**
+       * Performance XML log format is in http://jakarta.apache.org/jmeter/usermanual/listeners.html
+       *
+       * There are two different tags which delimit jmeter samples: 
+       * - httpSample for http samples 
+       * - sample for non http samples
+       *
+       * There are also two different XML formats which we have to handle: 
+       * v2.0 = "label", "timeStamp", "time", "success"
+       * v2.1 = "lb", "ts", "t", "s"
+       */
+      @Override
+      public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        if (!"httpSample".equalsIgnoreCase(qName) && !"sample".equalsIgnoreCase(qName)) {
+          return;
+        }
+        
+        final HttpSample sample = new HttpSample();
+        
+        final String dateValue;
+        if (attributes.getValue("ts") != null) {
+          dateValue = attributes.getValue("ts");
+        } else {
+          dateValue = attributes.getValue("timeStamp");
+        }
+        sample.setDate( new Date(Long.valueOf(dateValue)) );
+        
+        final String durationValue;
+        if (attributes.getValue("t") != null) {
+          durationValue = attributes.getValue("t");
+        } else {
+          durationValue = attributes.getValue("time"); 
+        }
+        sample.setDuration(Long.valueOf(durationValue));
+        
+        final String successfulValue;
+        if (attributes.getValue("s") != null) {
+          successfulValue = attributes.getValue("s");
+        } else {
+          successfulValue = attributes.getValue("success");
+        }
+        sample.setSuccessful(Boolean.parseBoolean(successfulValue));
+        
+        final String uriValue;
+        if (attributes.getValue("lb") != null) {
+          uriValue = attributes.getValue("lb");
+        } else {
+          uriValue = attributes.getValue("label");
+        }
+        sample.setUri(uriValue);
+        
+        final String httpCodeValue;
+        if (attributes.getValue("rc") != null && attributes.getValue("rc").length() <= 3) {
+          httpCodeValue = attributes.getValue("rc");
+        } else {
+          httpCodeValue = "0";
+        }
+        sample.setHttpCode(httpCodeValue);
+        
+        final String sizeInKbValue;
+        if (attributes.getValue("by") != null) {
+          sizeInKbValue = attributes.getValue("by");
+        } else {
+          sizeInKbValue = "0";
+        }
+        sample.setSizeInKb(Double.valueOf(sizeInKbValue) / 1024d);
+        
+        if (counter == 0) {
+          currentSample = sample;
+        }
+          counter++;
+      }
+
+      @Override
+      public void endElement(String uri, String localName, String qName) {
+        if ("httpSample".equalsIgnoreCase(qName) || "sample".equalsIgnoreCase(qName)) {
+          if (counter == 1) {
+            try {
+              report.addSample(currentSample);
+            } catch (SAXException e) {
+              e.printStackTrace();
+            }
+          }
+          counter--;
+        }
+      }
+    });
+    
+    return report;
+  }
+  
+  /**
+   * A delegate for {@link #parse(File)} that can process CSV data.
+   */
+  PerformanceReport parseCsv(File reportFile) throws Exception {
+    // TODO The arguments in this constructor should be configurable.
+    final JMeterCsvParser delegate = new JMeterCsvParser(this.glob, "timestamp,elapsed,URL,responseCode,success", ",", false);
+    return delegate.parse(reportFile);
+  }
+
 }
