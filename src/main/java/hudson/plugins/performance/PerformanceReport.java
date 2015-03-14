@@ -98,7 +98,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     synchronized (uriReportMap) {
       UriReport uriReport = uriReportMap.get(staplerUri);
       if (uriReport == null) {
-        uriReport = new UriReport(staplerUri, uri);
+        uriReport = new UriReport(this, staplerUri, uri);
         uriReportMap.put(staplerUri, uriReport);
       }
       uriReport.addHttpSample(pHttpSample);

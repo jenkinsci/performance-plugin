@@ -27,13 +27,11 @@
       <table class="sortable source" border="1">
         <j:choose>
           <j:when test="${it.getPerformanceReport().ifSummarizerParserUsed(it.getPerformanceReport().getReportFileName())}">
-            <th>${%URI}</th>
             <th>${%Samples}</th>
             <th>${%Time}</th>
             <th>${% Avg Response Time} (ms)</th>
             <j:forEach var="c" items="${it.httpSampleList}">
                 <tr>
-                <td class="left">${c.uri}</td>
                 <td>${c.summarizerSamples}</td>
                 <td class="center">${c.date}</td>
                 <td>${c.duration} ms.</td>
@@ -41,13 +39,11 @@
             </j:forEach>
           </j:when>
           <j:otherwise>
-            <th>${%URI}</th>
             <th>${%Http Code}</th>
             <th>${%Time}</th>
             <th>${%Duration} (ms)</th>
             <j:forEach var="c" items="${it.httpSampleList}">
                 <tr class="${h.ifThenElse(c.failed,'red','')}">
-                <td class="left">${c.uri}</td>
                 <td>${c.httpCode}</td>
                 <td class="center">${c.date}</td>
                 <td>${c.duration} ms.</td>

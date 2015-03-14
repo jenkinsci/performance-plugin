@@ -24,13 +24,13 @@ public class ThroughputReportTest {
         HttpSample httpSample1 = new HttpSample();
         httpSample1.setDate(new Date());
 
-        UriReport uriReport1 = new UriReport("f", "url1");
+        UriReport uriReport1 = new UriReport(performanceReport, "f", "url1");
         uriReport1.addHttpSample(httpSample1);
 
         HttpSample httpSample2 = new HttpSample();
         httpSample2.setDate(new Date());
 
-        UriReport uriReport2 = new UriReport("f", "url2");
+        UriReport uriReport2 = new UriReport(performanceReport, "f", "url2");
         uriReport2.addHttpSample(httpSample2);
 
         performanceReport.getUriReportMap().put(uriReport1.getUri(), uriReport1);
