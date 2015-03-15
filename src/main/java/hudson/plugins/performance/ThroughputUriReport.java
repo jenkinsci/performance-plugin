@@ -25,7 +25,6 @@ public class ThroughputUriReport {
         if (duration == 0) {
           return uriReport.size(); // more than zero requests should always take at least some time. If that didn't get logged, this is the most suitable alternative.
         }
-        
-        return uriReport.size() / (duration / MILLISECONDS_IN_SECOND);
+        return (long)(uriReport.size() / ((float)duration / MILLISECONDS_IN_SECOND));
     }
 }
