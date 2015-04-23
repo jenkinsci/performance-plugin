@@ -99,6 +99,8 @@ public class PerformancePublisher extends Recorder {
   private String configType="ART";
 
   private boolean modeOfThreshold = false;
+  
+  private boolean failBuildIfNoResultFile = false;
 
   private boolean compareBuildPrevious = false;
 
@@ -145,6 +147,7 @@ public class PerformancePublisher extends Recorder {
                             boolean modePerformancePerTestCase,
                             String comparisonType,
                             boolean modeOfThreshold,
+                            boolean failBuildIfNoResultFile,
                             boolean compareBuildPrevious,
                             List<? extends PerformanceReportParser> parsers,
                             boolean modeThroughput) {
@@ -162,6 +165,7 @@ public class PerformancePublisher extends Recorder {
     this.configType = comparisonType;
     PerformancePublisher.optionType = comparisonType;
     this.modeOfThreshold = modeOfThreshold;
+    this.failBuildIfNoResultFile = failBuildIfNoResultFile;
     this.compareBuildPrevious = compareBuildPrevious;
 
     if (parsers == null)
@@ -335,6 +339,9 @@ public class PerformancePublisher extends Recorder {
           if (files.isEmpty()) {
             if (build.getResult().isWorseThan(Result.UNSTABLE)) {
               return true;
+            }
+            if (failBuildIfNoResultFile) {
+            	build.setResult(Result.FAILURE);
             }
             logger.println("Performance: no " + parser.getReportName()
                     + " files matching '" + glob
@@ -525,6 +532,9 @@ public class PerformancePublisher extends Recorder {
           if (files.isEmpty()) {
             if (build.getResult().isWorseThan(Result.UNSTABLE)) {
                 return true;
+            }
+            if (failBuildIfNoResultFile) {
+            	build.setResult(Result.FAILURE);
             }
             logger.println("Performance: no " + parser.getReportName()
                     + " files matching '" + glob
