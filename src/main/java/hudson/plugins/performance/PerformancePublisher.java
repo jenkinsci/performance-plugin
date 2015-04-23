@@ -336,7 +336,6 @@ public class PerformancePublisher extends Recorder {
             if (build.getResult().isWorseThan(Result.UNSTABLE)) {
               return true;
             }
-            build.setResult(Result.FAILURE);
             logger.println("Performance: no " + parser.getReportName()
                     + " files matching '" + glob
                     + "' have been found. Has the report generated?. Setting Build to "
@@ -527,7 +526,6 @@ public class PerformancePublisher extends Recorder {
             if (build.getResult().isWorseThan(Result.UNSTABLE)) {
                 return true;
             }
-            build.setResult(Result.FAILURE);
             logger.println("Performance: no " + parser.getReportName()
                     + " files matching '" + glob
                     + "' have been found. Has the report generated?. Setting Build to "
