@@ -10,9 +10,11 @@ import java.io.Serializable;
  */
 public class HttpSample implements Serializable, Comparable<HttpSample> {
 
-  private static final long serialVersionUID = -3531990216789038711L;
+  	private static final long serialVersionUID = -3531990216789038711L;
 
-  private long duration;
+  	private long duration;
+
+	private long connectTime;
 
 	private boolean successful;
 
@@ -37,6 +39,10 @@ public class HttpSample implements Serializable, Comparable<HttpSample> {
 
 	public long getDuration() {
 		return duration;
+	}
+
+	public long getConnectTime() {
+		return connectTime;
 	}
 
 	public Date getDate() {
@@ -77,6 +83,10 @@ public class HttpSample implements Serializable, Comparable<HttpSample> {
 
 	public void setDuration(long duration) {
 		this.duration = duration;
+	}
+
+	public void setConnectTime(long connectTime) {
+		this.connectTime = connectTime;
 	}
 
 	public void setSuccessful(boolean successful) {

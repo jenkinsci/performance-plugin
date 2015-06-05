@@ -127,7 +127,15 @@ public class JMeterParser extends AbstractParser {
           durationValue = attributes.getValue("time"); 
         }
         sample.setDuration(Long.valueOf(durationValue));
-        
+
+        final String connectTimeValue;
+        if (attributes.getValue("ct") != null) {
+          connectTimeValue = attributes.getValue("ct");
+        } else {
+          connectTimeValue = "0";
+        }
+        sample.setConnectTime(Long.valueOf(connectTimeValue));
+
         final String successfulValue;
         if (attributes.getValue("s") != null) {
           successfulValue = attributes.getValue("s");

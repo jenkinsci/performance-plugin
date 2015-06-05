@@ -433,6 +433,10 @@ public final class PerformanceProjectAction implements Action {
             Messages.ProjectAction_Average(), label);
         dataSetBuilderAverage.add(performanceReport.get90Line(),
             Messages.ProjectAction_Line90(), label);
+          dataSetBuilderAverage.add(performanceReport.get95Line(),
+                  Messages.ProjectAction_Line95(), label);
+          dataSetBuilderAverage.add(performanceReport.get98Line(),
+                  Messages.ProjectAction_Line98(), label);
       }
       nbBuildsToAnalyze--;
       continue;
@@ -782,6 +786,10 @@ public final class PerformanceProjectAction implements Action {
             Messages.ProjectAction_Median(), label);
         dataSet.add(Math.round(report.get90Line()),
             Messages.ProjectAction_Line90(), label);
+        dataSet.add(Math.round(report.get95Line()),
+            Messages.ProjectAction_Line95(), label);
+        dataSet.add(Math.round(report.get98Line()),
+            Messages.ProjectAction_Line98(), label);
         dataSet.add(Math.round(report.getMin()),
             Messages.ProjectAction_Minimum(), label);
         dataSet.add(Math.round(report.getMax()),

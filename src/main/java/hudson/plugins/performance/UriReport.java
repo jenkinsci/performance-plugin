@@ -163,7 +163,15 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
   public long get90Line() {
     return getDurationAt(0.9);
   }
-  
+
+  public long get95Line() {
+    return getDurationAt(0.95);
+  }
+
+  public long get98Line() {
+    return getDurationAt(0.98);
+  }
+
   public String getHttpCode() {
     return StringUtils.join(httpCodes, ',');
   }

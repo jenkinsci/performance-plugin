@@ -8,6 +8,8 @@
   <td>${it.getMedian()}</td>
   <td class="${h.ifThenElse(it.getMedianDiff()>0,'red','green')}">${it.getMedianDiff()}</td>
   <td>${it.get90Line()}</td>
+  <td>${it.get95Line()}</td>
+  <td>${it.get98Line()}</td>
   <td>${it.getMin()}</td>
   <td>${it.getMax()}</td>
   <td>${it.getHttpCode()}</td>

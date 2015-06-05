@@ -22,6 +22,8 @@
     <th>${%Median} (ms)</th>
     <th>${%Median diff} (ms)</th>
     <th>${%Line90} (ms)</th>
+    <th>${%Line95} (ms)</th>
+    <th>${%Line98} (ms)</th>
     <th>${%Minimum} (ms)</th>
     <th>${%Maximum} (ms)</th>
     <th>${%Http Code}</th>
