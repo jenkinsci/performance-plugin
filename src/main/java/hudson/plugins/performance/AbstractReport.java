@@ -13,7 +13,6 @@ public abstract class AbstractReport {
 
   protected final DecimalFormat percentFormat;
   protected final DecimalFormat dataFormat; // three decimals
-  protected final DecimalFormat twoDForm; // two decimals
 
   abstract public int countErrors();
 
@@ -24,7 +23,6 @@ public abstract class AbstractReport {
 
     percentFormat = new DecimalFormat("0.0", DecimalFormatSymbols.getInstance( useThisLocale ));
     dataFormat = new DecimalFormat("#,###", DecimalFormatSymbols.getInstance( useThisLocale ));
-    twoDForm = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance( useThisLocale ));
   }
 
   public String errorPercentFormated() {
