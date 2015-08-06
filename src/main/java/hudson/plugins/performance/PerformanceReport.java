@@ -4,7 +4,8 @@ import hudson.model.AbstractBuild;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -321,8 +322,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   }
 
   private double roundTwoDecimals(double d) {
-    synchronized (twoDForm) {
-      return Double.valueOf(twoDForm.format(d));
-    }
+    BigDecimal bd = new BigDecimal(d);
+	bd = bd.setScale(2, RoundingMode.HALF_UP);
+	return bd.doubleValue();
   }
 }
