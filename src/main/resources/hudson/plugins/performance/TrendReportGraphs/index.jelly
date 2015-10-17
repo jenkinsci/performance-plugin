@@ -14,9 +14,7 @@
           <strong class="uri">${%URI}: ${URI}</strong>
          <tr>
           <td class="left">
-              <a href="./uriReport/${it.getUriReport(URI).encodeUriReport()}">
-              <st:out value="${it.getUriReport(URI).getShortUri()}" />
-              </a>
+              <st:out value="${it.getUriReport(URI).getStaplerUri()}" />
           </td>
           <j:choose>
             <j:when test="${it.getUriReport(URI).getPerformanceReport().ifSummarizerParserUsed(it.getPerformanceReport().getReportFileName())}">
