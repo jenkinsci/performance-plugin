@@ -16,7 +16,7 @@ public class ThroughputReportTest {
 
     @Test
     public void shouldReturnZeroIfNoUri() {
-        Assert.assertEquals(0, throughputReport.get());
+        Assert.assertEquals(0.0, throughputReport.get());
     }
 
     @Test
@@ -36,7 +36,29 @@ public class ThroughputReportTest {
         performanceReport.getUriReportMap().put(uriReport1.getUri(), uriReport1);
         performanceReport.getUriReportMap().put(uriReport2.getUri(), uriReport2);
 
-        Assert.assertEquals(2, throughputReport.get());
+        Assert.assertEquals(2.0, throughputReport.get());
+    }
+
+    @Test
+    public void shouldSummarizeThroughputUnder1ByDifferentUri() {
+        HttpSample httpSample1 = new HttpSample();
+        httpSample1.setDate(new Date());
+        httpSample1.setDuration(1100);
+
+        UriReport uriReport1 = new UriReport("f", "url1");
+        uriReport1.addHttpSample(httpSample1);
+
+        HttpSample httpSample2 = new HttpSample();
+        httpSample2.setDate(new Date());
+        httpSample2.setDuration(1100);
+
+        UriReport uriReport2 = new UriReport("f", "url2");
+        uriReport2.addHttpSample(httpSample2);
+
+        performanceReport.getUriReportMap().put(uriReport1.getUri(), uriReport1);
+        performanceReport.getUriReportMap().put(uriReport2.getUri(), uriReport2);
+
+        Assert.assertEquals(2.0/1100*1000, throughputReport.get());
     }
 
 }
