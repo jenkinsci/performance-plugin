@@ -298,24 +298,19 @@ public class PerformanceReport extends AbstractReport implements Serializable,
    * @return boolean indicating usage of summarized parser
    */
   public boolean ifSummarizerParserUsed(String filename) {
-    List<PerformanceReportParser> list = buildAction.getBuild().getProject()
-        .getPublishersList().get(PerformancePublisher.class).getParsers();
-
-    for (int i = 0; i < list.size(); i++) {
-      if (list.get(i).getDescriptor().getDisplayName()
-          .equals("JmeterSummarizer")) {
-        String fileExt = list.get(i).glob;
-        String parts[] = fileExt.split("\\s*[;:,]+\\s*");
-        for (String path : parts) {
-          if (filename.endsWith(path.substring(5))) {
-            return true;
-          }
+    PerformanceReportParser parser = buildAction.getParserByDisplayName("JmeterSummarizer");
+    if (parser != null) {
+      String fileExt = parser.glob;
+      String parts[] = fileExt.split("\\s*[;:,]+\\s*");
+      for (String path : parts) {
+        if (filename.endsWith(path.substring(5))) {
+         return true;
         }
-      } else if (list.get(i).getDescriptor().getDisplayName()
-        .equals("Iago")) {
-        return true;
       }
-      
+    }
+    parser = buildAction.getParserByDisplayName("Iago");
+    if (parser != null) {
+      return true;
     }
     return false;
   }
