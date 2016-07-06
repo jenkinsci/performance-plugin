@@ -2,6 +2,9 @@ package hudson.plugins.performance;
 
 import hudson.Extension;
 import hudson.util.FormValidation;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,10 +12,6 @@ import java.io.FileReader;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.xml.sax.SAXException;
 
 public class JMeterCsvParser extends AbstractParser {
 
@@ -34,16 +33,18 @@ public class JMeterCsvParser extends AbstractParser {
     String[] fields = pattern.split(delimiter);
     for (int i = 0; i < fields.length; i++) {
       String field = fields[i];
-      if ("timestamp".equals(field)) {
+      if ("timestamp".equalsIgnoreCase(field)) {
         timestampIdx = i;
-      } else if ("elapsed".equals(field)) {
+      } else if ("elapsed".equalsIgnoreCase(field)) {
         elapsedIdx = i;
-      } else if ("responseCode".equals(field)) {
+      } else if ("responseCode".equalsIgnoreCase(field)) {
         responseCodeIdx = i;
-      } else if ("success".equals(field)) {
+      } else if ("success".equalsIgnoreCase(field)) {
         successIdx = i;
-      } else if ("URL".equals(field)) {
-        urlIdx = i;
+      } else if ("URL".equalsIgnoreCase(field) && urlIdx < 0) {
+          urlIdx = i;
+      } else if ("label".equalsIgnoreCase(field) && urlIdx < 0) {
+          urlIdx = i;
       }
     }
     if (timestampIdx < 0 || elapsedIdx < 0 || responseCodeIdx < 0
@@ -90,9 +91,8 @@ public class JMeterCsvParser extends AbstractParser {
       }
     }
 
-    private void validatePresent(Set<String> missing, String pattern,
-        String string) {
-      if (!pattern.contains(string)) {
+    private void validatePresent(Set<String> missing, String pattern, String string) {
+      if (!pattern.toLowerCase().contains(string.toLowerCase())) {
         missing.add(string);
       }
     }
