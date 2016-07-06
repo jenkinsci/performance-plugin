@@ -1,19 +1,16 @@
 package hudson.plugins.performance;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import hudson.model.TaskListener;
 import hudson.util.StreamTaskListener;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class WrkSummarizerParserTest {
 
@@ -64,7 +61,7 @@ public class WrkSummarizerParserTest {
   @Test
   public void testParseWithLatencyDistributionBuckets() {
     List<File> files = new ArrayList<File>(1);
-    files.add(new File(getClass().getResource("/WrkResultsWithLatencyFlag.wrk") .getFile()));
+    files.add(new File(getClass().getResource("/WrkResultsWithLatencyFlag.wrk").getFile()));
 
     try {
       Collection<PerformanceReport> reports = parser.parse(null, files, listener);
@@ -73,16 +70,16 @@ public class WrkSummarizerParserTest {
       fail(e.getMessage());
     }
   }
-  
+
   @Test
   public void testParseWithErrors() {
     List<File> files = new ArrayList<File>(1);
-    files.add(new File(getClass().getResource("/WrkResultsWithErrors.wrk") .getFile()));
+    files.add(new File(getClass().getResource("/WrkResultsWithErrors.wrk").getFile()));
 
     try {
       Collection<PerformanceReport> reports = parser.parse(null, files, listener);
       assertFalse(reports.isEmpty());
-      
+
       // NOTE: uncomment once this is intentionally supported. Currently some
       //       refactoring is needed with summarized reports.
       // for(PerformanceReport report: reports) {
