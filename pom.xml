@@ -18,12 +18,6 @@
       <name>Manuel Carrasco Monino</name>
       <email>manolo@apache.org</email>
     </developer>
-    <developer>
-      <id>vergnes</id>
-    </developer>
-    <developer>
-      <id>aespy</id>
-    </developer>
   </developers>
 
   <scm>
