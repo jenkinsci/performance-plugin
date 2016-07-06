@@ -28,9 +28,10 @@ import java.util.logging.Logger;
  * 
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
-public abstract class AbstractParser extends PerformanceReportParser 
+public abstract class AbstractParser extends PerformanceReportParser
 {  
   private static final Logger LOGGER = Logger.getLogger(JMeterParser.class.getName());
+  private static long bit2MB = 1024 * 1024;
 
   /**
    * A suffix to be used for files in which a serialized PerformanceReport instance is stored.
@@ -52,7 +53,12 @@ public abstract class AbstractParser extends PerformanceReportParser
     final List<PerformanceReport> result = new ArrayList<PerformanceReport>();
 
     for (File reportFile : reports)
-    {      
+    {
+    	if (!isMemoryEnough(reportFile)) {
+    		// better to skip file than have out of memory error...
+    		continue;
+    	}
+    	
       // Attempt to load previously serialized instances from file or cache. 
       final PerformanceReport deserializedReport = loadSerializedReport(reportFile);
       if (deserializedReport != null) {
@@ -176,4 +182,18 @@ public abstract class AbstractParser extends PerformanceReportParser
       }
     }
   }
+  
+	boolean isMemoryEnough(File file) {
+		Runtime runtime = Runtime.getRuntime();
+		if (runtime != null) {
+			if (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory() < file.length()) {
+				System.gc();
+				if (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory() < file.length()) {
+					System.out.println("Too low memory... No enough " + (file.length() - runtime.maxMemory() + runtime.totalMemory() - runtime.freeMemory()) / bit2MB + " MB to process '" + file.getAbsolutePath() + "'...");
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }
