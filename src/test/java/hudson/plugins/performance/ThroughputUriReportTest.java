@@ -10,7 +10,8 @@ import java.util.Date;
  */
 public class ThroughputUriReportTest {
 
-    private UriReport uriReport = new UriReport("f", "x");
+    private PerformanceReport performanceReport = new PerformanceReport();
+    private UriReport uriReport = new UriReport(performanceReport, "f", "x");
 
     private ThroughputUriReport throughputUriReport = new ThroughputUriReport(uriReport);
 

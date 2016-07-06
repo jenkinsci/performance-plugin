@@ -1,10 +1,13 @@
 package hudson.plugins.performance;
 
+import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
 import hudson.util.ChartUtil;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -39,6 +42,11 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
   private final String staplerUri;
   
   private UriReport lastBuildUriReport;
+
+  /**
+   * The parent object to which this object belongs.
+   */
+  private final PerformanceReport performanceReport;
 
   private String uri;
   
@@ -97,7 +105,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
    */
   private Date end = null;
 
-  UriReport(String staplerUri, String uri) {
+  UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
+    this.performanceReport = performanceReport;
     this.staplerUri = staplerUri;
     this.uri = uri;
   }
@@ -107,7 +116,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
       nbError++;
     }
     synchronized (samples) {
-      if (samples.add(new Sample(sample.getDate(), sample.getDuration()))) {
+      if (samples.add(new Sample(sample.getHttpCode(), sample.getDate(), sample.getDuration()))) {
         isSorted = false;
       }
     }
@@ -172,14 +181,26 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     return getDurationAt(0.5);
   }
 
+  public AbstractBuild<?, ?> getBuild() {
+    return performanceReport.getBuild();
+  }
+
   public String getDisplayName() {
     return getUri();
+  }
+
+  public List<Sample> getHttpSampleList() {
+    return samples;
+  }
+
+  public PerformanceReport getPerformanceReport() {
+    return performanceReport;
   }
 
   protected List<Long> getSortedDuration() {
     synchronized (samples) {
       if (!isSorted || durationsSortedBySize == null || durationsSortedBySize.size() != samples.size()) {
-        
+
         durationsSortedBySize = new ArrayList<Long>(samples.size());
         for (Sample sample : samples) {
           durationsSortedBySize.add(sample.duration);
@@ -228,6 +249,13 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     return uri;
   }
 
+  public String getShortUri() {
+    if ( uri.length() > 130 ) {
+        return uri.substring( 0, 129 );
+    }
+    return uri;
+  }
+
   public boolean isFailed() {
     return countErrors() != 0;
   }
@@ -236,6 +264,14 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     synchronized (samples) {
       return samples.size();
     }
+  }
+
+  public String encodeUriReport() throws UnsupportedEncodingException {
+    StringBuilder sb = new StringBuilder(120);
+    sb.append(performanceReport.getReportFileName()).append(
+        GraphConfigurationDetail.SEPARATOR).append(getStaplerUri()).append(
+        END_PERFORMANCE_PARAMETER);
+    return URLEncoder.encode(sb.toString(), "UTF-8");
   }
 
   public void addLastBuildUriReport( UriReport lastBuildUriReport ) {
@@ -318,10 +354,24 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     
     final Date date;
     final long duration;
+    final String httpCode;
     
-    public Sample(Date date, long duration) {
+    public Sample(String httpCode, Date date, long duration) {
+      this.httpCode = httpCode;
       this.date = date;
       this.duration = duration;
+    }
+
+    public String getHttpCode() {
+      return httpCode;
+    }
+      
+    public Date getDate() {
+      return date;
+    }
+
+    public long getDuration() {
+      return duration;
     }
 
     /** Compare first based on duration, next on date. */
