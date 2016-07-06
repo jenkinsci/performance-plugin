@@ -99,6 +99,8 @@ public class PerformancePublisher extends Recorder {
   private String configType="ART";
 
   private boolean modeOfThreshold = false;
+  
+  private boolean failBuildIfNoResultFile = false;
 
   private boolean compareBuildPrevious = false;
 
@@ -145,6 +147,7 @@ public class PerformancePublisher extends Recorder {
                             boolean modePerformancePerTestCase,
                             String comparisonType,
                             boolean modeOfThreshold,
+                            boolean failBuildIfNoResultFile,
                             boolean compareBuildPrevious,
                             List<? extends PerformanceReportParser> parsers,
                             boolean modeThroughput) {
@@ -162,6 +165,7 @@ public class PerformancePublisher extends Recorder {
     this.configType = comparisonType;
     PerformancePublisher.optionType = comparisonType;
     this.modeOfThreshold = modeOfThreshold;
+    this.failBuildIfNoResultFile = failBuildIfNoResultFile;
     this.compareBuildPrevious = compareBuildPrevious;
 
     if (parsers == null)
@@ -336,7 +340,9 @@ public class PerformancePublisher extends Recorder {
             if (build.getResult().isWorseThan(Result.UNSTABLE)) {
               return true;
             }
-            build.setResult(Result.FAILURE);
+            if (failBuildIfNoResultFile) {
+            	build.setResult(Result.FAILURE);
+            }
             logger.println("Performance: no " + parser.getReportName()
                     + " files matching '" + glob
                     + "' have been found. Has the report generated?. Setting Build to "
@@ -527,7 +533,9 @@ public class PerformancePublisher extends Recorder {
             if (build.getResult().isWorseThan(Result.UNSTABLE)) {
                 return true;
             }
-            build.setResult(Result.FAILURE);
+            if (failBuildIfNoResultFile) {
+            	build.setResult(Result.FAILURE);
+            }
             logger.println("Performance: no " + parser.getReportName()
                     + " files matching '" + glob
                     + "' have been found. Has the report generated?. Setting Build to "

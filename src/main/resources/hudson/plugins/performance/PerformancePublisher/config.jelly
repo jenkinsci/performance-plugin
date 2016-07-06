@@ -9,7 +9,13 @@
   <f:entry title="Select mode:   ">
     <f:booleanRadio name="modeOfThreshold" field="modeOfThreshold" true="Relative Threshold" false="Error Threshold" />
   </f:entry>
-
+ 
+   <f:entry title="Build result:   ">
+		<f:checkbox name="failBuildIfNoResultFile" title="Fail build when result files are not present" field="failBuildIfNoResultFile">
+		    		  Fail build when result files are not present
+        </f:checkbox>
+  </f:entry>
+  
   <f:block>
     <f:entry title="Use Error thresholds on single build:   ">
       <table width="500px">
