@@ -56,6 +56,22 @@ public abstract class AbstractReport {
     }
   }
 
+  abstract public long get95Line();
+
+  public String get95LineFormated() {
+    synchronized (dataFormat) {
+      return dataFormat.format(get95Line());
+    }
+  }
+
+  abstract public long get98Line();
+
+  public String get98LineFormated() {
+    synchronized (dataFormat) {
+      return dataFormat.format(get98Line());
+    }
+  }
+
   abstract public long getMax();
 
   public String getMaxFormated() {

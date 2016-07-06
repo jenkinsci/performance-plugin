@@ -180,6 +180,14 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     return getDurationAt(.9);
   }
 
+  public long get95Line() {
+    return getDurationAt(.95);
+  }
+
+  public long get98Line() {
+    return getDurationAt(.98);
+  }
+
   public long getMedian() {
     return getDurationAt(.5);
   }
