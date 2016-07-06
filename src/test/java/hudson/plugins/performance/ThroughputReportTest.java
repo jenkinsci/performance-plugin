@@ -45,14 +45,14 @@ public class ThroughputReportTest {
         httpSample1.setDate(new Date());
         httpSample1.setDuration(1100);
 
-        UriReport uriReport1 = new UriReport("f", "url1");
+        UriReport uriReport1 = new UriReport(null, "f", "url1");
         uriReport1.addHttpSample(httpSample1);
 
         HttpSample httpSample2 = new HttpSample();
         httpSample2.setDate(new Date());
         httpSample2.setDuration(1100);
 
-        UriReport uriReport2 = new UriReport("f", "url2");
+        UriReport uriReport2 = new UriReport(null, "f", "url2");
         uriReport2.addHttpSample(httpSample2);
 
         performanceReport.getUriReportMap().put(uriReport1.getUri(), uriReport1);
