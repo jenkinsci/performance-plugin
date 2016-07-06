@@ -199,7 +199,6 @@ public class PerformancePublisher extends Recorder {
    * Maven Performance plugin
    * </p>
    *
-   * @param performanceReportWorkspaceName
    * @return the name of the PerformanceReport in the Build
    */
   public static String getPerformanceReportBuildFileName(
@@ -245,7 +244,7 @@ public class PerformancePublisher extends Recorder {
       }
       if (!files.isEmpty()) return files;
 
-    } catch (IOException e) {
+    } catch (IOException ignored) {
     }
 
     //Agoley:  seems like this block doesn't work
@@ -282,7 +281,7 @@ public class PerformancePublisher extends Recorder {
     //For absolute error/unstable threshold..
     if (!modeOfThreshold) {
       try {
-        List<UriReport> curruriList = null;
+        List<UriReport> curruriList;
         HashMap<String, String> responseTimeThresholdMap = null;
 
         if (!"".equals(this.errorUnstableResponseTimeThreshold) && this.errorUnstableResponseTimeThreshold != null) {
@@ -459,7 +458,7 @@ public class PerformancePublisher extends Recorder {
             logger.print("\n\n\n");
           }
         }
-      } catch (Exception e) {
+      } catch (Exception ignored) {
       }
     } else {
 
@@ -467,8 +466,8 @@ public class PerformancePublisher extends Recorder {
       try {
 
         String name = "";
-        FileWriter fw = null;
-        BufferedWriter bw = null;
+        FileWriter fw;
+        BufferedWriter bw;
 
         String relative = "<relativeDefinition>\n";
         String unstable = "\t<unstable>\n";
@@ -567,7 +566,7 @@ public class PerformancePublisher extends Recorder {
         bw.write("<results>\n");
 
         // getting previous build/nth previous build..
-        AbstractBuild<?, ?> prevBuild = null;
+        AbstractBuild<?, ?> prevBuild;
 
         if (compareBuildPrevious) {
           buildNo += "previous";
@@ -609,7 +608,7 @@ public class PerformancePublisher extends Recorder {
 
           result = Result.SUCCESS;
           String failedLabel = null, unStableLabel = null;
-          double relativeDiff = 0, relativeDiffPercent = 0;
+          double relativeDiff, relativeDiffPercent;
 
           logger.print("\nComparison build no. - " + prevBuild.number + " and " + build.number + " using ");
 
@@ -642,7 +641,7 @@ public class PerformancePublisher extends Recorder {
               if (prevuriList.get(i).getStaplerUri().equalsIgnoreCase(curruriList.get(j).getStaplerUri())) {
 
                 relativeDiff = curruriList.get(j).getAverage() - prevuriList.get(i).getAverage();
-                relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getAverage();
+                relativeDiffPercent = (relativeDiff * 100) / prevuriList.get(i).getAverage();
                 relativeDiffPercent = Math.round(relativeDiffPercent * 100);
                 relativeDiffPercent = relativeDiffPercent / 100;
 
@@ -654,7 +653,7 @@ public class PerformancePublisher extends Recorder {
                 avg += "\t</" + curruriList.get(j).getStaplerUri() + ">\n";
 
                 relativeDiff = curruriList.get(j).getMedian() - prevuriList.get(i).getMedian();
-                relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getMedian();
+                relativeDiffPercent = (relativeDiff * 100) / prevuriList.get(i).getMedian();
                 relativeDiffPercent = Math.round(relativeDiffPercent * 100);
                 relativeDiffPercent = relativeDiffPercent / 100;
 
@@ -666,7 +665,7 @@ public class PerformancePublisher extends Recorder {
                 med += "\t</" + curruriList.get(j).getStaplerUri() + ">\n";
 
                 relativeDiff = curruriList.get(j).get90Line() - prevuriList.get(i).get90Line();
-                relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).get90Line();
+                relativeDiffPercent = (relativeDiff * 100) / prevuriList.get(i).get90Line();
                 relativeDiffPercent = Math.round(relativeDiffPercent * 100);
                 relativeDiffPercent = relativeDiffPercent / 100;
 
@@ -681,7 +680,7 @@ public class PerformancePublisher extends Recorder {
                 if (configType.equalsIgnoreCase("ART")) {
 
                   relativeDiff = curruriList.get(j).getAverage() - prevuriList.get(i).getAverage();
-                  relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getAverage();
+                  relativeDiffPercent = (relativeDiff * 100) / prevuriList.get(i).getAverage();
 
                   relativeDiffPercent = Math.round(relativeDiffPercent * 100);
                   relativeDiffPercent = relativeDiffPercent / 100;
@@ -693,7 +692,7 @@ public class PerformancePublisher extends Recorder {
                 } else if (configType.equalsIgnoreCase("MRT")) {
 
                   relativeDiff = curruriList.get(j).getMedian() - prevuriList.get(i).getMedian();
-                  relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getMedian();
+                  relativeDiffPercent = (relativeDiff * 100) / prevuriList.get(i).getMedian();
 
                   relativeDiffPercent = Math.round(relativeDiffPercent * 100);
                   relativeDiffPercent = relativeDiffPercent / 100;
@@ -705,7 +704,7 @@ public class PerformancePublisher extends Recorder {
                 } else if (configType.equalsIgnoreCase("PRT")) {
 
                   relativeDiff = curruriList.get(j).get90Line() - prevuriList.get(i).get90Line();
-                  relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).get90Line();
+                  relativeDiffPercent = (relativeDiff * 100) / prevuriList.get(i).get90Line();
 
                   relativeDiffPercent = Math.round(relativeDiffPercent * 100);
                   relativeDiffPercent = relativeDiffPercent / 100;
@@ -767,7 +766,7 @@ public class PerformancePublisher extends Recorder {
         bw.close();
         fw.close();
 
-      } catch (Exception e) {
+      } catch (Exception ignored) {
       }
     }
     return true;
@@ -864,8 +863,7 @@ public class PerformancePublisher extends Recorder {
   public static File[] getPerformanceReportDirectory(AbstractBuild<?, ?> build,
                                                      String parserDisplayName, PrintStream logger) {
     File folder = new File(build.getRootDir() + "/" + PerformanceReportMap.getPerformanceReportFileRelativePath(parserDisplayName, ""));
-    File[] listOfFiles = folder.listFiles();
-    return listOfFiles;
+    return folder.listFiles();
   }
 
 
@@ -885,7 +883,7 @@ public class PerformancePublisher extends Recorder {
     int nextBuildNumber = build.number - nthBuildNumber;
 
     for (int i = 1; i <= nextBuildNumber; i++) {
-      nthBuild = (AbstractBuild<?, ?>) nthBuild.getPreviousBuild();
+      nthBuild = nthBuild.getPreviousBuild();
       if (nthBuild == null)
         return null;
     }
