@@ -16,7 +16,7 @@ public class ThroughputUriReportTest {
 
     @Test
     public void shouldReturnZeroIfNoHttpSamples() {
-        Assert.assertEquals(0, throughputUriReport.get());
+        Assert.assertEquals(0.0, throughputUriReport.get());
     }
 
     @Test
@@ -27,7 +27,7 @@ public class ThroughputUriReportTest {
 
         uriReport.addHttpSample(httpSample1);
 
-        Assert.assertEquals(1, throughputUriReport.get());
+        Assert.assertEquals(1.0, throughputUriReport.get());
     }
 
     @Test
@@ -38,7 +38,7 @@ public class ThroughputUriReportTest {
 
         uriReport.addHttpSample(httpSample1);
 
-        Assert.assertEquals(0, throughputUriReport.get());
+        Assert.assertEquals(0.1, throughputUriReport.get());
     }
 
     @Test
@@ -52,7 +52,7 @@ public class ThroughputUriReportTest {
         uriReport.addHttpSample(httpSample1);
         uriReport.addHttpSample(httpSample2);
 
-        Assert.assertEquals(2, throughputUriReport.get());
+        Assert.assertEquals(2.0, throughputUriReport.get());
     }
 
     @Test
@@ -83,11 +83,11 @@ public class ThroughputUriReportTest {
         uriReport.addHttpSample(httpSample1);
         uriReport.addHttpSample(httpSample2);
 
-        Assert.assertEquals(2, throughputUriReport.get());
+        Assert.assertEquals(2.0, throughputUriReport.get());
     }
 
     @Test
-    public void shouldCalculateThroughput2() {
+      public void shouldCalculateThroughput2() {
         long time = System.currentTimeMillis();
 
         // 0 sec - start first request, start second r
@@ -115,7 +115,7 @@ public class ThroughputUriReportTest {
         uriReport.addHttpSample(httpSample2);
         uriReport.addHttpSample(httpSample3);
 
-        Assert.assertEquals(0, throughputUriReport.get());
+        Assert.assertEquals(0.5, throughputUriReport.get());
     }
 
 }

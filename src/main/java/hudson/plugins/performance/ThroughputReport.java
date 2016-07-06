@@ -13,12 +13,15 @@ public class ThroughputReport {
         this.performanceReport = performanceReport;
     }
 
-    public long get() {
+    public double get() {
         final List<UriReport> uriReports = performanceReport.getUriListOrdered();
-        if (uriReports.isEmpty()) return 0L;
+        if (uriReports.isEmpty()) return 0;
 
-        long sumThroughput = 0;
-        for (UriReport uriReport : uriReports) sumThroughput += new ThroughputUriReport(uriReport).get();
+        double sumThroughput = 0;
+        for (UriReport uriReport : uriReports) {
+            sumThroughput += new ThroughputUriReport(uriReport).get();
+        }
+
         // here we assume that all uri executed in parallel and have same test duration
         return sumThroughput;
     }
