@@ -1,60 +1,63 @@
 package hudson.plugins.performance;
 
-import hudson.model.ModelObject;
 import hudson.model.AbstractProject;
-import hudson.plugins.performance.CookieHandler;
+import hudson.model.ModelObject;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
-
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * Configures the trend graph of this plug-in.
  */
 public class GraphConfigurationDetail implements ModelObject {
 
-  /** Logger. */
+  /**
+   * Logger.
+   */
   private static final Logger LOGGER = Logger.getLogger(GraphConfigurationDetail.class.getName());
 
   public static final String LEGACY_SEPARATOR = ";";
   public static final String SEPARATOR = ":";
-  /** The number of builds to consider. */
+  /**
+   * The number of builds to consider.
+   */
   private int buildCount;
-  /** The first days to consider. */
+  /**
+   * The first days to consider.
+   */
   private String firstDayCount;
-  /** The last days to consider. */
+  /**
+   * The last days to consider.
+   */
   private String lastDayCount;
-  /** The type of config to use. */
+  /**
+   * The type of config to use.
+   */
   private String configType;
-  /** The build step to consider. */
+  /**
+   * The build step to consider.
+   */
   private int buildStep;
-  
+
 
   public static final int DEFAULT_COUNT = 0;
-  
-  public static final int DEFAULT_STEP = 1; 
+
+  public static final int DEFAULT_STEP = 1;
 
   public static final String DEFAULT_DATE = "dd/MM/yyyy";
 
@@ -63,34 +66,34 @@ public class GraphConfigurationDetail implements ModelObject {
   public static final String BUILD_CONFIG = "BUILD";
 
   public static final String DATE_CONFIG = "DATE";
-  
+
   public static final String BUILDNTH_CONFIG = "BUILDNTH";
 
-    public boolean isNone() {
-        return configType.compareToIgnoreCase(GraphConfigurationDetail.NONE_CONFIG) == 0;
-    }
+  public boolean isNone() {
+    return configType.compareToIgnoreCase(GraphConfigurationDetail.NONE_CONFIG) == 0;
+  }
 
-    public boolean isBuildCount() {
-        return configType.compareToIgnoreCase(GraphConfigurationDetail.BUILD_CONFIG) == 0;
-    }
+  public boolean isBuildCount() {
+    return configType.compareToIgnoreCase(GraphConfigurationDetail.BUILD_CONFIG) == 0;
+  }
 
-    public boolean isBuildNth(){
-    	return configType.compareToIgnoreCase(GraphConfigurationDetail.BUILDNTH_CONFIG) == 0;
-    }
-    
-    public boolean isDate() {
-        return configType.compareToIgnoreCase(GraphConfigurationDetail.DATE_CONFIG) == 0;
-    }
+  public boolean isBuildNth() {
+    return configType.compareToIgnoreCase(GraphConfigurationDetail.BUILDNTH_CONFIG) == 0;
+  }
 
-    public boolean isDefaultDates() {
-        return DEFAULT_DATE.compareTo(firstDayCount) == 0
-            && DEFAULT_DATE.compareTo(lastDayCount) == 0;
-    }
+  public boolean isDate() {
+    return configType.compareToIgnoreCase(GraphConfigurationDetail.DATE_CONFIG) == 0;
+  }
 
-    static DateFormat format = new SimpleDateFormat(DEFAULT_DATE);
+  public boolean isDefaultDates() {
+    return DEFAULT_DATE.compareTo(firstDayCount) == 0
+        && DEFAULT_DATE.compareTo(lastDayCount) == 0;
+  }
+
+  static DateFormat format = new SimpleDateFormat(DEFAULT_DATE);
 
   public GraphConfigurationDetail(final AbstractProject<?, ?> project,
-      final String pluginName, final StaplerRequest request) {
+                                  final String pluginName, final StaplerRequest request) {
 
     String value = createCookieHandler(pluginName).getValue(
         request.getCookies());
@@ -112,14 +115,12 @@ public class GraphConfigurationDetail implements ModelObject {
   /**
    * Saves the configured values. Subclasses need to implement the actual
    * persistence.
-   * 
-   * @param request
-   *            Stapler request
-   * @param response
-   *            Stapler response
+   *
+   * @param request  Stapler request
+   * @param response Stapler response
    */
   public void doSave(final StaplerRequest request,
-      final StaplerResponse response) {
+                     final StaplerResponse response) {
     try {
       JSONObject formData = request.getSubmittedForm();
       String buildCountString = formData.getString("buildCountString");
@@ -142,16 +143,16 @@ public class GraphConfigurationDetail implements ModelObject {
       if (StringUtils.isNotBlank(radioConfigType)) {
         configType = formData.getString("radioConfigType");
       }
-      
+
       int buildStep = DEFAULT_STEP;
-      if (formData.has("buildStepString")){
-    	  String buildStepString = formData.getString("buildStepString");
-    	  
-    	  if (StringUtils.isNotBlank(buildStepString)) {
-    		  buildStep = formData.getInt("buildStepString");
-    	  }
+      if (formData.has("buildStepString")) {
+        String buildStepString = formData.getString("buildStepString");
+
+        if (StringUtils.isNotBlank(buildStepString)) {
+          buildStep = formData.getInt("buildStepString");
+        }
       }
-      
+
       String value = serializeToString(configType, buildCount, firstDayCount,
           lastDayCount, buildStep);
       persistValue(value, request, response);
@@ -180,10 +181,9 @@ public class GraphConfigurationDetail implements ModelObject {
 
   /**
    * Creates a new cookie handler to convert the cookie to a string value.
-   * 
-   * @param cookieName
-   *            the suffix of the cookie name that is used to persist the
-   *            configuration per user
+   *
+   * @param cookieName the suffix of the cookie name that is used to persist the
+   *                   configuration per user
    * @return the new cookie handler
    */
   private static CookieHandler createCookieHandler(final String cookieName) {
@@ -191,23 +191,23 @@ public class GraphConfigurationDetail implements ModelObject {
   }
 
   protected void persistValue(final String value, final StaplerRequest request,
-      final StaplerResponse response) {
-    
+                              final StaplerResponse response) {
+
     // First check for URL values
     String buildCount = request.getParameter("buildCount");
     if (buildCount != null) {
-        setBuildCount (Integer.parseInt(buildCount));
-        setConfigType(GraphConfigurationDetail.BUILD_CONFIG);
-        return;
+      setBuildCount(Integer.parseInt(buildCount));
+      setConfigType(GraphConfigurationDetail.BUILD_CONFIG);
+      return;
     }
-    
+
     String buildStep = request.getParameter("buildStep");
     if (buildStep != null) {
-        setBuildStep(Integer.parseInt(buildStep));
-        setConfigType(GraphConfigurationDetail.BUILDNTH_CONFIG);
-        return;
+      setBuildStep(Integer.parseInt(buildStep));
+      setConfigType(GraphConfigurationDetail.BUILDNTH_CONFIG);
+      return;
     }
-    
+
     // If not found, check cookie    
     Cookie cookie = createCookieHandler("performance").create(
         request.getAncestors(), value);
@@ -215,23 +215,21 @@ public class GraphConfigurationDetail implements ModelObject {
   }
 
   protected String serializeToString(final String configType,
-      final int buildCount, final String firstDayCount,
-      final String lastDayCount, final int buildStep) {
+                                     final int buildCount, final String firstDayCount,
+                                     final String lastDayCount, final int buildStep) {
     return configType + SEPARATOR + buildCount + SEPARATOR + firstDayCount
         + SEPARATOR + lastDayCount + SEPARATOR + buildStep;
   }
 
   /**
    * Creates a file with for the default values.
-   * 
-   * @param project
-   *            the project used as directory for the file
-   * @param pluginName
-   *            the name of the plug-in
+   *
+   * @param project    the project used as directory for the file
+   * @param pluginName the name of the plug-in
    * @return the created file
    */
   protected static File createDefaultsFile(final AbstractProject<?, ?> project,
-      final String pluginName) {
+                                           final String pluginName) {
     return new File(project.getRootDir(), pluginName + ".txt");
   }
 
@@ -240,12 +238,11 @@ public class GraphConfigurationDetail implements ModelObject {
    * not in the expected format, a list containing -1, 1, 2 and/or 3 is
    * returned. -1 is a global error, 1 is a dayCount error, 2 is a first date
    * error, 3 is a last date error. Return an empty list if all is good.
-   * 
-   * @param value
-   *            the initialization value stored in the format
-   *            <code>configType;buildCount;firstDayCount;lastDayCount</code>
+   *
+   * @param value the initialization value stored in the format
+   *              <code>configType;buildCount;firstDayCount;lastDayCount</code>
    * @return an empty list is the initialization was successful, a list
-   *         containing -1, 1, 2 or 3 otherwise
+   * containing -1, 1, 2 or 3 otherwise
    */
   private List<Integer> initializeFrom(final String value) {
     List<Integer> listErrors = new ArrayList<Integer>(0);
@@ -256,9 +253,9 @@ public class GraphConfigurationDetail implements ModelObject {
 
     String[] values;
     if (value.contains(LEGACY_SEPARATOR))
-        values = StringUtils.split(value, LEGACY_SEPARATOR);
+      values = StringUtils.split(value, LEGACY_SEPARATOR);
     else
-        values = StringUtils.split(value, SEPARATOR);
+      values = StringUtils.split(value, SEPARATOR);
 
     if ((values.length != 4) && (values.length != 5)) {
       listErrors.add(-1);
@@ -266,7 +263,7 @@ public class GraphConfigurationDetail implements ModelObject {
     }
     configType = values[0];
     if (BUILD_CONFIG.compareToIgnoreCase(configType) != 0
-    	&& BUILDNTH_CONFIG.compareToIgnoreCase(configType) != 0	
+        && BUILDNTH_CONFIG.compareToIgnoreCase(configType) != 0
         && DATE_CONFIG.compareToIgnoreCase(configType) != 0
         && NONE_CONFIG.compareToIgnoreCase(configType) != 0) {
       listErrors.add(-1);
@@ -315,16 +312,16 @@ public class GraphConfigurationDetail implements ModelObject {
       listErrors.add(2);
       listErrors.add(3);
     }
-    
+
     try {
-    	if (values.length == 5){
-    		buildStep = Integer.parseInt(values[4]);
-    	}
-      } catch (JSONException e) {
-        listErrors.add(4);
-        e.printStackTrace();
+      if (values.length == 5) {
+        buildStep = Integer.parseInt(values[4]);
       }
-    
+    } catch (JSONException e) {
+      listErrors.add(4);
+      e.printStackTrace();
+    }
+
     // clean the error list
     if (!listErrors.isEmpty()) {
       Collections.sort(listErrors);
@@ -350,7 +347,7 @@ public class GraphConfigurationDetail implements ModelObject {
    * <p>
    * Get a gregorian calendar from a String of type : DD/MM/YYYY
    * </p>
-   * 
+   *
    * @param dateString
    * @return GregorianCalendar
    * @throws ParseException
@@ -370,7 +367,7 @@ public class GraphConfigurationDetail implements ModelObject {
     configType = NONE_CONFIG;
     for (Integer errorNumber : initializationResult) {
       if (errorNumber == -1) {
-    	buildCount = DEFAULT_COUNT;
+        buildCount = DEFAULT_COUNT;
         firstDayCount = DEFAULT_DATE;
         lastDayCount = DEFAULT_DATE;
         buildStep = DEFAULT_STEP;
@@ -381,16 +378,15 @@ public class GraphConfigurationDetail implements ModelObject {
       } else if (errorNumber == 3) {
         lastDayCount = DEFAULT_DATE;
       } else if (errorNumber == 4) {
-    	  buildStep = DEFAULT_STEP;
+        buildStep = DEFAULT_STEP;
       }
     }
   }
 
   /**
    * Reads the default values from file.
-   * 
-   * @param defaultsFile
-   *            the file with the default values
+   *
+   * @param defaultsFile the file with the default values
    * @return the default values from file.
    */
   private String readFromDefaultsFile(final File defaultsFile) {
@@ -414,13 +410,13 @@ public class GraphConfigurationDetail implements ModelObject {
   public void setBuildCount(int buildCount) {
     this.buildCount = buildCount;
   }
-  
+
   public int getBuildStep() {
-	  return buildStep;
+    return buildStep;
   }
-  
-  public void setBuildStep(int buildStep){
-	  this.buildStep = buildStep;
+
+  public void setBuildStep(int buildStep) {
+    this.buildStep = buildStep;
   }
 
   public String getFirstDayCount() {

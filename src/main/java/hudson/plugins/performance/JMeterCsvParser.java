@@ -42,9 +42,9 @@ public class JMeterCsvParser extends AbstractParser {
       } else if ("success".equalsIgnoreCase(field)) {
         successIdx = i;
       } else if ("URL".equalsIgnoreCase(field) && urlIdx < 0) {
-          urlIdx = i;
+        urlIdx = i;
       } else if ("label".equalsIgnoreCase(field) && urlIdx < 0) {
-          urlIdx = i;
+        urlIdx = i;
       }
     }
     if (timestampIdx < 0 || elapsedIdx < 0 || responseCodeIdx < 0
@@ -113,7 +113,7 @@ public class JMeterCsvParser extends AbstractParser {
   PerformanceReport parse(File reportFile) throws Exception {
     final PerformanceReport report = new PerformanceReport();
     report.setReportFileName(reportFile.getName());
-    
+
     final BufferedReader reader = new BufferedReader(new FileReader(reportFile));
     try {
       String line = reader.readLine();
@@ -126,12 +126,12 @@ public class JMeterCsvParser extends AbstractParser {
           try {
             report.addSample(sample);
           } catch (SAXException e) {
-            throw new RuntimeException("Error parsing file '"+ reportFile +"': Unable to add sample for line " + line, e);
+            throw new RuntimeException("Error parsing file '" + reportFile + "': Unable to add sample for line " + line, e);
           }
         }
         line = reader.readLine();
       }
-      
+
       return report;
     } finally {
       if (reader != null) {
@@ -142,9 +142,8 @@ public class JMeterCsvParser extends AbstractParser {
 
   /**
    * Parses a single HttpSample instance from a single CSV line.
-   * 
-   * @param line
-   *          file line with the provided pattern (cannot be null).
+   *
+   * @param line file line with the provided pattern (cannot be null).
    * @return An sample instance (never null).
    */
   private HttpSample getSample(String line) {

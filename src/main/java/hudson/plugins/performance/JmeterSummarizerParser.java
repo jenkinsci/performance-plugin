@@ -1,13 +1,12 @@
 package hudson.plugins.performance;
 
 import hudson.Extension;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-
-import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Parses JMeter Summarized results
@@ -47,12 +46,11 @@ public class JmeterSummarizerParser extends AbstractParser {
   }
 
   @Override
-  PerformanceReport parse(File reportFile) throws Exception 
-  {
+  PerformanceReport parse(File reportFile) throws Exception {
     final PerformanceReport report = new PerformanceReport();
     report.setReportFileName(reportFile.getName());
     report.setReportFileName(reportFile.getName());
-    
+
     Scanner s = null;
     try {
       s = new Scanner(reportFile);
@@ -95,7 +93,7 @@ public class JmeterSummarizerParser extends AbstractParser {
           }
         }
       }
-      
+
       return report;
     } finally {
       if (s != null) s.close();

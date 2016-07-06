@@ -1,22 +1,14 @@
 package hudson.plugins.performance;
 
-import hudson.model.ModelObject;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.ModelObject;
 import hudson.plugins.performance.PerformanceProjectAction.Range;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.ColorPalette;
 import hudson.util.DataSetBuilder;
 import hudson.util.ShiftedCategoryAxis;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -32,6 +24,12 @@ import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import java.awt.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Configures the trend graph of this plug-in.
  */
@@ -44,15 +42,15 @@ public class TestSuiteReportDetail implements ModelObject {
   private transient List<String> performanceReportTestCaseList;
 
   public TestSuiteReportDetail(final AbstractProject<?, ?> project,
-      final String pluginName, final StaplerRequest request, String filename,
-      Range buildsLimits) {
+                               final String pluginName, final StaplerRequest request, String filename,
+                               Range buildsLimits) {
     this.project = project;
     this.filename = filename;
     this.buildsLimits = buildsLimits;
   }
 
   public void doRespondingTimeGraphPerTestCaseMode(StaplerRequest request,
-      StaplerResponse response) throws IOException {
+                                                   StaplerResponse response) throws IOException {
     String testUri = request.getParameter("performanceReportTest");
     PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
     request.bindParameters(performanceReportPosition);
@@ -119,7 +117,7 @@ public class TestSuiteReportDetail implements ModelObject {
         true, // include legend
         true, // tooltips
         false // urls
-        );
+    );
 
     // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
 

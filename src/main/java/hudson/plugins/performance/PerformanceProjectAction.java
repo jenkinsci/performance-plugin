@@ -3,27 +3,22 @@ package hudson.plugins.performance;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.util.*;
+import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import hudson.util.ColorPalette;
+import hudson.util.DataSetBuilder;
+import hudson.util.ShiftedCategoryAxis;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.*;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
@@ -32,6 +27,16 @@ import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class PerformanceProjectAction implements Action {
 
@@ -44,7 +49,9 @@ public final class PerformanceProjectAction implements Action {
   @SuppressWarnings("unused")
   private static final long serialVersionUID = 1L;
 
-  /** Logger. */
+  /**
+   * Logger.
+   */
   private static final Logger LOGGER = Logger
       .getLogger(PerformanceProjectAction.class.getName());
 
@@ -79,7 +86,7 @@ public final class PerformanceProjectAction implements Action {
         true, // include legend
         true, // tooltips
         false // urls
-        );
+    );
 
     // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
 
@@ -130,7 +137,7 @@ public final class PerformanceProjectAction implements Action {
         true, // include legend
         true, // tooltips
         false // urls
-        );
+    );
 
     // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
 
@@ -214,10 +221,10 @@ public final class PerformanceProjectAction implements Action {
   }
 
   protected static JFreeChart createSummarizerChart(CategoryDataset dataset,
-      String yAxis, String chartTitle) {
+                                                    String yAxis, String chartTitle) {
 
     final JFreeChart chart = ChartFactory.createBarChart(chartTitle, // chart
-                                                                     // title
+        // title
         null, // unused
         yAxis, // range axis label
         dataset, // data
@@ -225,7 +232,7 @@ public final class PerformanceProjectAction implements Action {
         true, // include legend
         true, // tooltips
         true // urls
-        );
+    );
 
     chart.setBackgroundPaint(Color.white);
 
@@ -279,27 +286,27 @@ public final class PerformanceProjectAction implements Action {
     return chart;
   }
 
-    private String getPerformanceReportNameFile(StaplerRequest request) {
-        PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-        request.bindParameters(performanceReportPosition);
-        return getPerformanceReportNameFile(performanceReportPosition);
-    }
+  private String getPerformanceReportNameFile(StaplerRequest request) {
+    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    request.bindParameters(performanceReportPosition);
+    return getPerformanceReportNameFile(performanceReportPosition);
+  }
 
-    private String getPerformanceReportNameFile(final PerformanceReportPosition performanceReportPosition) {
-        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
-        if (performanceReportNameFile == null) {
-            if (getPerformanceReportList().size() == 1) {
-                performanceReportNameFile = getPerformanceReportList().get(0);
-            }
-        }
-        return performanceReportNameFile;
+  private String getPerformanceReportNameFile(final PerformanceReportPosition performanceReportPosition) {
+    String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+    if (performanceReportNameFile == null) {
+      if (getPerformanceReportList().size() == 1) {
+        performanceReportNameFile = getPerformanceReportList().get(0);
+      }
     }
+    return performanceReportNameFile;
+  }
 
   public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
       throws IOException {
     final String performanceReportNameFile = getPerformanceReportNameFile(request);
     if (performanceReportNameFile == null) {
-        return;
+      return;
     }
 
     if (ChartUtil.awtProblemCause != null) {
@@ -342,11 +349,11 @@ public final class PerformanceProjectAction implements Action {
   }
 
   public void doRespondingTimeGraphPerTestCaseMode(
-          StaplerRequest request, StaplerResponse response) throws IOException {
-      final String performanceReportNameFile = getPerformanceReportNameFile(request);
-      if (performanceReportNameFile == null) {
-          return;
-      }
+      StaplerRequest request, StaplerResponse response) throws IOException {
+    final String performanceReportNameFile = getPerformanceReportNameFile(request);
+    if (performanceReportNameFile == null) {
+      return;
+    }
 
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
@@ -392,10 +399,10 @@ public final class PerformanceProjectAction implements Action {
   }
 
   public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
-      final String performanceReportNameFile = getPerformanceReportNameFile(request);
-      if (performanceReportNameFile == null) {
-          return;
-      }
+    final String performanceReportNameFile = getPerformanceReportNameFile(request);
+    if (performanceReportNameFile == null) {
+      return;
+    }
 
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
@@ -441,57 +448,57 @@ public final class PerformanceProjectAction implements Action {
         createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
   }
 
-    public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
-        final String performanceReportNameFile = getPerformanceReportNameFile(request);
-        if (performanceReportNameFile == null) {
-            return;
-        }
-
-        if (ChartUtil.awtProblemCause != null) {
-            // not available. send out error message
-            response.sendRedirect2(request.getContextPath() + "/images/headless.png");
-            return;
-        }
-
-        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-        final List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
-        final Range buildsLimits = getFirstAndLastBuild(request, builds);
-
-        int nbBuildsToAnalyze = builds.size();
-        for (final AbstractBuild<?, ?> build : builds) {
-            if (buildsLimits.in(nbBuildsToAnalyze)) {
-
-                if (!buildsLimits.includedByStep(build.number)) {
-                    continue;
-                }
-
-                final PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
-                if (performanceBuildAction == null) {
-                    continue;
-                }
-
-                final PerformanceReport performanceReport = performanceBuildAction
-                        .getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
-                if (performanceReport == null) {
-                    nbBuildsToAnalyze--;
-                    continue;
-                }
-
-                final ThroughputReport throughputReport = new ThroughputReport(performanceReport);
-                final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
-                dataSetBuilder.add(throughputReport.get(), Messages.ProjectAction_RequestsPerSeconds(), label);
-            }
-            nbBuildsToAnalyze--;
-        }
-
-        ChartUtil.generateGraph(request, response,
-                createThroughputChart(dataSetBuilder.build()), 400, 200);
+  public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
+    final String performanceReportNameFile = getPerformanceReportNameFile(request);
+    if (performanceReportNameFile == null) {
+      return;
     }
 
+    if (ChartUtil.awtProblemCause != null) {
+      // not available. send out error message
+      response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+      return;
+    }
+
+    final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+    final List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    final Range buildsLimits = getFirstAndLastBuild(request, builds);
+
+    int nbBuildsToAnalyze = builds.size();
+    for (final AbstractBuild<?, ?> build : builds) {
+      if (buildsLimits.in(nbBuildsToAnalyze)) {
+
+        if (!buildsLimits.includedByStep(build.number)) {
+          continue;
+        }
+
+        final PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+        if (performanceBuildAction == null) {
+          continue;
+        }
+
+        final PerformanceReport performanceReport = performanceBuildAction
+            .getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
+        if (performanceReport == null) {
+          nbBuildsToAnalyze--;
+          continue;
+        }
+
+        final ThroughputReport throughputReport = new ThroughputReport(performanceReport);
+        final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+        dataSetBuilder.add(throughputReport.get(), Messages.ProjectAction_RequestsPerSeconds(), label);
+      }
+      nbBuildsToAnalyze--;
+    }
+
+    ChartUtil.generateGraph(request, response,
+        createThroughputChart(dataSetBuilder.build()), 400, 200);
+  }
+
   public void doSummarizerGraph(StaplerRequest request, StaplerResponse response) throws IOException {
-      final PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-      request.bindParameters(performanceReportPosition);
-      final String performanceReportNameFile = getPerformanceReportNameFile(performanceReportPosition);
+    final PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    request.bindParameters(performanceReportPosition);
+    final String performanceReportNameFile = getPerformanceReportNameFile(performanceReportPosition);
 
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
@@ -506,7 +513,7 @@ public final class PerformanceProjectAction implements Action {
     Range buildsLimits = getFirstAndLastBuild(request, builds);
 
     int nbBuildsToAnalyze = builds.size();
-    for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
+    for (Iterator<?> iterator = builds.iterator(); iterator.hasNext(); ) {
       AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator.next();
       if (buildsLimits.in(nbBuildsToAnalyze)) {
         NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
@@ -602,7 +609,7 @@ public final class PerformanceProjectAction implements Action {
           LOGGER
               .log(Level.SEVERE, "Error during the manage of the Calendar", e);
         }
-        for (Iterator<?> iterator = builds.iterator(); iterator.hasNext();) {
+        for (Iterator<?> iterator = builds.iterator(); iterator.hasNext(); ) {
           AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator
               .next();
           GregorianCalendar buildDate = new GregorianCalendar();
@@ -680,16 +687,13 @@ public final class PerformanceProjectAction implements Action {
   /**
    * Returns the graph configuration for this project.
    *
-   * @param link
-   *          not used
-   * @param request
-   *          Stapler request
-   * @param response
-   *          Stapler response
+   * @param link     not used
+   * @param request  Stapler request
+   * @param response Stapler response
    * @return the dynamic result of the analysis (detail page).
    */
   public Object getDynamic(final String link, final StaplerRequest request,
-      final StaplerResponse response) {
+                           final StaplerResponse response) {
     if (CONFIGURE_LINK.equals(link)) {
       return createUserConfiguration(request);
     } else if (TRENDREPORT_LINK.equals(link)) {
@@ -704,8 +708,7 @@ public final class PerformanceProjectAction implements Action {
   /**
    * Creates a view to configure the trend graph for the current user.
    *
-   * @param request
-   *          Stapler request
+   * @param request Stapler request
    * @return a view to configure the trend graph for the current user
    */
   private Object createUserConfiguration(final StaplerRequest request) {
@@ -717,8 +720,7 @@ public final class PerformanceProjectAction implements Action {
   /**
    * Creates a view to configure the trend graph for the current user.
    *
-   * @param request
-   *          Stapler request
+   * @param request Stapler request
    * @return a view to configure the trend graph for the current user
    */
   private Object createTrendReport(final StaplerRequest request) {
@@ -754,7 +756,7 @@ public final class PerformanceProjectAction implements Action {
   }
 
   private DataSetBuilder<String, NumberOnlyBuildLabel> getTrendReportData(final StaplerRequest request,
-      String performanceReportNameFile) {
+                                                                          String performanceReportNameFile) {
 
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<String, NumberOnlyBuildLabel>();
     List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();

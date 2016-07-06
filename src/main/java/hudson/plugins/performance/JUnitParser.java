@@ -1,21 +1,19 @@
 package hudson.plugins.performance;
 
 import hudson.Extension;
-
-import java.io.File;
-import java.util.Date;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
+import java.util.Date;
+
 /**
  * Parser for JUnit.
- * 
+ *
  * @author Manuel Carrasco
  */
 public class JUnitParser extends AbstractParser {
@@ -48,14 +46,12 @@ public class JUnitParser extends AbstractParser {
     final SAXParser parser = factory.newSAXParser();
     final PerformanceReport report = new PerformanceReport();
     report.setReportFileName(reportFile.getName());
-    parser.parse(reportFile, new DefaultHandler() 
-    {
+    parser.parse(reportFile, new DefaultHandler() {
       private HttpSample currentSample;
       private int status;
 
       @Override
-      public void endElement(String uri, String localName, String qName) throws SAXException 
-      {
+      public void endElement(String uri, String localName, String qName) throws SAXException {
         if (("testsuite".equalsIgnoreCase(qName) || "testcase".equalsIgnoreCase(qName)) && status != 0) {
           report.addSample(currentSample);
           status = 0;
@@ -68,8 +64,7 @@ public class JUnitParser extends AbstractParser {
        * inside testcase tag. SOAPUI uses JUnit format
        */
       @Override
-      public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException 
-      {
+      public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if ("testcase".equalsIgnoreCase(qName)) {
           if (status != 0) {
             report.addSample(currentSample);
@@ -100,10 +95,9 @@ public class JUnitParser extends AbstractParser {
   /**
    * Strips any commas from <code>time</code>, then parses it into a long.
    */
-  static long parseDuration(final String time)
-  {
+  static long parseDuration(final String time) {
     // don't want commas or else will break on parse.
-    final double duration = Double.parseDouble(time.replaceAll(",", "")); 
+    final double duration = Double.parseDouble(time.replaceAll(",", ""));
     return (long) (duration * 1000);
   }
 }

@@ -2,21 +2,16 @@ package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.*;
-
 import hudson.model.TaskListener;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.DataSetBuilder;
-import java.io.FilenameFilter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+
+import java.io.*;
+import java.net.URLDecoder;
+import java.util.*;
 
 /**
  * Root object of a performance report.
@@ -30,7 +25,7 @@ public class PerformanceReportMap implements ModelObject {
   /**
    * {@link PerformanceReport}s are keyed by
    * {@link PerformanceReport#reportFileName}
-   * 
+   * <p>
    * Test names are arbitrary human-readable and URL-safe string that identifies
    * an individual report.
    */
@@ -43,12 +38,11 @@ public class PerformanceReportMap implements ModelObject {
 
   /**
    * Parses the reports and build a {@link PerformanceReportMap}.
-   * 
-   * @throws IOException
-   *           If a report fails to parse.
+   *
+   * @throws IOException If a report fails to parse.
    */
   PerformanceReportMap(final PerformanceBuildAction buildAction,
-      TaskListener listener) throws IOException {
+                       TaskListener listener) throws IOException {
     this.buildAction = buildAction;
     parseReports(getBuild(), listener, new PerformanceReportCollector() {
 
@@ -95,7 +89,7 @@ public class PerformanceReportMap implements ModelObject {
    * <p>
    * Give the Performance report with the parameter for name in Bean
    * </p>
-   * 
+   *
    * @param performanceReportName
    * @return
    */
@@ -105,9 +99,8 @@ public class PerformanceReportMap implements ModelObject {
 
   /**
    * Get a URI report within a Performance report file
-   * 
-   * @param uriReport
-   *          "Performance report file name";"URI name"
+   *
+   * @param uriReport "Performance report file name";"URI name"
    * @return
    */
   public UriReport getUriReport(String uriReport) {
@@ -166,7 +159,7 @@ public class PerformanceReportMap implements ModelObject {
    * Verify if the PerformanceReport exist the performanceReportName must to be
    * like it is in the build
    * </p>
-   * 
+   *
    * @param performanceReportName
    * @return boolean
    */
@@ -175,7 +168,7 @@ public class PerformanceReportMap implements ModelObject {
   }
 
   public void doRespondingTimeGraph(StaplerRequest request,
-      StaplerResponse response) throws IOException {
+                                    StaplerResponse response) throws IOException {
     String parameter = request.getParameter("performanceReportPosition");
     AbstractBuild<?, ?> previousBuild = getBuild();
     final Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> buildReports = new LinkedHashMap<AbstractBuild<?, ?>, Map<String, PerformanceReport>>();
@@ -254,7 +247,7 @@ public class PerformanceReportMap implements ModelObject {
   }
 
   private void parseReports(AbstractBuild<?, ?> build, TaskListener listener,
-      PerformanceReportCollector collector, final String filename)
+                            PerformanceReportCollector collector, final String filename)
       throws IOException {
     File repo = new File(build.getRootDir(),
         PerformanceReportMap.getPerformanceReportDirRelativePath());
@@ -300,7 +293,7 @@ public class PerformanceReportMap implements ModelObject {
           try {
             collector.addAll(p.parse(build, Arrays.asList(listFiles), listener));
           } catch (IOException ex) {
-            listener.getLogger().println("Unable to process directory '"+ dir+"'.");
+            listener.getLogger().println("Unable to process directory '" + dir + "'.");
             ex.printStackTrace(listener.getLogger());
           }
         }
@@ -355,7 +348,7 @@ public class PerformanceReportMap implements ModelObject {
   }
 
   public Object getDynamic(final String link, final StaplerRequest request,
-      final StaplerRequest response) {
+                           final StaplerRequest response) {
     if (TRENDREPORT_LINK.equals(link)) {
       return createTrendReportGraphs(request);
     } else {

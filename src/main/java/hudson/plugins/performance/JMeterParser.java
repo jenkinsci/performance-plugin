@@ -1,19 +1,17 @@
 package hudson.plugins.performance;
 
 import hudson.Extension;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.parsers.SAXParserFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
-
-import javax.xml.parsers.SAXParserFactory;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Parser for JMeter.
@@ -21,7 +19,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Kohsuke Kawaguchi
  */
 public class JMeterParser extends AbstractParser {
-  
+
   @Extension
   public static class DescriptorImpl extends PerformanceReportParserDescriptor {
     @Override
@@ -40,23 +38,22 @@ public class JMeterParser extends AbstractParser {
     return "**/*.jtl";
   }
 
-  PerformanceReport parse(File reportFile) throws Exception
-  {
+  PerformanceReport parse(File reportFile) throws Exception {
     // JMeter stores either CSV or XML in .JTL files.
     final boolean isXml = isXmlFile(reportFile);
-    
+
     if (isXml) {
       return parseXml(reportFile);
     } else {
       return parseCsv(reportFile);
     }
   }
-  
+
   /**
    * Utility method that checks if the provided file has XML content.
-   * 
+   * <p>
    * This implementation looks for the first non-empty file. If an XML prolog appears there, this method returns <code>true</code>, otherwise <code>false</code> is returned.
-   * 
+   *
    * @param file File from which the content is to e analyzed. Cannot be null.
    * @return <code>true</code> if the file content has been determined to be XML, otherwise <code>false</code>.
    */
@@ -65,7 +62,7 @@ public class JMeterParser extends AbstractParser {
     try {
       reader = new BufferedReader(new FileReader(file));
       String firstLine;
-      while ((firstLine = reader.readLine()) != null ) {
+      while ((firstLine = reader.readLine()) != null) {
         if (firstLine.trim().length() == 0) continue; // skip empty lines.
         return firstLine != null && firstLine.toLowerCase().trim().startsWith("<?xml ");
       }
@@ -76,16 +73,15 @@ public class JMeterParser extends AbstractParser {
       }
     }
   }
-  
+
   /**
    * A delegate for {@link #parse(File)} that can process XML data.
    */
-  PerformanceReport parseXml(File reportFile) throws Exception 
-  {
+  PerformanceReport parseXml(File reportFile) throws Exception {
     final SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setValidating(false);
     factory.setNamespaceAware(false);
-    
+
     final PerformanceReport report = new PerformanceReport();
     report.setReportFileName(reportFile.getName());
 
@@ -109,25 +105,25 @@ public class JMeterParser extends AbstractParser {
         if (!"httpSample".equalsIgnoreCase(qName) && !"sample".equalsIgnoreCase(qName)) {
           return;
         }
-        
+
         final HttpSample sample = new HttpSample();
-        
+
         final String dateValue;
         if (attributes.getValue("ts") != null) {
           dateValue = attributes.getValue("ts");
         } else {
           dateValue = attributes.getValue("timeStamp");
         }
-        sample.setDate( new Date(Long.valueOf(dateValue)) );
-        
+        sample.setDate(new Date(Long.valueOf(dateValue)));
+
         final String durationValue;
         if (attributes.getValue("t") != null) {
           durationValue = attributes.getValue("t");
         } else {
-          durationValue = attributes.getValue("time"); 
+          durationValue = attributes.getValue("time");
         }
         sample.setDuration(Long.valueOf(durationValue));
-        
+
         final String successfulValue;
         if (attributes.getValue("s") != null) {
           successfulValue = attributes.getValue("s");
@@ -135,7 +131,7 @@ public class JMeterParser extends AbstractParser {
           successfulValue = attributes.getValue("success");
         }
         sample.setSuccessful(Boolean.parseBoolean(successfulValue));
-        
+
         final String uriValue;
         if (attributes.getValue("lb") != null) {
           uriValue = attributes.getValue("lb");
@@ -143,7 +139,7 @@ public class JMeterParser extends AbstractParser {
           uriValue = attributes.getValue("label");
         }
         sample.setUri(uriValue);
-        
+
         final String httpCodeValue;
         if (attributes.getValue("rc") != null && attributes.getValue("rc").length() <= 3) {
           httpCodeValue = attributes.getValue("rc");
@@ -151,7 +147,7 @@ public class JMeterParser extends AbstractParser {
           httpCodeValue = "0";
         }
         sample.setHttpCode(httpCodeValue);
-        
+
         final String sizeInKbValue;
         if (attributes.getValue("by") != null) {
           sizeInKbValue = attributes.getValue("by");
@@ -159,11 +155,11 @@ public class JMeterParser extends AbstractParser {
           sizeInKbValue = "0";
         }
         sample.setSizeInKb(Double.valueOf(sizeInKbValue) / 1024d);
-        
+
         if (counter == 0) {
           currentSample = sample;
         }
-          counter++;
+        counter++;
       }
 
       @Override
@@ -180,10 +176,10 @@ public class JMeterParser extends AbstractParser {
         }
       }
     });
-    
+
     return report;
   }
-  
+
   /**
    * A delegate for {@link #parse(File)} that can process CSV data.
    */

@@ -1,43 +1,42 @@
 package hudson.plugins.performance;
 
 import hudson.Extension;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.util.Date;
 import java.util.Scanner;
 
-import org.kohsuke.stapler.DataBoundConstructor;
-
 /**
  * Parser for wrk (https://github.com/wg/wrk)
- * 
+ * <p>
  * <p>
  * Note that Wrk does not produce request-level data, and can only be processed
  * in it's summarized form (unless extended to do otherwise).
- * 
+ *
  * @author John Murray me@johnmurray.io
  */
 public class WrkSummarizerParser extends AbstractParser {
 
   private enum LineType {
-    RUNNING, 
-    THREAD_CONN_COUNT, 
-    OUTPUT_HEADER, 
-    LATENCY_DIST, 
-    LATENCY_DIST_BUCKET_HEADER, 
-    LATENCY_DIST_BUCKET, 
-    REQ_SEC_DIST, 
-    SUMMARY, 
-    REQ_SEC, 
-    TRANSFER_SEC, 
-    ERROR_COUNT, 
+    RUNNING,
+    THREAD_CONN_COUNT,
+    OUTPUT_HEADER,
+    LATENCY_DIST,
+    LATENCY_DIST_BUCKET_HEADER,
+    LATENCY_DIST_BUCKET,
+    REQ_SEC_DIST,
+    SUMMARY,
+    REQ_SEC,
+    TRANSFER_SEC,
+    ERROR_COUNT,
     UNKNOWN
   }
 
   public enum TimeUnit {
-    MILLISECOND(1), 
-    SECOND(1000), 
-    MINUTE(1000 * 60), 
+    MILLISECOND(1),
+    SECOND(1000),
+    MINUTE(1000 * 60),
     HOUR(1000 * 60 * 60);
 
     private final int factor;
@@ -70,11 +69,10 @@ public class WrkSummarizerParser extends AbstractParser {
   }
 
   @Override
-  PerformanceReport parse(File reportFile) throws Exception 
-  {
+  PerformanceReport parse(File reportFile) throws Exception {
     final PerformanceReport r = new PerformanceReport();
     r.setReportFileName(reportFile.getName());
-    
+
     Scanner s = null;
     try {
       s = new Scanner(reportFile);
@@ -91,62 +89,62 @@ public class WrkSummarizerParser extends AbstractParser {
           String secondToken = scanner.next();
 
           switch (determineLineType(firstToken, secondToken)) {
-          case RUNNING:
-            // extract URI
-            scanner.next();
-            scanner.next();
-            String uri = scanner.next();
+            case RUNNING:
+              // extract URI
+              scanner.next();
+              scanner.next();
+              String uri = scanner.next();
 
-            sample.setUri(uri);
-            break;
-          case LATENCY_DIST:
-            Scanner latencyScanner = new Scanner(line.toLowerCase());
-            latencyScanner.next(); // header (skip)
-            long latencyAvg = getTime(latencyScanner.next(),
-                TimeUnit.MILLISECOND);
-            latencyScanner.next(); // stdDev (skipping)
-            long latencyMax = getTime(latencyScanner.next(),
-                TimeUnit.MILLISECOND);
+              sample.setUri(uri);
+              break;
+            case LATENCY_DIST:
+              Scanner latencyScanner = new Scanner(line.toLowerCase());
+              latencyScanner.next(); // header (skip)
+              long latencyAvg = getTime(latencyScanner.next(),
+                  TimeUnit.MILLISECOND);
+              latencyScanner.next(); // stdDev (skipping)
+              long latencyMax = getTime(latencyScanner.next(),
+                  TimeUnit.MILLISECOND);
 
-            sample.setDuration(latencyAvg);
-            sample.setSummarizerMax(latencyMax);
-            break;
-          case REQ_SEC_DIST:
-            // float reqSecAvg = Float.parseFloat(secondToken);
-            // float reqSecStdDev = scanner.nextFloat();
-            // float reqSecMax = scanner.nextFloat();
-            // float reqSecPercentInOneStdDev = scanner.nextFloat();
-            break;
-          case SUMMARY:
-            long totalReq = Long.parseLong(firstToken);
-            Scanner summaryScanner = new Scanner(line.toLowerCase());
-            summaryScanner.next();
-            summaryScanner.next();
-            summaryScanner.next();
-            // long totalTime = getTime(summaryScanner.next(), logger,
-            // TimeUnit.SECOND);
+              sample.setDuration(latencyAvg);
+              sample.setSummarizerMax(latencyMax);
+              break;
+            case REQ_SEC_DIST:
+              // float reqSecAvg = Float.parseFloat(secondToken);
+              // float reqSecStdDev = scanner.nextFloat();
+              // float reqSecMax = scanner.nextFloat();
+              // float reqSecPercentInOneStdDev = scanner.nextFloat();
+              break;
+            case SUMMARY:
+              long totalReq = Long.parseLong(firstToken);
+              Scanner summaryScanner = new Scanner(line.toLowerCase());
+              summaryScanner.next();
+              summaryScanner.next();
+              summaryScanner.next();
+              // long totalTime = getTime(summaryScanner.next(), logger,
+              // TimeUnit.SECOND);
 
-            sample.setSummarizerSamples(totalReq);
-            summaryScanner.close();
-            break;
-          case ERROR_COUNT:
-            scanner.next();
-            scanner.next();
-            int numErrors = scanner.nextInt();
+              sample.setSummarizerSamples(totalReq);
+              summaryScanner.close();
+              break;
+            case ERROR_COUNT:
+              scanner.next();
+              scanner.next();
+              int numErrors = scanner.nextInt();
 
-            sample.setSummarizerErrors(numErrors);
-            break;
-          case REQ_SEC:
-          case TRANSFER_SEC:
-            // not currently used by performance-plugin
-            break;
-          case THREAD_CONN_COUNT:
-          case OUTPUT_HEADER:
-          case LATENCY_DIST_BUCKET_HEADER:
-          case LATENCY_DIST_BUCKET:
-          case UNKNOWN:
-            // do nothing, don't need output
-            break;
+              sample.setSummarizerErrors(numErrors);
+              break;
+            case REQ_SEC:
+            case TRANSFER_SEC:
+              // not currently used by performance-plugin
+              break;
+            case THREAD_CONN_COUNT:
+            case OUTPUT_HEADER:
+            case LATENCY_DIST_BUCKET_HEADER:
+            case LATENCY_DIST_BUCKET:
+            case UNKNOWN:
+              // do nothing, don't need output
+              break;
           }
         } finally {
           if (scanner != null)
@@ -168,15 +166,13 @@ public class WrkSummarizerParser extends AbstractParser {
   /**
    * Given a time string (eg: 0ms, 1m, 2s, 3h, etc.) parse and yield the time in
    * a specified time unit (millisecond, second, minute, hour)
-   * 
+   * <p>
    * <p>
    * If no result can be returned, a 0 value will result and any errors
    * encountered will be logged.
-   * 
-   * @param timeString
-   *          String representation from `wrk` command-output
-   * @param tu
-   *          Time unit to return time string in
+   *
+   * @param timeString String representation from `wrk` command-output
+   * @param tu         Time unit to return time string in
    * @return Time in seconds, as parsed from input
    */
   public long getTime(String timeString, TimeUnit tu) {
@@ -210,12 +206,9 @@ public class WrkSummarizerParser extends AbstractParser {
   /**
    * Given the first couple of tokens from a line, determine what type of line
    * it is (by returning a LineType) so that is can be processed accordingly.
-   * 
-   * @param t1
-   *          First token in the processed line
-   * @param t2
-   *          Second token in the processed line
-   * 
+   *
+   * @param t1 First token in the processed line
+   * @param t2 Second token in the processed line
    * @return LineType indicating how the rest of the line should be processed
    */
   public LineType determineLineType(String t1, String t2) {

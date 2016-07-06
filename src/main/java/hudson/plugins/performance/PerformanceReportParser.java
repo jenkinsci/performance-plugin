@@ -8,17 +8,18 @@ import hudson.model.Hudson;
 import hudson.model.TaskListener;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 
 /**
  * Parses performance result files into {@link PerformanceReport}s. This object
  * is persisted with {@link PerformancePublisher} into the project
  * configuration.
- * 
+ * <p>
  * <p>
  * Subtypes can define additional parser-specific parameters as instance fields.
- * 
+ *
  * @author Kohsuke Kawaguchi
  */
 public abstract class PerformanceReportParser implements

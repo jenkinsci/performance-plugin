@@ -1,23 +1,18 @@
 package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.xml.sax.SAXException;
+import java.util.*;
 
 /**
  * Represents a single performance report, which consists of multiple
  * {@link UriReport}s for different URLs that was tested.
- * 
+ * <p>
  * This object belongs under {@link PerformanceReportMap}.
  */
 public class PerformanceReport extends AbstractReport implements Serializable,
@@ -37,10 +32,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   private PerformanceReport lastBuildReport;
 
   /**
-   * A lazy cache of all duration values of all HTTP samples in all UriReports, ordered by duration. 
+   * A lazy cache of all duration values of all HTTP samples in all UriReports, ordered by duration.
    */
   private transient List<Long> durationsSortedBySize = null;
-  
+
   /**
    * A lazy cache of all UriReports, reverse-ordered.
    */
@@ -50,17 +45,17 @@ public class PerformanceReport extends AbstractReport implements Serializable,
    * The amount of http samples that are not successful.
    */
   private int nbError = 0;
-  
+
   /**
    * The sum of summarizerErrors values from all samples;
    */
   private float summarizerErrors = 0;
-  
+
   /**
    * The amount of samples in all uriReports combined.
    */
   private int size;
-  
+
   /**
    * The duration of all samples combined, in milliseconds.
    */
@@ -70,7 +65,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
    * The size of all samples combined, in kilobytes.
    */
   private double totalSizeInKB = 0;
-  
+
   /**
    * The longest duration from all samples, or Long.MIN_VALUE when no samples where processed.
    */
@@ -80,12 +75,12 @@ public class PerformanceReport extends AbstractReport implements Serializable,
    * The shortest duration from all samples, or Long.MAX_VALUE when no samples where processed.
    */
   private long min = Long.MAX_VALUE;
-  
+
 
   public static String asStaplerURI(String uri) {
     return uri.replace("http:", "").replaceAll("/", "_");
   }
-  
+
   public void addSample(HttpSample pHttpSample) throws SAXException {
     String uri = pHttpSample.getUri();
     if (uri == null) {
@@ -108,7 +103,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
       durationsSortedBySize = null;
       uriReportsOrdered = null;
     }
-    
+
     if (!pHttpSample.isSuccessful()) {
       nbError++;
     }
@@ -144,7 +139,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     if (size == 0) {
       return 0;
     }
-    
+
     return totalDuration / size;
   }
 
@@ -163,7 +158,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     if (size == 0) {
       return 0;
     }
-    
+
     synchronized (uriReportMap) {
       if (durationsSortedBySize == null) {
         durationsSortedBySize = new ArrayList<Long>();
@@ -175,7 +170,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
       return durationsSortedBySize.get((int) (durationsSortedBySize.size() * percentage));
     }
   }
-   
+
   public long get90Line() {
     return getDurationAt(.9);
   }
@@ -293,9 +288,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   /**
    * Check if the filename of the file being parsed is being parsed by a
    * summarized parser (JMeterSummarizer).
-   * 
-   * @param filename
-   *          name of the file being parsed
+   *
+   * @param filename name of the file being parsed
    * @return boolean indicating usage of summarized parser
    */
   public boolean ifSummarizerParserUsed(String filename) {
@@ -305,7 +299,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
       String parts[] = fileExt.split("\\s*[;:,]+\\s*");
       for (String path : parts) {
         if (filename.endsWith(path.substring(5))) {
-         return true;
+          return true;
         }
       }
     }
@@ -318,7 +312,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
   private double roundTwoDecimals(double d) {
     BigDecimal bd = new BigDecimal(d);
-	bd = bd.setScale(2, RoundingMode.HALF_UP);
-	return bd.doubleValue();
+    bd = bd.setScale(2, RoundingMode.HALF_UP);
+    return bd.doubleValue();
   }
 }

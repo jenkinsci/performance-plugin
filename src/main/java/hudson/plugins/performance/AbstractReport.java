@@ -1,10 +1,10 @@
 package hudson.plugins.performance;
 
+import org.kohsuke.stapler.Stapler;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-
-import org.kohsuke.stapler.Stapler;
 
 /**
  * Abstract class for classes with size, error, mean, average, 90 line, min and max attributes
@@ -19,10 +19,10 @@ public abstract class AbstractReport {
   abstract public double errorPercent();
 
   public AbstractReport() {
-    final Locale useThisLocale = ( Stapler.getCurrentRequest() != null ) ? Stapler.getCurrentRequest().getLocale() : Locale.getDefault();
+    final Locale useThisLocale = (Stapler.getCurrentRequest() != null) ? Stapler.getCurrentRequest().getLocale() : Locale.getDefault();
 
-    percentFormat = new DecimalFormat("0.0", DecimalFormatSymbols.getInstance( useThisLocale ));
-    dataFormat = new DecimalFormat("#,###", DecimalFormatSymbols.getInstance( useThisLocale ));
+    percentFormat = new DecimalFormat("0.0", DecimalFormatSymbols.getInstance(useThisLocale));
+    dataFormat = new DecimalFormat("#,###", DecimalFormatSymbols.getInstance(useThisLocale));
   }
 
   public String errorPercentFormated() {

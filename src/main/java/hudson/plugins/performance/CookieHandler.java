@@ -1,11 +1,10 @@
 package hudson.plugins.performance;
 
-import java.util.List;
-
-import javax.servlet.http.Cookie;
-
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Ancestor;
+
+import javax.servlet.http.Cookie;
+import java.util.List;
 
 /**
  * Creates and converts cookies.
@@ -13,16 +12,19 @@ import org.kohsuke.stapler.Ancestor;
  * @author Ulli Hafner
  */
 public class CookieHandler {
-  /** One year (in seconds). */
+  /**
+   * One year (in seconds).
+   */
   private static final int ONE_YEAR = 60 * 60 * 24 * 365;
-  /** The name of the cookie. */
+  /**
+   * The name of the cookie.
+   */
   private final String name;
 
   /**
    * Creates a new instance of {@link CookieHandler}.
    *
-   * @param name
-   *            the name of the cookie
+   * @param name the name of the cookie
    */
   public CookieHandler(final String name) {
     this.name = "hudson.plugins." + name;
@@ -31,10 +33,8 @@ public class CookieHandler {
   /**
    * Sends a cookie with the specified value.
    *
-   * @param requestAncestors
-   *            the ancestors of the request
-   * @param value
-   *            the cookie value
+   * @param requestAncestors the ancestors of the request
+   * @param value            the cookie value
    * @return the created cookie
    */
   public Cookie create(final List<Ancestor> requestAncestors, final String value) {
@@ -50,8 +50,7 @@ public class CookieHandler {
    * Selects the correct cookie from the specified cookies and returns its
    * value. If there is no such cookie, then an empty string is returned.
    *
-   * @param cookies
-   *            the cookies to scan
+   * @param cookies the cookies to scan
    * @return the cookie value or an empty string if the cookie is not found
    */
   public String getValue(final Cookie[] cookies) {
