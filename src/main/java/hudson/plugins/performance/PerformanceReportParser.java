@@ -6,7 +6,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.Describable;
 import hudson.model.Hudson;
 import hudson.model.TaskListener;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +28,6 @@ public abstract class PerformanceReportParser implements
    */
   public final String glob;
 
-  @DataBoundConstructor
   protected PerformanceReportParser(String glob) {
     this.glob = (glob == null || glob.length() == 0) ? getDefaultGlobPattern()
         : glob;
