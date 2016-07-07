@@ -33,7 +33,7 @@
             <j:forEach var="c" items="${it.httpSampleList}">
                 <tr>
                 <td>${c.summarizerSamples}</td>
-                <td class="center">${c.date}</td>
+                <td class="center" data="${c.date.getTime()}">${c.date}</td>
                 <td>${c.duration} ms.</td>
                 </tr>
             </j:forEach>
@@ -45,7 +45,7 @@
             <j:forEach var="c" items="${it.httpSampleList}">
                 <tr class="${h.ifThenElse(c.failed,'red','')}">
                 <td>${c.httpCode}</td>
-                <td class="center">${c.date}</td>
+                <td class="center" data="${c.date.getTime()}">${c.date}</td>
                 <td>${c.duration} ms.</td>
                 </tr>
             </j:forEach>
