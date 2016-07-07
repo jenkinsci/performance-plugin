@@ -19,7 +19,9 @@
          <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">
            <tr class="${h.ifThenElse(uriReport.failed,'red','')}">
              <td class="left">
-               <st:out value="${uriReport.getStaplerUri()}" />
+               <a href="./uriReport/${uriReport.encodeUriReport()}">
+                 <st:out value="${uriReport.getStaplerUri()}" />
+               </a>
              </td>
            <j:choose>
              <j:when test="${performanceReport.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
