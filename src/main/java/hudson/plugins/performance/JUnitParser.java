@@ -1,6 +1,7 @@
 package hudson.plugins.performance;
 
 import hudson.Extension;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -96,8 +97,12 @@ public class JUnitParser extends AbstractParser {
    * Strips any commas from <code>time</code>, then parses it into a long.
    */
   static long parseDuration(final String time) {
-    // don't want commas or else will break on parse.
-    final double duration = Double.parseDouble(time.replaceAll(",", ""));
-    return (long) (duration * 1000);
+    if(StringUtils.isEmpty(time)){
+      return 0;
+    } else {
+      // don't want commas or else will break on parse.
+      final double duration = Double.parseDouble(time.replaceAll(",", ""));
+      return (long) (duration * 1000);
+    }
   }
 }
