@@ -4,17 +4,20 @@ import hudson.util.StreamTaskListener;
 import org.easymock.classextension.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class PerformanceReportTest {
 
@@ -61,25 +64,9 @@ public class PerformanceReportTest {
     assertEquals(sample1.getUri(), uriReport.getUri());
   }
 
-
-  /*    @Test
-    public void testCountError() throws SAXException {
-          HttpSample sample1 = new HttpSample();
-      sample1.setSuccessful(false);
-      sample1.setUri("sample1");
-      performanceReport.addSample(sample1);
-
-      HttpSample sample2 = new HttpSample();
-      sample2.setSuccessful(true);
-      sample2.setUri("sample2");
-      performanceReport.addSample(sample2);
-      assertEquals(1, performanceReport.countErrors());
-    }
-  */
   @Test
-  public void testPerformanceReport() throws IOException, SAXException {
-    PerformanceReport performanceReport = parseOneJMeter(new File(
-        "src/test/resources/JMeterResults.jtl"));
+  public void testPerformanceReport() throws IOException, URISyntaxException {
+    PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResults.jtl").toURI()));
     Map<String, UriReport> uriReportMap = performanceReport
         .getUriReportMap();
     assertEquals(2, uriReportMap.size());
@@ -108,10 +95,8 @@ public class PerformanceReportTest {
   }
 
   @Test
-  public void testPerformanceNonHTTPSamplesMultiThread() throws IOException,
-      SAXException {
-    PerformanceReport performanceReport = parseOneJMeter(new File(
-        "src/test/resources/JMeterResultsMultiThread.jtl"));
+  public void testPerformanceNonHTTPSamplesMultiThread() throws IOException, URISyntaxException {
+    PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsMultiThread.jtl").toURI()));
 
     Map<String, UriReport> uriReportMap = performanceReport
         .getUriReportMap();
@@ -129,9 +114,8 @@ public class PerformanceReportTest {
   }
 
   @Test
-  public void testPerformanceReportJUnit() throws IOException, SAXException {
-    PerformanceReport performanceReport = parseOneJUnit(new File(
-        "src/test/resources/TEST-JUnitResults.xml"));
+  public void testPerformanceReportJUnit() throws IOException, URISyntaxException {
+    PerformanceReport performanceReport = parseOneJUnit(new File(getClass().getResource("/TEST-JUnitResults.xml").toURI()));
     Map<String, UriReport> uriReportMap = performanceReport
         .getUriReportMap();
     assertEquals(5, uriReportMap.size());
@@ -150,9 +134,9 @@ public class PerformanceReportTest {
   }
 
   @Test
-  public void testIssue5571() throws IOException, SAXException {
-    PerformanceReport performanceReport = parseOneJUnit(new File(
-        "src/test/resources/jUnitIssue5571.xml"));
+  public void testIssue5571() throws IOException, URISyntaxException {
+    PerformanceReport performanceReport = parseOneJUnit(new File(getClass().getResource("/jUnitIssue5571.xml").toURI()));
+
     Map<String, UriReport> uriReportMap = performanceReport
         .getUriReportMap();
     assertEquals(1, uriReportMap.size());
@@ -167,9 +151,8 @@ public class PerformanceReportTest {
   }
 
   @Test
-  public void testPerformanceReportMultiLevel() throws IOException, SAXException {
-    PerformanceReport performanceReport = parseOneJMeter(new File(
-        "src/test/resources/JMeterResultsMultiLevel.jtl"));
+  public void testPerformanceReportMultiLevel() throws IOException, URISyntaxException {
+    PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsMultiLevel.jtl").toURI()));
     Map<String, UriReport> uriReportMap = performanceReport
         .getUriReportMap();
     assertEquals(2, uriReportMap.size());
@@ -178,9 +161,34 @@ public class PerformanceReportTest {
   }
 
   @Test
-  public void testGetUriListOrdered() throws IOException, SAXException {
-    PerformanceReport performanceReport = parseOneJMeter(new File("src/test/resources/JMeterResultsRandomUri.jtl"));
+  public void testGetUriListOrdered() throws IOException, URISyntaxException {
+    PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsRandomUri.jtl").toURI()));
     List<UriReport> uriReports = performanceReport.getUriListOrdered();
     assertEquals("Ant", uriReports.get(0).getUri());
   }
+
+  @Test
+  public void testCanGetCorrect90LineValue() throws IOException, URISyntaxException {
+    PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsCalculateNthLine.jtl").toURI()));
+    assertEquals(9L, performanceReport.get90Line());
+  }
+
+  @Test
+  public void testCanGetCorrect90LineValueWithThreeSamples() throws IOException, URISyntaxException {
+    PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsCalculateNthLineFrom3Samples.jtl").toURI()));
+    assertEquals(2L, performanceReport.get90Line());
+  }
+
+  @Test
+  public void testCanGetCorrectMaxValueWithThreeSamples() throws IOException, URISyntaxException {
+    PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsCalculateNthLineFrom3Samples.jtl").toURI()));
+    assertEquals(3L, performanceReport.getMax());
+  }
+
+  @Test
+  public void testCanGetCorrectMinValueWithThreeSamples() throws IOException, URISyntaxException{
+    PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsCalculateNthLineFrom3Samples.jtl").toURI()));
+    assertEquals(1L, performanceReport.getMin());
+  }
+
 }
