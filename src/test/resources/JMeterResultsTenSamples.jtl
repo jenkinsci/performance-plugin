@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testResults version="1.2">
+<httpSample t="1" lt="9770" ts="1296846793179" s="true" lb="Bat" rc="200" rm="OK" tn="Sesiones de usuario 1-2" dt="text" by="771065"/>
+<httpSample t="2" lt="148" ts="1296846847952" s="true" lb="Dog" rc="200" rm="OK" tn="Sesiones de usuario 1-2" dt="text" by="744705"/>
+<httpSample t="3" lt="321" ts="1296846947037" s="true" lb="Ant" rc="200" rm="OK" tn="Sesiones de usuario 1-1" dt="text" by="771149"/>
+<httpSample t="4" lt="3" ts="1296846968923" s="true" lb="Cat" rc="200" rm="OK" tn="Sesiones de usuario 1-1" dt="text" by="744705"/>
+<httpSample t="5" lt="9770" ts="1296846793179" s="true" lb="Bat" rc="200" rm="OK" tn="Sesiones de usuario 1-2" dt="text" by="771065"/>
+<httpSample t="6" lt="148" ts="1296846847952" s="true" lb="Dog" rc="200" rm="OK" tn="Sesiones de usuario 1-2" dt="text" by="744705"/>
+<httpSample t="7" lt="321" ts="1296846947037" s="true" lb="Ant" rc="200" rm="OK" tn="Sesiones de usuario 1-1" dt="text" by="771149"/>
+<httpSample t="8" lt="3" ts="1296846968923" s="true" lb="Cat" rc="200" rm="OK" tn="Sesiones de usuario 1-1" dt="text" by="744705"/>
+<httpSample t="9" lt="321" ts="1296846947037" s="true" lb="Ant" rc="200" rm="OK" tn="Sesiones de usuario 1-1" dt="text" by="771149"/>
+<httpSample t="10" lt="3" ts="1296846968923" s="true" lb="Cat" rc="200" rm="OK" tn="Sesiones de usuario 1-1" dt="text" by="744705"/>
+</testResults>
