@@ -83,8 +83,9 @@ public class JUnitParser extends AbstractParser {
           currentSample.setSuccessful(false);
           report.addSample(currentSample);
           status = 0;
-        } else if ("failure".equalsIgnoreCase(qName) && status != 0) {
+        } else if ("error".equalsIgnoreCase(qName) && status != 0) {
           currentSample.setErrorObtained(true);
+          currentSample.setSuccessful(false);
           report.addSample(currentSample);
           status = 0;
         }

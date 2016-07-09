@@ -3,7 +3,6 @@ package hudson.plugins.performance;
 import org.junit.Test;
 
 import java.io.File;
-import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,7 +32,19 @@ public class JUnitParserTest {
     // Verify results.
     assertNotNull(result);
     assertEquals("The source file contains four samples. These should all have been added to the performance report.", 4, result.size());
-
   }
 
+  @Test
+  public void testCanParseJunitResultFileWithSuccessErrorAndFailure() throws Exception {
+    final JUnitParser parser = new JUnitParser(null);
+    final File reportFile = new File(getClass().getResource("/TEST-JUnitResults-success-failure-error.xml").toURI());
+
+    // Execute system under test.
+    final PerformanceReport result = parser.parse(reportFile);
+
+    // Verify results.
+    assertNotNull(result);
+    assertEquals("The source file contains 3 samples. These should all have been added to the performance report.", 3, result.size());
+    assertEquals("The source file contains 2 failed samples. 1 test failure and 1 runtime error sample.", 2, result.countErrors());
+  }
 }

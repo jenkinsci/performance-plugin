@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite errors="1" failures="1" hostname="someHostname" name="tests.ATest" tests="3" time="0.069" timestamp="2009-12-19T17:58:59">
+
+    <testcase classname="tests.ATest" name="error" time="0.0060">
+        <error type="java.lang.RuntimeException">java.lang.RuntimeException at tests.ATest.error(ATest.java:11)</error>
+    </testcase>
+
+    <testcase classname="tests.ATest" name="fail" time="0.0020">
+        <failure type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: at tests.ATest.fail(ATest.java:9)</failure>
+    </testcase>
+
+    <testcase classname="tests.ATest" name="sucess" time="0.0"/>
+
+</testsuite>
