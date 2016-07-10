@@ -19,6 +19,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     Comparable<PerformanceReport> {
 
   private static final long serialVersionUID = 675698410989941826L;
+  private static final double ZERO_PERCENT = 0;
+  private static final double ONE_HUNDRED_PERCENT = 100;
+  private static final double NINETY_PERCENT = 90;
+  private static final double FIFTY_PERCENT = 50;
 
   private transient PerformanceBuildAction buildAction;
 
@@ -66,17 +70,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
    */
   private double totalSizeInKB = 0;
 
-  /**
-   * The longest duration from all samples, or Long.MIN_VALUE when no samples where processed.
-   */
-  private long max = Long.MIN_VALUE;
-
-  /**
-   * The shortest duration from all samples, or Long.MAX_VALUE when no samples where processed.
-   */
-  private long min = Long.MAX_VALUE;
-
-
   public static String asStaplerURI(String uri) {
     return uri.replace("http:", "").replaceAll("/", "_");
   }
@@ -111,8 +104,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     size++;
     totalDuration += pHttpSample.getDuration();
     totalSizeInKB += pHttpSample.getSizeInKb();
-    max = Math.max(pHttpSample.getDuration(), max);
-    min = Math.min(pHttpSample.getDuration(), min);
   }
 
   public int compareTo(PerformanceReport jmReport) {
@@ -150,13 +141,19 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     return roundTwoDecimals(totalSizeInKB / size);
   }
 
+  /**
+   * 0 percent will give the first value from ordered list of durations
+   * 100 percent will give the last value from ordered list of durations
+   * @param percentage must be a value between 0 and 100 (inclusive)
+   * @return value at the percentage specified.
+   */
   private long getDurationAt(double percentage) {
-    if (percentage < 0 || percentage > 1) {
-      throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 1 (inclusive)");
+    if (percentage < ZERO_PERCENT || percentage > ONE_HUNDRED_PERCENT) {
+      throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 100 (inclusive)");
     }
 
     if (size == 0) {
-      return 0;
+      return Long.MIN_VALUE;
     }
 
     synchronized (uriReportMap) {
@@ -167,16 +164,26 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         }
         Collections.sort(durationsSortedBySize);
       }
-      return durationsSortedBySize.get((int) (durationsSortedBySize.size() * percentage));
+
+      final double percentInDecimals = percentage / 100;
+      int indexToReturn = ((int) (durationsSortedBySize.size() * percentInDecimals)) - 1;
+
+      // Make sure a valid index is used.
+      if (indexToReturn < 0) {
+        indexToReturn = 0;
+      } else if (indexToReturn >= durationsSortedBySize.size()) {
+        indexToReturn = durationsSortedBySize.size() - 1;
+      }
+      return durationsSortedBySize.get(indexToReturn);
     }
   }
 
   public long get90Line() {
-    return getDurationAt(.9);
+    return getDurationAt(NINETY_PERCENT);
   }
 
   public long getMedian() {
-    return getDurationAt(.5);
+    return getDurationAt(FIFTY_PERCENT);
   }
 
   public String getHttpCode() {
@@ -200,7 +207,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   }
 
   public long getMax() {
-    return max;
+    return getDurationAt(ONE_HUNDRED_PERCENT);
   }
 
   public double getTotalTrafficInKb() {
@@ -208,7 +215,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
   }
 
   public long getMin() {
-    return min;
+    return getDurationAt(ZERO_PERCENT);
   }
 
   public String getReportFileName() {

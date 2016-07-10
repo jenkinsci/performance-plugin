@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testResults version="1.2">
+<httpSample t="1" lt="9770" ts="1296846793179" s="true" lb="Bat" rc="200" rm="OK" tn="Sesiones de usuario 1-2" dt="text" by="771065"/>
+<httpSample t="2" lt="9770" ts="1296846793179" s="true" lb="Bat" rc="200" rm="OK" tn="Sesiones de usuario 1-2" dt="text" by="771065"/>
+<httpSample t="3" lt="9770" ts="1296846793179" s="true" lb="Bat" rc="200" rm="OK" tn="Sesiones de usuario 1-2" dt="text" by="771065"/>
+</testResults>
