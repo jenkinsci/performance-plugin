@@ -28,6 +28,7 @@ import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -637,6 +638,7 @@ public final class PerformanceProjectAction implements Action {
     return project;
   }
 
+  @Nonnull
   public List<String> getPerformanceReportList() {
     this.performanceReportList = new ArrayList<String>(0);
     if (null == this.project) {
@@ -676,12 +678,7 @@ public final class PerformanceProjectAction implements Action {
   }
 
   public boolean isTrendVisibleOnProjectDashboard() {
-    if (getPerformanceReportList() != null
-        && getPerformanceReportList().size() == 1) {
-      return true;
-    } else {
-      return false;
-    }
+    return getPerformanceReportList().size() == 1;
   }
 
   /**

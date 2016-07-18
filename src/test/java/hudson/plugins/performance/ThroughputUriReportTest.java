@@ -22,10 +22,7 @@ public class ThroughputUriReportTest {
 
   @Test
   public void shouldReturnThroughputEvenIfOneHttpSample() {
-    HttpSample httpSample1 = new HttpSample();
-    httpSample1.setDate(new Date());
-    httpSample1.setDuration(1000);
-
+    HttpSample httpSample1 = createHttpSample(new Date(), 1000);
     uriReport.addHttpSample(httpSample1);
 
     Assert.assertEquals(1.0, throughputUriReport.get());
@@ -33,10 +30,7 @@ public class ThroughputUriReportTest {
 
   @Test
   public void shouldReturnZeroWhenAllRequestsTookMoreSecond() {
-    HttpSample httpSample1 = new HttpSample();
-    httpSample1.setDate(new Date());
-    httpSample1.setDuration(10000);
-
+    HttpSample httpSample1 = createHttpSample(new Date(), 10000);
     uriReport.addHttpSample(httpSample1);
 
     Assert.assertEquals(0.1, throughputUriReport.get());
@@ -44,11 +38,8 @@ public class ThroughputUriReportTest {
 
   @Test
   public void shouldReturnCountOfRequestIfAllRequestsTookLessThanOneSecond() {
-    HttpSample httpSample1 = new HttpSample();
-    httpSample1.setDate(new Date());
-
-    HttpSample httpSample2 = new HttpSample();
-    httpSample2.setDate(new Date());
+    HttpSample httpSample1 = createHttpSample(new Date(), 0);
+    HttpSample httpSample2 = createHttpSample(new Date(), 0);
 
     uriReport.addHttpSample(httpSample1);
     uriReport.addHttpSample(httpSample2);
@@ -67,19 +58,10 @@ public class ThroughputUriReportTest {
     // 0 sec - total 3        - 1 sec - total 1        - 2 sec
     // throughput (per second) 2
 
-    HttpSample httpSample1 = new HttpSample();
-    httpSample1.setDate(new Date(time));
-
-    HttpSample httpSample2 = new HttpSample();
-    httpSample2.setDate(new Date(time + 1000));
-
-    HttpSample httpSample3 = new HttpSample();
-    httpSample3.setDate(new Date(time));
-    httpSample3.setDuration(500);
-
-    HttpSample httpSample4 = new HttpSample();
-    httpSample4.setDate(new Date(time));
-    httpSample4.setDuration(10);
+    HttpSample httpSample1 = createHttpSample(new Date(), 0);
+    HttpSample httpSample2 = createHttpSample(new Date(time + 1000), 0);
+    HttpSample httpSample3 = createHttpSample(new Date(), 500);
+    HttpSample httpSample4 = createHttpSample(new Date(), 10);
 
     uriReport.addHttpSample(httpSample1);
     uriReport.addHttpSample(httpSample2);
@@ -100,17 +82,9 @@ public class ThroughputUriReportTest {
     // 6 sec - finish 3 r
     // throughput per second 1
 
-    HttpSample httpSample1 = new HttpSample();
-    httpSample1.setDate(new Date(time));
-    httpSample1.setDuration(1000);
-
-    HttpSample httpSample2 = new HttpSample();
-    httpSample2.setDate(new Date(time));
-    httpSample2.setDuration(1000);
-
-    HttpSample httpSample3 = new HttpSample();
-    httpSample3.setDate(new Date(time + 3000));
-    httpSample3.setDuration(3000);
+    HttpSample httpSample1 = createHttpSample(new Date(), 1000);
+    HttpSample httpSample2 = createHttpSample(new Date(), 1000);
+    HttpSample httpSample3 = createHttpSample(new Date(time + 3000), 3000);
 
     uriReport.addHttpSample(httpSample1);
     uriReport.addHttpSample(httpSample2);
@@ -119,4 +93,18 @@ public class ThroughputUriReportTest {
     Assert.assertEquals(0.5, throughputUriReport.get());
   }
 
+  @Test // JENKINS-27373
+  public void durationOf1ShouldNotThrowDivideByZeroException() {
+    HttpSample httpSample1 = createHttpSample(new Date(), 1);
+
+    uriReport.addHttpSample(httpSample1);
+    Assert.assertEquals(1000.0, throughputUriReport.get());
+  }
+
+  private HttpSample createHttpSample(Date date, long duration){
+    HttpSample httpSample = new HttpSample();
+    httpSample.setDate(date);
+    httpSample.setDuration(duration);
+    return httpSample;
+  }
 }
