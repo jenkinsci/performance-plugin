@@ -15,6 +15,7 @@ import java.util.Set;
 
 public class JMeterCsvParser extends AbstractParser {
 
+  public static final String DEFAULT_DELIMITER = ",";
   public final boolean skipFirstLine;
   public final String delimiter;
   public int timestampIdx = -1;
