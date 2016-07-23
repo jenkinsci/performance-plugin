@@ -6,10 +6,38 @@
                    items="${instance.parsers}"
                    addCaption="${%Add a new report}"/>
   </f:entry>
-  <f:entry title="Select mode:   ">
-    <f:booleanRadio name="modeOfThreshold" field="modeOfThreshold" true="Relative Threshold" false="Error Threshold" />
+  <f:entry title="${%Performance display}">
+    <table width="300px">
+      <tbody>
+        <tr>
+          <td>
+            <f:checkbox name="modePerformancePerTestCase" title="Performance Per Test Case Mode" field="modePerformancePerTestCase" checked="true">
+              Display Performance Report Per Test Case
+            </f:checkbox>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <f:checkbox name="modeThroughput" title="Show Throughput Chart" field="modeThroughput">
+              Display Performance Report with Throughput (requests per second)
+            </f:checkbox>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </f:entry>
- 
+  
+  <f:entry title="Select evaluation mode" field="modeEvaluation">
+    <f:booleanRadio name="modeEvaluation"  false="Standard Mode" true="Expert Mode" />
+  </f:entry> 
+
+  <f:entry>
+    <table style="border:1;border-style:solid"> 
+      <p><b>Standard Mode</b></p>
+        <f:entry title="Select mode:   ">
+          <f:booleanRadio name="modeOfThreshold" field="modeOfThreshold" true="Relative Threshold" false="Error Threshold" />
+        </f:entry>
+
    <f:entry title="Build result:   ">
 		<f:checkbox name="failBuildIfNoResultFile" title="Fail build when result files are not present" field="failBuildIfNoResultFile">
 		    		  Fail build when result files are not present
@@ -122,26 +150,41 @@
       </table>
     </f:entry>
   </f:block>
-
-  <f:entry title="${%Performance display}">
-    <table width="300px">
+</table>
+</f:entry>                 
+  
+<f:entry>
+ <table style="border:1;border-style:solid">
+   <p><b>Expert Mode</b></p>
+   <f:entry title="Constraint settings">
+    <table width="500px">
       <tbody>
         <tr>
           <td>
-            <f:checkbox name="modePerformancePerTestCase" title="Performance Per Test Case Mode" field="modePerformancePerTestCase" checked="true">
-    		  Display Performance Report Per Test Case
-    		</f:checkbox>
+          <f:checkbox name="ignoreFailedBuilds" title="Ignore Failed Builds"  checked="${instance.isIgnoreFailedBuilds()}"/>
           </td>
         </tr>
         <tr>
           <td>
-            <f:checkbox name="modeThroughput" title="Show Throughput Chart" field="modeThroughput">
-    		  Display Performance Report with Throughput (requests per second)
-    		</f:checkbox>
+            <f:checkbox name="ignoreUnstableBuilds" title="Ignore Unstable Builds" field="ignoreUnstableBuilds" checked="${instance.isIgnoreUnstableBuilds()}"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <f:checkbox name="persistConstraintLog" title="Save constraint log to workspace"  checked="${instance.isPersistConstraintLog()}"/>
           </td>
         </tr>
       </tbody>
     </table>
   </f:entry>
+   
+  <f:entry title="Constraints" field="constraints">
+    <f:hetero-list name="constraints" hasHeader="true"
+                   descriptors="${descriptor.getConstraintDescriptors()}"
+                   items="${instance.constraints}"
+                   addCaption="${%Add a new constraint}"/>
+   </f:entry>
+  </table>
+ </f:entry>
 
 </j:jelly>
