@@ -16,6 +16,8 @@ import java.util.Set;
 public class JMeterCsvParser extends AbstractParser {
 
   public static final String DEFAULT_DELIMITER = ",";
+  public static final String DEFAULT_CSV_FORMAT = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,bytes,Latency";
+  private static final boolean DONT_SKIP_FIRST_LINE = false;
   public final boolean skipFirstLine;
   public final String delimiter;
   public int timestampIdx = -1;
@@ -52,6 +54,10 @@ public class JMeterCsvParser extends AbstractParser {
         || successIdx < 0 || urlIdx < 0) {
       throw new Exception("Missing required column");
     }
+  }
+
+  public JMeterCsvParser(String glob) throws Exception {
+    this(glob, DEFAULT_CSV_FORMAT, DEFAULT_DELIMITER, DONT_SKIP_FIRST_LINE);
   }
 
   @Extension

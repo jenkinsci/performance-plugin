@@ -121,6 +121,11 @@ public class JMeterParserTest {
     assertNotNull(result);
     assertEquals("The source file contains three samples. These should all have been added to the performance report.",
         3, result.size());
+
+    UriReport uriReport = result.getUriReportMap().get("GET _ordermgmt_inventory");
+    assertEquals(0, uriReport.countErrors());
+    assertEquals("200", uriReport.getHttpCode());
+    assertEquals("GET /ordermgmt/inventory", uriReport.getUri());
   }
 
 

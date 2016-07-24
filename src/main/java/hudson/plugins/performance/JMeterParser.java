@@ -184,8 +184,7 @@ public class JMeterParser extends AbstractParser {
    * A delegate for {@link #parse(File)} that can process CSV data.
    */
   PerformanceReport parseCsv(File reportFile) throws Exception {
-    // TODO The arguments in this constructor should be configurable.
-    final JMeterCsvParser delegate = new JMeterCsvParser(this.glob, "timestamp,elapsed,URL,responseCode,success", ",", false);
+    final JMeterCsvParser delegate = new JMeterCsvParser(this.glob);
     return delegate.parse(reportFile);
   }
 
