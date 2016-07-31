@@ -69,6 +69,11 @@ public class PerformanceReport extends AbstractReport implements Serializable,
    * The size of all samples combined, in kilobytes.
    */
   private double totalSizeInKB = 0;
+  private long summarizerMin;
+  private long summarizerMax;
+  private long summarizerAvg;
+  private String summarizerErrorPercent = null;
+  private long summarizerSize;
 
   public static String asStaplerURI(String uri) {
     return uri.replace("http:", "").replaceAll("/", "_");
@@ -321,5 +326,45 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     BigDecimal bd = new BigDecimal(d);
     bd = bd.setScale(2, RoundingMode.HALF_UP);
     return bd.doubleValue();
+  }
+
+  public void setSummarizerSize(long summarizerSize) {
+    this.summarizerSize = summarizerSize;
+  }
+
+  public long getSummarizerSize() {
+    return summarizerSize;
+  }
+
+  public void setSummarizerMin(long summarizerMin) {
+    this.summarizerMin = summarizerMin;
+  }
+
+  public long getSummarizerMin() {
+    return summarizerMin;
+  }
+
+  public void setSummarizerMax(long summarizerMax) {
+    this.summarizerMax = summarizerMax;
+  }
+
+  public long getSummarizerMax() {
+    return summarizerMax;
+  }
+
+  public void setSummarizerAvg(long summarizerAvg) {
+    this.summarizerAvg = summarizerAvg;
+  }
+
+  public long getSummarizerAvg() {
+    return summarizerAvg;
+  }
+
+  public void setSummarizerErrors(String summarizerErrorPercent) {
+    this.summarizerErrorPercent = summarizerErrorPercent;
+  }
+
+  public String getSummarizerErrors() {
+    return summarizerErrorPercent;
   }
 }
