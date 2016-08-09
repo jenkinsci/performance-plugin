@@ -12,4 +12,11 @@
 2014/05/22 14:51:00 INFO  - jmeter.reporters.Summariser: Generate Summary Results +    186 in    43s =    4.3/s Avg:   536 Min:     5 Max:  4617 Err:     0 (0.00%) Active: 5 Started: 5 Finished: 0 
 2014/05/22 14:53:54 INFO  - jmeter.engine.StandardJMeterEngine: Notifying test listeners of end of test 
 2014/05/22 14:53:54 INFO  - jmeter.reporters.Summariser: Generate Summary Results +   1069 in   175s =    6.1/s Avg:   295 Min:    33 Max:  5628 Err:     0 (0.00%) Active: 0 Started: 5 Finished: 5 
-2014/05/22 14:53:54 INFO  - jmeter.reporters.Summariser: Generate Summary Results =   1255 in   217s =    5.8/s Avg:   330 Min:     5 Max:  5628 Err:     0 (0.00%) 
+2014/05/22 14:53:54 INFO  - jmeter.reporters.Summariser: Generate Summary Results =   1255 in   217s =    5.8/s Avg:   330 Min:     5 Max:  5628 Err:     0 (0.00%)
+
+# added made up numbers
+2014/05/22 14:53:54 INFO  - jmeter.reporters.Summariser: Generate Summary Results +      1 in      1 =    1.0/s Avg:   295 Min:    33 Max:  5628 Err:     0 (0.00%) Active: 0 Started: 5 Finished: 5
+2014/05/22 14:53:54 INFO  - jmeter.reporters.Summariser: Generate Summary Results =   1256 in   217s =    6.8/s Avg:   331 Min:     4 Max:  5629 Err:     0 (0.00%)
+# added made up numbers
+2014/05/22 14:53:54 INFO  - jmeter.reporters.Summariser: Generate Summary Results +   1 in   175s =    6.1/s Avg:   295 Min:    33 Max:  5628 Err:     0 (0.00%) Active: 0 Started: 5 Finished: 5
+2014/05/22 14:53:54 INFO  - jmeter.reporters.Summariser: Generate Summary Results =   1257 in   217s =    7.8/s Avg:   333 Min:     3 Max:  5630 Err:     123 (4.56%)
