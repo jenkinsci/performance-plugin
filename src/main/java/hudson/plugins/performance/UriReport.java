@@ -99,7 +99,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
    */
   private Date end = null;
 
-  UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
+  public UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
     this.performanceReport = performanceReport;
     this.staplerUri = staplerUri;
     this.uri = uri;
