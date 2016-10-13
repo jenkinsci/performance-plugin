@@ -171,25 +171,7 @@ public class PerformanceReportMap implements ModelObject {
                                     StaplerResponse response) throws IOException {
     String parameter = request.getParameter("performanceReportPosition");
     AbstractBuild<?, ?> previousBuild = getBuild();
-    final Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> buildReports = new LinkedHashMap<AbstractBuild<?, ?>, Map<String, PerformanceReport>>();
-    while (previousBuild != null) {
-      final AbstractBuild<?, ?> currentBuild = previousBuild;
-      parseReports(currentBuild, TaskListener.NULL,
-          new PerformanceReportCollector() {
-
-            public void addAll(Collection<PerformanceReport> parse) {
-              for (PerformanceReport performanceReport : parse) {
-                if (buildReports.get(currentBuild) == null) {
-                  Map<String, PerformanceReport> map = new LinkedHashMap<String, PerformanceReport>();
-                  buildReports.put(currentBuild, map);
-                }
-                buildReports.get(currentBuild).put(
-                    performanceReport.getReportFileName(), performanceReport);
-              }
-            }
-          }, parameter);
-      previousBuild = previousBuild.getPreviousCompletedBuild();
-    }
+    final Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
     // Now we should have the data necessary to generate the graphs!
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
     for (AbstractBuild<?, ?> currentBuild : buildReports.keySet()) {
@@ -202,12 +184,8 @@ public class PerformanceReportMap implements ModelObject {
         .createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
   }
 
-  public void doSummarizerGraph(StaplerRequest request, StaplerResponse response)
-      throws IOException {
-    String parameter = request.getParameter("performanceReportPosition");
-    AbstractBuild<?, ?> previousBuild = getBuild();
+  private Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> getBuildReports(String parameter, AbstractBuild<?, ?> previousBuild) throws IOException {
     final Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> buildReports = new LinkedHashMap<AbstractBuild<?, ?>, Map<String, PerformanceReport>>();
-
     while (previousBuild != null) {
       final AbstractBuild<?, ?> currentBuild = previousBuild;
       parseReports(currentBuild, TaskListener.NULL,
@@ -226,6 +204,15 @@ public class PerformanceReportMap implements ModelObject {
           }, parameter);
       previousBuild = previousBuild.getPreviousCompletedBuild();
     }
+
+    return buildReports;
+  }
+
+  public void doSummarizerGraph(StaplerRequest request, StaplerResponse response)
+      throws IOException {
+    String parameter = request.getParameter("performanceReportPosition");
+    AbstractBuild<?, ?> previousBuild = getBuild();
+    Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
     DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
     for (AbstractBuild<?, ?> currentBuild : buildReports.keySet()) {
       NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
