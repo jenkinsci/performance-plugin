@@ -17,6 +17,7 @@ public class JMeterCsvParser extends AbstractParser {
 
   public static final String DEFAULT_DELIMITER = ",";
   public static final String DEFAULT_CSV_FORMAT = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,bytes,Latency";
+  public static final String COMMAS_NOT_INSIDE_QUOTES = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
   private static final boolean DONT_SKIP_FIRST_LINE = false;
   public final boolean skipFirstLine;
   public final String delimiter;
@@ -124,7 +125,8 @@ public class JMeterCsvParser extends AbstractParser {
     final BufferedReader reader = new BufferedReader(new FileReader(reportFile));
     try {
       String line = reader.readLine();
-      if (line != null && skipFirstLine) {
+      if (line != null && (skipFirstLine || isFirstLineHeaderLine(line))) {
+        // skip the header line
         line = reader.readLine();
       }
       while (line != null) {
@@ -148,6 +150,21 @@ public class JMeterCsvParser extends AbstractParser {
   }
 
   /**
+   * If the first CSV value is a date then it definitely is not a header line.
+   * @param line First line of a CSV file.
+   * @return false if the first csv value is a date, else true.
+     */
+  private boolean isFirstLineHeaderLine(String line) {
+    try {
+      final String[] values = line.split(COMMAS_NOT_INSIDE_QUOTES);
+      new Date(Long.valueOf(values[0]));
+    }catch (Exception e){
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Parses a single HttpSample instance from a single CSV line.
    *
    * @param line file line with the provided pattern (cannot be null).
@@ -155,8 +172,7 @@ public class JMeterCsvParser extends AbstractParser {
    */
   private HttpSample getSample(String line) {
     final HttpSample sample = new HttpSample();
-    final String commasNotInsideQuotes = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
-    final String[] values = line.split(commasNotInsideQuotes);
+    final String[] values = line.split(COMMAS_NOT_INSIDE_QUOTES);
     sample.setDate(new Date(Long.valueOf(values[timestampIdx])));
     sample.setDuration(Long.valueOf(values[elapsedIdx]));
     sample.setHttpCode(values[responseCodeIdx]);
