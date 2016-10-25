@@ -1,6 +1,5 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
-	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
-	xmlns:jm="/hudson/plugins/performance/tags">
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
   <td>${it.size()}</td>
   <td class="${h.ifThenElse(it.getSizeDiff()>=0,'green','red')}">${it.getSizeDiff()}</td>
   <td>${it.getAverage()}</td>

@@ -1,6 +1,5 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
-	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
-	xmlns:e="/hudson/plugins/performance/tags">
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
  <j:choose>
  <j:when test="${it.ifSummarizerParserUsed(it.getReportFileName())}">
   <tr>

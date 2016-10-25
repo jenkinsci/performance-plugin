@@ -1,4 +1,5 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local"  xmlns:my="myTagLib" >
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
   <j:if test="${from.isTrendVisibleOnProjectDashboard()}">
     <div class="test-trend-caption">
       ${%Performance Trend}
