@@ -4,22 +4,20 @@ import hudson.AbortException;
 import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
-import hudson.model.Describable;
 import hudson.model.AbstractBuild;
-import hudson.model.Hudson;
+import hudson.model.Describable;
 import hudson.plugins.performance.PerformanceBuildAction;
 import hudson.plugins.performance.PerformanceReport;
 import hudson.plugins.performance.UriReport;
 import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.QueryParameter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 
 /**
  * Parent class for AbsoluteConstraint and RelativeConstraint
@@ -84,11 +82,11 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
 	private ConstraintSettings settings;
 
 	public ConstraintDescriptor getDescriptor() {
-		return (ConstraintDescriptor) Hudson.getInstance().getDescriptorOrDie(getClass());
+		return (ConstraintDescriptor) Jenkins.getInstance().getDescriptorOrDie(getClass());
 	}
 
 	public static ExtensionList<AbstractConstraint> all() {
-		return Hudson.getInstance().getExtensionList(AbstractConstraint.class);
+		return Jenkins.getInstance().getExtensionList(AbstractConstraint.class);
 	}
 
 	protected AbstractConstraint(Metric meteredValue, Operator operator, String relatedPerfReport, Escalation escalationLevel, boolean success, TestCaseBlock testCaseBlock) {
@@ -115,8 +113,6 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
 	 * 
 	 * @param builds
 	 *            all builds that are saved in Jenkins
-	 * @param settings
-	 *            global constraint settings
 	 * @return
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
