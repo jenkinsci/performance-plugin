@@ -4,7 +4,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ public abstract class AbstractParser extends PerformanceReportParser {
    */
   private static final Cache<String, PerformanceReport> CACHE = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-  @DataBoundConstructor
   public AbstractParser(String glob) {
     super(glob);
   }

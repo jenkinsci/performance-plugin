@@ -2,6 +2,7 @@ package hudson.plugins.performance;
 
 import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
@@ -175,7 +176,7 @@ public class PerformanceReportMap implements ModelObject {
     // Now we should have the data necessary to generate the graphs!
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
     for (AbstractBuild<?, ?> currentBuild : buildReports.keySet()) {
-      NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+      NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) currentBuild);
       PerformanceReport report = buildReports.get(currentBuild).get(parameter);
       dataSetBuilderAverage.add(report.getAverage(),
           Messages.ProjectAction_Average(), label);
@@ -215,7 +216,7 @@ public class PerformanceReportMap implements ModelObject {
     Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
     DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
     for (AbstractBuild<?, ?> currentBuild : buildReports.keySet()) {
-      NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+      NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) currentBuild);
       PerformanceReport report = buildReports.get(currentBuild).get(parameter);
 
       // Now we should have the data necessary to generate the graphs!

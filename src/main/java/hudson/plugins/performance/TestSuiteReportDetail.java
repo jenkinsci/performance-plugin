@@ -3,6 +3,7 @@ package hudson.plugins.performance;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.ModelObject;
+import hudson.model.Run;
 import hudson.plugins.performance.PerformanceProjectAction.Range;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
@@ -79,7 +80,7 @@ public class TestSuiteReportDetail implements ModelObject {
         if (!buildsLimits.includedByStep(build.number)) {
           continue;
         }
-        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) build);
         PerformanceBuildAction performanceBuildAction = build
             .getAction(PerformanceBuildAction.class);
         if (performanceBuildAction == null) {
