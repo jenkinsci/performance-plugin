@@ -73,6 +73,11 @@
             <version>3.20.0-GA</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci</groupId>
+            <artifactId>symbol-annotation</artifactId>
+            <version>1.2</version>
+        </dependency>
     </dependencies>
 
     <profiles>

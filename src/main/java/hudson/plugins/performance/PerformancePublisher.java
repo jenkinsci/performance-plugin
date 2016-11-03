@@ -12,6 +12,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
 
 public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
+  @Symbol("performanceReport")
   @Extension
   public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
     @Override
