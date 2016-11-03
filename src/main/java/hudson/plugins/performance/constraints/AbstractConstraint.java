@@ -4,8 +4,8 @@ import hudson.AbortException;
 import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
-import hudson.model.AbstractBuild;
 import hudson.model.Describable;
+import hudson.model.Run;
 import hudson.plugins.performance.PerformanceBuildAction;
 import hudson.plugins.performance.PerformanceReport;
 import hudson.plugins.performance.UriReport;
@@ -120,7 +120,7 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
 	 * @throws AbortException
 	 * @throws ParseException
 	 */
-	public abstract ConstraintEvaluation evaluate(List<? extends AbstractBuild<?, ?>> builds) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, AbortException,
+	public abstract ConstraintEvaluation evaluate(List<? extends Run<?, ?>> builds) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, AbortException,
 			ParseException;
 
 	/**
@@ -189,7 +189,7 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
 	 * @throws ParseException
 	 *             if a timeframe string in the UI is not processable
 	 */
-	protected void checkForDefectiveParams(List<? extends AbstractBuild<?, ?>> builds) throws AbortException {
+	protected void checkForDefectiveParams(List<? extends Run<?, ?>> builds) throws AbortException {
 		boolean found = false;
 
 		if (builds.get(0).getAction(PerformanceBuildAction.class).getPerformanceReportMap().getPerformanceReport(getRelatedPerfReport()) == null) {

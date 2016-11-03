@@ -2,8 +2,8 @@ package hudson.plugins.performance;
 
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
-import hudson.model.AbstractBuild;
 import hudson.model.Describable;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 
@@ -42,7 +42,7 @@ public abstract class PerformanceReportParser implements
    * Parses the specified reports into {@link PerformanceReport}s.
    */
   public abstract Collection<PerformanceReport> parse(
-      AbstractBuild<?, ?> build, Collection<File> reports, TaskListener listener)
+          Run<?, ?> build, Collection<File> reports, TaskListener listener)
       throws IOException;
 
   public abstract String getDefaultGlobPattern();

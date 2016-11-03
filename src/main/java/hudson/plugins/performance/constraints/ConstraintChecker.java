@@ -1,7 +1,8 @@
 package hudson.plugins.performance.constraints;
 
 import hudson.AbortException;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
+
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -18,13 +19,13 @@ public class ConstraintChecker {
 	/**
 	 * All builds that are saved in Jenkins
 	 */
-	private List<? extends AbstractBuild<?, ?>> builds;
+	private List<? extends Run<?, ?>> builds;
 	/**
 	 * Global constraint settings
 	 */
 	private ConstraintSettings settings;
 
-	public ConstraintChecker(ConstraintSettings settings, List<? extends AbstractBuild<?, ?>> builds) {
+	public ConstraintChecker(ConstraintSettings settings, List<? extends Run<?, ?>> builds) {
 		this.settings = settings;
 		this.builds = builds;
 	}
@@ -66,11 +67,11 @@ public class ConstraintChecker {
 		this.settings = settings;
 	}
 
-	public List<? extends AbstractBuild<?, ?>> getBuilds() {
+	public List<? extends Run<?, ?>> getBuilds() {
 		return builds;
 	}
 
-	public void setBuilds(List<? extends AbstractBuild<?, ?>> builds) {
+	public void setBuilds(List<? extends Run<?, ?>> builds) {
 		this.builds = builds;
 	}
 

@@ -1,7 +1,7 @@
 package hudson.plugins.performance;
 
-import hudson.model.AbstractBuild;
 import hudson.model.Action;
+import hudson.model.Run;
 import hudson.util.StreamTaskListener;
 import org.kohsuke.stapler.StaplerProxy;
 
@@ -13,7 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PerformanceBuildAction implements Action, StaplerProxy {
-  private final AbstractBuild<?, ?> build;
+  private final Run<?, ?> build;
 
   /**
    * Configured parsers used to parse reports in this build.
@@ -28,7 +28,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
   private static final Logger logger = Logger.getLogger(PerformanceBuildAction.class.getName());
 
 
-  public PerformanceBuildAction(AbstractBuild<?, ?> pBuild, PrintStream logger,
+  public PerformanceBuildAction(Run<?, ?> pBuild, PrintStream logger,
                                 List<PerformanceReportParser> parsers) {
     build = pBuild;
     hudsonConsoleWriter = logger;
@@ -59,7 +59,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
     return getPerformanceReportMap();
   }
 
-  public AbstractBuild<?, ?> getBuild() {
+  public Run<?, ?> getBuild() {
     return build;
   }
 

@@ -5,7 +5,7 @@ import java.util.List;
 
 import hudson.AbortException;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.plugins.performance.PerformanceBuildAction;
 import hudson.plugins.performance.PerformanceReport;
 import hudson.plugins.performance.UriReport;
@@ -70,7 +70,7 @@ public class AbsoluteConstraint extends AbstractConstraint {
 	}
 
 	@Override
-	public ConstraintEvaluation evaluate(List<? extends AbstractBuild<?, ?>> builds) throws InvocationTargetException, AbortException {
+	public ConstraintEvaluation evaluate(List<? extends Run<?, ?>> builds) throws InvocationTargetException, AbortException {
 		if (builds.isEmpty()) {
 			throw new AbortException("Performance: No builds found to evaluate!");
 		}

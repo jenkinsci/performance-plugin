@@ -1,8 +1,6 @@
 package hudson.plugins.performance;
 
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.ModelObject;
+import hudson.model.*;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -11,13 +9,13 @@ import java.util.ArrayList;
 
 public class TrendReportGraphs implements ModelObject {
 
-  private AbstractBuild<?, ?> build;
+  private Run<?, ?> build;
   private String filename;
   private PerformanceReport performanceReport;
-  private AbstractProject<?, ?> project;
+  private Job<?, ?> project;
 
-  public TrendReportGraphs(final AbstractProject<?, ?> project,
-                           final AbstractBuild<?, ?> build, final StaplerRequest request,
+  public TrendReportGraphs(final Job<?, ?> project,
+                           final Run<?, ?> build, final StaplerRequest request,
                            String filename, PerformanceReport performanceReport) {
     this.build = build;
     this.filename = filename;
@@ -72,11 +70,11 @@ public class TrendReportGraphs implements ModelObject {
     return filename;
   }
 
-  public AbstractProject<?, ?> getProject() {
+  public Job<?, ?> getProject() {
     return project;
   }
 
-  public AbstractBuild<?, ?> getBuild() {
+  public Run<?, ?> getBuild() {
     return build;
   }
 

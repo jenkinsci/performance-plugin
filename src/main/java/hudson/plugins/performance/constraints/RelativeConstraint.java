@@ -1,19 +1,11 @@
 package hudson.plugins.performance.constraints;
 
-import java.io.PrintStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.ListIterator;
 import hudson.AbortException;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
-import hudson.model.AbstractProject;
+import hudson.model.Run;
 import hudson.plugins.performance.PerformanceBuildAction;
 import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.PerformanceReport;
@@ -24,6 +16,11 @@ import hudson.util.RunList;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+
+import java.io.PrintStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Compares new load test results with 1 or more load test results in the past in a dynamically
@@ -258,7 +255,7 @@ public class RelativeConstraint extends AbstractConstraint {
 	}
 
 	@Override
-	public ConstraintEvaluation evaluate(List<? extends AbstractBuild<?, ?>> builds) throws IllegalArgumentException, AbortException, ParseException {
+	public ConstraintEvaluation evaluate(List<? extends Run<?, ?>> builds) throws IllegalArgumentException, AbortException, ParseException {
 		if (builds.isEmpty()) {
 			throw new AbortException("Performance: No builds found to evaluate!");
 		}
@@ -288,7 +285,7 @@ public class RelativeConstraint extends AbstractConstraint {
 	 *            value of the measured metric of the new build
 	 * @return evaluated constraint
 	 */
-	private ConstraintEvaluation check(List<? extends AbstractBuild<?, ?>> builds, double newValue) {
+	private ConstraintEvaluation check(List<? extends Run<?, ?>> builds, double newValue) {
 		double calculatedValue = calcAveOfReports(builds);
 		/*
 		 * If calculatedValue == Long.MIN_VALUE there was no build found to evaluate this constraint
@@ -353,12 +350,12 @@ public class RelativeConstraint extends AbstractConstraint {
 	 *            all builds that are saved in Jenkins
 	 * @return average of measured metric over included builds
 	 */
-	private long calcAveOfReports(List<? extends AbstractBuild<?, ?>> builds) {
-		List<? extends AbstractBuild<?, ?>> buildsToAnalyze;
+	private long calcAveOfReports(List<? extends Run<?, ?>> builds) {
+		List<Run<?, ?>> buildsToAnalyze;
 		long tmpResult = 0;
 		int counter = 0;
 		long result = 0;
-		AbstractBuild<?, ?> newBuild = builds.get(0);
+		Run<?, ?> newBuild = builds.get(0);
 		if (!getPreviousResultsBlock().isChoicePreviousResults()) {
 			buildsToAnalyze = evaluateDate(builds);
 		} else {
@@ -366,7 +363,7 @@ public class RelativeConstraint extends AbstractConstraint {
 		}
 		setPreviousResults(buildsToAnalyze.size());
 		if (!buildsToAnalyze.isEmpty()) {
-			for (AbstractBuild<?, ?> actBuild : buildsToAnalyze) {
+			for (Run<?, ?> actBuild : buildsToAnalyze) {
 				if (actBuild.getAction(PerformanceBuildAction.class) != null && !actBuild.equals(newBuild)) {
 					List<PerformanceReport> tmpList = actBuild.getAction(PerformanceBuildAction.class).getPerformanceReportMap().getPerformanceListOrdered();
 					for (PerformanceReport pr : tmpList) {
@@ -408,8 +405,8 @@ public class RelativeConstraint extends AbstractConstraint {
 	 * @return builds list of builds that have taken place in a user defined time frame respecting
 	 *         the constraint settings
 	 */
-	private List<AbstractBuild<?, ?>> evaluateDate(List<? extends AbstractBuild<?, ?>> builds) {
-		List<AbstractBuild<?, ?>> result = new ArrayList<AbstractBuild<?, ?>>();
+	private List<Run<?, ?>> evaluateDate(List<? extends Run<?, ?>> builds) {
+		List<Run<?, ?>> result = new ArrayList<Run<?, ?>>();
 		Calendar timeframeStart = Calendar.getInstance();
 		timeframeStart.setTime(getTimeframeStart());
 		Calendar timeframeEnd = Calendar.getInstance();
@@ -418,7 +415,7 @@ public class RelativeConstraint extends AbstractConstraint {
 		if (getTimeframeEndString().equals("now")) {
 			timeframeEnd.setTime(new Date());
 		}
-		for (AbstractBuild<?, ?> build : builds) {
+		for (Run<?, ?> build : builds) {
 			if (build.getResult().equals(Result.SUCCESS) || build.getResult().equals(Result.UNSTABLE) && getSettings().isIgnoreUnstableBuilds() == false || build.getResult().equals(Result.FAILURE)
 					&& getSettings().isIgnoreFailedBuilds() == false) {
 				if (!build.getTimestamp().before(timeframeStart) && !build.getTimestamp().after(timeframeEnd) && !build.equals(builds.get(0))) {
@@ -437,8 +434,8 @@ public class RelativeConstraint extends AbstractConstraint {
 	 *            all builds that are saved in Jenkins
 	 * @return build list of previous builds that get included into the evaluation
 	 */
-	private List<AbstractBuild<?, ?>> evaluatePreviousBuilds(List<? extends AbstractBuild<?, ?>> builds) {
-		List<AbstractBuild<?, ?>> result = new ArrayList<AbstractBuild<?, ?>>();
+	private List<Run<?, ?>> evaluatePreviousBuilds(List<? extends Run<?, ?>> builds) {
+		List<Run<?, ?>> result = new ArrayList<Run<?, ?>>();
 		if (getPreviousResults() == -1) {
 			setPreviousResults(builds.size() - 1);
 		}

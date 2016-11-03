@@ -1,7 +1,7 @@
 package hudson.plugins.performance;
 
-import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
+import hudson.model.Run;
 import hudson.util.ChartUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jfree.data.time.FixedMillisecond;
@@ -175,7 +175,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     return getDurationAt(0.5);
   }
 
-  public AbstractBuild<?, ?> getBuild() {
+  public Run<?, ?> getBuild() {
     return performanceReport.getBuild();
   }
 

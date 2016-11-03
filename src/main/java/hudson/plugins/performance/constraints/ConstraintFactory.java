@@ -1,6 +1,6 @@
 package hudson.plugins.performance.constraints;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.plugins.performance.PerformanceBuildAction;
 import hudson.plugins.performance.PerformanceReport;
 import hudson.plugins.performance.UriReport;
@@ -28,7 +28,7 @@ public class ConstraintFactory {
 	 *            all constraints defined in the UI
 	 * @return list of all constraint clones that will get evaluated
 	 */
-	public List<? extends AbstractConstraint> createConstraintClones(AbstractBuild<?, ?> build, List<? extends AbstractConstraint> constraints) {
+	public List<? extends AbstractConstraint> createConstraintClones(Run<?, ?> build, List<? extends AbstractConstraint> constraints) {
 		/*
 		 * Checking the test case field and handle comma separated lists and wildcard
 		 */
