@@ -1,11 +1,7 @@
 package hudson.plugins.performance.constraints;
 
-import hudson.FilePath;
-import hudson.model.ParameterValue;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.ParametersAction;
-import hudson.model.StringParameterValue;
+import hudson.model.*;
+import jenkins.model.Jenkins;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,8 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import jenkins.model.Jenkins;
 
 /**
  * Creates a report of the constraint evaluation and stores it into a consecutive log file, a build
@@ -26,17 +20,13 @@ import jenkins.model.Jenkins;
 public class ConstraintReport {
 
 	/**
-	 * Path of workspace of the corresponding Jenkins job
-	 */
-	private FilePath workspacePath;
-	/**
 	 * Log file that is created and the log is printed to
 	 */
 	private File performanceLog;
 	/**
 	 * Newly created build object. Used to determine build number and build date
 	 */
-	private AbstractBuild<?, ?> newBuild;
+	private Run<?, ?> newBuild;
 
 	/**
 	 * Number of the build
@@ -95,7 +85,7 @@ public class ConstraintReport {
 	 */
 	private String loggerMsgAdv;
 
-	public ConstraintReport(ArrayList<ConstraintEvaluation> ceList, AbstractBuild<?, ?> globBuild, boolean persistConstraintLog) throws IOException, InterruptedException {
+	public ConstraintReport(ArrayList<ConstraintEvaluation> ceList, Run<?, ?> globBuild, boolean persistConstraintLog) throws IOException, InterruptedException {
 		this.newBuild = globBuild;
 		this.createMetaData(ceList, newBuild);
 		this.createLoggerMsg(ceList);
@@ -114,7 +104,7 @@ public class ConstraintReport {
 	 * @param newBuild
 	 *            Newly created build
 	 */
-	private void createMetaData(ArrayList<ConstraintEvaluation> ceList, AbstractBuild<?, ?> newBuild) {
+	private void createMetaData(ArrayList<ConstraintEvaluation> ceList, Run<?, ?> newBuild) {
 		this.buildNumber = newBuild.getNumber();
 		this.buildDate = newBuild.getTimestamp();
 		this.buildResult = determineBuildResult(ceList);
@@ -262,8 +252,7 @@ public class ConstraintReport {
 	 * @throws InterruptedException
 	 */
 	public void writeResultsToFile() throws InterruptedException, IOException {
-		workspacePath = newBuild.getWorkspace();
-		performanceLog = new File(workspacePath.toURI().getPath() + "performance-results" + File.separator + "performance.log");
+		performanceLog = new File(newBuild.getRootDir() + File.separator + "performance-results" + File.separator + "performance.log");
 		if (!performanceLog.exists()) {
 			performanceLog.getParentFile().mkdirs();
 			performanceLog.createNewFile();

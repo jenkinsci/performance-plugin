@@ -1,46 +1,30 @@
 package hudson.plugins.performance;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.plugins.performance.constraints.AbstractConstraint;
-import hudson.plugins.performance.constraints.ConstraintChecker;
-import hudson.plugins.performance.constraints.ConstraintDescriptor;
-import hudson.plugins.performance.constraints.ConstraintEvaluation;
-import hudson.plugins.performance.constraints.ConstraintFactory;
-import hudson.plugins.performance.constraints.ConstraintReport;
-import hudson.plugins.performance.constraints.ConstraintSettings;
+import hudson.model.*;
+import hudson.plugins.performance.constraints.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
+import jenkins.tasks.SimpleBuildStep;
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
-public class PerformancePublisher extends Recorder {
+import javax.annotation.Nonnull;
+import java.io.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+public class PerformancePublisher extends Recorder implements SimpleBuildStep {
+
+  @Symbol("performanceReport")
   @Extension
   public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
     @Override
@@ -208,8 +192,8 @@ public class PerformancePublisher extends Recorder {
     this.modeThroughput = modeThroughput;
   }
 
-  public static File getPerformanceReport(AbstractBuild<?, ?> build, String parserDisplayName,
-      String performanceReportName) {
+  public static File getPerformanceReport(Run<?, ?> build, String parserDisplayName,
+                                          String performanceReportName) {
     return new File(build.getRootDir(), PerformanceReportMap.getPerformanceReportFileRelativePath(parserDisplayName,
         getPerformanceReportBuildFileName(performanceReportName)));
   }
@@ -302,13 +286,13 @@ public class PerformancePublisher extends Recorder {
   }
 
   @Override
-  public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-      throws InterruptedException, IOException {
+  public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener)
+          throws InterruptedException, IOException {
 
     PrintStream logger = listener.getLogger();
     double thresholdTolerance = 0.00000001;
     Result result = Result.SUCCESS;
-    EnvVars env = build.getEnvironment(listener);
+    EnvVars env = run.getEnvironment(listener);
 
     Collection<PerformanceReport> parsedReports = null;
     String glob = null;
@@ -319,8 +303,8 @@ public class PerformancePublisher extends Recorder {
      */
 
     // add the report to the build object.
-    PerformanceBuildAction a = new PerformanceBuildAction(build, logger, parsers);
-    build.addAction(a);
+    PerformanceBuildAction a = new PerformanceBuildAction(run, logger, parsers);
+    run.addAction(a);
     logger.print("\n\n\n");
 
     for (PerformanceReportParser parser : parsers) {
@@ -329,21 +313,21 @@ public class PerformancePublisher extends Recorder {
       glob = env.expand(glob);
       logger.println("Performance: Recording " + parser.getReportName() + " reports '" + glob + "'");
 
-      List<FilePath> files = locatePerformanceReports(build.getWorkspace(), glob);
+      List<FilePath> files = locatePerformanceReports(workspace, glob);
 
       if (files.isEmpty()) {
-        if (build.getResult().isWorseThan(Result.UNSTABLE)) {
-          return true;
+        if (run.getResult().isWorseThan(Result.UNSTABLE)) {
+          return;
         }
 
-        build.setResult(Result.FAILURE);
+        run.setResult(Result.FAILURE);
         logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob
-            + "' have been found. Has the report generated?. Setting Build to " + build.getResult());
-        return true;
+            + "' have been found. Has the report generated?. Setting Build to " + run.getResult());
+        return;
       }
 
-      List<File> localReports = copyReportsToMaster(build, logger, files, parser.getDescriptor().getDisplayName());
-      parsedReports = parser.parse(build, localReports, listener);
+      List<File> localReports = copyReportsToMaster(run, logger, files, parser.getDescriptor().getDisplayName());
+      parsedReports = parser.parse(run, localReports, listener);
     }
 
     for (PerformanceReport r : parsedReports) {
@@ -388,15 +372,15 @@ public class PerformancePublisher extends Recorder {
           }
 
           // add the report to the build object.
-          a = new PerformanceBuildAction(build, logger, parsers);
-          build.addAction(a);
+          a = new PerformanceBuildAction(run, logger, parsers);
+          run.addAction(a);
           logger.print("\n\n\n");
 
           for (PerformanceReportParser parser : parsers) {
             // mark the build as unstable or failure depending on the outcome.
             for (PerformanceReport r : parsedReports) {
 
-              xmlDir = build.getRootDir().getAbsolutePath();
+              xmlDir = run.getRootDir().getAbsolutePath();
               xmlDir += "/" + archive_directory;
 
               String[] arr = glob.split("/");
@@ -435,7 +419,7 @@ public class PerformancePublisher extends Recorder {
 
               if (errorFailedThreshold >= 0 && errorPercent - errorFailedThreshold > thresholdTolerance) {
                 result = Result.FAILURE;
-                build.setResult(Result.FAILURE);
+                run.setResult(Result.FAILURE);
               } else if (errorUnstableThreshold >= 0 && errorPercent - errorUnstableThreshold > thresholdTolerance) {
                 result = Result.UNSTABLE;
               }
@@ -456,14 +440,14 @@ public class PerformancePublisher extends Recorder {
                 logger.println("ERROR: Threshold set to a non-number ["
                     + responseTimeThresholdMap.get(r.getReportFileName()) + "]");
                 result = Result.FAILURE;
-                build.setResult(Result.FAILURE);
+                run.setResult(Result.FAILURE);
 
               }
-              if (result.isWorseThan(build.getResult())) {
-                build.setResult(result);
+              if (result.isWorseThan(run.getResult())) {
+                run.setResult(result);
               }
               logger.println("Performance: File " + r.getReportFileName() + " reported " + errorPercent
-                  + "% of errors [" + result + "]. Build status is: " + build.getResult());
+                  + "% of errors [" + result + "]. Build status is: " + run.getResult());
 
               for (int i = 0; i < curruriList.size(); i++) {
                 avg += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
@@ -556,28 +540,28 @@ public class PerformancePublisher extends Recorder {
           List<UriReport> curruriList = null;
 
           // add the report to the build object.
-          a = new PerformanceBuildAction(build, logger, parsers);
-          build.addAction(a);
+          a = new PerformanceBuildAction(run, logger, parsers);
+          run.addAction(a);
           logger.print("\n\n\n");
 
           for (PerformanceReportParser parser : parsers) {
             glob = parser.glob;
             glob = env.expand(glob);
             name = glob;
-            List<FilePath> files = locatePerformanceReports(build.getWorkspace(), glob);
+            List<FilePath> files = locatePerformanceReports(workspace, glob);
 
             if (files.isEmpty()) {
-              if (build.getResult().isWorseThan(Result.UNSTABLE)) {
-                return true;
+              if (run.getResult().isWorseThan(Result.UNSTABLE)) {
+                return;
               }
-              build.setResult(Result.FAILURE);
+              run.setResult(Result.FAILURE);
               logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob
-                  + "' have been found. Has the report generated?. Setting Build to " + build.getResult());
+                  + "' have been found. Has the report generated?. Setting Build to " + run.getResult());
             }
 
-            List<File> localReports = copyReportsToMaster(build, logger, files,
+            List<File> localReports = copyReportsToMaster(run, logger, files,
                 parser.getDescriptor().getDisplayName());
-            parsedReports = parser.parse(build, localReports, listener);
+            parsedReports = parser.parse(run, localReports, listener);
 
             for (PerformanceReport r : parsedReports) {
               r.setBuildAction(a);
@@ -588,7 +572,7 @@ public class PerformancePublisher extends Recorder {
             }
           }
 
-          xmlDir = build.getRootDir().getAbsolutePath();
+          xmlDir = run.getRootDir().getAbsolutePath();
           xmlDir += "/" + archive_directory;
 
           String[] arr = name.split("/");
@@ -606,14 +590,14 @@ public class PerformancePublisher extends Recorder {
           bw.write("<results>\n");
 
           // getting previous build/nth previous build..
-          AbstractBuild<?, ?> prevBuild = null;
+          Run<?, ?> prevBuild;
 
           if (compareBuildPrevious) {
             buildNo += "previous";
-            prevBuild = build.getPreviousSuccessfulBuild();
+            prevBuild = run.getPreviousSuccessfulBuild();
           } else {
             buildNo += nthBuildNumber;
-            prevBuild = getnthBuild(build, listener);
+            prevBuild = getnthBuild(run);
           }
 
           buildNo += "</buildNum>\n";
@@ -650,7 +634,7 @@ public class PerformancePublisher extends Recorder {
             String failedLabel = null, unStableLabel = null;
             double relativeDiff = 0, relativeDiffPercent = 0;
 
-            logger.print("\nComparison build no. - " + prevBuild.number + " and " + build.number + " using ");
+            logger.print("\nComparison build no. - " + prevBuild.number + " and " + run.number + " using ");
 
             // Comparing both builds based on either average, median or 90
             // percentile response time...
@@ -769,7 +753,7 @@ public class PerformancePublisher extends Recorder {
                         && Math.abs(relativeDiffPercent) - relativeFailedThresholdNegative > thresholdTolerance) {
 
                       result = Result.FAILURE;
-                      build.setResult(Result.FAILURE);
+                      run.setResult(Result.FAILURE);
                       failedLabel = prevuriList.get(i).getStaplerUri();
 
                     } else if (relativeUnstableThresholdNegative >= 0
@@ -784,7 +768,7 @@ public class PerformancePublisher extends Recorder {
                         && Math.abs(relativeDiffPercent) - relativeFailedThresholdPositive > thresholdTolerance) {
 
                       result = Result.FAILURE;
-                      build.setResult(Result.FAILURE);
+                      run.setResult(Result.FAILURE);
                       failedLabel = prevuriList.get(i).getStaplerUri();
 
                     } else if (relativeUnstableThresholdPositive >= 0
@@ -795,8 +779,8 @@ public class PerformancePublisher extends Recorder {
                     }
                   }
 
-                  if (result.isWorseThan(build.getResult())) {
-                    build.setResult(result);
+                  if (result.isWorseThan(run.getResult())) {
+                    run.setResult(result);
                   }
 
                 }
@@ -833,30 +817,29 @@ public class PerformancePublisher extends Recorder {
      */
     else {
       ConstraintFactory factory = new ConstraintFactory();
-      ConstraintSettings settings = new ConstraintSettings(listener, ignoreFailedBuilds, ignoreUnstableBuilds,
+      ConstraintSettings settings = new ConstraintSettings((BuildListener) listener, ignoreFailedBuilds, ignoreUnstableBuilds,
           persistConstraintLog);
-      ConstraintChecker checker = new ConstraintChecker(settings, build.getProject().getBuilds());
+      ConstraintChecker checker = new ConstraintChecker(settings, run.getParent().getBuilds());
       ArrayList<ConstraintEvaluation> ceList = new ArrayList<ConstraintEvaluation>();
       try {
-        ceList = checker.checkAllConstraints(factory.createConstraintClones(build, constraints));
+        ceList = checker.checkAllConstraints(factory.createConstraintClones(run, constraints));
       } catch (Exception e) {
         e.printStackTrace();
       }
       /*
        * Create Report of evaluated constraints
        */
-      ConstraintReport cr = new ConstraintReport(ceList, build.getProject().getBuilds().get(0), persistConstraintLog);
+      ConstraintReport cr = new ConstraintReport(ceList, run.getParent().getBuilds().get(0), persistConstraintLog);
       logger.print(cr.getLoggerMsg());
       /*
        * Determine build result
        */
-      build.setResult(cr.getBuildResult());
+      run.setResult(cr.getBuildResult());
     }
-    return true;
   }
 
-  private List<File> copyReportsToMaster(AbstractBuild<?, ?> build, PrintStream logger, List<FilePath> files,
-      String parserDisplayName) throws IOException, InterruptedException {
+  private List<File> copyReportsToMaster(Run<?, ?> build, PrintStream logger, List<FilePath> files,
+                                         String parserDisplayName) throws IOException, InterruptedException {
     List<File> localReports = new ArrayList<File>();
     for (FilePath src : files) {
       final File localReport = getPerformanceReport(build, parserDisplayName, src.getName());
@@ -937,8 +920,8 @@ public class PerformancePublisher extends Recorder {
     return configType.compareToIgnoreCase(PerformancePublisher.PRT) == 0;
   }
 
-  public static File[] getPerformanceReportDirectory(AbstractBuild<?, ?> build, String parserDisplayName,
-      PrintStream logger) {
+  public static File[] getPerformanceReportDirectory(Run<?, ?> build, String parserDisplayName,
+                                                     PrintStream logger) {
     File folder = new File(
         build.getRootDir() + "/" + PerformanceReportMap.getPerformanceReportFileRelativePath(parserDisplayName, ""));
     return folder.listFiles();
@@ -949,13 +932,14 @@ public class PerformancePublisher extends Recorder {
    *
    * @param build,
    *          listener
+   * @param build
    * @return build object
    * @throws IOException
    */
 
   // @psingh5 -
-  public AbstractBuild<?, ?> getnthBuild(AbstractBuild<?, ?> build, BuildListener listener) throws IOException {
-    AbstractBuild<?, ?> nthBuild = build;
+  public Run<?, ?> getnthBuild(Run<?, ?> build) throws IOException {
+    Run<?, ?> nthBuild = build;
 
     int nextBuildNumber = build.number - nthBuildNumber;
 
@@ -967,7 +951,7 @@ public class PerformancePublisher extends Recorder {
     return (nthBuildNumber == 0) ? null : nthBuild;
   }
 
-  private List<File> getExistingReports(AbstractBuild<?, ?> build, PrintStream logger, String parserDisplayName)
+  private List<File> getExistingReports(Run<?, ?> build, PrintStream logger, String parserDisplayName)
       throws IOException, InterruptedException {
     List<File> localReports = new ArrayList<File>();
     final File localReport[] = getPerformanceReportDirectory(build, parserDisplayName, logger);

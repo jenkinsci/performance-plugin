@@ -2,7 +2,7 @@ package hudson.plugins.performance;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 
 import java.io.*;
@@ -37,7 +37,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
   }
 
   @Override
-  public Collection<PerformanceReport> parse(AbstractBuild<?, ?> build, Collection<File> reports, TaskListener listener) throws IOException {
+  public Collection<PerformanceReport> parse(Run<?, ?> build, Collection<File> reports, TaskListener listener) throws IOException {
     final List<PerformanceReport> result = new ArrayList<PerformanceReport>();
 
     for (File reportFile : reports) {

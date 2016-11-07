@@ -2,7 +2,7 @@ package hudson.plugins.performance.constraints;
 
 import hudson.DescriptorExtensionList;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 
 public abstract class ConstraintDescriptor extends Descriptor<AbstractConstraint> {
 
@@ -11,7 +11,7 @@ public abstract class ConstraintDescriptor extends Descriptor<AbstractConstraint
 	}
 
 	public static DescriptorExtensionList<AbstractConstraint, ConstraintDescriptor> all() {
-		return Hudson.getInstance().<AbstractConstraint, ConstraintDescriptor> getDescriptorList(AbstractConstraint.class);
+		return Jenkins.getInstance().getDescriptorList(AbstractConstraint.class);
 	}
 
 	public static ConstraintDescriptor getById(String id) {

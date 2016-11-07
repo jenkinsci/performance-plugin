@@ -1,6 +1,5 @@
 package hudson.plugins.performance;
 
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.ModelObject;
 import hudson.model.Run;
@@ -70,17 +69,17 @@ public class TestSuiteReportDetail implements ModelObject {
       return;
     }
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-    List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    List<? extends Run<?, ?>> builds = getProject().getBuilds();
     Range buildsLimits = this.buildsLimits;
 
     int nbBuildsToAnalyze = builds.size();
-    for (AbstractBuild<?, ?> build : builds) {
+    for (Run<?, ?> build : builds) {
       if (buildsLimits.in(nbBuildsToAnalyze)) {
 
         if (!buildsLimits.includedByStep(build.number)) {
           continue;
         }
-        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) build);
+        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
         PerformanceBuildAction performanceBuildAction = build
             .getAction(PerformanceBuildAction.class);
         if (performanceBuildAction == null) {
@@ -160,10 +159,10 @@ public class TestSuiteReportDetail implements ModelObject {
     this.performanceReportTestCaseList = new ArrayList<String>(0);
     String performanceReportNameFile = this.getFilename();
 
-    List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    List<? extends Run<?, ?>> builds = getProject().getBuilds();
 
     builds.size();
-    for (AbstractBuild<?, ?> build : builds) {
+    for (Run<?, ?> build : builds) {
 
       PerformanceBuildAction performanceBuildAction = build
           .getAction(PerformanceBuildAction.class);

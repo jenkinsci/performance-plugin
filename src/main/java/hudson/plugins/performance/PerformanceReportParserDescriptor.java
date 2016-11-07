@@ -2,7 +2,7 @@ package hudson.plugins.performance;
 
 import hudson.DescriptorExtensionList;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -21,7 +21,7 @@ public abstract class PerformanceReportParserDescriptor extends
    * Returns all the registered {@link PerformanceReportParserDescriptor}s.
    */
   public static DescriptorExtensionList<PerformanceReportParser, PerformanceReportParserDescriptor> all() {
-    return Hudson.getInstance().<PerformanceReportParser, PerformanceReportParserDescriptor>getDescriptorList(PerformanceReportParser.class);
+    return Jenkins.getInstance().getDescriptorList(PerformanceReportParser.class);
   }
 
   public static PerformanceReportParserDescriptor getById(String id) {

@@ -1,6 +1,6 @@
 package hudson.plugins.performance;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -195,7 +195,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     return "";
   }
 
-  public AbstractBuild<?, ?> getBuild() {
+  public Run<?, ?> getBuild() {
     return buildAction.getBuild();
   }
 

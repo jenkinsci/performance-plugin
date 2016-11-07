@@ -1,6 +1,5 @@
 package hudson.plugins.performance;
 
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Run;
@@ -317,18 +316,18 @@ public final class PerformanceProjectAction implements Action {
       return;
     }
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderErrors = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-    List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    List<? extends Run<?, ?>> builds = getProject().getBuilds();
     Range buildsLimits = getFirstAndLastBuild(request, builds);
 
     int nbBuildsToAnalyze = builds.size();
-    for (AbstractBuild<?, ?> currentBuild : builds) {
+    for (Run<?, ?> currentBuild : builds) {
       if (buildsLimits.in(nbBuildsToAnalyze)) {
 
         if (!buildsLimits.includedByStep(currentBuild.number)) {
           continue;
         }
 
-        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) currentBuild);
+        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
         PerformanceBuildAction performanceBuildAction = currentBuild
             .getAction(PerformanceBuildAction.class);
         if (performanceBuildAction == null) {
@@ -363,14 +362,14 @@ public final class PerformanceProjectAction implements Action {
       return;
     }
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-    List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    List<? extends Run<?, ?>> builds = getProject().getBuilds();
     Range buildsLimits = getFirstAndLastBuild(request, builds);
 
     int nbBuildsToAnalyze = builds.size();
 
-    for (AbstractBuild<?, ?> build : builds) {
+    for (Run<?, ?> build : builds) {
       if (buildsLimits.in(nbBuildsToAnalyze)) {
-        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) build);
+        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
 
         if (!buildsLimits.includedByStep(build.number)) {
           continue;
@@ -412,18 +411,18 @@ public final class PerformanceProjectAction implements Action {
       return;
     }
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-    List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    List<? extends Run<?, ?>> builds = getProject().getBuilds();
     Range buildsLimits = getFirstAndLastBuild(request, builds);
 
     int nbBuildsToAnalyze = builds.size();
-    for (AbstractBuild<?, ?> build : builds) {
+    for (Run<?, ?> build : builds) {
       if (buildsLimits.in(nbBuildsToAnalyze)) {
 
         if (!buildsLimits.includedByStep(build.number)) {
           continue;
         }
 
-        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) build);
+        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
         PerformanceBuildAction performanceBuildAction = build
             .getAction(PerformanceBuildAction.class);
         if (performanceBuildAction == null) {
@@ -463,11 +462,11 @@ public final class PerformanceProjectAction implements Action {
     }
 
     final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-    final List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    final List<? extends Run<?, ?>> builds = getProject().getBuilds();
     final Range buildsLimits = getFirstAndLastBuild(request, builds);
 
     int nbBuildsToAnalyze = builds.size();
-    for (final AbstractBuild<?, ?> build : builds) {
+    for (final Run<?, ?> build : builds) {
       if (buildsLimits.in(nbBuildsToAnalyze)) {
 
         if (!buildsLimits.includedByStep(build.number)) {
@@ -487,7 +486,7 @@ public final class PerformanceProjectAction implements Action {
         }
 
         final ThroughputReport throughputReport = new ThroughputReport(performanceReport);
-        final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) build);
+        final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
         dataSetBuilder.add(throughputReport.get(), Messages.ProjectAction_RequestsPerSeconds(), label);
       }
       nbBuildsToAnalyze--;
@@ -515,10 +514,10 @@ public final class PerformanceProjectAction implements Action {
     Range buildsLimits = getFirstAndLastBuild(request, builds);
 
     int nbBuildsToAnalyze = builds.size();
-    for (Iterator<?> iterator = builds.iterator(); iterator.hasNext(); ) {
-      AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator.next();
+    for (Object build : builds) {
+      Run<?, ?> currentBuild = (Run<?, ?>) build;
       if (buildsLimits.in(nbBuildsToAnalyze)) {
-        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) currentBuild);
+        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
         PerformanceBuildAction performanceBuildAction = currentBuild
             .getAction(PerformanceBuildAction.class);
         if (performanceBuildAction == null) {
@@ -611,9 +610,8 @@ public final class PerformanceProjectAction implements Action {
           LOGGER
               .log(Level.SEVERE, "Error during the manage of the Calendar", e);
         }
-        for (Iterator<?> iterator = builds.iterator(); iterator.hasNext(); ) {
-          AbstractBuild<?, ?> currentBuild = (AbstractBuild<?, ?>) iterator
-              .next();
+        for (Object build : builds) {
+          Run<?, ?> currentBuild = (Run<?, ?>) build;
           GregorianCalendar buildDate = new GregorianCalendar();
           buildDate.setTime(currentBuild.getTimestamp().getTime());
           if (firstDate.getTime().before(buildDate.getTime())) {
@@ -732,7 +730,7 @@ public final class PerformanceProjectAction implements Action {
   private Object createTestsuiteReport(final StaplerRequest request) {
     String filename = getTestSuiteReportFilename(request);
 
-    List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    List<? extends Run<?, ?>> builds = getProject().getBuilds();
     Range buildsLimits = getFirstAndLastBuild(request, builds);
 
     TestSuiteReportDetail report = new TestSuiteReportDetail(project,
@@ -757,13 +755,13 @@ public final class PerformanceProjectAction implements Action {
                                                                           String performanceReportNameFile) {
 
     DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-    List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    List<? extends Run<?, ?>> builds = getProject().getBuilds();
     Range buildsLimits = getFirstAndLastBuild(request, builds);
 
     int nbBuildsToAnalyze = builds.size();
-    for (AbstractBuild<?, ?> currentBuild : builds) {
+    for (Run<?, ?> currentBuild : builds) {
       if (buildsLimits.in(nbBuildsToAnalyze)) {
-        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel((Run<?, ?>) currentBuild);
+        NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
         PerformanceBuildAction performanceBuildAction = currentBuild
             .getAction(PerformanceBuildAction.class);
         if (performanceBuildAction == null) {
