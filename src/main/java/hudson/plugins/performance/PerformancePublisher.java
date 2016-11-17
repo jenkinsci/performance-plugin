@@ -56,7 +56,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      *
      * @return the name of the option selected in the previous run
      */
-    public ListBoxModel doFillComparisonTypeItems() {
+    public ListBoxModel doFillConfigTypeItems() {
       ListBoxModel items = new ListBoxModel();
 
       // getting the user selected value
@@ -162,7 +162,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                               double relativeUnstableThresholdNegative,
                               int nthBuildNumber,
                               boolean modePerformancePerTestCase,
-                              String comparisonType,
+                              String configType,
                               boolean modeOfThreshold,
                               boolean failBuildIfNoResultFile,
                               boolean compareBuildPrevious,
@@ -179,8 +179,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     this.relativeUnstableThresholdNegative = relativeUnstableThresholdNegative;
 
     this.nthBuildNumber = nthBuildNumber;
-    this.configType = comparisonType;
-    PerformancePublisher.optionType = comparisonType;
+    this.configType = configType;
+    PerformancePublisher.optionType = configType;
     this.modeOfThreshold = modeOfThreshold;
     this.failBuildIfNoResultFile = failBuildIfNoResultFile;
     this.compareBuildPrevious = compareBuildPrevious;
@@ -908,6 +908,14 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     this.filename = filename;
   }
 
+  public boolean isFailBuildIfNoResultFile() {
+    return failBuildIfNoResultFile;
+  }
+
+  public void setFailBuildIfNoResultFile(boolean failBuildIfNoResultFile) {
+    this.failBuildIfNoResultFile = failBuildIfNoResultFile;
+  }
+
   public boolean isART() {
     return configType.compareToIgnoreCase(PerformancePublisher.ART) == 0;
   }
@@ -1100,3 +1108,4 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
   }
 
 }
+
