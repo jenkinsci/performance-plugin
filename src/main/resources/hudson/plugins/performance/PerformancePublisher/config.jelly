@@ -98,10 +98,10 @@
             <label>Unstable % Range</label>
           </td>
           <td>
-            <f:textbox field="relativeUnstableThresholdNegative"/>
+            <f:number field="relativeUnstableThresholdNegative"/>
           </td>
           <td>
-            <f:textbox field="relativeUnstableThresholdPositive"/>
+            <f:number field="relativeUnstableThresholdPositive"/>
           </td>
         </tr>
         <tr>
@@ -109,10 +109,10 @@
             <label>Failed % Range</label>
           </td>
           <td>
-            <f:textbox field="relativeFailedThresholdNegative"/>
+            <f:number field="relativeFailedThresholdNegative"/>
           </td>
           <td>
-            <f:textbox field="relativeFailedThresholdPositive"/>
+            <f:number field="relativeFailedThresholdPositive"/>
           </td>
         </tr>
         <tr>
@@ -123,7 +123,7 @@
                   <f:booleanRadio name="compareBuildPrevious" field="compareBuildPrevious" true="Compare with previous Build" false="Compare with Build number" />
                 </td>
                 <td width="20%">
-                  <f:textbox field="nthBuildNumber"/>
+                  <f:number field="nthBuildNumber"/>
                 </td>
               </tr>
             </table>
@@ -136,8 +136,8 @@
           <td colspan="2">
             <table>
               <tr>
-                <f:entry field="comparisonType" name="comparisonType">
-                  <f:select name="comparisonType">
+                <f:entry field="configType" name="configType">
+                  <f:select name="configType">
                     <option value="ART">Average Response Time</option>
                     <option value="MRT">Median Response Time</option>
                     <option value="PRT">90% ResponseTime</option>
