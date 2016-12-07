@@ -95,9 +95,7 @@ public class TestSuiteReportDetail implements ModelObject {
         String testStaplerUri = PerformanceReport.asStaplerURI(testUri);
         UriReport reportForTestUri = performanceReport.getUriReportMap().get(testStaplerUri);
         if (reportForTestUri != null) {
-          for (Long duration : reportForTestUri.getDurations()) {
-            dataSetBuilderAverage.add(duration, testUri, label);
-          }
+          dataSetBuilderAverage.add(reportForTestUri.getAverage(), testUri, label);
         }
       }
       nbBuildsToAnalyze--;
