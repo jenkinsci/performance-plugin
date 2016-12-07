@@ -35,14 +35,13 @@ import java.util.List;
  */
 public class TestSuiteReportDetail implements ModelObject {
 
-  private AbstractProject<?, ?> project;
-  private String filename;
-  private Range buildsLimits;
+  private final AbstractProject<?, ?> project;
+  private final String filename;
+  private final Range buildsLimits;
 
   private transient List<String> performanceReportTestCaseList;
 
-  public TestSuiteReportDetail(final AbstractProject<?, ?> project,
-                               final String pluginName, final StaplerRequest request, String filename,
+  public TestSuiteReportDetail(final AbstractProject<?, ?> project, String filename,
                                Range buildsLimits) {
     this.project = project;
     this.filename = filename;
@@ -51,27 +50,18 @@ public class TestSuiteReportDetail implements ModelObject {
 
   public void doRespondingTimeGraphPerTestCaseMode(StaplerRequest request,
                                                    StaplerResponse response) throws IOException {
-    String testUri = request.getParameter("performanceReportTest");
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
-    String performanceReportNameFile = performanceReportPosition
-        .getPerformanceReportPosition();
-    if (performanceReportNameFile == null) {
-      if (getPerformanceReportTestCaseList().size() == 1) {
-        performanceReportNameFile = getPerformanceReportTestCaseList().get(0);
-      } else {
-        return;
-      }
-    }
     if (ChartUtil.awtProblemCause != null) {
       // not available. send out error message
       response.sendRedirect2(request.getContextPath() + "/images/headless.png");
       return;
     }
-    DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-    List<? extends Run<?, ?>> builds = getProject().getBuilds();
-    Range buildsLimits = this.buildsLimits;
+    String testUri = request.getParameter("performanceReportTest");
+    ChartUtil.generateGraph(request, response,
+        createRespondingTimeChart(getChartDatasetBuilderForBuilds(testUri, getProject().getBuilds()).build()), 600, 200);
+  }
 
+  DataSetBuilder<String, NumberOnlyBuildLabel> getChartDatasetBuilderForBuilds(String testUri, List<? extends Run<?, ?>> builds) {
+    DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
     int nbBuildsToAnalyze = builds.size();
     for (Run<?, ?> build : builds) {
       if (buildsLimits.in(nbBuildsToAnalyze)) {
@@ -100,8 +90,7 @@ public class TestSuiteReportDetail implements ModelObject {
       }
       nbBuildsToAnalyze--;
     }
-    ChartUtil.generateGraph(request, response,
-        createRespondingTimeChart(dataSetBuilderAverage.build()), 600, 200);
+    return dataSetBuilderAverage;
   }
 
   protected static JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
