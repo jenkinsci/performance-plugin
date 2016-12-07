@@ -722,21 +722,13 @@ public final class PerformanceProjectAction implements Action {
   private Object createTrendReport(final StaplerRequest request) {
     String filename = getTrendReportFilename(request);
     CategoryDataset dataSet = getTrendReportData(request, filename).build();
-    TrendReportDetail report = new TrendReportDetail(project, PLUGIN_NAME,
-        request, filename, dataSet);
-    return report;
+    return new TrendReportDetail(project, PLUGIN_NAME, request, filename, dataSet);
   }
 
   private Object createTestsuiteReport(final StaplerRequest request) {
     String filename = getTestSuiteReportFilename(request);
-
-    List<? extends Run<?, ?>> builds = getProject().getBuilds();
-    Range buildsLimits = getFirstAndLastBuild(request, builds);
-
-    TestSuiteReportDetail report = new TestSuiteReportDetail(project,
-        PLUGIN_NAME, request, filename, buildsLimits);
-
-    return report;
+    Range buildsLimits = getFirstAndLastBuild(request, getProject().getBuilds());
+    return new TestSuiteReportDetail(project, filename, buildsLimits);
   }
 
   private String getTrendReportFilename(final StaplerRequest request) {
