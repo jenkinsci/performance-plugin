@@ -30,7 +30,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
   /**
    * A cache that contains serialized PerformanceReport instances. This cache intends to limit disc IO.
    */
-  private static final Cache<String, PerformanceReport> CACHE = CacheBuilder.newBuilder().maximumSize(1000).build();
+  private static final Cache<String, PerformanceReport> CACHE = CacheBuilder.newBuilder().maximumSize(1000).softValues().build();
 
   public AbstractParser(String glob) {
     super(glob);
