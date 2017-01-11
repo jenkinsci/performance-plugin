@@ -422,6 +422,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 run.setResult(Result.FAILURE);
               } else if (errorUnstableThreshold >= 0 && errorPercent - errorUnstableThreshold > thresholdTolerance) {
                 result = Result.UNSTABLE;
+                run.setResult(Result.UNSTABLE);
               }
 
               long average = r.getAverage();
@@ -761,6 +762,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                         && Math.abs(relativeDiffPercent) - relativeUnstableThresholdNegative > thresholdTolerance) {
 
                       result = Result.UNSTABLE;
+                      run.setResult(Result.UNSTABLE);
                       unStableLabel = prevuriList.get(i).getStaplerUri();
                     }
                   } else if (relativeDiffPercent >= 0) {
@@ -776,6 +778,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                         && Math.abs(relativeDiffPercent) - relativeUnstableThresholdPositive > thresholdTolerance) {
 
                       result = Result.UNSTABLE;
+                      run.setResult(Result.UNSTABLE);
                       unStableLabel = prevuriList.get(i).getStaplerUri();
                     }
                   }
