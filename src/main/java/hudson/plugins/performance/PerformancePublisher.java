@@ -292,6 +292,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     PrintStream logger = listener.getLogger();
     double thresholdTolerance = 0.00000001;
     Result result = Result.SUCCESS;
+    run.setResult(Result.SUCCESS);
     EnvVars env = run.getEnvironment(listener);
 
     Collection<PerformanceReport> parsedReports = null;
@@ -490,7 +491,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             }
           }
         } catch (Exception e) {
-        	logger.println("ERROR: Exception while determining absolute error/unstable threshold evaluation (" + e.getMessage() + ")");
+        	logger.println("ERROR: Exception while determining absolute error/unstable threshold evaluation");
+        	e.printStackTrace(logger);
         }
       } else {
         // For relative comparisons between builds...
@@ -812,7 +814,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
           fw.close();
 
         } catch (Exception e) {
-        	logger.println("ERROR: Exception while determining relative comparison between builds (" + e.getMessage() + ")");
+        	logger.println("ERROR: Exception while determining relative comparison between builds");
+        	e.printStackTrace(logger);
         }
 
       }
