@@ -489,6 +489,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             }
           }
         } catch (Exception e) {
+        	logger.println("ERROR: Exception while determining absolute error/unstable threshold evaluation (" + e.getMessage() + ")");
         }
       } else {
         // For relative comparisons between builds...
@@ -808,6 +809,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
           fw.close();
 
         } catch (Exception e) {
+        	logger.println("ERROR: Exception while determining relative comparison between builds (" + e.getMessage() + ")");
         }
 
       }
