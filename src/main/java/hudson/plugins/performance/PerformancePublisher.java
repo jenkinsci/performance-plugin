@@ -166,7 +166,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                               boolean modeOfThreshold,
                               boolean failBuildIfNoResultFile,
                               boolean compareBuildPrevious,
-                              List<? extends PerformanceReportParser> parsers,
+                              List<PerformanceReportParser> parsers,
                               boolean modeThroughput) {
 
     this.errorFailedThreshold = errorFailedThreshold;

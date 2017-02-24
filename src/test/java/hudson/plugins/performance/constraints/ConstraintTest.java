@@ -16,9 +16,9 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import hudson.plugins.performance.AbstractParser;
 import hudson.plugins.performance.JMeterParser;
 import hudson.plugins.performance.PerformancePublisher;
+import hudson.plugins.performance.PerformanceReportParser;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
 import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
 import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
@@ -47,7 +47,7 @@ public class ConstraintTest {
 		List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
 		abstractBuildsList.add(absoluteConstraint);
 		
-		List<AbstractParser> abstractParserList = new ArrayList<AbstractParser>();
+		List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
 		abstractParserList.add(new JMeterParser("testResult.xml"));
 		
 		PerformancePublisher performancePublisher = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,true,false,
@@ -93,7 +93,7 @@ public class ConstraintTest {
 		List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
 		abstractBuildsList.add(absoluteConstraint);
 		
-		List<AbstractParser> abstractParserList = new ArrayList<AbstractParser>();
+		List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
 		abstractParserList.add(new JMeterParser("testResult.xml"));
 		
 		PerformancePublisher performancePublisher = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,true,false,
@@ -139,7 +139,7 @@ public class ConstraintTest {
 		List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
 		abstractBuildsList.add(absoluteConstraint);
 		
-		List<AbstractParser> abstractParserList = new ArrayList<AbstractParser>();
+		List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
 		abstractParserList.add(new JMeterParser("testResult.xml"));
 		
 		PerformancePublisher performancePublisher = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,true,false,
@@ -185,7 +185,7 @@ public class ConstraintTest {
 		List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
 		abstractBuildsList.add(absoluteConstraint);
 		
-		List<AbstractParser> abstractParserList = new ArrayList<AbstractParser>();
+		List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
 		abstractParserList.add(new JMeterParser("testResult.xml"));
 		
 		PerformancePublisher performancePublisher = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,true,false,
@@ -231,7 +231,7 @@ public class ConstraintTest {
 		List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
 		abstractBuildsList.add(absoluteConstraint);
 		
-		List<AbstractParser> abstractParserList = new ArrayList<AbstractParser>();
+		List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
 		abstractParserList.add(new JMeterParser("testResult.xml"));
 		
 		PerformancePublisher performancePublisher = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,true,false,
@@ -277,7 +277,7 @@ public class ConstraintTest {
 		List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
 		abstractBuildsList.add(absoluteConstraint);
 		
-		List<AbstractParser> abstractParserList = new ArrayList<AbstractParser>();
+		List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
 		abstractParserList.add(new JMeterParser("testResult.xml"));
 		
 		PerformancePublisher performancePublisher = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,true,false,
@@ -323,7 +323,7 @@ public class ConstraintTest {
 		List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
 		abstractBuildsList.add(absoluteConstraint);
 		
-		List<AbstractParser> abstractParserList = new ArrayList<AbstractParser>();
+		List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
 		abstractParserList.add(new JMeterParser("testResult.xml"));
 		
 		PerformancePublisher performancePublisher = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,true,false,
@@ -369,7 +369,7 @@ public class ConstraintTest {
 		List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
 		abstractBuildsList.add(absoluteConstraint);
 		
-		List<AbstractParser> abstractParserList = new ArrayList<AbstractParser>();
+		List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
 		abstractParserList.add(new JMeterParser("testResult.xml"));
 		
 		PerformancePublisher performancePublisher = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,true,false,
@@ -415,7 +415,7 @@ public class ConstraintTest {
 		List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
 		abstractBuildsList.add(absoluteConstraint);
 		
-		List<AbstractParser> abstractParserList = new ArrayList<AbstractParser>();
+		List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
 		abstractParserList.add(new JMeterParser("testResult.xml"));
 		
 		PerformancePublisher performancePublisher = new PerformancePublisher(10, 20, "",0,0,0,0,0,false,"",false,true,false,
