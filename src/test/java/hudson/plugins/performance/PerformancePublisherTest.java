@@ -8,8 +8,7 @@ import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
-
-import static java.util.Arrays.asList;
+import java.util.Collections;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -17,7 +16,7 @@ import static java.util.Arrays.asList;
 public class PerformancePublisherTest extends HudsonTestCase {
   public void testConfigRoundtrip() throws Exception {
     PerformancePublisher before = new PerformancePublisher(10, 20, "", 0, 0, 0, 0, 0, false, "", false, false, false,
-        asList(new JMeterParser("**/*.jtl")), false);
+        Collections.<PerformanceReportParser>singletonList(new JMeterParser("**/*.jtl")), false);
 
     FreeStyleProject p = createFreeStyleProject();
     p.getPublishersList().add(before);
@@ -52,7 +51,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
       }
     });
     p.getPublishersList().add(
-        new PerformancePublisher(0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, asList(new JMeterParser(
+        new PerformancePublisher(0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
             "**/*.jtl")), false));
 
     FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
@@ -82,7 +81,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
       }
     });
     p.getPublishersList().add(
-        new PerformancePublisher(0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, asList(new JMeterParser(
+        new PerformancePublisher(0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
             "${JOB_NAME}/*.jtl")), false));
 
     FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
@@ -113,7 +112,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
       }
     });
     p.getPublishersList().add(
-        new PerformancePublisher(0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, false, asList(new JMeterParser(
+        new PerformancePublisher(0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
             "**/*.jtl")), false));
 
     FreeStyleBuild b = assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
@@ -144,7 +143,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
       }
     });
     p.getPublishersList().add(
-        new PerformancePublisher(0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false, asList(new JMeterParser(
+        new PerformancePublisher(0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
             "**/*.jtl")), false));
 
     FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
@@ -173,7 +172,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
     FreeStyleProject p = createFreeStyleProject();
 
     p.getPublishersList().add(
-        new PerformancePublisher(0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, asList(new JUnitParser(
+        new PerformancePublisher(0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, Collections.<PerformanceReportParser>singletonList(new JUnitParser(
             "**/*.xml")), false));
     // first build
     p.getBuildersList().add(new TestBuilder() {
