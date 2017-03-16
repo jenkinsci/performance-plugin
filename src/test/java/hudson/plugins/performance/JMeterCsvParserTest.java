@@ -13,25 +13,37 @@ public class JMeterCsvParserTest {
   private static final String TEST_FILE_PATTERN = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,bytes";
   private static final String NO_GLOB = null;
   private File reportFile;
+  private File reportFile2;
+  private File reportFile3;
 
   @Before
   public void beforeMethod() throws Exception {
     reportFile = new File(getClass().getResource("/JMeterCsvResults.csv").toURI());
+    reportFile2 = new File(getClass().getResource("/JMeterCsvResults2.csv").toURI());
+    reportFile3 = new File(getClass().getResource("/JMeterCsvResults3.csv").toURI());
   }
 
   @Test
   public void canParseCsvFile() throws Exception {
     final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, DEFAULT_DELIMITER, SKIP_FIRST_LINE);
-    parseAndVerifyResult(parser);
+    parseAndVerifyResult(parser, reportFile);
   }
 
   @Test
   public void canParseCsvFileWhenSkipFirstLineIsNotSpecifiedAndFirstLineHasHeader() throws Exception {
     final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB);
-    parseAndVerifyResult(parser);
+    parseAndVerifyResult(parser, reportFile);
   }
 
-  private void parseAndVerifyResult(JMeterCsvParser parser) throws Exception {
+  @Test
+  public void testDateDateFormats() throws Exception {
+    final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, DEFAULT_DELIMITER, SKIP_FIRST_LINE);
+    parseAndVerifyResult(parser, reportFile);
+    parseAndVerifyResult(parser, reportFile2);
+    parseAndVerifyResult(parser, reportFile3);
+  }
+
+  private void parseAndVerifyResult(JMeterCsvParser parser, File file) throws Exception {
     final PerformanceReport result = parser.parse(reportFile);
     // Verify results.
     assertNotNull(result);

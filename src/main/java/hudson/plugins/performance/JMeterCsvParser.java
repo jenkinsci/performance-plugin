@@ -122,6 +122,9 @@ public class JMeterCsvParser extends AbstractParser {
 
   @Override
   PerformanceReport parse(File reportFile) throws Exception {
+    this.dateFormat = null;
+    this.isNumberDateFormat = false;
+
     final PerformanceReport report = new PerformanceReport();
     report.setReportFileName(reportFile.getName());
 
@@ -184,36 +187,54 @@ public class JMeterCsvParser extends AbstractParser {
     return sample;
   }
 
+  private boolean isNumberDateFormat = false;
+  private SimpleDateFormat dateFormat;
+
   protected final static String[] DATE_FORMATS = new String[]{
     "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS"
   };
 
 
   private Date parseTimestamp(String timestamp) {
-    Date result = null;
-
-    for (String format : DATE_FORMATS) {
-      try {
-        result = new SimpleDateFormat(format).parse(timestamp);
-      } catch (ParseException ex) {
-        // ok
-      }
-
-      if (result != null) {
-        break;
-      }
+    if (this.dateFormat == null) {
+      initDateFormat(timestamp);
     }
 
-    if (result == null) {
-      try {
-        result = new Date(Long.valueOf(timestamp));
-      } catch (NumberFormatException ex) {
-        throw new RuntimeException("Cannot parse timestamp: " + timestamp +
-            ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), ex);
-      }
+    try {
+      return isNumberDateFormat ?
+             new Date(Long.valueOf(timestamp)) :
+             dateFormat.parse(timestamp);
+    } catch (ParseException e) {
+      throw new RuntimeException("Cannot parse timestamp: " + timestamp +
+                ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), e);
     }
-
-    return result;
   }
+
+    private void initDateFormat(String timestamp) {
+      Date result = null;
+      for (String format : DATE_FORMATS) {
+        try {
+            dateFormat = new SimpleDateFormat(format);
+            result = dateFormat.parse(timestamp);
+        } catch (ParseException ex) {
+          // ok
+            dateFormat = null;
+        }
+
+        if (result != null) {
+          break;
+        }
+      }
+
+      if (result == null) {
+        try {
+          Long.valueOf(timestamp);
+          isNumberDateFormat = true;
+        } catch (NumberFormatException ex) {
+            throw new RuntimeException("Cannot parse timestamp: " + timestamp +
+                    ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), ex);
+        }
+      }
+    }
 
 }
