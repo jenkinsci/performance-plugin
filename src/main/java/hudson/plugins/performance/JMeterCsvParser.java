@@ -209,7 +209,7 @@ public class JMeterCsvParser extends AbstractParser {
         result = new Date(Long.valueOf(timestamp));
       } catch (NumberFormatException ex) {
         throw new RuntimeException("Cannot parse timestamp: " + timestamp +
-            ". Please use one of supported formats: " + Arrays.toString(DATE_FORMATS), ex);
+            ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), ex);
       }
     }
 
