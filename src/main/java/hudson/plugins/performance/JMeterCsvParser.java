@@ -9,6 +9,9 @@ import org.xml.sax.SAXException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -173,11 +176,44 @@ public class JMeterCsvParser extends AbstractParser {
   private HttpSample getSample(String line) {
     final HttpSample sample = new HttpSample();
     final String[] values = line.split(COMMAS_NOT_INSIDE_QUOTES);
-    sample.setDate(new Date(Long.valueOf(values[timestampIdx])));
+    sample.setDate(parseTimestamp(values[timestampIdx]));
     sample.setDuration(Long.valueOf(values[elapsedIdx]));
     sample.setHttpCode(values[responseCodeIdx]);
     sample.setSuccessful(Boolean.valueOf(values[successIdx]));
     sample.setUri(values[urlIdx]);
     return sample;
   }
+
+  protected final static String[] DATE_FORMATS = new String[]{
+    "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS"
+  };
+
+
+  private Date parseTimestamp(String timestamp) {
+    Date result = null;
+
+    for (String format : DATE_FORMATS) {
+      try {
+        result = new SimpleDateFormat(format).parse(timestamp);
+      } catch (ParseException ex) {
+        // ok
+      }
+
+      if (result == null) {
+        break;
+      }
+    }
+
+    if (result == null) {
+      try {
+        result = new Date(Long.valueOf(timestamp));
+      } catch (NumberFormatException ex) {
+        throw new RuntimeException("Cannot parse timestamp: " + timestamp +
+            ". Please use one of supported formats: " + Arrays.toString(DATE_FORMATS), ex);
+      }
+    }
+
+    return result;
+  }
+
 }
