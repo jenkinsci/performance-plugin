@@ -1,0 +1,4 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,bytes
+2001/20/20 12:05:05.123,1425,GET /ordermgmt/login - Login Page,200,OK,Thread Group 1-1,text,true,3478
+2001/20/20 12:05:25.123,2204,GET /ordermgmt/pre-logout,200,OK,Thread Group 1-1,text,true,19714
+2001/20/20 12:05:55.123,2204,GET /ordermgmt/pre-logout,200,OK,Thread Group 1-1,text,true,19714
