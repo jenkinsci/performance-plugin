@@ -7,23 +7,23 @@ import java.util.List;
  */
 public class ThroughputReport {
 
-  private final PerformanceReport performanceReport;
+    private final PerformanceReport performanceReport;
 
-  public ThroughputReport(final PerformanceReport performanceReport) {
-    this.performanceReport = performanceReport;
-  }
-
-  public double get() {
-    final List<UriReport> uriReports = performanceReport.getUriListOrdered();
-    if (uriReports.isEmpty()) return 0;
-
-    double sumThroughput = 0;
-    for (UriReport uriReport : uriReports) {
-      sumThroughput += new ThroughputUriReport(uriReport).get();
+    public ThroughputReport(final PerformanceReport performanceReport) {
+        this.performanceReport = performanceReport;
     }
 
-    // here we assume that all uri executed in parallel and have same test duration
-    return sumThroughput;
-  }
+    public double get() {
+        final List<UriReport> uriReports = performanceReport.getUriListOrdered();
+        if (uriReports.isEmpty()) return 0;
+
+        double sumThroughput = 0;
+        for (UriReport uriReport : uriReports) {
+            sumThroughput += new ThroughputUriReport(uriReport).get();
+        }
+
+        // here we assume that all uri executed in parallel and have same test duration
+        return sumThroughput;
+    }
 
 }

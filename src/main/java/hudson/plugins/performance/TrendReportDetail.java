@@ -13,85 +13,85 @@ import java.util.List;
  * Configures the trend graph of this plug-in.
  */
 public class TrendReportDetail implements ModelObject,
-    Iterable<TrendReportDetail.Row> {
+        Iterable<TrendReportDetail.Row> {
 
-  private AbstractProject<?, ?> project;
-  private String filename;
-  private CategoryDataset dataSet;
+    private AbstractProject<?, ?> project;
+    private String filename;
+    private CategoryDataset dataSet;
 
-  public TrendReportDetail(final AbstractProject<?, ?> project,
-                           final String pluginName, final StaplerRequest request, String filename,
-                           CategoryDataset dataSet) {
-    this.project = project;
-    this.filename = filename;
-    this.dataSet = dataSet;
-  }
-
-  public AbstractProject<?, ?> getProject() {
-    return project;
-  }
-
-  public String getFilename() {
-    return filename;
-  }
-
-  public String getDisplayName() {
-    return Messages.TrendReportDetail_DisplayName();
-  }
-
-  public Iterator<Row> iterator() {
-    return new RowIterator();
-  }
-
-  public Iterator<Row> getIterator() {
-    return iterator();
-  }
-
-  public List getColumnLabels() {
-    return dataSet.getRowKeys();
-  }
-
-  public class RowIterator implements Iterator<Row> {
-
-    private int entry = 0;
-
-    public boolean hasNext() {
-      return (entry < dataSet.getColumnCount());
+    public TrendReportDetail(final AbstractProject<?, ?> project,
+                             final String pluginName, final StaplerRequest request, String filename,
+                             CategoryDataset dataSet) {
+        this.project = project;
+        this.filename = filename;
+        this.dataSet = dataSet;
     }
 
-    public Row next() {
-      return new Row(entry++);
+    public AbstractProject<?, ?> getProject() {
+        return project;
     }
 
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  public class Row {
-
-    int entry;
-
-    public Row(int entry) {
-      this.entry = entry;
+    public String getFilename() {
+        return filename;
     }
 
-    public Object getLabel() {
-      return dataSet.getColumnKey(entry);
+    public String getDisplayName() {
+        return Messages.TrendReportDetail_DisplayName();
     }
 
-    public List getLabels() {
-      return dataSet.getRowKeys();
+    public Iterator<Row> iterator() {
+        return new RowIterator();
     }
 
-    public List<Number> getValues() {
-      int count = dataSet.getRowCount();
-      List<Number> list = new ArrayList<Number>(count);
-      for (int i = 0; i < count; i++) {
-        list.add(dataSet.getValue(dataSet.getRowKey(i),
-            dataSet.getColumnKey(entry)));
-      }
-      return list;
+    public Iterator<Row> getIterator() {
+        return iterator();
     }
-  }
+
+    public List getColumnLabels() {
+        return dataSet.getRowKeys();
+    }
+
+    public class RowIterator implements Iterator<Row> {
+
+        private int entry = 0;
+
+        public boolean hasNext() {
+            return (entry < dataSet.getColumnCount());
+        }
+
+        public Row next() {
+            return new Row(entry++);
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    public class Row {
+
+        int entry;
+
+        public Row(int entry) {
+            this.entry = entry;
+        }
+
+        public Object getLabel() {
+            return dataSet.getColumnKey(entry);
+        }
+
+        public List getLabels() {
+            return dataSet.getRowKeys();
+        }
+
+        public List<Number> getValues() {
+            int count = dataSet.getRowCount();
+            List<Number> list = new ArrayList<Number>(count);
+            for (int i = 0; i < count; i++) {
+                list.add(dataSet.getValue(dataSet.getRowKey(i),
+                        dataSet.getColumnKey(entry)));
+            }
+            return list;
+        }
+    }
 }

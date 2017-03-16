@@ -22,40 +22,40 @@ import java.util.Collection;
  * @author Kohsuke Kawaguchi
  */
 public abstract class PerformanceReportParser implements
-    Describable<PerformanceReportParser>, ExtensionPoint {
-  /**
-   * GLOB patterns that specify the performance report.
-   */
-  public final String glob;
+        Describable<PerformanceReportParser>, ExtensionPoint {
+    /**
+     * GLOB patterns that specify the performance report.
+     */
+    public final String glob;
 
-  protected PerformanceReportParser(String glob) {
-    this.glob = (glob == null || glob.length() == 0) ? getDefaultGlobPattern()
-        : glob;
-  }
+    protected PerformanceReportParser(String glob) {
+        this.glob = (glob == null || glob.length() == 0) ? getDefaultGlobPattern()
+                : glob;
+    }
 
-  public PerformanceReportParserDescriptor getDescriptor() {
-    return (PerformanceReportParserDescriptor) Jenkins.getInstance()
-        .getDescriptorOrDie(getClass());
-  }
+    public PerformanceReportParserDescriptor getDescriptor() {
+        return (PerformanceReportParserDescriptor) Jenkins.getInstance()
+                .getDescriptorOrDie(getClass());
+    }
 
-  /**
-   * Parses the specified reports into {@link PerformanceReport}s.
-   */
-  public abstract Collection<PerformanceReport> parse(
-          Run<?, ?> build, Collection<File> reports, TaskListener listener)
-      throws IOException;
+    /**
+     * Parses the specified reports into {@link PerformanceReport}s.
+     */
+    public abstract Collection<PerformanceReport> parse(
+            Run<?, ?> build, Collection<File> reports, TaskListener listener)
+            throws IOException;
 
-  public abstract String getDefaultGlobPattern();
+    public abstract String getDefaultGlobPattern();
 
-  /**
-   * All registered implementations.
-   */
-  public static ExtensionList<PerformanceReportParser> all() {
-    return Jenkins.getInstance().getExtensionList(PerformanceReportParser.class);
-  }
+    /**
+     * All registered implementations.
+     */
+    public static ExtensionList<PerformanceReportParser> all() {
+        return Jenkins.getInstance().getExtensionList(PerformanceReportParser.class);
+    }
 
-  public String getReportName() {
-    return this.getClass().getName().replaceAll("^.*\\.(\\w+)Parser.*$", "$1");
-  }
+    public String getReportName() {
+        return this.getClass().getName().replaceAll("^.*\\.(\\w+)Parser.*$", "$1");
+    }
 
 }
