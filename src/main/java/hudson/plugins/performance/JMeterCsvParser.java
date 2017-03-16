@@ -199,7 +199,7 @@ public class JMeterCsvParser extends AbstractParser {
         // ok
       }
 
-      if (result == null) {
+      if (result != null) {
         break;
       }
     }
