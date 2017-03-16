@@ -9,77 +9,77 @@ import java.util.ArrayList;
 
 public class TrendReportGraphs implements ModelObject {
 
-  private Run<?, ?> build;
-  private String filename;
-  private PerformanceReport performanceReport;
-  private Job<?, ?> project;
+    private Run<?, ?> build;
+    private String filename;
+    private PerformanceReport performanceReport;
+    private Job<?, ?> project;
 
-  public TrendReportGraphs(final Job<?, ?> project,
-                           final Run<?, ?> build, final StaplerRequest request,
-                           String filename, PerformanceReport performanceReport) {
-    this.build = build;
-    this.filename = filename;
-    this.performanceReport = performanceReport;
-    this.project = project;
-  }
+    public TrendReportGraphs(final Job<?, ?> project,
+                             final Run<?, ?> build, final StaplerRequest request,
+                             String filename, PerformanceReport performanceReport) {
+        this.build = build;
+        this.filename = filename;
+        this.performanceReport = performanceReport;
+        this.project = project;
+    }
 
-  public void doRespondingTimeGraph(StaplerRequest request,
-                                    StaplerResponse response) throws IOException {
+    public void doRespondingTimeGraph(StaplerRequest request,
+                                      StaplerResponse response) throws IOException {
 
-    PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
-    request.bindParameters(performanceReportPosition);
+        PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+        request.bindParameters(performanceReportPosition);
 
-    PerformanceBuildAction performanceBuildAction = build
-        .getAction(PerformanceBuildAction.class);
+        PerformanceBuildAction performanceBuildAction = build
+                .getAction(PerformanceBuildAction.class);
 
-    if (performanceBuildAction != null) {
-      if (performanceReport != null) {
-        String uri = performanceReportPosition.getSummarizerTrendUri();
-        if (uri != null) {
-          UriReport uriReport = performanceReport.getUriReportMap().get(uri);
-          uriReport.doSummarizerTrendGraph(request, response);
+        if (performanceBuildAction != null) {
+            if (performanceReport != null) {
+                String uri = performanceReportPosition.getSummarizerTrendUri();
+                if (uri != null) {
+                    UriReport uriReport = performanceReport.getUriReportMap().get(uri);
+                    uriReport.doSummarizerTrendGraph(request, response);
+                }
+            }
         }
-      }
     }
-  }
 
-  public ArrayList<String> getUris() {
-    ArrayList<String> uriList = new ArrayList<String>();
-    PerformanceReport report = getPerformanceReport();
+    public ArrayList<String> getUris() {
+        ArrayList<String> uriList = new ArrayList<String>();
+        PerformanceReport report = getPerformanceReport();
 
-    if (report != null) {
-      uriList.addAll(report.getUriReportMap().keySet());
+        if (report != null) {
+            uriList.addAll(report.getUriReportMap().keySet());
+        }
+        return uriList;
     }
-    return uriList;
-  }
 
-  public UriReport getUriReport(String uri) {
-    if (performanceReport != null) {
-      return performanceReport.getUriReportMap().get(uri);
-    } else {
-      return build.getAction(PerformanceBuildAction.class)
-          .getPerformanceReportMap().getUriReport(uri);
+    public UriReport getUriReport(String uri) {
+        if (performanceReport != null) {
+            return performanceReport.getUriReportMap().get(uri);
+        } else {
+            return build.getAction(PerformanceBuildAction.class)
+                    .getPerformanceReportMap().getUriReport(uri);
+        }
     }
-  }
 
-  public String getDisplayName() {
-    return Messages.TrendReportDetail_DisplayName();
-  }
+    public String getDisplayName() {
+        return Messages.TrendReportDetail_DisplayName();
+    }
 
-  public String getFilename() {
-    return filename;
-  }
+    public String getFilename() {
+        return filename;
+    }
 
-  public Job<?, ?> getProject() {
-    return project;
-  }
+    public Job<?, ?> getProject() {
+        return project;
+    }
 
-  public Run<?, ?> getBuild() {
-    return build;
-  }
+    public Run<?, ?> getBuild() {
+        return build;
+    }
 
-  public PerformanceReport getPerformanceReport() {
-    return performanceReport;
-  }
+    public PerformanceReport getPerformanceReport() {
+        return performanceReport;
+    }
 
 }

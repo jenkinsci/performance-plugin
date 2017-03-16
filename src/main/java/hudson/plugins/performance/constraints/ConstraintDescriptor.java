@@ -6,18 +6,18 @@ import jenkins.model.Jenkins;
 
 public abstract class ConstraintDescriptor extends Descriptor<AbstractConstraint> {
 
-	public final String getId() {
-		return getClass().getName();
-	}
+    public final String getId() {
+        return getClass().getName();
+    }
 
-	public static DescriptorExtensionList<AbstractConstraint, ConstraintDescriptor> all() {
-		return Jenkins.getInstance().getDescriptorList(AbstractConstraint.class);
-	}
+    public static DescriptorExtensionList<AbstractConstraint, ConstraintDescriptor> all() {
+        return Jenkins.getInstance().getDescriptorList(AbstractConstraint.class);
+    }
 
-	public static ConstraintDescriptor getById(String id) {
-		for (ConstraintDescriptor d : all())
-			if (d.getId().equals(id))
-				return d;
-		return null;
-	}
+    public static ConstraintDescriptor getById(String id) {
+        for (ConstraintDescriptor d : all())
+            if (d.getId().equals(id))
+                return d;
+        return null;
+    }
 }
