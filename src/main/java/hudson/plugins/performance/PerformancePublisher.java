@@ -377,8 +377,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     }
 
                     // add the report to the build object.
-                    a = new PerformanceBuildAction(run, logger, parsers);
-                    run.addAction(a);
                     logger.print("\n\n\n");
 
                     for (PerformanceReportParser parser : parsers) {
@@ -416,7 +414,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                             med += "<median>\n";
                             perct += "<percentile>\n";
 
-                            r.setBuildAction(a);
                             double errorPercent = r.errorPercent();
                             calc += errorPercent;
 
@@ -548,8 +545,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     List<UriReport> curruriList = null;
 
                     // add the report to the build object.
-                    a = new PerformanceBuildAction(run, logger, parsers);
-                    run.addAction(a);
                     logger.print("\n\n\n");
 
                     for (PerformanceReportParser parser : parsers) {
@@ -572,7 +567,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                         parsedReports = parser.parse(run, localReports, listener);
 
                         for (PerformanceReport r : parsedReports) {
-                            r.setBuildAction(a);
                             // URI list is the list of labels in the current JMeter results
                             // file
                             curruriList = r.getUriListOrdered();
