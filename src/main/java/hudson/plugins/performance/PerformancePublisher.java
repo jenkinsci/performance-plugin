@@ -611,9 +611,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     List<UriReport> prevuriList = null;
 
                     if (prevBuild != null) {
-                        PerformanceBuildAction b = new PerformanceBuildAction(prevBuild, logger, parsers);
-                        prevBuild.addAction(b);
-
                         // getting files related to the previous build selected
                         for (PerformanceReportParser parser : parsers) {
                             glob = parser.glob;
@@ -623,8 +620,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                             parsedReports = parser.parse(prevBuild, localReports, listener);
 
                             for (PerformanceReport r : parsedReports) {
-                                r.setBuildAction(b);
-
                                 // uri list is the list of labels in the previous jmeter results
                                 // file
                                 prevuriList = r.getUriListOrdered();
