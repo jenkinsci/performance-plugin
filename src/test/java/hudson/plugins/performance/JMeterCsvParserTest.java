@@ -5,7 +5,6 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static hudson.plugins.performance.JMeterCsvParser.*;
 import static org.junit.Assert.*;
 
 public class JMeterCsvParserTest {
@@ -25,7 +24,7 @@ public class JMeterCsvParserTest {
 
     @Test
     public void canParseCsvFile() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, DEFAULT_DELIMITER, SKIP_FIRST_LINE);
+        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, JMeterCsvParser.DEFAULT_DELIMITER, SKIP_FIRST_LINE);
         parseAndVerifyResult(parser, reportFile);
     }
 
@@ -37,7 +36,7 @@ public class JMeterCsvParserTest {
 
     @Test
     public void testDateDateFormats() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, DEFAULT_DELIMITER, SKIP_FIRST_LINE);
+        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, JMeterCsvParser.DEFAULT_DELIMITER, SKIP_FIRST_LINE);
         parseAndVerifyResult(parser, reportFile);
         parseAndVerifyResult(parser, reportFile2);
         parseAndVerifyResult(parser, reportFile3);
