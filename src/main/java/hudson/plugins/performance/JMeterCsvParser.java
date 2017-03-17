@@ -19,7 +19,7 @@ import java.util.Set;
 public class JMeterCsvParser extends AbstractParser {
 
     public static final String DEFAULT_DELIMITER = ",";
-    public static final String DEFAULT_CSV_FORMAT = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,bytes,Latency";
+    public static final String DEFAULT_CSV_FORMAT = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,Latency,IdleTime,Connect";
     public static final String COMMAS_NOT_INSIDE_QUOTES = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
     private static final boolean DONT_SKIP_FIRST_LINE = false;
     public final boolean skipFirstLine;
@@ -84,11 +84,7 @@ public class JMeterCsvParser extends AbstractParser {
                 FormValidation.error(Messages.CsvParser_validation_patternEmpty());
             }
             Set<String> missing = new HashSet<String>();
-            validatePresent(missing, pattern, "timestamp");
             validatePresent(missing, pattern, "elapsed");
-            validatePresent(missing, pattern, "responseCode");
-            validatePresent(missing, pattern, "success");
-            validatePresent(missing, pattern, "URL");
             if (missing.isEmpty()) {
                 return FormValidation.ok();
             } else {
