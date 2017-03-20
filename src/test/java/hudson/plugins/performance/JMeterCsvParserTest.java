@@ -1,5 +1,6 @@
 package hudson.plugins.performance;
 
+import hudson.util.FormValidation;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,9 +44,25 @@ public class JMeterCsvParserTest {
     }
 
     private void parseAndVerifyResult(JMeterCsvParser parser, File file) throws Exception {
-        final PerformanceReport result = parser.parse(reportFile);
+        final PerformanceReport result = parser.parse(file);
         // Verify results.
         assertNotNull(result);
         assertEquals("The source file contains three samples. These should all have been added to the performance report.", 3, result.size());
+    }
+
+    @Test
+    public void testCSVHeaderValidation() throws Exception {
+        JMeterCsvParser.DescriptorImpl descriptor = new JMeterCsvParser.DescriptorImpl();
+
+        FormValidation validation = descriptor.doCheckPattern("timestamp,success,elapsed,responseCode,URL");
+        assertEquals(FormValidation.ok(), validation);
+
+        validation = descriptor.doCheckPattern("timestamp,success,elapsed,responseCode,label");
+        assertEquals(FormValidation.ok(), validation);
+
+        validation = descriptor.doCheckPattern("timestamp,success,elapsed,responseCode");
+        assertEquals(FormValidation.error(Messages
+                .CsvParser_validation_MissingFields() + ": URL (or label)").getMessage(), validation.getMessage());
+
     }
 }
