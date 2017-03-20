@@ -1,11 +1,11 @@
 package hudson.plugins.performance;
 
+import hudson.util.FormValidation;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 
-import static hudson.plugins.performance.JMeterCsvParser.*;
 import static org.junit.Assert.*;
 
 public class JMeterCsvParserTest {
@@ -25,7 +25,7 @@ public class JMeterCsvParserTest {
 
     @Test
     public void canParseCsvFile() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, DEFAULT_DELIMITER, SKIP_FIRST_LINE);
+        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, JMeterCsvParser.DEFAULT_DELIMITER, SKIP_FIRST_LINE);
         parseAndVerifyResult(parser, reportFile);
     }
 
@@ -37,16 +37,32 @@ public class JMeterCsvParserTest {
 
     @Test
     public void testDateDateFormats() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, DEFAULT_DELIMITER, SKIP_FIRST_LINE);
+        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, JMeterCsvParser.DEFAULT_DELIMITER, SKIP_FIRST_LINE);
         parseAndVerifyResult(parser, reportFile);
         parseAndVerifyResult(parser, reportFile2);
         parseAndVerifyResult(parser, reportFile3);
     }
 
     private void parseAndVerifyResult(JMeterCsvParser parser, File file) throws Exception {
-        final PerformanceReport result = parser.parse(reportFile);
+        final PerformanceReport result = parser.parse(file);
         // Verify results.
         assertNotNull(result);
         assertEquals("The source file contains three samples. These should all have been added to the performance report.", 3, result.size());
+    }
+
+    @Test
+    public void testCSVHeaderValidation() throws Exception {
+        JMeterCsvParser.DescriptorImpl descriptor = new JMeterCsvParser.DescriptorImpl();
+
+        FormValidation validation = descriptor.doCheckPattern("timestamp,success,elapsed,responseCode,URL");
+        assertEquals(FormValidation.ok(), validation);
+
+        validation = descriptor.doCheckPattern("timestamp,success,elapsed,responseCode,label");
+        assertEquals(FormValidation.ok(), validation);
+
+        validation = descriptor.doCheckPattern("timestamp,success,elapsed,responseCode");
+        assertEquals(FormValidation.error(Messages
+                .CsvParser_validation_MissingFields() + ": URL (or label)").getMessage(), validation.getMessage());
+
     }
 }

@@ -19,7 +19,7 @@ import java.util.Set;
 public class JMeterCsvParser extends AbstractParser {
 
     public static final String DEFAULT_DELIMITER = ",";
-    public static final String DEFAULT_CSV_FORMAT = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,bytes,Latency";
+    public static final String DEFAULT_CSV_FORMAT = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,Latency,IdleTime,Connect";
     public static final String COMMAS_NOT_INSIDE_QUOTES = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
     private static final boolean DONT_SKIP_FIRST_LINE = false;
     public final boolean skipFirstLine;
@@ -85,10 +85,13 @@ public class JMeterCsvParser extends AbstractParser {
             }
             Set<String> missing = new HashSet<String>();
             validatePresent(missing, pattern, "timestamp");
+            validatePresent(missing, pattern, "success");
             validatePresent(missing, pattern, "elapsed");
             validatePresent(missing, pattern, "responseCode");
-            validatePresent(missing, pattern, "success");
             validatePresent(missing, pattern, "URL");
+            validatePresent(missing, pattern, "label");
+            validateURLorLabel(missing);
+
             if (missing.isEmpty()) {
                 return FormValidation.ok();
             } else {
@@ -99,6 +102,18 @@ public class JMeterCsvParser extends AbstractParser {
                 builder.setLength(builder.length() - 2);
                 return FormValidation.error(Messages
                         .CsvParser_validation_MissingFields() + ": " + builder.toString());
+            }
+        }
+
+        private void validateURLorLabel(Set<String> missing) {
+            if (missing.contains("URL") && missing.contains("label")) {
+                missing.remove("URL");
+                missing.remove("label");
+                missing.add("URL (or label)");
+            } else if (missing.contains("URL")) {
+                missing.remove("URL");
+            } else if (missing.contains("label")) {
+                missing.remove("label");
             }
         }
 
