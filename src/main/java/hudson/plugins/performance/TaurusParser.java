@@ -2,13 +2,26 @@ package hudson.plugins.performance;
 
 import hudson.Extension;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parser for Taurus
  */
 public class TaurusParser extends AbstractParser {
+
+    private boolean isXMLFileType;
 
     @Extension
     public static class DescriptorImpl extends PerformanceReportParserDescriptor {
@@ -19,7 +32,7 @@ public class TaurusParser extends AbstractParser {
     }
 
     @DataBoundConstructor
-    public TaurusParser(String glob, String logDateFormat) {
+    public TaurusParser(String glob) {
         super(glob);
     }
 
@@ -30,6 +43,110 @@ public class TaurusParser extends AbstractParser {
 
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
-        return null;
+        return isXMLFileType ? readFromXML(reportFile) : readFromCSV(reportFile);
+    }
+
+    private PerformanceReport readFromXML(File reportFile) throws Exception {
+        final PerformanceReport report = new PerformanceReport();
+        report.setReportFileName(reportFile.getName());
+
+        DocumentBuilderFactory dbFactory
+                = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(reportFile);
+        doc.getDocumentElement().normalize();
+
+        Node URLNode = doc.getElementsByTagName("ReportURL").item(0);
+        if (URLNode != null) {
+            URLNode.getTextContent();
+        }
+
+        NodeList nList = doc.getElementsByTagName("Group");
+        for (int temp = 0; temp < nList.getLength(); temp++) {
+            Node nNode = nList.item(temp);
+
+            if (((Element) nNode).getAttribute("label").isEmpty()) {
+
+                TaurusStatusReport statusReport = getTaurusStatusReport((Element) nNode);
+                statusReport.setLabel(TaurusStatusReport.DEFAULT_TAURUS_LABEL);
+                report.addSample(statusReport);
+
+                break;
+            }
+        }
+
+        return report;
+    }
+
+    private TaurusStatusReport getTaurusStatusReport(Element group) {
+        final TaurusStatusReport report = new TaurusStatusReport();
+
+        report.setBytes(Long.valueOf(((Element) group.getElementsByTagName("bytes").item(0)).getAttribute("value")));
+        report.setFail(Integer.valueOf(((Element) group.getElementsByTagName("fail").item(0)).getAttribute("value")));
+        report.setSucc(Integer.valueOf(((Element) group.getElementsByTagName("succ").item(0)).getAttribute("value")));
+        report.setAvg_rt(Double.valueOf(((Element) group.getElementsByTagName("avg_rt").item(0)).getAttribute("value")) * 1000); // to ms
+
+        return report;
+    }
+
+    private PerformanceReport readFromCSV(File reportFile) throws Exception {
+        final PerformanceReport report = new PerformanceReport();
+        report.setReportFileName(reportFile.getName());
+
+        final BufferedReader reader = new BufferedReader(new FileReader(reportFile));
+        try {
+            final List<String> header = readHeader(reader.readLine(), ",");
+            String line = reader.readLine();
+            if (line != null) { // TODO: skip summary line?
+                // read summary
+                report.addSample(TaurusStatusReport(header, line));
+
+            }
+//            while (line != null) {
+//                line = reader.readLine();
+//            }
+
+            return report;
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+        }
+    }
+
+    private List<String> readHeader(String headerLine, String separator) {
+        final List<String> header = new ArrayList<String>();
+        for (String v : headerLine.split(separator)) {
+            header.add(v.toLowerCase());
+        }
+        return header;
+    }
+
+    private TaurusStatusReport TaurusStatusReport(List<String> header, String line) {
+        final TaurusStatusReport report = new TaurusStatusReport();
+
+        String[] values = line.split(",");
+
+//        if (!values[header.indexOf("label")].isEmpty()) {
+//            report.setLabel(values[header.indexOf("label")]);
+//        } else {
+            report.setLabel(TaurusStatusReport.DEFAULT_TAURUS_LABEL);
+//        }
+
+        report.setBytes(Long.valueOf(values[header.indexOf("bytes")]));
+        report.setFail(Integer.valueOf(values[header.indexOf("fail")]));
+        report.setSucc(Integer.valueOf(values[header.indexOf("succ")]));
+        report.setAvg_rt(Double.valueOf(values[header.indexOf("avg_rt")]) * 1000); // to ms
+
+        return report;
+    }
+
+    public boolean isXMLFileType() {
+        return isXMLFileType;
+    }
+
+    @DataBoundSetter
+    public void setXMLFileType(boolean XMLFileType) {
+        isXMLFileType = XMLFileType;
     }
 }

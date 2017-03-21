@@ -128,6 +128,17 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         }
     }
 
+    public void addTaurusStatusReport(TaurusStatusReport report) {
+        totalDuration += report.getAvg_rt();
+        summarizerSize += report.getFail() + report.getSucc();
+        summarizerErrors += report.getFail();
+        synchronized (samples) {
+            if (samples.add(new Sample(report.getLabel(), null, (long) report.getAvg_rt()))) {
+                isSorted = true;
+            }
+        }
+    }
+
     public int compareTo(UriReport uriReport) {
         if (uriReport == this) {
             return 0;

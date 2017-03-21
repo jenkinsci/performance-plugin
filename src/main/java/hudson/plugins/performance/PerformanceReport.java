@@ -111,6 +111,30 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         totalSizeInKB += pHttpSample.getSizeInKb();
     }
 
+    public void addSample(TaurusStatusReport sample) {
+        String uri = sample.getLabel();
+        if (uri == null) {
+            buildAction
+                    .getHudsonConsoleWriter()
+                    .println("label cannot be empty, please ensure your jmx file specifies "
+                            + "name properly for each http sample: skipping sample");
+            return;
+        }
+
+        String staplerUri = PerformanceReport.asStaplerURI(uri);
+        synchronized (uriReportMap) {
+            UriReport uriReport = new UriReport(this, staplerUri, uri);
+            uriReport.addTaurusStatusReport(sample);
+            uriReportMap.put(staplerUri, uriReport);
+        }
+
+        summarizerErrors += sample.getFail();
+        int sampleCount = sample.getFail() + sample.getSucc();
+        size += sampleCount;
+        totalDuration += sample.getAvg_rt() * sampleCount;
+        totalSizeInKB += sample.getBytes();
+    }
+
     public int compareTo(PerformanceReport jmReport) {
         if (this == jmReport) {
             return 0;
