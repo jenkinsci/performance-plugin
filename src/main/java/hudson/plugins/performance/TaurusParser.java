@@ -43,7 +43,8 @@ public class TaurusParser extends AbstractParser {
 
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
-        return isXMLFileType ? readFromXML(reportFile) : readFromCSV(reportFile);
+        return  readFromXML(reportFile);
+//        return isXMLFileType ? readFromXML(reportFile) : readFromCSV(reportFile);
     }
 
     private PerformanceReport readFromXML(File reportFile) throws Exception {
@@ -58,7 +59,7 @@ public class TaurusParser extends AbstractParser {
 
         Node URLNode = doc.getElementsByTagName("ReportURL").item(0);
         if (URLNode != null) {
-            URLNode.getTextContent();
+            reportURL = URLNode.getTextContent();
         }
 
         NodeList nList = doc.getElementsByTagName("Group");
@@ -70,7 +71,6 @@ public class TaurusParser extends AbstractParser {
                 TaurusStatusReport statusReport = getTaurusStatusReport((Element) nNode);
                 statusReport.setLabel(TaurusStatusReport.DEFAULT_TAURUS_LABEL);
                 report.addSample(statusReport);
-
                 break;
             }
         }
