@@ -299,7 +299,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         run.setResult(Result.SUCCESS);
         EnvVars env = run.getEnvironment(listener);
 
-        Collection<PerformanceReport> parsedReports = null;
+        Collection<PerformanceReport> parsedReports = Collections.emptyList();
         String glob = null;
 
         /**
