@@ -15,17 +15,17 @@ public class TaurusStatusReport implements Serializable, Comparable<TaurusStatus
     }
 
     private String label;
-//    private int concurrency;
-//    private int throughput;
+
     private int succ;
     private int fail;
     private double avg_rt;
-//    private double avg_ct;
-//    private double avg_lt;
-//    private double stdev_rt;
+
     private long bytes;
 
-    // TODO: rc_*** - counts for specific response codes
+    private double perc0;
+    private double perc50;
+    private double perc90;
+    private double perc100;
 
 
     public String getLabel() {
@@ -66,5 +66,37 @@ public class TaurusStatusReport implements Serializable, Comparable<TaurusStatus
 
     public void setBytes(long bytes) {
         this.bytes = bytes;
+    }
+
+    public double getPerc50() {
+        return perc50;
+    }
+
+    public void setPerc50(double perc50) {
+        this.perc50 = perc50;
+    }
+
+    public double getPerc90() {
+        return perc90;
+    }
+
+    public void setPerc90(double perc90) {
+        this.perc90 = perc90;
+    }
+
+    public double getPerc0() {
+        return perc0;
+    }
+
+    public void setPerc0(double perc0) {
+        this.perc0 = perc0;
+    }
+
+    public double getPerc100() {
+        return perc100;
+    }
+
+    public void setPerc100(double perc100) {
+        this.perc100 = perc100;
     }
 }

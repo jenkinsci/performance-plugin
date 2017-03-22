@@ -77,6 +77,12 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private String summarizerErrorPercent = null;
     private long summarizerSize;
 
+    private long average;
+    private long perc0;
+    private long perc50;
+    private long perc90;
+    private long perc100;
+
     public static String asStaplerURI(String uri) {
         return uri.replace("http:", "").replaceAll("/", "_");
     }
@@ -123,18 +129,17 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             return;
         }
 
-        String staplerUri = PerformanceReport.asStaplerURI(uri);
-        synchronized (uriReportMap) {
-            UriReport uriReport = new UriReport(this, staplerUri, uri);
-            uriReport.addTaurusStatusReport(sample);
-            uriReportMap.put(staplerUri, uriReport);
-        }
-
         summarizerErrors += sample.getFail();
         int sampleCount = sample.getFail() + sample.getSucc();
         size += sampleCount;
         totalDuration += sample.getAvg_rt() * sampleCount;
         totalSizeInKB += sample.getBytes();
+
+        average = (long) sample.getAvg_rt();
+        perc50 = (long) sample.getPerc50();
+        perc90 = (long) sample.getPerc90();
+        perc0 = (long) sample.getPerc0();
+        perc100 = (long) sample.getPerc100();
     }
 
     public int compareTo(PerformanceReport jmReport) {
@@ -158,11 +163,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     public long getAverage() {
-        if (size == 0) {
-            return 0;
+        if (average == 0) {
+            average = (size == 0) ? 0 : (totalDuration / size);
         }
-
-        return totalDuration / size;
+        return average;
     }
 
     public double getAverageSizeInKb() {
@@ -211,11 +215,17 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     public long get90Line() {
-        return getDurationAt(NINETY_PERCENT);
+        if (perc90 == 0) {
+            perc90 = getDurationAt(NINETY_PERCENT);
+        }
+        return perc90;
     }
 
     public long getMedian() {
-        return getDurationAt(FIFTY_PERCENT);
+        if (perc50 == 0) {
+            perc50= getDurationAt(FIFTY_PERCENT);
+        }
+        return perc50;
     }
 
     public String getHttpCode() {
@@ -398,4 +408,25 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     public String getSummarizerErrors() {
         return summarizerErrorPercent;
     }
+
+    public void setAverage(long average) {
+        this.average = average;
+    }
+
+    public void setPerc0(long perc0) {
+        this.perc0 = perc0;
+    }
+
+    public void setPerc50(long perc50) {
+        this.perc50 = perc50;
+    }
+
+    public void setPerc90(long perc90) {
+        this.perc90 = perc90;
+    }
+
+    public void setPerc100(long perc100) {
+        this.perc100 = perc100;
+    }
+
 }

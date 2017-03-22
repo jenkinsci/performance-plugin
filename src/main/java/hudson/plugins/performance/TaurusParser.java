@@ -89,6 +89,21 @@ public class TaurusParser extends AbstractParser {
         report.setSucc(Integer.valueOf(((Element) group.getElementsByTagName("succ").item(0)).getAttribute("value")));
         report.setAvg_rt(Double.valueOf(((Element) group.getElementsByTagName("avg_rt").item(0)).getAttribute("value")) * 1000); // to ms
 
+        NodeList perc = group.getElementsByTagName("perc");
+        for (int i = 0; i < perc.getLength(); i++) {
+            Node nNode = perc.item(i);
+            if (((Element) nNode).getAttribute("param").equals("50.0")) {
+                report.setPerc50(Double.valueOf(((Element) nNode).getAttribute("value")) * 1000); // to ms
+            } else if (((Element) nNode).getAttribute("param").equals("90.0")) {
+                report.setPerc90(Double.valueOf(((Element) nNode).getAttribute("value")) * 1000); // to ms
+            } else if (((Element) nNode).getAttribute("param").equals("0.0")) {
+                report.setPerc0(Double.valueOf(((Element) nNode).getAttribute("value")) * 1000); // to ms
+            } else if (((Element) nNode).getAttribute("param").equals("100.0")) {
+                report.setPerc100(Double.valueOf(((Element) nNode).getAttribute("value")) * 1000); // to ms
+            }
+        }
+
+
         return report;
     }
 
@@ -100,7 +115,7 @@ public class TaurusParser extends AbstractParser {
         try {
             final List<String> header = readHeader(reader.readLine(), ",");
             String line = reader.readLine();
-            if (line != null) { // TODO: skip summary line?
+            if (line != null) { // TODO: skip summary line or view only summary info
                 // read summary
                 report.addSample(TaurusStatusReport(header, line));
 
@@ -140,7 +155,7 @@ public class TaurusParser extends AbstractParser {
         report.setFail(Integer.valueOf(values[header.indexOf("fail")]));
         report.setSucc(Integer.valueOf(values[header.indexOf("succ")]));
         report.setAvg_rt(Double.valueOf(values[header.indexOf("avg_rt")]) * 1000); // to ms
-
+        // TODO: perc from CSV
         return report;
     }
 }
