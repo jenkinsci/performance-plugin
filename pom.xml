@@ -9,13 +9,14 @@
     <artifactId>performance</artifactId>
     <packaging>hpi</packaging>
     <version>2.1-SNAPSHOT</version>
-    <name>Performance plugin</name>
+    <name>Performance Plugin</name>
+    <description>This plugin allows tracking performance KPIs, based on results read from popular testing tools  (JMeter, JUnit, Taurus).</description>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Performance+Plugin</url>
 
     <developers>
         <developer>
             <id>undera</id>
-            <name>Andrey Pokhilko (BlazeMeter)</name>
+            <name>Andrey Pokhilko (CA BlazeMeter)</name>
             <email>andrey@blazemeter.com</email>
         </developer>
     </developers>
