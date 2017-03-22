@@ -1,6 +1,7 @@
 package hudson.plugins.performance;
 
 import hudson.Extension;
+import org.apache.commons.io.FilenameUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.w3c.dom.Document;
@@ -20,8 +21,6 @@ import java.util.List;
  * Parser for Taurus
  */
 public class TaurusParser extends AbstractParser {
-
-    private boolean isXMLFileType;
 
     @Extension
     public static class DescriptorImpl extends PerformanceReportParserDescriptor {
@@ -43,9 +42,13 @@ public class TaurusParser extends AbstractParser {
 
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
-        return  readFromXML(reportFile);
-//        return isXMLFileType ? readFromXML(reportFile) : readFromCSV(reportFile);
+        return isXMLFileType(reportFile) ? readFromXML(reportFile) : readFromCSV(reportFile);
     }
+
+    private boolean isXMLFileType(File reportFile) {
+        return FilenameUtils.getExtension(reportFile.getName()).toLowerCase().contains("xml");
+    }
+
 
     private PerformanceReport readFromXML(File reportFile) throws Exception {
         final PerformanceReport report = new PerformanceReport();
@@ -139,14 +142,5 @@ public class TaurusParser extends AbstractParser {
         report.setAvg_rt(Double.valueOf(values[header.indexOf("avg_rt")]) * 1000); // to ms
 
         return report;
-    }
-
-    public boolean isXMLFileType() {
-        return isXMLFileType;
-    }
-
-    @DataBoundSetter
-    public void setXMLFileType(boolean XMLFileType) {
-        isXMLFileType = XMLFileType;
     }
 }

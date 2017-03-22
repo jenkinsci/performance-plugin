@@ -3,7 +3,4 @@
   <f:entry title="${%Report files}" field="glob">
     <f:textbox/>
   </f:entry>
-  <f:entry title="File type" field="modeEvaluation">
-      <f:booleanRadio name="isXMLFileType"  false="CSV" true="XML" />
-  </f:entry>
 </j:jelly>
