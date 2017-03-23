@@ -249,7 +249,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     public long getMax() {
-        return getDurationAt(ONE_HUNDRED_PERCENT);
+        if (perc100 == 0) {
+            perc100= getDurationAt(ONE_HUNDRED_PERCENT);
+        }
+        return perc100;
     }
 
     public double getTotalTrafficInKb() {
@@ -257,7 +260,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     public long getMin() {
-        return getDurationAt(ZERO_PERCENT);
+        if (perc0 == 0) {
+            perc0= getDurationAt(ZERO_PERCENT);
+        }
+        return perc0;
     }
 
     public String getReportFileName() {
