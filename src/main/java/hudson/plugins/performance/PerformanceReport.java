@@ -67,7 +67,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private long totalDuration = 0;
 
     /**
-     * The samplesCount of all samples combined, in kilobytes.
+     * The size of all samples combined, in kilobytes.
      */
     private double totalSizeInKB = 0;
     private long summarizerMin;
