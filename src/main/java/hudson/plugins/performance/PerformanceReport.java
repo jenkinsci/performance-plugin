@@ -26,7 +26,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     private transient PerformanceBuildAction buildAction;
 
-    private transient BlazeMeterBuildReport blazeMeterBuildReport;
+    private transient ExternalBuildReport externalBuildReport;
 
     private String reportFileName = null;
 
@@ -322,8 +322,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         this.lastBuildReport = lastBuildReport;
     }
 
-    public void setBlazeMeterBuildReport(BlazeMeterBuildReport blazeMeterBuildReport) {
-        this.blazeMeterBuildReport = blazeMeterBuildReport;
+    public void setExternalBuildReport(ExternalBuildReport externalBuildReport) {
+        this.externalBuildReport = externalBuildReport;
     }
 
     public long getAverageDiff() {

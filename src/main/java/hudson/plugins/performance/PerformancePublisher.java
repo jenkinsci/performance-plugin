@@ -306,7 +306,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
          * preparing evaluation - this is necessary regardless of the mode of
          * evaluation
          */
-        BlazeMeterBuildReport blazeMeterBuildReport = null;
+        ExternalBuildReport externalBuildReport = null;
         // add the report to the build object.
         PerformanceBuildAction a = new PerformanceBuildAction(run, logger, parsers);
         run.addAction(a);
@@ -335,14 +335,14 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             parsedReports = parser.parse(run, localReports, listener);
 
             if (parser.reportURL != null && !parser.reportURL.isEmpty()) {
-                blazeMeterBuildReport = new BlazeMeterBuildReport(run, parser.reportURL);
-                run.addAction(blazeMeterBuildReport);
+                externalBuildReport = new ExternalBuildReport(parser.reportURL);
+                run.addAction(externalBuildReport);
             }
         }
 
         for (PerformanceReport r : parsedReports) {
             r.setBuildAction(a);
-            r.setBlazeMeterBuildReport(blazeMeterBuildReport);
+            r.setExternalBuildReport(externalBuildReport);
         }
 
         // for mode "standard evaluation"
