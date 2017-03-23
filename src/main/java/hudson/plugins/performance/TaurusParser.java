@@ -69,10 +69,14 @@ public class TaurusParser extends AbstractParser {
         for (int temp = 0; temp < nList.getLength(); temp++) {
             Node nNode = nList.item(temp);
 
-            if (!((Element) nNode).getAttribute("label").isEmpty()) { // skip summary node
+            if (!((Element) nNode).getAttribute("label").isEmpty()) {
                 TaurusStatusReport statusReport = getTaurusStatusReport((Element) nNode);
                 statusReport.setLabel(((Element) nNode).getAttribute("label"));
-                report.addSample(statusReport);
+                report.addSample(statusReport, false);
+            } else {
+                TaurusStatusReport statusReport = getTaurusStatusReport((Element) nNode);
+                statusReport.setLabel(TaurusStatusReport.DEFAULT_TAURUS_LABEL);
+                report.addSample(statusReport, true);
             }
         }
 
@@ -114,11 +118,11 @@ public class TaurusParser extends AbstractParser {
             final List<String> header = readHeader(reader.readLine(), ",");
             String line = reader.readLine();
             if (line != null) {
-                // skip summary line
+                report.addSample(getTaurusStatusReport(header, line), true);
                 line = reader.readLine();
             }
             while (line != null) {
-                report.addSample(getTaurusStatusReport(header, line));
+                report.addSample(getTaurusStatusReport(header, line), false);
                 line = reader.readLine();
             }
             return report;

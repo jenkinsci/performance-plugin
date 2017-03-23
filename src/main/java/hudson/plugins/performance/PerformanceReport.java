@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -119,7 +120,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         totalSizeInKB += pHttpSample.getSizeInKb();
     }
 
-    public void addSample(TaurusStatusReport sample) {
+    public void addSample(TaurusStatusReport sample, boolean isSummaryReport) {
         String uri = sample.getLabel();
         if (uri == null) {
             buildAction
@@ -129,31 +130,33 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             return;
         }
 
-        String staplerUri = PerformanceReport.asStaplerURI(uri);
-        synchronized (uriReportMap) {
-            UriReport uriReport = uriReportMap.get(staplerUri);
-            if (uriReport == null) {
-                uriReport = new UriReport(this, staplerUri, uri);
-                uriReportMap.put(staplerUri, uriReport);
+        if (isSummaryReport) {
+            summarizerErrors = nbError = sample.getFail();
+            int sampleCount = sample.getFail() + sample.getSucc();
+            size = sampleCount;
+            totalDuration = (long) sample.getAvg_rt() * sampleCount;
+            totalSizeInKB = sample.getBytes();
+
+            average = (long) sample.getAvg_rt();
+            perc50 = (long) sample.getPerc50();
+            perc90 = (long) sample.getPerc90();
+            perc0 = (long) sample.getPerc0();
+            perc100 = (long) sample.getPerc100();
+        } else {
+            String staplerUri = PerformanceReport.asStaplerURI(uri);
+            synchronized (uriReportMap) {
+                UriReport uriReport = uriReportMap.get(staplerUri);
+                if (uriReport == null) {
+                    uriReport = new UriReport(this, staplerUri, uri);
+                    uriReportMap.put(staplerUri, uriReport);
+                }
+                uriReport.setFromTaurusStatusReport(sample);
+
+                // reset the lazy loaded caches.
+                durationsSortedBySize = null;
+                uriReportsOrdered = null;
             }
-            uriReport.setFromTaurusStatusReport(sample);
-
-            // reset the lazy loaded caches.
-            durationsSortedBySize = null;
-            uriReportsOrdered = null;
         }
-
-        summarizerErrors += sample.getFail();
-        int sampleCount = sample.getFail() + sample.getSucc();
-        size += sampleCount;
-        totalDuration += sample.getAvg_rt() * sampleCount;
-        totalSizeInKB += sample.getBytes();
-
-        average = (long) sample.getAvg_rt();
-        perc50 = (long) sample.getPerc50();
-        perc90 = (long) sample.getPerc90();
-        perc0 = (long) sample.getPerc0();
-        perc100 = (long) sample.getPerc100();
     }
 
     public int compareTo(PerformanceReport jmReport) {
@@ -170,9 +173,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     public double errorPercent() {
         if (ifSummarizerParserUsed(reportFileName)) {
             if (uriReportMap.size() == 0) return 0;
-            return summarizerErrors / uriReportMap.size();
+            return Math.round((summarizerErrors / uriReportMap.size()) * 100.0) / 100;
         } else {
-            return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
+            return Math.round((size() == 0 ? 0 : ((double) countErrors()) / size() * 100) * 100) / 100;
         }
     }
 

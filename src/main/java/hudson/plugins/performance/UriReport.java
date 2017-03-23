@@ -136,12 +136,6 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public void setFromTaurusStatusReport(TaurusStatusReport report) {
-        // ADD info about uri
-
-//        totalDuration += report.getAvg_rt();
-//        summarizerSize += report.getFail() + report.getSucc();
-//        summarizerErrors += report.getFail();
-
         average = (long) report.getAvg_rt();
         perc0 = (long) report.getPerc0();
         perc50 = (long) report.getPerc50();
@@ -155,7 +149,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         int size = report.getSucc() + report.getFail();
         synchronized (samples) {
             for (int i = 0; i < size; i++) {
-                samples.add(new Sample("500", new Date(), i));
+                samples.add(new Sample("500", new Date(), i)); // TODO: FIX IT
             }
         }
     }
@@ -172,7 +166,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public double errorPercent() {
-        return ((double) countErrors()) / size() * 100;
+        return Math.round((((double) countErrors()) / size() * 100) * 100) / 100;
     }
 
     public long getAverage() {
