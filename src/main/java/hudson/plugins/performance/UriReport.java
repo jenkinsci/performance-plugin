@@ -100,11 +100,11 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     private Date end = null;
 
 
-    private long average;
-    private long perc0;
-    private long perc50;
-    private long perc90;
-    private long perc100;
+    private Long average;
+    private Long perc0;
+    private Long perc50;
+    private Long perc90;
+    private Long perc100;
 
     public UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
         this.performanceReport = performanceReport;
@@ -170,7 +170,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public long getAverage() {
-        if (average == 0) {
+        if (average == null) {
             average = totalDuration / size();
         }
         return average;
@@ -193,7 +193,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public long get90Line() {
-        if (perc90 == 0) {
+        if (perc90 == null) {
             perc90 = getDurationAt(0.9);
         }
         return perc90;
@@ -204,7 +204,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public long getMedian() {
-        if (perc50 == 0) {
+        if (perc50 == null) {
             perc50 = getDurationAt(0.5);
         }
         return perc50;
@@ -255,7 +255,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public long getMax() {
-        if (perc100 == 0) {
+        if (perc100 == null) {
             final List<Long> durations = getSortedDuration();
             perc100 = durations.isEmpty() ? 0 : durations.get(durations.size() - 1);
         }
@@ -263,7 +263,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public long getMin() {
-        if (perc0 == 0) {
+        if (perc0 == null) {
             final List<Long> durations = getSortedDuration();
             perc0 = durations.isEmpty() ? 0 : durations.get(0);
         }
