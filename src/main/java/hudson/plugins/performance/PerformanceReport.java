@@ -238,7 +238,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     public long getMedian() {
         if (perc50 == null) {
-            perc50= getDurationAt(FIFTY_PERCENT);
+            perc50 = getDurationAt(FIFTY_PERCENT);
         }
         return perc50;
     }
@@ -265,7 +265,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     public long getMax() {
         if (perc100 == null) {
-            perc100= getDurationAt(ONE_HUNDRED_PERCENT);
+            perc100 = getDurationAt(ONE_HUNDRED_PERCENT);
         }
         return perc100;
     }
@@ -276,7 +276,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     public long getMin() {
         if (perc0 == null) {
-            perc0= getDurationAt(ZERO_PERCENT);
+            perc0 = getDurationAt(ZERO_PERCENT);
         }
         return perc0;
     }
