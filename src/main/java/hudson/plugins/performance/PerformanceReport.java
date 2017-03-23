@@ -129,9 +129,23 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             return;
         }
 
+        String staplerUri = PerformanceReport.asStaplerURI(uri);
+        synchronized (uriReportMap) {
+            UriReport uriReport = uriReportMap.get(staplerUri);
+            if (uriReport == null) {
+                uriReport = new UriReport(this, staplerUri, uri);
+                uriReportMap.put(staplerUri, uriReport);
+            }
+            uriReport.addTaurusStatusReport(sample);
+
+            // reset the lazy loaded caches.
+            durationsSortedBySize = null;
+            uriReportsOrdered = null;
+        }
+
         summarizerErrors += sample.getFail();
         int sampleCount = sample.getFail() + sample.getSucc();
-        size += sampleCount;
+        size++;
         totalDuration += sample.getAvg_rt() * sampleCount;
         totalSizeInKB += sample.getBytes();
 

@@ -117,13 +117,13 @@ public class TaurusParser extends AbstractParser {
             String line = reader.readLine();
             if (line != null) { // TODO: skip summary line or view only summary info
                 // read summary
-                report.addSample(TaurusStatusReport(header, line));
-
+//                report.addSample(TaurusStatusReport(header, line));
+                line = reader.readLine();
             }
-//            while (line != null) {
-//                line = reader.readLine();
-//            }
-
+            while (line != null) {
+                report.addSample(getTaurusStatusReport(header, line));
+                line = reader.readLine();
+            }
             return report;
         } finally {
             if (reader != null) {
@@ -140,21 +140,27 @@ public class TaurusParser extends AbstractParser {
         return header;
     }
 
-    private TaurusStatusReport TaurusStatusReport(List<String> header, String line) {
+    private TaurusStatusReport getTaurusStatusReport(List<String> header, String line) {
         final TaurusStatusReport report = new TaurusStatusReport();
 
         String[] values = line.split(",");
 
-//        if (!values[header.indexOf("label")].isEmpty()) {
-//            report.setLabel(values[header.indexOf("label")]);
-//        } else {
+        if (!values[header.indexOf("label")].isEmpty()) {
+            report.setLabel(values[header.indexOf("label")]);
+        } else {
             report.setLabel(TaurusStatusReport.DEFAULT_TAURUS_LABEL);
-//        }
+        }
 
         report.setBytes(Long.valueOf(values[header.indexOf("bytes")]));
         report.setFail(Integer.valueOf(values[header.indexOf("fail")]));
         report.setSucc(Integer.valueOf(values[header.indexOf("succ")]));
         report.setAvg_rt(Double.valueOf(values[header.indexOf("avg_rt")]) * 1000); // to ms
+
+        report.setPerc0(Double.valueOf(values[header.indexOf("perc_0.0")]) * 1000); // to ms
+        report.setPerc50(Double.valueOf(values[header.indexOf("perc_50.0")]) * 1000); // to ms
+        report.setPerc90(Double.valueOf(values[header.indexOf("perc_90.0")]) * 1000); // to ms
+        report.setPerc100(Double.valueOf(values[header.indexOf("perc_100.0")]) * 1000); // to ms
+
         // TODO: perc from CSV
         return report;
     }
