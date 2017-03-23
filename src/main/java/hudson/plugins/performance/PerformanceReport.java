@@ -171,9 +171,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     public double errorPercent() {
         if (ifSummarizerParserUsed(reportFileName)) {
             if (uriReportMap.size() == 0) return 0;
-            return summarizerErrors / uriReportMap.size();
+            return Math.round((summarizerErrors / uriReportMap.size()) * 1000.0) / 1000.0;
         } else {
-            return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
+            return Math.round((size() == 0 ? 0 : ((double) countErrors()) / size() * 100) * 1000.0) / 1000.0;
         }
     }
 

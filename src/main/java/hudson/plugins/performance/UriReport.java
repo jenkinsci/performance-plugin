@@ -166,7 +166,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public double errorPercent() {
-        return ((double) countErrors()) / size() * 100;
+        return Math.round((((double) countErrors()) / size() * 100) * 1000.0) / 1000.0;
     }
 
     public long getAverage() {
