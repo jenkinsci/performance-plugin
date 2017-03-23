@@ -341,7 +341,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         if (lastBuildReport == null) {
             return 0;
         }
-        return errorPercent() - lastBuildReport.errorPercent();
+        return Math.round((errorPercent() - lastBuildReport.errorPercent()) * 1000.0) / 1000.0;
     }
 
     public String getLastBuildHttpCodeIfChanged() {

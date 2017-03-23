@@ -325,7 +325,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         if (lastBuildUriReport == null) {
             return 0;
         }
-        return errorPercent() - lastBuildUriReport.errorPercent();
+        return Math.round((errorPercent() - lastBuildUriReport.errorPercent()) * 1000.0) / 1000.0;
     }
 
     public String getLastBuildHttpCodeIfChanged() {
