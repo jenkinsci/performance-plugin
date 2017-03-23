@@ -2,9 +2,6 @@ package hudson.plugins.performance;
 
 import java.io.Serializable;
 
-/**
- *
- */
 public class TaurusStatusReport implements Serializable, Comparable<TaurusStatusReport> {
 
     public static final String DEFAULT_TAURUS_LABEL = "SUMMARY";
