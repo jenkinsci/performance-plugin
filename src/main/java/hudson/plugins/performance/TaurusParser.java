@@ -145,8 +145,9 @@ public class TaurusParser extends AbstractParser {
 
         String[] values = line.split(",");
 
-        if (!values[header.indexOf("label")].isEmpty()) {
-            report.setLabel(values[header.indexOf("label")]);
+        int labelIndex = header.indexOf("label");
+        if (values.length < (labelIndex - 1) && !values[labelIndex].isEmpty()) {
+            report.setLabel(values[labelIndex]);
         } else {
             report.setLabel(TaurusStatusReport.DEFAULT_TAURUS_LABEL);
         }
