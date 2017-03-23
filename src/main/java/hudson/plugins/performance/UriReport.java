@@ -106,6 +106,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     private Long perc90;
     private Long perc100;
 
+    private int size;
+
     public UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
         this.performanceReport = performanceReport;
         this.staplerUri = staplerUri;
@@ -119,6 +121,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         synchronized (samples) {
             if (samples.add(new Sample(sample.getHttpCode(), sample.getDate(), sample.getDuration()))) {
                 isSorted = false;
+                size++;
             }
         }
         totalDuration += sample.getDuration();
@@ -146,11 +149,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         summarizerErrors = report.getFail();
         nbError = report.getFail();
 
-        int size = report.getSucc() + report.getFail();
         synchronized (samples) {
-            for (int i = 0; i < size; i++) {
-                samples.add(new Sample("500", new Date(), i)); // TODO: FIX IT
-            }
+            size = report.getSucc() + report.getFail();
         }
     }
 
@@ -230,7 +230,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         synchronized (samples) {
             if (!isSorted || durationsSortedBySize == null || durationsSortedBySize.size() != samples.size()) {
 
-                durationsSortedBySize = new ArrayList<Long>(samples.size());
+                durationsSortedBySize = new ArrayList<Long>(size());
                 for (Sample sample : samples) {
                     durationsSortedBySize.add(sample.duration);
                 }
@@ -291,7 +291,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
     public int size() {
         synchronized (samples) {
-            return samples.size();
+            return size;
         }
     }
 
