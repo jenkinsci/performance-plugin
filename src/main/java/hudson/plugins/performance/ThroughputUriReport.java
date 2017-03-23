@@ -14,7 +14,7 @@ public class ThroughputUriReport {
     }
 
     public double get() {
-        if (uriReport.size() == 0) {
+        if (uriReport.samplesCount() == 0) {
             return 0;
         }
 
@@ -23,8 +23,8 @@ public class ThroughputUriReport {
         final long duration = end - start;
 
         if (duration == 0) {
-            return uriReport.size(); // more than zero requests should always take at least some time. If that didn't get logged, this is the most suitable alternative.
+            return uriReport.samplesCount(); // more than zero requests should always take at least some time. If that didn't get logged, this is the most suitable alternative.
         }
-        return (uriReport.size() / ((double) duration / MILLISECONDS_IN_SECOND));
+        return (uriReport.samplesCount() / ((double) duration / MILLISECONDS_IN_SECOND));
     }
 }

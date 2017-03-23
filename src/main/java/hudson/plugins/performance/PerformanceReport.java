@@ -59,7 +59,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     /**
      * The amount of samples in all uriReports combined.
      */
-    private int size;
+    private int samplesCount;
 
     /**
      * The duration of all samples combined, in milliseconds.
@@ -67,7 +67,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private long totalDuration = 0;
 
     /**
-     * The size of all samples combined, in kilobytes.
+     * The samplesCount of all samples combined, in kilobytes.
      */
     private double totalSizeInKB = 0;
     private long summarizerMin;
@@ -113,7 +113,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             nbError++;
         }
         summarizerErrors += pHttpSample.getSummarizerErrors();
-        size++;
+        samplesCount++;
         totalDuration += pHttpSample.getDuration();
         totalSizeInKB += pHttpSample.getSizeInKb();
     }
@@ -131,7 +131,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         if (isSummaryReport) {
             summarizerErrors = nbError = sample.getFail();
             int sampleCount = sample.getFail() + sample.getSucc();
-            size = sampleCount;
+            samplesCount = sampleCount;
             totalDuration = (long) sample.getAverageResponseTime() * sampleCount;
             totalSizeInKB = sample.getBytes();
 
@@ -173,22 +173,22 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             if (uriReportMap.size() == 0) return 0;
             return Math.round((summarizerErrors / uriReportMap.size()) * 1000.0) / 1000.0;
         } else {
-            return Math.round((size() == 0 ? 0 : ((double) countErrors()) / size() * 100) * 1000.0) / 1000.0;
+            return Math.round((samplesCount() == 0 ? 0 : ((double) countErrors()) / samplesCount() * 100) * 1000.0) / 1000.0;
         }
     }
 
     public long getAverage() {
         if (average == null) {
-            average = (size == 0) ? 0 : (totalDuration / size);
+            average = (samplesCount == 0) ? 0 : (totalDuration / samplesCount);
         }
         return average;
     }
 
     public double getAverageSizeInKb() {
-        if (size == 0) {
+        if (samplesCount == 0) {
             return 0;
         }
-        return roundTwoDecimals(totalSizeInKB / size);
+        return roundTwoDecimals(totalSizeInKB / samplesCount);
     }
 
     /**
@@ -203,7 +203,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 100 (inclusive)");
         }
 
-        if (size == 0) {
+        if (samplesCount == 0) {
             return 0;
         }
 
@@ -307,8 +307,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         this.reportFileName = reportFileName;
     }
 
-    public int size() {
-        return size;
+    public int samplesCount() {
+        return samplesCount;
     }
 
     public void setLastBuildReport(PerformanceReport lastBuildReport) {
@@ -352,7 +352,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         if (lastBuildReport == null) {
             return 0;
         }
-        return size() - lastBuildReport.size();
+        return samplesCount() - lastBuildReport.samplesCount();
     }
 
     /**

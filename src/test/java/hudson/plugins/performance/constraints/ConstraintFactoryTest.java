@@ -108,7 +108,7 @@ public class ConstraintFactoryTest {
          */
         List<? extends AbstractConstraint> result = this.constraintFactory.createConstraintClones(abstractBuild, constraints1);
         /**
-         * Check list size
+         * Check list samplesCount
          */
         Assert.assertThat(result.size(), is(16));
         /**
