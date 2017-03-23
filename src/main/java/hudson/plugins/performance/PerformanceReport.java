@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -27,7 +26,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     private transient PerformanceBuildAction buildAction;
 
-    private transient ExternalBuildReport externalBuildReport;
 
     private String reportFileName = null;
 
@@ -134,10 +132,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             summarizerErrors = nbError = sample.getFail();
             int sampleCount = sample.getFail() + sample.getSucc();
             size = sampleCount;
-            totalDuration = (long) sample.getAvg_rt() * sampleCount;
+            totalDuration = (long) sample.getAverageResponseTime() * sampleCount;
             totalSizeInKB = sample.getBytes();
 
-            average = (long) sample.getAvg_rt();
+            average = (long) sample.getAverageResponseTime();
             perc50 = (long) sample.getPerc50();
             perc90 = (long) sample.getPerc90();
             perc0 = (long) sample.getPerc0();
@@ -173,9 +171,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     public double errorPercent() {
         if (ifSummarizerParserUsed(reportFileName)) {
             if (uriReportMap.size() == 0) return 0;
-            return Math.round((summarizerErrors / uriReportMap.size()) * 100.0) / 100;
+            return summarizerErrors / uriReportMap.size();
         } else {
-            return Math.round((size() == 0 ? 0 : ((double) countErrors()) / size() * 100) * 100) / 100;
+            return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
         }
     }
 
@@ -325,10 +323,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         this.lastBuildReport = lastBuildReport;
     }
 
-    public void setExternalBuildReport(ExternalBuildReport externalBuildReport) {
-        this.externalBuildReport = externalBuildReport;
-    }
-
     public long getAverageDiff() {
         if (lastBuildReport == null) {
             return 0;
@@ -430,26 +424,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     public String getSummarizerErrors() {
         return summarizerErrorPercent;
-    }
-
-    public void setAverage(long average) {
-        this.average = average;
-    }
-
-    public void setPerc0(long perc0) {
-        this.perc0 = perc0;
-    }
-
-    public void setPerc50(long perc50) {
-        this.perc50 = perc50;
-    }
-
-    public void setPerc90(long perc90) {
-        this.perc90 = perc90;
-    }
-
-    public void setPerc100(long perc100) {
-        this.perc100 = perc100;
     }
 
 }

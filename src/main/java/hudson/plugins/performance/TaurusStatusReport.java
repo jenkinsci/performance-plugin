@@ -2,22 +2,17 @@ package hudson.plugins.performance;
 
 import java.io.Serializable;
 
-public class TaurusStatusReport implements Serializable, Comparable<TaurusStatusReport> {
+public class TaurusStatusReport implements Serializable {
 
     public static final String DEFAULT_TAURUS_LABEL = "SUMMARY";
-
-    @Override
-    public int compareTo(TaurusStatusReport o) {
-        return 0;
-    }
 
     private String label;
 
     private int succ;
     private int fail;
-    private double avg_rt;
-
     private long bytes;
+
+    private double averageResponseTime;
 
     private double perc0;
     private double perc50;
@@ -49,12 +44,12 @@ public class TaurusStatusReport implements Serializable, Comparable<TaurusStatus
         this.fail = fail;
     }
 
-    public double getAvg_rt() {
-        return avg_rt;
+    public double getAverageResponseTime() {
+        return averageResponseTime;
     }
 
-    public void setAvg_rt(double avg_rt) {
-        this.avg_rt = avg_rt;
+    public void setAverageResponseTime(double averageResponseTime) {
+        this.averageResponseTime = averageResponseTime;
     }
 
     public long getBytes() {
@@ -96,4 +91,5 @@ public class TaurusStatusReport implements Serializable, Comparable<TaurusStatus
     public void setPerc100(double perc100) {
         this.perc100 = perc100;
     }
+
 }

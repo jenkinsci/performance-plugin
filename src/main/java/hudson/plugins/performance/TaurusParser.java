@@ -3,7 +3,6 @@ package hudson.plugins.performance;
 import hudson.Extension;
 import org.apache.commons.io.FilenameUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -89,7 +88,7 @@ public class TaurusParser extends AbstractParser {
         report.setBytes(Long.valueOf(((Element) group.getElementsByTagName("bytes").item(0)).getAttribute("value")));
         report.setFail(Integer.valueOf(((Element) group.getElementsByTagName("fail").item(0)).getAttribute("value")));
         report.setSucc(Integer.valueOf(((Element) group.getElementsByTagName("succ").item(0)).getAttribute("value")));
-        report.setAvg_rt(Double.valueOf(((Element) group.getElementsByTagName("avg_rt").item(0)).getAttribute("value")) * 1000); // to ms
+        report.setAverageResponseTime(Double.valueOf(((Element) group.getElementsByTagName("avg_rt").item(0)).getAttribute("value")) * 1000); // to ms
 
         NodeList perc = group.getElementsByTagName("perc");
         for (int i = 0; i < perc.getLength(); i++) {
@@ -155,7 +154,7 @@ public class TaurusParser extends AbstractParser {
         report.setBytes(Long.valueOf(values[header.indexOf("bytes")]));
         report.setFail(Integer.valueOf(values[header.indexOf("fail")]));
         report.setSucc(Integer.valueOf(values[header.indexOf("succ")]));
-        report.setAvg_rt(Double.valueOf(values[header.indexOf("avg_rt")]) * 1000); // to ms
+        report.setAverageResponseTime(Double.valueOf(values[header.indexOf("avg_rt")]) * 1000); // to ms
 
         report.setPerc0(Double.valueOf(values[header.indexOf("perc_0.0")]) * 1000); // to ms
         report.setPerc50(Double.valueOf(values[header.indexOf("perc_50.0")]) * 1000); // to ms

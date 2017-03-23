@@ -136,7 +136,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public void setFromTaurusStatusReport(TaurusStatusReport report) {
-        average = (long) report.getAvg_rt();
+        average = (long) report.getAverageResponseTime();
         perc0 = (long) report.getPerc0();
         perc50 = (long) report.getPerc50();
         perc90 = (long) report.getPerc90();
@@ -166,7 +166,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public double errorPercent() {
-        return Math.round((((double) countErrors()) / size() * 100) * 100) / 100;
+        return ((double) countErrors()) / size() * 100;
     }
 
     public long getAverage() {
