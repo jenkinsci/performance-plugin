@@ -69,12 +69,10 @@ public class TaurusParser extends AbstractParser {
         for (int temp = 0; temp < nList.getLength(); temp++) {
             Node nNode = nList.item(temp);
 
-            if (((Element) nNode).getAttribute("label").isEmpty()) {
-
+            if (!((Element) nNode).getAttribute("label").isEmpty()) { // skip summary node
                 TaurusStatusReport statusReport = getTaurusStatusReport((Element) nNode);
-                statusReport.setLabel(TaurusStatusReport.DEFAULT_TAURUS_LABEL);
+                statusReport.setLabel(((Element) nNode).getAttribute("label"));
                 report.addSample(statusReport);
-                break;
             }
         }
 
@@ -115,9 +113,8 @@ public class TaurusParser extends AbstractParser {
         try {
             final List<String> header = readHeader(reader.readLine(), ",");
             String line = reader.readLine();
-            if (line != null) { // TODO: skip summary line or view only summary info
-                // read summary
-//                report.addSample(TaurusStatusReport(header, line));
+            if (line != null) {
+                // skip summary line
                 line = reader.readLine();
             }
             while (line != null) {
@@ -161,7 +158,6 @@ public class TaurusParser extends AbstractParser {
         report.setPerc90(Double.valueOf(values[header.indexOf("perc_90.0")]) * 1000); // to ms
         report.setPerc100(Double.valueOf(values[header.indexOf("perc_100.0")]) * 1000); // to ms
 
-        // TODO: perc from CSV
         return report;
     }
 }

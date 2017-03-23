@@ -99,6 +99,13 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
      */
     private Date end = null;
 
+
+    private long average;
+    private long perc0;
+    private long perc50;
+    private long perc90;
+    private long perc100;
+
     public UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
         this.performanceReport = performanceReport;
         this.staplerUri = staplerUri;
@@ -128,13 +135,27 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         }
     }
 
-    public void addTaurusStatusReport(TaurusStatusReport report) {
-        totalDuration += report.getAvg_rt();
-        summarizerSize += report.getFail() + report.getSucc();
-        summarizerErrors += report.getFail();
+    public void setFromTaurusStatusReport(TaurusStatusReport report) {
+        // ADD info about uri
+
+//        totalDuration += report.getAvg_rt();
+//        summarizerSize += report.getFail() + report.getSucc();
+//        summarizerErrors += report.getFail();
+
+        average = (long) report.getAvg_rt();
+        perc0 = (long) report.getPerc0();
+        perc50 = (long) report.getPerc50();
+        perc90 = (long) report.getPerc90();
+        perc100 = (long) report.getPerc100();
+
+        summarizerSize = report.getBytes();
+        summarizerErrors = report.getFail();
+        nbError = report.getFail();
+
+        int size = report.getSucc() + report.getFail();
         synchronized (samples) {
-            if (samples.add(new Sample(report.getLabel(), null, (long) report.getAvg_rt()))) {
-                isSorted = true;
+            for (int i = 0; i < size; i++) {
+                samples.add(new Sample("500", new Date(), i));
             }
         }
     }
@@ -155,7 +176,10 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public long getAverage() {
-        return totalDuration / size();
+        if (average == 0) {
+            average = totalDuration / size();
+        }
+        return average;
     }
 
     private long getDurationAt(double percentage) {
@@ -175,7 +199,10 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public long get90Line() {
-        return getDurationAt(0.9);
+        if (perc90 == 0) {
+            perc90 = getDurationAt(0.9);
+        }
+        return perc90;
     }
 
     public String getHttpCode() {
@@ -183,7 +210,10 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public long getMedian() {
-        return getDurationAt(0.5);
+        if (perc50 == 0) {
+            perc50 = getDurationAt(0.5);
+        }
+        return perc50;
     }
 
     public Run<?, ?> getBuild() {
@@ -231,19 +261,19 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public long getMax() {
-        final List<Long> durations = getSortedDuration();
-        if (durations.isEmpty()) {
-            return 0;
+        if (perc100 == 0) {
+            final List<Long> durations = getSortedDuration();
+            perc100 = durations.isEmpty() ? 0 : durations.get(durations.size() - 1);
         }
-        return durations.get(durations.size() - 1);
+        return perc100;
     }
 
     public long getMin() {
-        final List<Long> durations = getSortedDuration();
-        if (durations.isEmpty()) {
-            return 0;
+        if (perc0 == 0) {
+            final List<Long> durations = getSortedDuration();
+            perc0 = durations.isEmpty() ? 0 : durations.get(0);
         }
-        return durations.get(0);
+        return perc0;
     }
 
     public String getStaplerUri() {

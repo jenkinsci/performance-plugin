@@ -136,7 +136,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
                 uriReport = new UriReport(this, staplerUri, uri);
                 uriReportMap.put(staplerUri, uriReport);
             }
-            uriReport.addTaurusStatusReport(sample);
+            uriReport.setFromTaurusStatusReport(sample);
 
             // reset the lazy loaded caches.
             durationsSortedBySize = null;
@@ -145,7 +145,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
         summarizerErrors += sample.getFail();
         int sampleCount = sample.getFail() + sample.getSucc();
-        size++;
+        size += sampleCount;
         totalDuration += sample.getAvg_rt() * sampleCount;
         totalSizeInKB += sample.getBytes();
 
