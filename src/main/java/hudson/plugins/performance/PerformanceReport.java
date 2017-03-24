@@ -83,7 +83,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private Long perc100;
 
     public static String asStaplerURI(String uri) {
-        return uri.replace("http:", "").replaceAll("/", "_");
+        return uri.replace("http:", "").replace("https:", "").replaceAll("/", "_").replaceAll(":", "_");
     }
 
     public void addSample(HttpSample pHttpSample) throws SAXException {
