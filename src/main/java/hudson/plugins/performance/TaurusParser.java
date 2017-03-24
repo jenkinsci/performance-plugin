@@ -41,13 +41,8 @@ public class TaurusParser extends AbstractParser {
 
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
-        return isXMLFileType(reportFile) ? readFromXML(reportFile) : readFromCSV(reportFile);
+        return readFromXML(reportFile);
     }
-
-    private boolean isXMLFileType(File reportFile) {
-        return FilenameUtils.getExtension(reportFile.getName()).toLowerCase().contains("xml");
-    }
-
 
     private PerformanceReport readFromXML(File reportFile) throws Exception {
         final PerformanceReport report = new PerformanceReport();
@@ -105,64 +100,6 @@ public class TaurusParser extends AbstractParser {
             }
         }
 
-
-        return report;
-    }
-
-    private PerformanceReport readFromCSV(File reportFile) throws Exception {
-        final PerformanceReport report = new PerformanceReport();
-        report.setReportFileName(reportFile.getName());
-
-        final BufferedReader reader = new BufferedReader(new FileReader(reportFile));
-        try {
-            final List<String> header = readHeader(reader.readLine(), ",");
-            String line = reader.readLine();
-            if (line != null) {
-                report.addSample(getTaurusStatusReport(header, line), true);
-                line = reader.readLine();
-            }
-            while (line != null) {
-                report.addSample(getTaurusStatusReport(header, line), false);
-                line = reader.readLine();
-            }
-            return report;
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
-        }
-    }
-
-    private List<String> readHeader(String headerLine, String separator) {
-        final List<String> header = new ArrayList<String>();
-        for (String v : headerLine.split(separator)) {
-            header.add(v.toLowerCase());
-        }
-        return header;
-    }
-
-    private TaurusStatusReport getTaurusStatusReport(List<String> header, String line) {
-        final TaurusStatusReport report = new TaurusStatusReport();
-
-        String[] values = line.split(",");
-
-        int labelIndex = header.indexOf("label");
-        if (values.length < (labelIndex - 1) && !values[labelIndex].isEmpty()) {
-            report.setLabel(values[labelIndex]);
-        } else {
-            report.setLabel(TaurusStatusReport.DEFAULT_TAURUS_LABEL);
-        }
-
-        report.setBytes(Long.valueOf(values[header.indexOf("bytes")]));
-        report.setFail(Integer.valueOf(values[header.indexOf("fail")]));
-        report.setSucc(Integer.valueOf(values[header.indexOf("succ")]));
-        report.setThroughput(Long.valueOf(values[header.indexOf("throughput")]));
-        report.setAverageResponseTime(Double.valueOf(values[header.indexOf("avg_rt")]) * 1000); // to ms
-
-        report.setPerc0(Double.valueOf(values[header.indexOf("perc_0.0")]) * 1000); // to ms
-        report.setPerc50(Double.valueOf(values[header.indexOf("perc_50.0")]) * 1000); // to ms
-        report.setPerc90(Double.valueOf(values[header.indexOf("perc_90.0")]) * 1000); // to ms
-        report.setPerc100(Double.valueOf(values[header.indexOf("perc_100.0")]) * 1000); // to ms
 
         return report;
     }
