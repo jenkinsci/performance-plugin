@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <FinalStatus>
-  <ReportURL>https://a.blazemeter.com/app/?public-token=NBgnrk5Auwaz9CdRJxYxxA6HC2EBemxjg8etofTiMHTiHoCEMF#reports/r-ext-58d1268d430e4/summary</ReportURL>
+  <ReportURL>https://link_for_report.com/aaaa/bbb/report</ReportURL>
   <Group label="">
     <avg_ct value="0">
       <name>avg_ct</name>
@@ -75,7 +75,7 @@
       <value>11</value>
     </fail>
   </Group>
-  <Group label="http://jmeter-plugins.org/">
+  <Group label="http://test_url1.org/">
     <avg_ct value="0">
       <name>avg_ct</name>
       <value>0</value>
@@ -149,7 +149,7 @@
       <value>11</value>
     </fail>
   </Group>
-  <Group label="http://blazedemo.com/">
+  <Group label="http://test_url2.com/">
     <avg_ct value="0">
       <name>avg_ct</name>
       <value>0</value>
