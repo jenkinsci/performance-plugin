@@ -348,7 +348,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         return "";
     }
 
-    public int getSizeDiff() {
+    public int getSamplesCountDiff() {
         if (lastBuildReport == null) {
             return 0;
         }

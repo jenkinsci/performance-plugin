@@ -344,7 +344,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         return lastBuildUriReport.getHttpCode();
     }
 
-    public int getSizeDiff() {
+    public int getSamplesCountDiff() {
         if (lastBuildUriReport == null) {
             return 0;
         }

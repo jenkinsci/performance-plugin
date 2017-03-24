@@ -82,5 +82,5 @@ public abstract class AbstractReport {
 
     abstract public String getLastBuildHttpCodeIfChanged();
 
-    abstract public int getSizeDiff();
+    abstract public int getSamplesCountDiff();
 }

@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core">
   <td>${it.samplesCount()}</td>
-  <td class="${h.ifThenElse(it.getSizeDiff()>=0,'green','red')}">${it.getSizeDiff()}</td>
+  <td class="${h.ifThenElse(it.getSizeDiff()>=0,'green','red')}">${it.getSamplesCountDiff()}</td>
   <td>${it.getAverage()}</td>
   <td class="${h.ifThenElse(it.getAverageDiff()>0,'red','green')}">${it.getAverageDiff()}</td>
   <td>${it.getMedian()}</td>

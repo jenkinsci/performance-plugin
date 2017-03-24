@@ -80,6 +80,6 @@ public class TaurusParserTest {
         // Check summary values
         assertEquals("Check diff median", -14.0, report.getMedianDiff(), DELTA);
         assertEquals("Check diff average", -400, report.getAverageDiff());
-        assertEquals("Check diff samples count", 232, report.getSizeDiff());
+        assertEquals("Check diff samples count", 232, report.getSamplesCountDiff());
     }
 }
