@@ -75,7 +75,7 @@
       <value>11</value>
     </fail>
   </Group>
-  <Group label="https://jmeter-plugins.org/">
+  <Group label="http://jmeter-plugins.org/">
     <avg_ct value="0">
       <name>avg_ct</name>
       <value>0</value>
