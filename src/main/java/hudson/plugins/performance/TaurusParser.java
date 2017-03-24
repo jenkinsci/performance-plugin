@@ -35,7 +35,7 @@ public class TaurusParser extends AbstractParser {
     }
 
     @Override
-    PerformanceReport parse(File reportFile) throws Exception {
+    protected PerformanceReport parse(File reportFile) throws Exception {
         return readFromXML(reportFile);
     }
 
