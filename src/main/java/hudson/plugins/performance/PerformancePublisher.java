@@ -309,7 +309,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         // add the report to the build object.
         PerformanceBuildAction a = new PerformanceBuildAction(run, logger, parsers);
         run.addAction(a);
-        logger.print("\n\n\n");
 
         for (PerformanceReportParser parser : parsers) {
             glob = parser.glob;
@@ -380,8 +379,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     }
 
                     // add the report to the build object.
-                    logger.print("\n\n\n");
-
                     for (PerformanceReportParser parser : parsers) {
                         // mark the build as unstable or failure depending on the outcome.
                         for (PerformanceReport r : parsedReports) {
@@ -431,8 +428,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                             }
 
                             long average = r.getAverage();
-                            logger.println(r.getReportFileName() + " has an average of: " + Long.toString(average));
-
                             try {
                                 if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(r.getReportFileName()) != null) {
                                     if (Long.parseLong(responseTimeThresholdMap.get(r.getReportFileName())) <= average) {
@@ -490,8 +485,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                             bw.write(xml);
                             bw.close();
                             fw.close();
-
-                            logger.print("\n\n\n");
                         }
                     }
                 } catch (Exception e) {
@@ -548,8 +541,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     List<UriReport> curruriList = null;
 
                     // add the report to the build object.
-                    logger.print("\n\n\n");
-
                     for (PerformanceReportParser parser : parsers) {
                         glob = parser.glob;
                         glob = env.expand(glob);
