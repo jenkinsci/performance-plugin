@@ -31,7 +31,7 @@ public class JUnitParserTest {
 
         // Verify results.
         assertNotNull(result);
-        assertEquals("The source file contains four samples. These should all have been added to the performance report.", 4, result.size());
+        assertEquals("The source file contains four samples. These should all have been added to the performance report.", 4, result.samplesCount());
     }
 
     @Test
@@ -44,7 +44,7 @@ public class JUnitParserTest {
 
         // Verify results.
         assertNotNull(result);
-        assertEquals("The source file contains 3 samples. These should all have been added to the performance report.", 3, result.size());
+        assertEquals("The source file contains 3 samples. These should all have been added to the performance report.", 3, result.samplesCount());
         assertEquals("The source file contains 2 failed samples. 1 test failure and 1 runtime error sample.", 2, result.countErrors());
     }
 }

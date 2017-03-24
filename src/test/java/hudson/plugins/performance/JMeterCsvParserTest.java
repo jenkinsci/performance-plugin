@@ -23,6 +23,7 @@ public class JMeterCsvParserTest {
         reportFile3 = new File(getClass().getResource("/JMeterCsvResults3.csv").toURI());
     }
 
+
     @Test
     public void canParseCsvFile() throws Exception {
         final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, JMeterCsvParser.DEFAULT_DELIMITER, SKIP_FIRST_LINE);
@@ -47,7 +48,7 @@ public class JMeterCsvParserTest {
         final PerformanceReport result = parser.parse(file);
         // Verify results.
         assertNotNull(result);
-        assertEquals("The source file contains three samples. These should all have been added to the performance report.", 3, result.size());
+        assertEquals("The source file contains three samples. These should all have been added to the performance report.", 3, result.samplesCount());
     }
 
     @Test

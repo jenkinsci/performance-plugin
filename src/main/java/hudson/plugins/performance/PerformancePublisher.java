@@ -306,7 +306,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
          * preparing evaluation - this is necessary regardless of the mode of
          * evaluation
          */
-
         // add the report to the build object.
         PerformanceBuildAction a = new PerformanceBuildAction(run, logger, parsers);
         run.addAction(a);
@@ -333,6 +332,10 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
             List<File> localReports = copyReportsToMaster(run, logger, files, parser.getDescriptor().getDisplayName());
             parsedReports = parser.parse(run, localReports, listener);
+
+            if (parser.reportURL != null && !parser.reportURL.isEmpty()) {
+                run.addAction(new ExternalBuildReport(parser.reportURL));
+            }
         }
 
         for (PerformanceReport r : parsedReports) {

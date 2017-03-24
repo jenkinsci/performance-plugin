@@ -26,6 +26,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     private transient PerformanceBuildAction buildAction;
 
+
     private String reportFileName = null;
 
     /**
@@ -58,7 +59,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     /**
      * The amount of samples in all uriReports combined.
      */
-    private int size;
+    private int samplesCount;
 
     /**
      * The duration of all samples combined, in milliseconds.
@@ -74,6 +75,12 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private long summarizerAvg;
     private String summarizerErrorPercent = null;
     private long summarizerSize;
+
+    private Long average;
+    private Long perc0;
+    private Long perc50;
+    private Long perc90;
+    private Long perc100;
 
     public static String asStaplerURI(String uri) {
         return uri.replace("http:", "").replaceAll("/", "_");
@@ -106,9 +113,48 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             nbError++;
         }
         summarizerErrors += pHttpSample.getSummarizerErrors();
-        size++;
+        samplesCount++;
         totalDuration += pHttpSample.getDuration();
         totalSizeInKB += pHttpSample.getSizeInKb();
+    }
+
+    public void addSample(TaurusStatusReport sample, boolean isSummaryReport) {
+        String uri = sample.getLabel();
+        if (uri == null) {
+            buildAction
+                    .getHudsonConsoleWriter()
+                    .println("label cannot be empty, please ensure your jmx file specifies "
+                            + "name properly for each http sample: skipping sample");
+            return;
+        }
+
+        if (isSummaryReport) {
+            summarizerErrors = nbError = sample.getFail();
+            int sampleCount = sample.getFail() + sample.getSucc();
+            samplesCount = sampleCount;
+            totalDuration = (long) sample.getAverageResponseTime() * sampleCount;
+            totalSizeInKB = sample.getBytes();
+
+            average = (long) sample.getAverageResponseTime();
+            perc50 = (long) sample.getPerc50();
+            perc90 = (long) sample.getPerc90();
+            perc0 = (long) sample.getPerc0();
+            perc100 = (long) sample.getPerc100();
+        } else {
+            String staplerUri = PerformanceReport.asStaplerURI(uri);
+            synchronized (uriReportMap) {
+                UriReport uriReport = uriReportMap.get(staplerUri);
+                if (uriReport == null) {
+                    uriReport = new UriReport(this, staplerUri, uri);
+                    uriReportMap.put(staplerUri, uriReport);
+                }
+                uriReport.setFromTaurusStatusReport(sample);
+
+                // reset the lazy loaded caches.
+                durationsSortedBySize = null;
+                uriReportsOrdered = null;
+            }
+        }
     }
 
     public int compareTo(PerformanceReport jmReport) {
@@ -125,25 +171,24 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     public double errorPercent() {
         if (ifSummarizerParserUsed(reportFileName)) {
             if (uriReportMap.size() == 0) return 0;
-            return summarizerErrors / uriReportMap.size();
+            return Math.round((summarizerErrors / uriReportMap.size()) * 1000.0) / 1000.0;
         } else {
-            return size() == 0 ? 0 : ((double) countErrors()) / size() * 100;
+            return Math.round((samplesCount() == 0 ? 0 : ((double) countErrors()) / samplesCount() * 100) * 1000.0) / 1000.0;
         }
     }
 
     public long getAverage() {
-        if (size == 0) {
-            return 0;
+        if (average == null) {
+            average = (samplesCount == 0) ? 0 : (totalDuration / samplesCount);
         }
-
-        return totalDuration / size;
+        return average;
     }
 
     public double getAverageSizeInKb() {
-        if (size == 0) {
+        if (samplesCount == 0) {
             return 0;
         }
-        return roundTwoDecimals(totalSizeInKB / size);
+        return roundTwoDecimals(totalSizeInKB / samplesCount);
     }
 
     /**
@@ -158,7 +203,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 100 (inclusive)");
         }
 
-        if (size == 0) {
+        if (samplesCount == 0) {
             return 0;
         }
 
@@ -185,11 +230,17 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     public long get90Line() {
-        return getDurationAt(NINETY_PERCENT);
+        if (perc90 == null) {
+            perc90 = getDurationAt(NINETY_PERCENT);
+        }
+        return perc90;
     }
 
     public long getMedian() {
-        return getDurationAt(FIFTY_PERCENT);
+        if (perc50 == null) {
+            perc50 = getDurationAt(FIFTY_PERCENT);
+        }
+        return perc50;
     }
 
     public String getHttpCode() {
@@ -213,7 +264,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     public long getMax() {
-        return getDurationAt(ONE_HUNDRED_PERCENT);
+        if (perc100 == null) {
+            perc100 = getDurationAt(ONE_HUNDRED_PERCENT);
+        }
+        return perc100;
     }
 
     public double getTotalTrafficInKb() {
@@ -221,7 +275,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     public long getMin() {
-        return getDurationAt(ZERO_PERCENT);
+        if (perc0 == null) {
+            perc0 = getDurationAt(ZERO_PERCENT);
+        }
+        return perc0;
     }
 
     public String getReportFileName() {
@@ -250,8 +307,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         this.reportFileName = reportFileName;
     }
 
-    public int size() {
-        return size;
+    public int samplesCount() {
+        return samplesCount;
     }
 
     public void setLastBuildReport(PerformanceReport lastBuildReport) {
@@ -284,18 +341,18 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         if (lastBuildReport == null) {
             return 0;
         }
-        return errorPercent() - lastBuildReport.errorPercent();
+        return Math.round((errorPercent() - lastBuildReport.errorPercent()) * 1000.0) / 1000.0;
     }
 
     public String getLastBuildHttpCodeIfChanged() {
         return "";
     }
 
-    public int getSizeDiff() {
+    public int getSamplesCountDiff() {
         if (lastBuildReport == null) {
             return 0;
         }
-        return size() - lastBuildReport.size();
+        return samplesCount() - lastBuildReport.samplesCount();
     }
 
     /**
@@ -368,4 +425,5 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     public String getSummarizerErrors() {
         return summarizerErrorPercent;
     }
+
 }

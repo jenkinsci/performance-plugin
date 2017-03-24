@@ -97,7 +97,7 @@ public class JMeterParserTest {
         // Verify results.
         assertNotNull(result);
         assertEquals("The source file contains eight samples. These should all have been added to the performance report.",
-                8, result.size());
+                8, result.samplesCount());
     }
 
     /**
@@ -120,7 +120,7 @@ public class JMeterParserTest {
         // Verify results.
         assertNotNull(result);
         assertEquals("The source file contains three samples. These should all have been added to the performance report.",
-                3, result.size());
+                3, result.samplesCount());
 
         UriReport uriReport = result.getUriReportMap().get("GET _ordermgmt_inventory");
         assertEquals(0, uriReport.countErrors());
