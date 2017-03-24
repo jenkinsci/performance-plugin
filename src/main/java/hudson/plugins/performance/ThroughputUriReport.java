@@ -15,7 +15,7 @@ public class ThroughputUriReport {
 
     public double get() {
         Long throughput = uriReport.getThroughput();
-        if (throughput != null){
+        if (throughput != null) {
             return throughput;
         } else  {
             if (uriReport.samplesCount() == 0) {

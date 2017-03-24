@@ -65,6 +65,22 @@ public class PerformanceReportTest {
     }
 
     @Test
+    public void testAddTaurusSample() throws Exception {
+        PrintStream printStream = EasyMock.createMock(PrintStream.class);
+        EasyMock.expect(
+                performanceReport.getBuildAction().getHudsonConsoleWriter())
+                .andReturn(printStream);
+        printStream
+                .println("label cannot be empty, please ensure your jmx file specifies name properly for each http sample: skipping sample");
+        EasyMock.replay(printStream);
+        EasyMock.replay(performanceReport.getBuildAction());
+
+        TaurusStatusReport sample = new TaurusStatusReport();
+        performanceReport.addSample(sample, true);
+        assertEquals(0, performanceReport.countErrors());
+    }
+
+    @Test
     public void testPerformanceReport() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResults.jtl").toURI()));
         Map<String, UriReport> uriReportMap = performanceReport
@@ -221,4 +237,14 @@ public class PerformanceReportTest {
         performanceReport.getDurationAt(101);
     }
 
+    @Test
+    public void testCompare() {
+        PerformanceReport report = new PerformanceReport();
+        report.setReportFileName("aaaaaa");
+        PerformanceReport report1 = new PerformanceReport();
+        report1.setReportFileName("bbbbb");
+        assertEquals(-1, report.compareTo(report1));
+        assertEquals(1, report1.compareTo(report));
+        assertEquals(0, report1.compareTo(report1));
+    }
 }

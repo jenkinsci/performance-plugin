@@ -82,4 +82,9 @@ public class TaurusParserTest {
         assertEquals("Check diff average", -400, report.getAverageDiff());
         assertEquals("Check diff samples count", 232, report.getSamplesCountDiff());
     }
+
+    @Test
+    public void testGlobPattern() throws Exception {
+        assertEquals("**/*.xml", new TaurusParser("").getDefaultGlobPattern());
+    }
 }
