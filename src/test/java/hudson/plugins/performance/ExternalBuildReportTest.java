@@ -12,7 +12,6 @@ public class ExternalBuildReportTest {
 
         assertEquals("View External Report", report.getDisplayName());
         assertEquals("graph.gif", report.getIconFileName());
-        assertEquals("graph.gif", report.getIconFileName());
         assertEquals("http://some.url.com", report.getUrlName());
         assertEquals(null, report.getTarget());
     }
