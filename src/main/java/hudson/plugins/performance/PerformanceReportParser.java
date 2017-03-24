@@ -27,6 +27,7 @@ public abstract class PerformanceReportParser implements
      * GLOB patterns that specify the performance report.
      */
     public final String glob;
+    public String reportURL;
 
     protected PerformanceReportParser(String glob) {
         this.glob = (glob == null || glob.length() == 0) ? getDefaultGlobPattern()

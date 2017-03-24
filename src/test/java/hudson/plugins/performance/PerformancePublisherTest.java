@@ -1,12 +1,16 @@
 package hudson.plugins.performance;
 
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
+import javax.annotation.Nonnull;
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -203,5 +207,30 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
         assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
 
+    }
+
+    @Test
+    public void testEmptyReportParsersList() throws Exception {
+        PerformancePublisher publisher = new PerformancePublisher(0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, true, "MRT",
+                true, true, true, Collections.<PerformanceReportParser>emptyList(), true);
+        RunExt run = new RunExt( createFreeStyleProject());
+        run.onStartBuilding();
+        try {
+            publisher.perform(run, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
+        } catch (NullPointerException ex) {
+            fail("Plugin must work with empty parser list" + ex.getMessage());
+        }
+    }
+
+    private class RunExt extends Run {
+
+        protected RunExt(@Nonnull Job job) throws IOException {
+            super(job);
+        }
+
+        @Override
+        protected void onStartBuilding() {
+            super.onStartBuilding();
+        }
     }
 }

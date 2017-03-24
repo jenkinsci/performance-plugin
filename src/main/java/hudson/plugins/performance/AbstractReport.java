@@ -7,7 +7,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * Abstract class for classes with size, error, mean, average, 90 line, min and max attributes
+ * Abstract class for classes with samplesCount, error, mean, average, 90 line, min and max attributes
  */
 public abstract class AbstractReport {
 
@@ -70,7 +70,7 @@ public abstract class AbstractReport {
 
     abstract public long getMin();
 
-    abstract public int size();
+    abstract public int samplesCount();
 
     abstract public String getHttpCode();
 
@@ -82,5 +82,5 @@ public abstract class AbstractReport {
 
     abstract public String getLastBuildHttpCodeIfChanged();
 
-    abstract public int getSizeDiff();
+    abstract public int getSamplesCountDiff();
 }
