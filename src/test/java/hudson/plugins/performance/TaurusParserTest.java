@@ -5,24 +5,26 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
-/**
- *
- */
 public class TaurusParserTest {
 
     public static final double DELTA = 0.000001;
 
-    //TODO:
-    // - last build (check compare between builds)
     @Test
     public void testReadXML() throws Exception {
         TaurusParser parser = new TaurusParser("xml report");
 
         PerformanceReport report = parser.parse(new File(getClass().getResource("/TaurusXMLReport.xml").toURI()));
+        PerformanceReport prevReport = parser.parse(new File(getClass().getResource("/TaurusPreviousBuildReport.xml").toURI()));
         assertNotNull(report);
         checkPerformanceReport(report);
+
+        assertNotNull(prevReport);
+        report.setLastBuildReport(prevReport);
+        checkReportDiff(report);
 
         Map<String, UriReport> uriReportMap = report.getUriReportMap();
         assertEquals(2, uriReportMap.size());
@@ -48,7 +50,7 @@ public class TaurusParserTest {
         assertEquals("Check average", (long) (0.80638 * 1000), report.getAverage());
         assertEquals("Check samples count", 326 + 11, report.samplesCount(), DELTA);
         assertEquals("Check throughput", new Long(337), report.getThroughput());
-
+        assertEquals("Check errors", 3.264, report.errorPercent(), DELTA);
     }
 
     private void checkUriReport2(UriReport report) {
@@ -60,6 +62,7 @@ public class TaurusParserTest {
         assertEquals("Check average", (long) (0.11568 * 1000), report.getAverage());
         assertEquals("Check samples count", 340, report.samplesCount(), DELTA);
         assertEquals("Check throughput", new Long(340), report.getThroughput());
+        assertEquals("Check errors", 0.0, report.errorPercent(), DELTA);
     }
 
     private void checkPerformanceReport(PerformanceReport report) {
@@ -71,6 +74,12 @@ public class TaurusParserTest {
         assertEquals("Check average", (long) (0.45950 * 1000), report.getAverage());
         assertEquals("Check samples count", 666 + 11, report.samplesCount(), DELTA);
         assertEquals("Check total KB", 6946463, report.getTotalTrafficInKb(), DELTA);
+    }
 
+    private void checkReportDiff(PerformanceReport report) {
+        // Check summary values
+        assertEquals("Check diff median", -14.0, report.getMedianDiff(), DELTA);
+        assertEquals("Check diff average", -400, report.getAverageDiff());
+        assertEquals("Check diff samples count", 232, report.getSizeDiff());
     }
 }
