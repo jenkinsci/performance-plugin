@@ -88,6 +88,7 @@ public class TaurusParser extends AbstractParser {
         report.setBytes(Long.valueOf(((Element) group.getElementsByTagName("bytes").item(0)).getAttribute("value")));
         report.setFail(Integer.valueOf(((Element) group.getElementsByTagName("fail").item(0)).getAttribute("value")));
         report.setSucc(Integer.valueOf(((Element) group.getElementsByTagName("succ").item(0)).getAttribute("value")));
+        report.setThroughput(Long.valueOf(((Element) group.getElementsByTagName("throughput").item(0)).getAttribute("value")));
         report.setAverageResponseTime(Double.valueOf(((Element) group.getElementsByTagName("avg_rt").item(0)).getAttribute("value")) * 1000); // to ms
 
         NodeList perc = group.getElementsByTagName("perc");
@@ -155,6 +156,7 @@ public class TaurusParser extends AbstractParser {
         report.setBytes(Long.valueOf(values[header.indexOf("bytes")]));
         report.setFail(Integer.valueOf(values[header.indexOf("fail")]));
         report.setSucc(Integer.valueOf(values[header.indexOf("succ")]));
+        report.setThroughput(Long.valueOf(values[header.indexOf("throughput")]));
         report.setAverageResponseTime(Double.valueOf(values[header.indexOf("avg_rt")]) * 1000); // to ms
 
         report.setPerc0(Double.valueOf(values[header.indexOf("perc_0.0")]) * 1000); // to ms

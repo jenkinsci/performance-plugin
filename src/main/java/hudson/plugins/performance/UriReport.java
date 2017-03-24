@@ -105,8 +105,10 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     private Long perc50;
     private Long perc90;
     private Long perc100;
+    private Long throughput;
 
     private int samplesCount;
+
 
     public UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
         this.performanceReport = performanceReport;
@@ -145,6 +147,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         perc90 = (long) report.getPerc90();
         perc100 = (long) report.getPerc100();
 
+        throughput = report.getThroughput();
+        
         summarizerSize = report.getBytes();
         summarizerErrors = report.getFail();
         nbError = report.getFail();
@@ -415,5 +419,9 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
             if (this.date.after(other.date)) return 1;
             return 0;
         }
+    }
+
+    public Long getThroughput() {
+        return throughput;
     }
 }

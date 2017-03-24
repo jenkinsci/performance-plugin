@@ -19,6 +19,8 @@ public class TaurusStatusReport implements Serializable {
     private double perc90;
     private double perc100;
 
+    private long throughput;
+
 
     public String getLabel() {
         return label;
@@ -92,4 +94,11 @@ public class TaurusStatusReport implements Serializable {
         this.perc100 = perc100;
     }
 
+    public long getThroughput() {
+        return throughput;
+    }
+
+    public void setThroughput(long throughput) {
+        this.throughput = throughput;
+    }
 }
