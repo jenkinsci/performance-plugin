@@ -201,6 +201,11 @@ public class ConstraintReportTest {
         String s = result.getLoggerMsgAdv();
         //checking content of loggerMsg
         assertTrue(s.contains("Number of all constraints: 6\nRelative constraints: 3\nAbsolute constraints: 3\nSuccessful constraints: 3\nViolated constraints: 3\n->INFORMATION: 1\n->UNSTABLE: 2\n->ERROR: 0\n-------------- \n----------------------------------------------------------- \nEvaluating all relative constraints! \n-------------- \nRelative constraint failed! - Report: Result.xml \nThe constraint says: Average of all test cases must not be greater than 110 \nMeasured value for Average: 120 \nIncluded builds: 3 builds \nEscalation Level: Warning\n-------------- \nRelative constraint successful! - Report: Result.xml \nThe constraint says: Average of all test cases must not be less than 1 \nMeasured value for Average: 120 \nIncluded builds: 3 builds \nEscalation Level: Warning\n-------------- \nRelative constraint failed! - Report: Result.xml \nThe constraint says: Maximum of all test cases must not be greater than 990 \nMeasured value for Maximum: 1000 \nIncluded builds: 3 builds \nEscalation Level: Warning\n-------------- \nEvaluating all absolute constraints! \n-------------- \nAbsolute constraint successful! - Report: Result.xml \n The constraint says: Average of checkTickets must not be greater than 100 \n Measured value for Average: 9 \n Escalation Level: Error\n-------------- \nAbsolute constraint failed! - Report: Result.xml \n The constraint says: Average of checkTickets must not be less than 100 \n Measured value for Average: 9 \n Escalation Level: Information\n-------------- \nAbsolute constraint successful! - Report: Result.xml \n The constraint says: Average of checkTickets must not be equal than 9 \n Measured value for Average: 9 \n Escalation Level: Warning\n-------------- \nThe highest escalation: Warning! The build will be marked as UNSTABLE\n\n"));
+
+        // remove 'null' directory and including folders
+        f.delete();
+        f.getParentFile().delete();
+        f.getParentFile().getParentFile().delete();
     }
 
 }
