@@ -26,23 +26,6 @@ import java.util.List;
  */
 public abstract class AbstractConstraint implements Describable<AbstractConstraint>, ExtensionPoint {
 
-    @Extension
-    public static class DescriptorImpl extends ConstraintDescriptor {
-
-        @Override
-        public String getDisplayName() {
-            // no name since this is abstract extension point
-            return "";
-        }
-
-        public FormValidation doCheckRelatedPerfReport(@QueryParameter String relatedPerfReport) {
-            if (StringUtils.isEmpty(relatedPerfReport)) {
-                return FormValidation.error("This field must not be empty");
-            }
-            return FormValidation.ok();
-        }
-    }
-
     /**
      * Holds the information whether constraint is fulfilled(true) or violated(false)
      */
