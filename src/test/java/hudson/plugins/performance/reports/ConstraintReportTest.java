@@ -1,4 +1,4 @@
-package hudson.plugins.performance.constraints;
+package hudson.plugins.performance.reports;
 
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import hudson.plugins.performance.constraints.AbsoluteConstraint;
+import hudson.plugins.performance.constraints.ConstraintEvaluation;
+import hudson.plugins.performance.constraints.RelativeConstraint;
 import hudson.plugins.performance.reports.ConstraintReport;
 import jenkins.model.Jenkins;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
