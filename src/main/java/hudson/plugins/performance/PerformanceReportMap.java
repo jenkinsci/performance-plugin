@@ -9,7 +9,7 @@ import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.PerformanceReportPosition;
+import hudson.plugins.performance.data.PerformanceReportPosition;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;

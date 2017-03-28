@@ -1,4 +1,4 @@
-package hudson.plugins.performance.reports;
+package hudson.plugins.performance.data;
 
 public class PerformanceReportPosition {
     private String performanceReportPosition;

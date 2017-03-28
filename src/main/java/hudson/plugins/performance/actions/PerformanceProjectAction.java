@@ -10,7 +10,7 @@ import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
 import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.PerformanceReportPosition;
+import hudson.plugins.performance.data.PerformanceReportPosition;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.plugins.performance.reports.throughput.ThroughputReport;
 import hudson.util.ChartUtil;

@@ -5,7 +5,7 @@ import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.PerformanceReportPosition;
+import hudson.plugins.performance.data.PerformanceReportPosition;
 import hudson.plugins.performance.reports.UriReport;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
