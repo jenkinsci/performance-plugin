@@ -658,4 +658,17 @@ public class ConstraintCheckerTest {
         when(performanceReport3_1.getMedian()).thenReturn((long) 10);
         when(performanceReport3_1.getMin()).thenReturn((long) 10);
     }
+
+    @Test
+    public void test() throws Exception {
+        ConstraintChecker checker = new ConstraintChecker(null, null);
+        checker.setSettings(constraintSettings);
+        assertEquals(constraintSettings, checker.getSettings());
+
+        List<AbstractBuild<?, ?>> list = new ArrayList<AbstractBuild<?, ?>>();
+        list.add(abstractBuild0);
+        checker.setBuilds(list);
+
+        assertEquals(list, checker.getBuilds());
+    }
 }
