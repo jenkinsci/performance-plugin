@@ -6,6 +6,7 @@ import hudson.model.Describable;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.performance.PerformancePublisher;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import jenkins.model.Jenkins;
 

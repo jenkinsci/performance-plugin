@@ -1,7 +1,8 @@
-package hudson.plugins.performance.parsers;
+package hudson.plugins.performance.descriptors;
 
 import hudson.DescriptorExtensionList;
 import hudson.model.Descriptor;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
 import jenkins.model.Jenkins;
 
 /**

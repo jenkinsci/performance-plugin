@@ -1,7 +1,8 @@
-package hudson.plugins.performance.constraints;
+package hudson.plugins.performance.descriptors;
 
 import hudson.DescriptorExtensionList;
 import hudson.model.Descriptor;
+import hudson.plugins.performance.constraints.AbstractConstraint;
 import jenkins.model.Jenkins;
 
 public abstract class ConstraintDescriptor extends Descriptor<AbstractConstraint> {

@@ -1,6 +1,7 @@
 package hudson.plugins.performance.parsers;
 
 import hudson.Extension;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import org.kohsuke.stapler.DataBoundConstructor;

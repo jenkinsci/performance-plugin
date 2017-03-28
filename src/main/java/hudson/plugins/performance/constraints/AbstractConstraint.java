@@ -6,6 +6,7 @@ import hudson.ExtensionPoint;
 import hudson.model.Describable;
 import hudson.model.Run;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.descriptors.ConstraintDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
 import jenkins.model.Jenkins;

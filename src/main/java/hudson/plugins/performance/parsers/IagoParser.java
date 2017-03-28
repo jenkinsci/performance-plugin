@@ -10,6 +10,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
 import hudson.Extension;
 import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.SAXException;

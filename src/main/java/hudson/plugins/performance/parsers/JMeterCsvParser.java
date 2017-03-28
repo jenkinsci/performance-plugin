@@ -3,6 +3,7 @@ package hudson.plugins.performance.parsers;
 import hudson.Extension;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.Messages;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.util.FormValidation;
 import org.kohsuke.stapler.DataBoundConstructor;
