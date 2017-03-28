@@ -8,8 +8,10 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import hudson.model.FreeStyleProject;
 import hudson.plugins.performance.PerformanceReportMap;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
@@ -18,8 +20,10 @@ import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
 import org.jfree.data.category.CategoryDataset;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -44,6 +48,9 @@ public class TestSuiteReportDetailTest {
     PerformanceBuildAction buildAction;
     @Mock
     PerformanceReport report;
+
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
     private Map<String, UriReport> uriReportMap = new HashMap<String, UriReport>();
 
@@ -86,5 +93,20 @@ public class TestSuiteReportDetailTest {
         when(mock.in(anyInt())).thenReturn(true);
         when(mock.includedByStep(anyInt())).thenReturn(true);
         return mock;
+    }
+
+    @Test
+    public void testFlow() throws Exception {
+        FreeStyleProject project = j.createFreeStyleProject();
+        project.createExecutable();
+
+        TestSuiteReportDetail reportDetail = new TestSuiteReportDetail(project, "testFilename", alwaysInRangeMock());
+
+        assertEquals("Test Suite report", reportDetail.getDisplayName());
+        assertEquals("testFilename", reportDetail.getFilename());
+        assertEquals(project, reportDetail.getProject());
+
+        List<String> list = reportDetail.getPerformanceReportTestCaseList();
+        assertEquals(0, list.size());
     }
 }
