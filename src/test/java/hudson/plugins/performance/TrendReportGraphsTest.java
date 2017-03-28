@@ -15,8 +15,6 @@ public class TrendReportGraphsTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
-    @Mock
-    private StaplerRequest request;
 
     @Test
     public void test() throws Exception {
@@ -24,7 +22,7 @@ public class TrendReportGraphsTest {
         FreeStyleBuild build = project.createExecutable();
         PerformanceReport report = new PerformanceReport();
 
-        TrendReportGraphs graphs = new TrendReportGraphs(project, build, request, "simpleFilename", report);
+        TrendReportGraphs graphs = new TrendReportGraphs(project, build, null, "simpleFilename", report);
 
         assertEquals(0, graphs.getUris().size());
         assertEquals("simpleFilename", graphs.getFilename());
