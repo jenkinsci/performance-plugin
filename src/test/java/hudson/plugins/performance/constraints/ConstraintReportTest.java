@@ -12,13 +12,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import jenkins.model.Jenkins;
-import hudson.plugins.performance.constraints.ConstraintEvaluation;
-import hudson.plugins.performance.constraints.ConstraintReport;
-import hudson.plugins.performance.constraints.AbsoluteConstraint;
-import hudson.plugins.performance.constraints.RelativeConstraint;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
 
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

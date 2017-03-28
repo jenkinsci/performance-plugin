@@ -3,6 +3,14 @@ package hudson.plugins.performance;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.actions.PerformanceProjectAction;
+import hudson.plugins.performance.details.GraphConfigurationDetail;
+import hudson.plugins.performance.parsers.JMeterParser;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportPosition;
+import hudson.plugins.performance.reports.UriReport;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.DataSetBuilder;
@@ -41,7 +49,7 @@ public class PerformanceReportMap implements ModelObject {
      *
      * @throws IOException If a report fails to parse.
      */
-    PerformanceReportMap(final PerformanceBuildAction buildAction,
+    public PerformanceReportMap(final PerformanceBuildAction buildAction,
                          TaskListener listener) throws IOException {
         this.buildAction = buildAction;
         parseReports(getBuild(), listener, new PerformanceReportCollector() {

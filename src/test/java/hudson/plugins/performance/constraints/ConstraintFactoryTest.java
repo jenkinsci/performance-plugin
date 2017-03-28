@@ -16,10 +16,10 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import hudson.model.AbstractBuild;
-import hudson.plugins.performance.PerformanceBuildAction;
-import hudson.plugins.performance.PerformanceReport;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.PerformanceReportMap;
-import hudson.plugins.performance.UriReport;
+import hudson.plugins.performance.reports.UriReport;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
 import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
 import hudson.plugins.performance.constraints.AbstractConstraint.Operator;

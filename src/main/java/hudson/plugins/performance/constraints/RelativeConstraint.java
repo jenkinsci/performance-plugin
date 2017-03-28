@@ -6,10 +6,10 @@ import hudson.model.AbstractProject;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.plugins.performance.PerformanceBuildAction;
 import hudson.plugins.performance.PerformancePublisher;
-import hudson.plugins.performance.PerformanceReport;
-import hudson.plugins.performance.UriReport;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
@@ -20,7 +20,11 @@ import org.kohsuke.stapler.QueryParameter;
 import java.io.PrintStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Compares new load test results with 1 or more load test results in the past in a dynamically

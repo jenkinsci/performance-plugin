@@ -1,9 +1,9 @@
 package hudson.plugins.performance.constraints;
 
 import hudson.model.Run;
-import hudson.plugins.performance.PerformanceBuildAction;
-import hudson.plugins.performance.PerformanceReport;
-import hudson.plugins.performance.UriReport;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
 
 import java.util.ArrayList;
 import java.util.Arrays;

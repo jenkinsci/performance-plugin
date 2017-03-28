@@ -1,18 +1,14 @@
 package hudson.plugins.performance.constraints;
 
 import hudson.AbortException;
-import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
 import hudson.model.Describable;
 import hudson.model.Run;
-import hudson.plugins.performance.PerformanceBuildAction;
-import hudson.plugins.performance.PerformanceReport;
-import hudson.plugins.performance.UriReport;
-import hudson.util.FormValidation;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.QueryParameter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;

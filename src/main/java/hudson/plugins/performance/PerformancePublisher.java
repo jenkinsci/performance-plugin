@@ -4,8 +4,27 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
-import hudson.plugins.performance.constraints.*;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.performance.actions.ExternalBuildReportAction;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.actions.PerformanceProjectAction;
+import hudson.plugins.performance.constraints.AbstractConstraint;
+import hudson.plugins.performance.constraints.ConstraintChecker;
+import hudson.plugins.performance.constraints.ConstraintDescriptor;
+import hudson.plugins.performance.constraints.ConstraintEvaluation;
+import hudson.plugins.performance.constraints.ConstraintFactory;
+import hudson.plugins.performance.constraints.ConstraintReport;
+import hudson.plugins.performance.constraints.ConstraintSettings;
+import hudson.plugins.performance.parsers.JMeterParser;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.plugins.performance.parsers.PerformanceReportParserDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -17,8 +36,17 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -333,7 +361,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             parsedReports = parser.parse(run, localReports, listener);
 
             if (parser.reportURL != null && !parser.reportURL.isEmpty()) {
-                run.addAction(new ExternalBuildReport(parser.reportURL));
+                run.addAction(new ExternalBuildReportAction(parser.reportURL));
             }
         }
 
