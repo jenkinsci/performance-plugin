@@ -89,8 +89,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
         return reportMap;
     }
 
-    public void setPerformanceReportMap(
-            WeakReference<PerformanceReportMap> performanceReportMap) {
+    public void setPerformanceReportMap(WeakReference<PerformanceReportMap> performanceReportMap) {
         this.performanceReportMap = performanceReportMap;
     }
 }
