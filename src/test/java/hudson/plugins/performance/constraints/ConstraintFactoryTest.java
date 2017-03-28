@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.is;
 import java.util.ArrayList;
 import java.util.List;
 
+import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,4 +1,4 @@
-package hudson.plugins.performance.constraints;
+package hudson.plugins.performance.constraints.blocks;
 
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;

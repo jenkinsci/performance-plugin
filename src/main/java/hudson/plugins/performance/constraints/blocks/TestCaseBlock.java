@@ -1,4 +1,4 @@
-package hudson.plugins.performance.constraints;
+package hudson.plugins.performance.constraints.blocks;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 

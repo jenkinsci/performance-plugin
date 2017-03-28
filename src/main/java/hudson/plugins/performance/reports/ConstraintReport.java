@@ -1,10 +1,13 @@
-package hudson.plugins.performance.constraints;
+package hudson.plugins.performance.reports;
 
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.StringParameterValue;
+import hudson.plugins.performance.constraints.AbsoluteConstraint;
+import hudson.plugins.performance.constraints.ConstraintEvaluation;
+import hudson.plugins.performance.constraints.RelativeConstraint;
 import jenkins.model.Jenkins;
 
 import java.io.File;

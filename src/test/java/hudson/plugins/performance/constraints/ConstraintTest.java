@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;

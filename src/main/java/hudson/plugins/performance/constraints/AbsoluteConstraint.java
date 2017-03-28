@@ -7,6 +7,7 @@ import hudson.AbortException;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
 import hudson.plugins.performance.descriptors.ConstraintDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;

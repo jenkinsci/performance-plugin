@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import hudson.plugins.performance.reports.ConstraintReport;
 import jenkins.model.Jenkins;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
 

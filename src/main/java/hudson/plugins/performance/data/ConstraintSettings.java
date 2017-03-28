@@ -1,4 +1,4 @@
-package hudson.plugins.performance.constraints;
+package hudson.plugins.performance.data;
 
 import hudson.model.BuildListener;
 

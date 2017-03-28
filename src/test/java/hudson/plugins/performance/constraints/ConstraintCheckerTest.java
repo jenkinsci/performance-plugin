@@ -16,6 +16,9 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 
+import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import hudson.plugins.performance.data.ConstraintSettings;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
