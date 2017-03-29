@@ -19,6 +19,7 @@ import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
 import org.jfree.data.category.CategoryDataset;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,6 +58,11 @@ public class TestSuiteReportDetailTest {
     @Before
     public void setUp() throws Exception {
         uriReportMap.put(TEST_URI, getUriReport());
+    }
+
+    @After
+    public void shutdown() throws Exception {
+        j.after();
     }
 
     private UriReport getUriReport() {

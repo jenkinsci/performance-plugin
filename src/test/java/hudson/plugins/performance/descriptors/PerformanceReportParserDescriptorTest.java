@@ -7,6 +7,7 @@ import hudson.plugins.performance.parsers.JUnitParser;
 import hudson.plugins.performance.parsers.JmeterSummarizerParser;
 import hudson.plugins.performance.parsers.TaurusParser;
 import hudson.plugins.performance.parsers.WrkSummarizerParser;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -17,6 +18,11 @@ public class PerformanceReportParserDescriptorTest {
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
+
+    @After
+    public void shutdown() throws Exception {
+        j.after();
+    }
 
     @Test
     public void name() throws Exception {

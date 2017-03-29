@@ -4,6 +4,7 @@ import hudson.model.FreeStyleProject;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +25,11 @@ public class PerformanceProjectActionTest {
 
     @Mock
     private StaplerRequest staplerRequest;
+
+    @After
+    public void shutdown() throws Exception {
+        j.after();
+    }
 
 
     @Test

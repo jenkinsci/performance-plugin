@@ -2,6 +2,7 @@ package hudson.plugins.performance.descriptors;
 
 import hudson.plugins.performance.constraints.AbsoluteConstraint;
 import hudson.plugins.performance.constraints.RelativeConstraint;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -12,6 +13,11 @@ public class ConstraintDescriptorTest {
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
+
+    @After
+    public void shutdown() throws Exception {
+        j.after();
+    }
 
     @Test
     public void name() throws Exception {
