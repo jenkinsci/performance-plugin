@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 public class ParserDetectorTest {
 
 
-//    @Test
+    @Test
     public void testFlow() throws Exception {
         File file;
 
