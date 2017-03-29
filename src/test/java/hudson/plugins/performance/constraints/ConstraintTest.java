@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,9 +18,9 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import hudson.plugins.performance.JMeterParser;
+import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.PerformancePublisher;
-import hudson.plugins.performance.PerformanceReportParser;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
 import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
 import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
@@ -27,6 +29,11 @@ public class ConstraintTest {
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
+
+    @After
+    public void shutdown() throws Exception {
+        j.after();
+    }
 
     /**
      * Testing: Escalation.INFORMATION

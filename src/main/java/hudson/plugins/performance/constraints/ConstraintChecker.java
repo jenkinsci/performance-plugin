@@ -2,6 +2,7 @@ package hudson.plugins.performance.constraints;
 
 import hudson.AbortException;
 import hudson.model.Run;
+import hudson.plugins.performance.data.ConstraintSettings;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;

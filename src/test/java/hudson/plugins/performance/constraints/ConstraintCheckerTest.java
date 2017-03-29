@@ -16,6 +16,9 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 
+import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import hudson.plugins.performance.data.ConstraintSettings;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,7 +26,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.steadystate.css.parser.ParseException;
@@ -31,10 +33,10 @@ import com.steadystate.css.parser.ParseException;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
-import hudson.plugins.performance.PerformanceBuildAction;
-import hudson.plugins.performance.PerformanceReport;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.PerformanceReportMap;
-import hudson.plugins.performance.UriReport;
+import hudson.plugins.performance.reports.UriReport;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
 import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
 import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
@@ -655,5 +657,18 @@ public class ConstraintCheckerTest {
         when(performanceReport3_1.getMax()).thenReturn((long) 10);
         when(performanceReport3_1.getMedian()).thenReturn((long) 10);
         when(performanceReport3_1.getMin()).thenReturn((long) 10);
+    }
+
+    @Test
+    public void test() throws Exception {
+        ConstraintChecker checker = new ConstraintChecker(null, null);
+        checker.setSettings(constraintSettings);
+        assertEquals(constraintSettings, checker.getSettings());
+
+        List<AbstractBuild<?, ?>> list = new ArrayList<AbstractBuild<?, ?>>();
+        list.add(abstractBuild0);
+        checker.setBuilds(list);
+
+        assertEquals(list, checker.getBuilds());
     }
 }

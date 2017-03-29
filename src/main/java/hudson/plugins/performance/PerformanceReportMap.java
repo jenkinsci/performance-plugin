@@ -3,15 +3,34 @@ package hudson.plugins.performance;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.actions.PerformanceProjectAction;
+import hudson.plugins.performance.details.GraphConfigurationDetail;
+import hudson.plugins.performance.parsers.JMeterParser;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.data.PerformanceReportPosition;
+import hudson.plugins.performance.reports.UriReport;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.DataSetBuilder;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * Root object of a performance report.
@@ -41,7 +60,7 @@ public class PerformanceReportMap implements ModelObject {
      *
      * @throws IOException If a report fails to parse.
      */
-    PerformanceReportMap(final PerformanceBuildAction buildAction,
+    public PerformanceReportMap(final PerformanceBuildAction buildAction,
                          TaskListener listener) throws IOException {
         this.buildAction = buildAction;
         parseReports(getBuild(), listener, new PerformanceReportCollector() {

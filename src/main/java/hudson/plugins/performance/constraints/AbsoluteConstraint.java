@@ -6,9 +6,11 @@ import java.util.List;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.model.Run;
-import hudson.plugins.performance.PerformanceBuildAction;
-import hudson.plugins.performance.PerformanceReport;
-import hudson.plugins.performance.UriReport;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import hudson.plugins.performance.descriptors.ConstraintDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
 import hudson.util.FormValidation;
 
 import org.apache.commons.lang.StringUtils;
