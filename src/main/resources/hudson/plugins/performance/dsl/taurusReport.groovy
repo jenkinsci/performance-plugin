@@ -9,8 +9,6 @@ taurusReport 'report_file.xml'
 */
 
 
-// The call(body) method in any file in workflowLibs.git/vars is exposed as a
-// method with the same name as the file.
 def call(fileName) {
     performanceReport parsers: [[$class: 'TaurusParser', glob: fileName]],
             relativeFailedThresholdNegative: 0.0, relativeFailedThresholdPositive: 0.0,
