@@ -9,7 +9,7 @@ import org.junit.runners.model.Statement;
 
 import java.util.Arrays;
 
-public class TaurusParserDSLVariableTest extends SingleJobTestBase {
+public class PerfReportDSLVariableTest extends SingleJobTestBase {
 
 
     @Test
@@ -17,10 +17,10 @@ public class TaurusParserDSLVariableTest extends SingleJobTestBase {
         this.story.addStep(new Statement() {
             public void evaluate() throws Throwable {
                 DumbSlave s = createSlave(story.j);
-                s.setLabelString("test taurus DSL function");
+                s.setLabelString("test performance report DSL function");
                 p = jenkins().createProject(WorkflowJob.class, "demo");
                 p.setDefinition(new CpsFlowDefinition(
-                        "node{ taurusReport 'test.xml' }"));
+                        "node{ perfReport 'test.xml' }"));
                 startBuilding();
                 waitForWorkflowToSuspend();
                 String log = Arrays.toString(p.getBuilds().getLastBuild().getLog(Integer.MAX_VALUE).toArray());

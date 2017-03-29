@@ -3,7 +3,7 @@ package hudson.plugins.performance.dsl
 
 /*
 <code>
-taurusReport 'report_file.xml'
+perfReport 'report_file.xml'
 </code>
 
 */

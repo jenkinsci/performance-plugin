@@ -14,12 +14,12 @@ import java.io.Reader;
 
 
 @Extension
-public class TaurusParserDSLVariable extends GlobalVariable {
+public class PerfReportDSLVariable extends GlobalVariable {
 
     @Nonnull
     @Override
     public String getName() {
-        return "taurusReport";
+        return "perfReport";
     }
 
     @Nonnull
