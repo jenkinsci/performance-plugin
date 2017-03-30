@@ -117,17 +117,12 @@ public class JMeterParserTest {
         final File reportFile = new File(getClass().getResource("/JENKINS-16627_CSV_instead_of_XML.jtl").toURI());
 
         // Execute system under test.
-        final PerformanceReport result = parser.parse(reportFile);
-
-        // Verify results.
-        assertNotNull(result);
-        assertEquals("The source file contains three samples. These should all have been added to the performance report.",
-                3, result.samplesCount());
-
-        UriReport uriReport = result.getUriReportMap().get("GET _ordermgmt_inventory");
-        assertEquals(0, uriReport.countErrors());
-        assertEquals("200", uriReport.getHttpCode());
-        assertEquals("GET /ordermgmt/inventory", uriReport.getUri());
+        try {
+            final PerformanceReport result = parser.parse(reportFile);
+            fail("cannot parse CSV file without header");
+        } catch (Exception ex) {
+            assertEquals("Missing required column", ex.getMessage());
+        }
     }
 
 
