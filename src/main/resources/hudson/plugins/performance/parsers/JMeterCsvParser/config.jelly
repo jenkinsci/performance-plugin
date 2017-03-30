@@ -3,13 +3,4 @@
   <f:entry title="${%Report files}" field="glob">
     <f:textbox/>
   </f:entry>
-  <f:entry title="${%csv.pattern}" field="pattern" description="${%csv.pattern.description}">
-    <f:textbox default="${%csv.pattern.default}"/>
-  </f:entry>
-  <f:entry title="${%csv.pattern.delimiter}" field="delimiter">
-    <f:textbox default="${%csv.pattern.delimiter.default}" />
-  </f:entry>
-  <f:entry title="${%csv.skipFirstLine}" field="skipFirstLine" description="${%csv.skipFirstLine.description}">
-    <f:checkbox default="true" />
-  </f:entry>
 </j:jelly>
