@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Auto-detect parser for file
@@ -22,23 +24,42 @@ public class ParserDetector {
         }
 
         if (line.startsWith("<?xml")) {
-            return detectXMLFile(reader);
-        } else if (line.startsWith("INF [")) {
+            return detectXMLFileType(reader);
+        } else if (isIagoFileType(line)) {
             return ParserType.IAGO;
-        } else if (line.startsWith("Running ")) {
+        } else if (isWRKFileType(line)) {
             return ParserType.WRK;
-        } else if (isJMeterCSVHeader(line)) {
+        } else if (isJMeterCSVFileType(line)) {
             return ParserType.JMETER_CSV;
         }
 
         return null;
     }
 
-    private static boolean isJMeterCSVHeader(String line) {
+    private static boolean isIagoFileType(String line) {
+        String patternString = "INF \\[.*\\] stats:.*";
+
+        Pattern pattern = Pattern.compile(patternString);
+
+        Matcher matcher = pattern.matcher(line);
+        return matcher.matches();
+    }
+
+    private static boolean isWRKFileType(String line) {
+        String patternString = "Running .*s test @.*";
+
+        Pattern pattern = Pattern.compile(patternString);
+
+        Matcher matcher = pattern.matcher(line);
+        return matcher.matches();
+    }
+
+    private static boolean isJMeterCSVFileType(String line) {
+//        JMeterCsvParser.DEFAULT_CSV_FORMAT;
         return false;
     }
 
-    private static ParserType detectXMLFile(final BufferedReader reader) throws IOException {
+    private static ParserType detectXMLFileType(final BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if (line == null) {
             throw new RuntimeException("File contains only xml header");
