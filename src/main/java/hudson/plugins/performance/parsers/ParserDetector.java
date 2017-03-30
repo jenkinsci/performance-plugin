@@ -16,11 +16,15 @@ public class ParserDetector {
         IAGO, JMETER_CSV, JMETER, JMETER_SUMMARIZER, JUNIT, TAURUS, WRK
     }
 
+    /**
+     * Detect report file type using file content.
+     * @return report file type.
+     */
     public static ParserType detect(File reportFile) throws IOException {
         final BufferedReader reader = new BufferedReader(new FileReader(reportFile));
         String line = reader.readLine();
         if (line == null) {
-            throw new RuntimeException("File " + reportFile.getName() + " is empty");
+            throw new IllegalArgumentException("File " + reportFile.getName() + " is empty");
         }
 
         if (line.startsWith("<?xml")) {
@@ -31,11 +35,16 @@ public class ParserDetector {
             return ParserType.WRK;
         } else if (isJMeterCSVFileType(line)) {
             return ParserType.JMETER_CSV;
+        } else if (isJMeterSummarizerFileType(line, reader)) {
+            return ParserType.JMETER_SUMMARIZER;
+        } else {
+            throw new IllegalArgumentException("Can not detect file type: " + reportFile.getName());
         }
-
-        return null;
     }
 
+    /**
+     * Detect Iago report type using pattern "INF \[.*\] stats:.*
+     */
     private static boolean isIagoFileType(String line) {
         String patternString = "INF \\[.*\\] stats:.*";
 
@@ -45,6 +54,9 @@ public class ParserDetector {
         return matcher.matches();
     }
 
+    /**
+     * Detect WRK report type using pattern "Running .*s test @.*"
+     */
     private static boolean isWRKFileType(String line) {
         String patternString = "Running .*s test @.*";
 
@@ -54,15 +66,46 @@ public class ParserDetector {
         return matcher.matches();
     }
 
+    /**
+     * Detect JMeterCSV report type using the search of main columns in CSV header,
+     *  such as timestamp, elapsed and url/label
+     */
     private static boolean isJMeterCSVFileType(String line) {
-//        JMeterCsvParser.DEFAULT_CSV_FORMAT;
+        line = line.toLowerCase();
+        return (line.contains("timestamp") && line.contains("elapsed") &&
+                (line.contains("url") || line.contains("label")));
+    }
+
+    /**
+     * Detect JMeterSummarizer report type.
+     * Read file, until It find a string "jmeter.reporters.Summariser: Generate Summary Results"
+     */
+    private static boolean isJMeterSummarizerFileType(String line, final BufferedReader reader) throws IOException {
+        String pattern = "jmeter.reporters.Summariser: Generate Summary Results";
+        if (line.contains(pattern)) {
+            return true;
+        }
+
+        line = reader.readLine();
+        while (line != null) {
+            if (line.contains(pattern)) {
+                return true;
+            }
+            line = reader.readLine();
+        }
         return false;
     }
 
+    /**
+     * Detect XML report type using the search of the first opening xml-tag.
+     *  <testResults> - JMETER;
+     *  <testsuite> - JUNIT;
+     *  <FinalStatus> - TAURUS.
+     */
     private static ParserType detectXMLFileType(final BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if (line == null) {
-            throw new RuntimeException("File contains only xml header");
+            throw new IllegalArgumentException("File contains only xml header");
         }
 
         if (line.contains("<testResults")) {
@@ -72,7 +115,7 @@ public class ParserDetector {
         } else if (line.contains("<FinalStatus>")) {
             return ParserType.TAURUS;
         } else {
-            throw new RuntimeException("Unknown xml file format");
+            throw new IllegalArgumentException("Unknown xml file format");
         }
     }
 }
