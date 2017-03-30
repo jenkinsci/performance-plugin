@@ -118,7 +118,7 @@ public class JMeterParserTest {
 
         // Execute system under test.
         try {
-            final PerformanceReport result = parser.parse(reportFile);
+            parser.parse(reportFile);
             fail("cannot parse CSV file without header");
         } catch (Exception ex) {
             assertEquals("Missing required column", ex.getMessage());
