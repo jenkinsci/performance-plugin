@@ -12,33 +12,30 @@ import java.util.regex.Pattern;
  */
 public class ParserDetector {
 
-    public enum ParserType {
-        IAGO, JMETER_CSV, JMETER, JMETER_SUMMARIZER, JUNIT, TAURUS, WRK
-    }
 
     /**
      * Detect report file type using file content.
      * @return report file type.
      */
-    public static ParserType detect(File reportFile) throws IOException {
-        final BufferedReader reader = new BufferedReader(new FileReader(reportFile));
+    public static String detect(String reportPath) throws IOException {
+        final BufferedReader reader = new BufferedReader(new FileReader(new File(reportPath)));
         String line = reader.readLine();
         if (line == null) {
-            throw new IllegalArgumentException("File " + reportFile.getName() + " is empty");
+            throw new IllegalArgumentException("File " + reportPath + " is empty");
         }
 
         if (line.startsWith("<?xml")) {
             return detectXMLFileType(reader);
         } else if (isIagoFileType(line)) {
-            return ParserType.IAGO;
+            return IagoParser.class.getSimpleName();
         } else if (isWRKFileType(line)) {
-            return ParserType.WRK;
+            return WrkSummarizerParser.class.getSimpleName();
         } else if (isJMeterCSVFileType(line)) {
-            return ParserType.JMETER_CSV;
+            return JMeterCsvParser.class.getSimpleName();
         } else if (isJMeterSummarizerFileType(line, reader)) {
-            return ParserType.JMETER_SUMMARIZER;
+            return JmeterSummarizerParser.class.getSimpleName();
         } else {
-            throw new IllegalArgumentException("Can not detect file type: " + reportFile.getName());
+            throw new IllegalArgumentException("Can not detect file type: " + reportPath);
         }
     }
 
@@ -102,18 +99,18 @@ public class ParserDetector {
      *  <testsuite> - JUNIT;
      *  <FinalStatus> - TAURUS.
      */
-    private static ParserType detectXMLFileType(final BufferedReader reader) throws IOException {
+    private static String detectXMLFileType(final BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if (line == null) {
             throw new IllegalArgumentException("File contains only xml header");
         }
 
         if (line.contains("<testResults")) {
-            return ParserType.JMETER;
+            return JMeterParser.class.getSimpleName();
         } else if (line.contains("<testsuite")) {
-            return ParserType.JUNIT;
+            return JUnitParser.class.getSimpleName();
         } else if (line.contains("<FinalStatus>")) {
-            return ParserType.TAURUS;
+            return TaurusParser.class.getSimpleName();
         } else {
             throw new IllegalArgumentException("Unknown xml file format");
         }
