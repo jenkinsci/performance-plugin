@@ -12,27 +12,27 @@ public class ParserDetectorTest {
 
     @Test
     public void testFlow() throws Exception {
-        File file;
+        String filePath;
 
-        file = new File(getClass().getResource("/TaurusXMLReport.xml").toURI());
-        assertEquals(ParserDetector.ParserType.TAURUS, ParserDetector.detect(file));
+        filePath = getClass().getResource("/TaurusXMLReport.xml").toURI().getPath();
+        assertEquals(TaurusParser.class.getSimpleName(), ParserDetector.detect(filePath));
 
-        file = new File(getClass().getResource("/JMeterResults.jtl").toURI());
-        assertEquals(ParserDetector.ParserType.JMETER, ParserDetector.detect(file));
+        filePath = getClass().getResource("/JMeterResults.jtl").toURI().getPath();
+        assertEquals(JMeterParser.class.getSimpleName(), ParserDetector.detect(filePath));
 
-        file = new File(getClass().getResource("/TEST-JUnitResults.xml").toURI());
-        assertEquals(ParserDetector.ParserType.JUNIT, ParserDetector.detect(file));
+        filePath = getClass().getResource("/TEST-JUnitResults.xml").toURI().getPath();
+        assertEquals(JUnitParser.class.getSimpleName(), ParserDetector.detect(filePath));
 
-        file = new File(getClass().getResource("/IagoResults.log").toURI());
-        assertEquals(ParserDetector.ParserType.IAGO, ParserDetector.detect(file));
+        filePath = getClass().getResource("/IagoResults.log").toURI().getPath();
+        assertEquals(IagoParser.class.getSimpleName(), ParserDetector.detect(filePath));
 
-        file = new File(getClass().getResource("/WrkResultsQuick.wrk").toURI());
-        assertEquals(ParserDetector.ParserType.WRK, ParserDetector.detect(file));
+        filePath = getClass().getResource("/WrkResultsQuick.wrk").toURI().getPath();
+        assertEquals(WrkSummarizerParser.class.getSimpleName(), ParserDetector.detect(filePath));
 
-        file = new File(getClass().getResource("/JMeterCsvResults.csv").toURI());
-        assertEquals(ParserDetector.ParserType.JMETER_CSV, ParserDetector.detect(file));
+        filePath = getClass().getResource("/JMeterCsvResults.csv").toURI().getPath();
+        assertEquals(JMeterCsvParser.class.getSimpleName(), ParserDetector.detect(filePath));
 
-        file = new File(getClass().getResource("/summary.log").toURI());
-        assertEquals(ParserDetector.ParserType.JMETER_SUMMARIZER, ParserDetector.detect(file));
+        filePath = getClass().getResource("/summary.log").toURI().getPath();
+        assertEquals(JmeterSummarizerParser.class.getSimpleName(), ParserDetector.detect(filePath));
     }
 }
