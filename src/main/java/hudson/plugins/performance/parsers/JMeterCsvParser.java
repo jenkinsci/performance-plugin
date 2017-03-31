@@ -28,7 +28,7 @@ public class JMeterCsvParser extends AbstractParser {
 
 
     @DataBoundConstructor
-    public JMeterCsvParser(String glob) throws Exception {
+    public JMeterCsvParser(String glob) {
         super(glob);
     }
 

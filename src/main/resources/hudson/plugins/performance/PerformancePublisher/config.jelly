@@ -1,11 +1,17 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+
+   <f:entry title="${%Report files}" field="reportFiles" description="${%report.files.description}">
+      <f:textbox />
+   </f:entry>
+
   <f:entry title="${%Performance report}" field="parsers">
     <f:hetero-list name="parsers" hasHeader="true"
                    descriptors="${descriptor.getParserDescriptors()}"
                    items="${instance.parsers}"
                    addCaption="${%Add a new report}"/>
   </f:entry>
+
   <f:entry title="${%Performance display}">
     <table width="300px">
       <tbody>

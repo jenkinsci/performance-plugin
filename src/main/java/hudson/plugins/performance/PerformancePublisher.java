@@ -184,8 +184,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private boolean ignoreUnstableBuilds;
     private boolean persistConstraintLog;
 
+    private List<String> reportFiles;
+
     @DataBoundConstructor
-    public PerformancePublisher(int errorFailedThreshold,
+    public PerformancePublisher(String reportFiles,
+                                int errorFailedThreshold,
                                 int errorUnstableThreshold,
                                 String errorUnstableResponseTimeThreshold,
                                 double relativeFailedThresholdPositive,
@@ -200,6 +203,10 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                                 boolean compareBuildPrevious,
                                 List<PerformanceReportParser> parsers,
                                 boolean modeThroughput) {
+
+        this.reportFiles = (reportFiles == null) ?
+                Collections.<String>emptyList() :
+                Arrays.asList(reportFiles.split(","));
 
         this.errorFailedThreshold = errorFailedThreshold;
         this.errorUnstableThreshold = errorUnstableThreshold;
