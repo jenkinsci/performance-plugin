@@ -56,9 +56,9 @@ public class IagoParser extends AbstractParser {
     public IagoParser(String glob, String pattern, String delimiter) {
         super(glob);
         this.statsDateFormat = getStatsDateFormat();
-        this.delimiter = delimiter;
-        this.pattern = pattern;
-        patterns = pattern.split(delimiter);
+        this.delimiter = (delimiter == null) ? "" : delimiter;
+        this.pattern = (pattern == null) ? "" : pattern;
+        patterns = this.pattern.split(this.delimiter);
     }
 
     @Override

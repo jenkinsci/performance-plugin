@@ -78,6 +78,23 @@
             <artifactId>symbol-annotation</artifactId>
             <version>1.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-cps</artifactId>
+            <version>${workflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-aggregator</artifactId>
+            <version>${workflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-aggregator</artifactId>
+            <version>${workflow.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -115,10 +132,11 @@
     </build>
 
     <properties>
-        <jenkins.version>1.580.1</jenkins.version>
+        <jenkins.version>1.607</jenkins.version>
         <java.level>6</java.level>
         <!-- disable FindBugs temporarily since there are 62 bugs -->
         <findbugs.failOnError>false</findbugs.failOnError>
+        <workflow.version>1.13</workflow.version>
     </properties>
 
     <repositories>

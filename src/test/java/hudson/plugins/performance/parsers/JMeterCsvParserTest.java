@@ -11,8 +11,6 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 public class JMeterCsvParserTest {
-    private static final Boolean SKIP_FIRST_LINE = true;
-    private static final String TEST_FILE_PATTERN = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,bytes";
     private static final String NO_GLOB = null;
     private File reportFile;
     private File reportFile2;
@@ -28,7 +26,7 @@ public class JMeterCsvParserTest {
 
     @Test
     public void canParseCsvFile() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, JMeterCsvParser.DEFAULT_DELIMITER, SKIP_FIRST_LINE);
+        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB);
         parseAndVerifyResult(parser, reportFile);
     }
 
@@ -40,7 +38,7 @@ public class JMeterCsvParserTest {
 
     @Test
     public void testDateDateFormats() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, TEST_FILE_PATTERN, JMeterCsvParser.DEFAULT_DELIMITER, SKIP_FIRST_LINE);
+        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB);
         parseAndVerifyResult(parser, reportFile);
         parseAndVerifyResult(parser, reportFile2);
         parseAndVerifyResult(parser, reportFile3);
@@ -54,18 +52,18 @@ public class JMeterCsvParserTest {
     }
 
     @Test
-    public void testCSVHeaderValidation() throws Exception {
-        JMeterCsvParser.DescriptorImpl descriptor = new JMeterCsvParser.DescriptorImpl();
+    public void testLookingForDelimeter() throws Exception {
+        assertEquals(",", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc,adzxcAZZAAZ"));
+        assertEquals("\t", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc\tadzxcAZZAAZ"));
+        assertEquals(";", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc;adzxcAZZAAZ"));
+        assertEquals("^", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc^adzxcAZZAAZ"));
+        assertEquals(":", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc:tadzxcAZZAAZ"));
 
-        FormValidation validation = descriptor.doCheckPattern("timestamp,success,elapsed,responseCode,URL");
-        assertEquals(FormValidation.ok(), validation);
-
-        validation = descriptor.doCheckPattern("timestamp,success,elapsed,responseCode,label");
-        assertEquals(FormValidation.ok(), validation);
-
-        validation = descriptor.doCheckPattern("timestamp,success,elapsed,responseCode");
-        assertEquals(FormValidation.error(Messages
-                .CsvParser_validation_MissingFields() + ": URL (or label)").getMessage(), validation.getMessage());
-
+        try {
+            JMeterCsvParser.lookingForDelimiter("asdadadadasd");
+            fail("Can not find delimiter in this string");
+        } catch (Exception ex) {
+            assertEquals("Cannot find delimiter in header asdadadadasd", ex.getMessage());
+        }
     }
 }
