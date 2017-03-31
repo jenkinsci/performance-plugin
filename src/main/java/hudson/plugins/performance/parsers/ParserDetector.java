@@ -67,8 +67,8 @@ public class ParserDetector {
      * Detect JMeterCSV report type using the search of main columns in CSV header,
      *  such as timestamp, elapsed and url/label
      */
-    private static boolean isJMeterCSVFileType(String line) {
-        line = line.toLowerCase();
+    private static boolean isJMeterCSVFileType(String header) {
+        String line = header.toLowerCase();
         return (line.contains("timestamp") && line.contains("elapsed") &&
                 (line.contains("url") || line.contains("label")));
     }
@@ -77,8 +77,9 @@ public class ParserDetector {
      * Detect JMeterSummarizer report type.
      * Read file, until It find a string "jmeter.reporters.Summariser: Generate Summary Results"
      */
-    private static boolean isJMeterSummarizerFileType(String line, final BufferedReader reader) throws IOException {
+    private static boolean isJMeterSummarizerFileType(String firstLine, final BufferedReader reader) throws IOException {
         String pattern = "jmeter.reporters.Summariser: Generate Summary Results";
+        String line = firstLine;
         if (line.contains(pattern)) {
             return true;
         }
