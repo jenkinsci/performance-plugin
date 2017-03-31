@@ -11,7 +11,7 @@ public class JmeterSummarizerParserTest {
 
     @Test
     public void testParse() throws Exception {
-        JmeterSummarizerParser jmeterSummarizerParser = new JmeterSummarizerParser(null, null);
+        JmeterSummarizerParser jmeterSummarizerParser = new JmeterSummarizerParser(null);
         File summaryLogFile = new File(getClass().getResource("/summary.log").toURI());
         PerformanceReport performanceReport = jmeterSummarizerParser.parse(summaryLogFile);
 
