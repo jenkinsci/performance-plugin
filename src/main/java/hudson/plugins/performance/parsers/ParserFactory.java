@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class ParserFactory {
 
-    public static AbstractParser getParser(String filePath) throws IOException {
+    public static PerformanceReportParser getParser(String filePath) throws IOException {
         final String parserName = ParserDetector.detect(filePath);
 
         if (parserName.equals(JMeterParser.class.getSimpleName())) {
@@ -18,9 +18,9 @@ public class ParserFactory {
         } else if (parserName.equals(WrkSummarizerParser.class.getSimpleName())) {
             return new WrkSummarizerParser(filePath);
         } else if (parserName.equals(JmeterSummarizerParser.class.getSimpleName())) {
-            return new JmeterSummarizerParser(filePath, ""); // TODO: summarizer
+            return new JmeterSummarizerParser(filePath);
         } else if (parserName.equals(IagoParser.class.getSimpleName())) {
-            return new IagoParser(filePath, "", ""); // TODO: IAGO
+            return new IagoParser(filePath);
         } else {
             throw new IllegalArgumentException("Unknown parser type: " + parserName);
         }
