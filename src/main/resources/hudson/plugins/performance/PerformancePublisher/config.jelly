@@ -52,7 +52,7 @@
             <label>${%Unstable}</label>
           </td>
           <td>
-            <f:textbox field="errorUnstableThreshold"/>
+            <f:textbox field="errorUnstableThreshold" default="-1"/>
           </td>
         </tr>
         <tr>
@@ -60,7 +60,7 @@
             <label>${%Failed}</label>
           </td>
           <td>
-            <f:textbox field="errorFailedThreshold"/>
+            <f:textbox field="errorFailedThreshold" default="-1"/>
           </td>
         </tr>
       </table>

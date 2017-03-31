@@ -15,6 +15,7 @@ def call(fileName) {
 
     performanceReport parsers: [[$class: className, glob: fileName]],
             relativeFailedThresholdNegative: 0.0, relativeFailedThresholdPositive: 0.0,
-            relativeUnstableThresholdNegative: 0.0, relativeUnstableThresholdPositive: 0.0
+            relativeUnstableThresholdNegative: 0.0, relativeUnstableThresholdPositive: 0.0,
+            errorFailedThreshold: 1,  errorUnstableThreshold: -1
 }
 
