@@ -6,9 +6,7 @@ import hudson.model.FreeStyleBuild;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.parsers.IagoParser.Stats;
 import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.UriReport;
 import junit.framework.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.HudsonTestCase;
 
@@ -16,7 +14,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;

@@ -4,11 +4,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
-import hudson.plugins.performance.constraints.AbsoluteConstraint;
 import hudson.plugins.performance.constraints.AbstractConstraint;
-import hudson.plugins.performance.parsers.JMeterParser;
-import hudson.plugins.performance.parsers.JUnitParser;
-import hudson.plugins.performance.parsers.PerformanceReportParser;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
@@ -18,9 +14,6 @@ import org.jvnet.hudson.test.TestBuilder;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
-import java.util.AbstractCollection;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
