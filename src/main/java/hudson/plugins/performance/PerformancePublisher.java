@@ -325,7 +325,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     protected List<PerformanceReportParser> getParsers(FilePath workspace) throws IOException {
         final List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
         if (reportFiles != null) {
-            for (String filePath : reportFiles.split(",")) {
+            for (String filePath : reportFiles.split(";")) {
                 if (!filePath.isEmpty()) {
                     parsers.add(ParserFactory.getParser(workspace, filePath));
                 }
@@ -342,7 +342,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         if (parsers != null && !this.parsers.isEmpty()) {
             StringBuilder builder = new StringBuilder();
             for (PerformanceReportParser p : this.parsers) {
-                builder.append(p.glob).append(',');
+                builder.append(p.glob).append(';');
             }
             builder.setLength(builder.length() - 1);
             this.reportFiles = builder.toString();
