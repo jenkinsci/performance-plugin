@@ -179,6 +179,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private boolean ignoreUnstableBuilds;
     private boolean persistConstraintLog;
 
+    /**
+     * Migrate into String reportFiles with autodetect parser type.
+     * Now this param use for restore previous job configs in GUI mode.
+     */
+    @Deprecated
+    private List<PerformanceReportParser> parsers;
+
     private String reportFiles;
 
     @DataBoundConstructor
@@ -196,8 +203,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                                 boolean modeOfThreshold,
                                 boolean failBuildIfNoResultFile,
                                 boolean compareBuildPrevious,
-                                boolean modeThroughput) {
-
+                                boolean modeThroughput,
+                                /**
+                                 * Deprecated. Now use for support previous pipeline jobs.
+                                 */
+                                List<PerformanceReportParser> parsers) {
+        this.parsers = parsers;
         this.reportFiles = reportFiles;
 
         this.errorFailedThreshold = errorFailedThreshold;
@@ -322,9 +333,34 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return parsers;
     }
 
+    /**
+     * Used for migrate from user choose of parser to autodetect parser
+     */
+    @Deprecated
+    private void migrateParsers() {
+        if (parsers != null && !this.parsers.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (PerformanceReportParser p : this.parsers) {
+                builder.append(p.glob).append(',');
+            }
+            builder.setLength(builder.length() - 1);
+            this.reportFiles = builder.toString();
+            this.parsers = null;
+        }
+    }
+    /**
+     * Now use for support previous pipeline jobs.
+     */
+    @Deprecated
+    public List<PerformanceReportParser> getParsers() {
+        return parsers;
+    }
+
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener)
             throws InterruptedException, IOException {
+        // Migrate config when run job
+        migrateParsers();
 
         final List<PerformanceReportParser> parsers = getParsers(workspace);
 
