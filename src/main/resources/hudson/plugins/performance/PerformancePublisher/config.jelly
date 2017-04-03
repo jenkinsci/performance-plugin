@@ -5,13 +5,6 @@
       <f:textbox />
    </f:entry>
 
-  <f:entry title="${%Performance report}" field="parsers">
-    <f:hetero-list name="parsers" hasHeader="true"
-                   descriptors="${descriptor.getParserDescriptors()}"
-                   items="${instance.parsers}"
-                   addCaption="${%Add a new report}"/>
-  </f:entry>
-
   <f:entry title="${%Performance display}">
     <table width="300px">
       <tbody>
