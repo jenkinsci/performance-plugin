@@ -1,8 +1,24 @@
 <div>
     <p>
         Specify the path to the Performance report files, relative to the <a href='ws/'>workspace root</a>.
-        Plugin will be automatically detect parser for each report file. You can specify multiple files, separated by comma.
+        Plugin will be automatically detect parser for each report file.
     </p>
+
+    <ul>
+        <li>You can specify multiple files and directories separated by semicolon.
+        <li>You use an Ant 'fileset' pattern.
+    </ul>
+    <p>
+        Default Values are:
+    </p>
+    <ul>
+        <li>JMeter reports: "**/*.jtl"</li>
+        <li>JMeter csv reports: "**/*.csv"</li>
+        <li>JMeter Summariser reports: "**/*.log"</li>
+        <li>Taurus reports: "**/*.xml"</li>
+        <li>JUnit report:   "**/TEST-*.xml"</li>
+        <li>wrk report:  "**/*.wrk"</li>
+    </ul>
 
     <ul>
         * By default jmeter writes summariser statistics to jmeter.log. To enable logging
