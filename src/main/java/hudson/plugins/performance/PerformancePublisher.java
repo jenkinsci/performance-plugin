@@ -180,7 +180,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private boolean ignoreUnstableBuilds;
     private boolean persistConstraintLog;
 
-    private List<String> reportFiles;
+    private String reportFiles;
 
     @DataBoundConstructor
     public PerformancePublisher(String reportFiles,
@@ -197,12 +197,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                                 boolean modeOfThreshold,
                                 boolean failBuildIfNoResultFile,
                                 boolean compareBuildPrevious,
-                                List<PerformanceReportParser> parsers,
                                 boolean modeThroughput) {
 
-        this.reportFiles = (reportFiles == null) ?
-                Collections.<String>emptyList() :
-                Arrays.asList(reportFiles.split(","));
+        this.reportFiles = reportFiles;
 
         this.errorFailedThreshold = errorFailedThreshold;
         this.errorUnstableThreshold = errorUnstableThreshold;
@@ -220,9 +217,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         this.failBuildIfNoResultFile = failBuildIfNoResultFile;
         this.compareBuildPrevious = compareBuildPrevious;
 
-//        if (parsers == null)
-//            parsers = Collections.emptyList();
-//        this.parsers = new ArrayList<PerformanceReportParser>(parsers);
         this.modePerformancePerTestCase = modePerformancePerTestCase;
         this.modeThroughput = modeThroughput;
     }
@@ -242,9 +236,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return BuildStepMonitor.NONE;
     }
 
-//    public List<PerformanceReportParser> getParsers() {
-//        return parsers;
-//    }
 
     /**
      * <p>
@@ -320,23 +311,25 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return files;
     }
 
+    protected List<PerformanceReportParser> getParsers(FilePath workspace) throws IOException {
+        final List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
+        if (reportFiles != null) {
+            for (String filePath : reportFiles.split(",")) {
+                if (!filePath.isEmpty()) {
+                    parsers.add(ParserFactory.getParser(workspace.getRemote() + '/' + filePath));
+                }
+            }
+        }
+        return parsers;
+    }
+
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener)
             throws InterruptedException, IOException {
+
+        final List<PerformanceReportParser> parsers = getParsers(workspace);
+
         PrintStream logger = listener.getLogger();
-
-        logger.println("WORKSPACE " + workspace.getRemote());
-
-        List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
-        for (String filePath : reportFiles) {
-            if (!filePath.isEmpty()) {
-                logger.println("File " + new File(filePath).getAbsolutePath());
-                logger.println("File to" + workspace.getRemote() + '/' + filePath);
-
-                parsers.add(ParserFactory.getParser(workspace.getRemote() + '/' + filePath));
-            }
-        }
-
         double thresholdTolerance = 0.00000001;
         Result result = Result.SUCCESS;
         run.setResult(Result.SUCCESS);
@@ -1140,6 +1133,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setModeEvaluation(boolean modeEvaluation) {
         this.modeEvaluation = modeEvaluation;
+    }
+
+    public String getReportFiles() {
+        return reportFiles;
+    }
+
+    @DataBoundSetter
+    public void setReportFiles(String reportFiles) {
+        this.reportFiles = reportFiles;
     }
 
 }
