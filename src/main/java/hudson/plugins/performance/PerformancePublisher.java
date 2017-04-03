@@ -881,16 +881,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return localReports;
     }
 
-//    public Object readResolve() {
-//         data format migration
-//        if (parsers == null)
-//            parsers = new ArrayList<PerformanceReportParser>();
-//        if (filename != null) {
-//            parsers.add(new JMeterParser(filename));
-//            filename = null;
-//        }
-//        return this;
-//    }
 
     public int getErrorFailedThreshold() {
         return errorFailedThreshold;
