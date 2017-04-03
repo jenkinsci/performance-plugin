@@ -54,11 +54,7 @@ public class ConstraintTest {
         List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
         abstractBuildsList.add(absoluteConstraint);
 
-        List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
-        abstractParserList.add(new JMeterParser("testResult.xml"));
-
-        PerformancePublisher performancePublisher = new PerformancePublisher("", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false,
-                abstractParserList, true);
+        PerformancePublisher performancePublisher = new PerformancePublisher("", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false, true);
         performancePublisher.setModeEvaluation(true);
         performancePublisher.setConstraints(abstractBuildsList);
         performancePublisher.setIgnoreFailedBuilds(false);
@@ -100,11 +96,8 @@ public class ConstraintTest {
         List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
         abstractBuildsList.add(absoluteConstraint);
 
-        List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
-        abstractParserList.add(new JMeterParser("testResult.xml"));
 
-        PerformancePublisher performancePublisher = new PerformancePublisher("testResult.xml", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false,
-                abstractParserList, true);
+        PerformancePublisher performancePublisher = new PerformancePublisher("testResult.xml", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false, true);
         performancePublisher.setModeEvaluation(true);
         performancePublisher.setConstraints(abstractBuildsList);
         performancePublisher.setIgnoreFailedBuilds(false);
@@ -146,11 +139,7 @@ public class ConstraintTest {
         List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
         abstractBuildsList.add(absoluteConstraint);
 
-        List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
-        abstractParserList.add(new JMeterParser("testResult.xml"));
-
-        PerformancePublisher performancePublisher = new PerformancePublisher(getClass().getResource("/constraint-test.xml").getFile(), 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false,
-                abstractParserList, true);
+        PerformancePublisher performancePublisher = new PerformancePublisher(getClass().getResource("/constraint-test.xml").getFile(), 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false, true);
         performancePublisher.setModeEvaluation(true);
         performancePublisher.setConstraints(abstractBuildsList);
         performancePublisher.setIgnoreFailedBuilds(false);
@@ -192,11 +181,7 @@ public class ConstraintTest {
         List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
         abstractBuildsList.add(absoluteConstraint);
 
-        List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
-        abstractParserList.add(new JMeterParser("testResult.xml"));
-
-        PerformancePublisher performancePublisher = new PerformancePublisher("", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false,
-                abstractParserList, true);
+        PerformancePublisher performancePublisher = new PerformancePublisher("", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false, true);
         performancePublisher.setModeEvaluation(true);
         performancePublisher.setConstraints(abstractBuildsList);
         performancePublisher.setIgnoreFailedBuilds(false);
@@ -238,11 +223,7 @@ public class ConstraintTest {
         List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
         abstractBuildsList.add(absoluteConstraint);
 
-        List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
-        abstractParserList.add(new JMeterParser("testResult.xml"));
-
-        PerformancePublisher performancePublisher = new PerformancePublisher(getClass().getResource("/constraint-test.xml").getFile(), 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false,
-                abstractParserList, true);
+        PerformancePublisher performancePublisher = new PerformancePublisher(getClass().getResource("/constraint-test.xml").getFile(), 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false, true);
         performancePublisher.setModeEvaluation(true);
         performancePublisher.setConstraints(abstractBuildsList);
         performancePublisher.setIgnoreFailedBuilds(false);
@@ -284,11 +265,7 @@ public class ConstraintTest {
         List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
         abstractBuildsList.add(absoluteConstraint);
 
-        List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
-        abstractParserList.add(new JMeterParser("testResult.xml"));
-
-        PerformancePublisher performancePublisher = new PerformancePublisher(getClass().getResource("/constraint-test.xml").getFile(), 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false,
-                abstractParserList, true);
+        PerformancePublisher performancePublisher = new PerformancePublisher(getClass().getResource("/constraint-test.xml").getFile(), 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false, true);
         performancePublisher.setModeEvaluation(true);
         performancePublisher.setConstraints(abstractBuildsList);
         performancePublisher.setIgnoreFailedBuilds(false);
@@ -330,11 +307,7 @@ public class ConstraintTest {
         List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
         abstractBuildsList.add(absoluteConstraint);
 
-        List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
-        abstractParserList.add(new JMeterParser("testResult.xml"));
-
-        PerformancePublisher performancePublisher = new PerformancePublisher("", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false,
-                abstractParserList, true);
+        PerformancePublisher performancePublisher = new PerformancePublisher("", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false, true);
         performancePublisher.setModeEvaluation(true);
         performancePublisher.setConstraints(abstractBuildsList);
         performancePublisher.setIgnoreFailedBuilds(false);
@@ -376,11 +349,7 @@ public class ConstraintTest {
         List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
         abstractBuildsList.add(absoluteConstraint);
 
-        List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
-        abstractParserList.add(new JMeterParser("testResult.xml"));
-
-        PerformancePublisher performancePublisher = new PerformancePublisher("", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false,
-                abstractParserList, true);
+        PerformancePublisher performancePublisher = new PerformancePublisher("", 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false, true);
         performancePublisher.setModeEvaluation(true);
         performancePublisher.setConstraints(abstractBuildsList);
         performancePublisher.setIgnoreFailedBuilds(false);
@@ -422,11 +391,7 @@ public class ConstraintTest {
         List<AbstractConstraint> abstractBuildsList = new ArrayList<AbstractConstraint>();
         abstractBuildsList.add(absoluteConstraint);
 
-        List<PerformanceReportParser> abstractParserList = new ArrayList<PerformanceReportParser>();
-        abstractParserList.add(new JMeterParser("testResult.xml"));
-
-        PerformancePublisher performancePublisher = new PerformancePublisher(getClass().getResource("/constraint-test.xml").getFile(), 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false,
-                abstractParserList, true);
+        PerformancePublisher performancePublisher = new PerformancePublisher(getClass().getResource("/constraint-test.xml").getFile(), 10, 20, "", 0, 0, 0, 0, 0, false, "", false, true, false, true);
         performancePublisher.setModeEvaluation(true);
         performancePublisher.setConstraints(abstractBuildsList);
         performancePublisher.setIgnoreFailedBuilds(false);

@@ -37,8 +37,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
-                        "**/*.jtl")), false));
+                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -68,8 +67,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
-                        "${JOB_NAME}/*.jtl")), false));
+                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -100,8 +98,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("test.jtl", 0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
-                        "**/*.jtl")), false));
+                new PerformancePublisher("test.jtl", 0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, false, false));
 
         FreeStyleBuild b = assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -132,8 +129,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
-                        "**/*.jtl")), false));
+                new PerformancePublisher("", 0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false, false));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -161,8 +157,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         FreeStyleProject p = createFreeStyleProject();
 
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, Collections.<PerformanceReportParser>singletonList(new JUnitParser(
-                        "**/*.xml")), false));
+                new PerformancePublisher("", 0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, false));
         // first build
         p.getBuildersList().add(new TestBuilder() {
             @Override
@@ -197,7 +192,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
     @Test
     public void testEmptyReportParsersList() throws Exception {
         PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, true, "MRT",
-                true, true, true, Collections.<PerformanceReportParser>emptyList(), true);
+                true, true, true, true);
         RunExt run = new RunExt( createFreeStyleProject());
         run.onStartBuilding();
         try {
