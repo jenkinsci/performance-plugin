@@ -21,7 +21,6 @@ import hudson.plugins.performance.constraints.ConstraintFactory;
 import hudson.plugins.performance.parsers.ParserFactory;
 import hudson.plugins.performance.reports.ConstraintReport;
 import hudson.plugins.performance.data.ConstraintSettings;
-import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;

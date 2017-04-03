@@ -4,6 +4,8 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.constraints.AbsoluteConstraint;
+import hudson.plugins.performance.constraints.AbstractConstraint;
 import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.JUnitParser;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
@@ -16,7 +18,10 @@ import org.jvnet.hudson.test.TestBuilder;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
+import java.util.AbstractCollection;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -212,5 +217,74 @@ public class PerformancePublisherTest extends HudsonTestCase {
         protected void onStartBuilding() {
             super.onStartBuilding();
         }
+    }
+
+    @Test
+    public void testOptionMethods() throws Exception {
+        final double DELTA = 0.001;
+        PerformancePublisher publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
+                true, true, true, true);
+        assertEquals("reportFile.xml", publisher.getReportFiles());
+        assertEquals(15, publisher.getErrorFailedThreshold());
+        assertEquals(16, publisher.getErrorUnstableThreshold());
+        assertEquals("reportFile.xml:100", publisher.getErrorUnstableResponseTimeThreshold());
+        assertEquals(9.0, publisher.getRelativeFailedThresholdPositive(), DELTA);
+        assertEquals(8.0, publisher.getRelativeFailedThresholdNegative(), DELTA);
+        assertEquals(7.0, publisher.getRelativeUnstableThresholdPositive(), DELTA);
+        assertEquals(6.0, publisher.getRelativeUnstableThresholdNegative(), DELTA);
+        assertEquals(3, publisher.getNthBuildNumber());
+        assertTrue(publisher.getModePerformancePerTestCase());
+        assertEquals("MRT", publisher.getConfigType());
+        assertTrue(publisher.getModeOfThreshold());
+        assertTrue(publisher.isFailBuildIfNoResultFile());
+        assertTrue(publisher.getCompareBuildPrevious());
+        assertTrue(publisher.isModeThroughput());
+
+        publisher.setReportFiles("newReportFile.xml");
+        publisher.setErrorFailedThreshold(0);
+        publisher.setErrorUnstableThreshold(0);
+        publisher.setErrorUnstableResponseTimeThreshold("newReportFile.xml:101");
+        publisher.setRelativeFailedThresholdPositive(0.0);
+        publisher.setRelativeFailedThresholdNegative(0.0);
+        publisher.setRelativeUnstableThresholdPositive(0.0);
+        publisher.setRelativeUnstableThresholdNegative(0.0);
+        publisher.setNthBuildNumber(0);
+        publisher.setModePerformancePerTestCase(false);
+        publisher.setConfigType("ART");
+        publisher.setModeOfThreshold(false);
+        publisher.setFailBuildIfNoResultFile(false);
+        publisher.setCompareBuildPrevious(false);
+        publisher.setModeThroughput(false);
+
+        assertEquals("newReportFile.xml", publisher.getReportFiles());
+        assertEquals(0, publisher.getErrorFailedThreshold());
+        assertEquals(0, publisher.getErrorUnstableThreshold());
+        assertEquals("newReportFile.xml:101", publisher.getErrorUnstableResponseTimeThreshold());
+        assertEquals(0.0, publisher.getRelativeFailedThresholdPositive(), DELTA);
+        assertEquals(0.0, publisher.getRelativeFailedThresholdNegative(), DELTA);
+        assertEquals(0.0, publisher.getRelativeUnstableThresholdPositive(), DELTA);
+        assertEquals(0.0, publisher.getRelativeUnstableThresholdNegative(), DELTA);
+        assertEquals(0, publisher.getNthBuildNumber());
+        assertFalse(publisher.getModePerformancePerTestCase());
+        assertEquals("ART", publisher.getConfigType());
+        assertFalse(publisher.getModeOfThreshold());
+        assertFalse(publisher.isFailBuildIfNoResultFile());
+        assertFalse(publisher.getCompareBuildPrevious());
+        assertFalse(publisher.isModeThroughput());
+
+        publisher.setModeEvaluation(true);
+        assertTrue(publisher.isModeEvaluation());
+        publisher.setPersistConstraintLog(true);
+        assertTrue(publisher.isPersistConstraintLog());
+        publisher.setIgnoreUnstableBuilds(true);
+        assertTrue(publisher.isIgnoreUnstableBuilds());
+        publisher.setIgnoreFailedBuilds(true);
+        assertTrue(publisher.isIgnoreFailedBuilds());
+        publisher.setModeRelativeThresholds(true);
+        assertTrue(publisher.getModeRelativeThresholds());
+        List<AbstractConstraint> allConstraints = AbstractConstraint.all();
+        publisher.setConstraints(allConstraints);
+        assertEquals(allConstraints, publisher.getConstraints());
+        assertEquals(PerformancePublisher.optionType, PerformancePublisher.getOptionType());
     }
 }
