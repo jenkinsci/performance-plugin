@@ -180,11 +180,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private boolean persistConstraintLog;
 
     /**
+     * @deprecated as of 2.2. for compatibility
      * Migrate into String reportFiles with autodetect parser type.
      * Now this param use for restore previous job configs in GUI mode.
      */
     @Deprecated
-    private List<PerformanceReportParser> parsers;
+    private transient List<PerformanceReportParser> parsers;
 
     private String reportFiles;
 
@@ -326,7 +327,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         if (reportFiles != null) {
             for (String filePath : reportFiles.split(",")) {
                 if (!filePath.isEmpty()) {
-                    parsers.add(ParserFactory.getParser(workspace.getRemote() + '/' + filePath));
+                    parsers.add(ParserFactory.getParser(workspace, filePath));
                 }
             }
         }

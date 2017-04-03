@@ -1,26 +1,46 @@
 package hudson.plugins.performance.parsers;
 
+import hudson.FilePath;
+
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Map;
 
 public class ParserFactory {
 
-    public static PerformanceReportParser getParser(String filePath) throws IOException {
-        final String parserName = ParserDetector.detect(filePath);
+    protected static final Map<String, String> defaultGlobPatterns = new Hashtable<String, String>();
 
+    static {
+        defaultGlobPatterns.put("parrot-server-stats.log", IagoParser.class.getSimpleName());
+        defaultGlobPatterns.put("**/*.csv", JMeterCsvParser.class.getSimpleName());
+        defaultGlobPatterns.put("**/*.jtl", JMeterParser.class.getSimpleName());
+        defaultGlobPatterns.put("**/*.log", JmeterSummarizerParser.class.getSimpleName());
+        defaultGlobPatterns.put("**/TEST-*.xml", JUnitParser.class.getSimpleName());
+        defaultGlobPatterns.put("**/*.xml", TaurusParser.class.getSimpleName());
+        defaultGlobPatterns.put("**/*.wrk", WrkSummarizerParser.class.getSimpleName());
+    }
+
+    public static PerformanceReportParser getParser(FilePath workspace, String glob) throws IOException {
+        return (defaultGlobPatterns.containsKey(glob)) ?
+                getParser(defaultGlobPatterns.get(glob), glob) :
+                getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob);
+    }
+
+    private static PerformanceReportParser getParser(String parserName, String glob) {
         if (parserName.equals(JMeterParser.class.getSimpleName())) {
-            return new JMeterParser(filePath);
+            return new JMeterParser(glob);
         } else if (parserName.equals(JMeterCsvParser.class.getSimpleName())) {
-            return new JMeterCsvParser(filePath);
+            return new JMeterCsvParser(glob);
         } else if (parserName.equals(JUnitParser.class.getSimpleName())) {
-            return new JUnitParser(filePath);
+            return new JUnitParser(glob);
         } else if (parserName.equals(TaurusParser.class.getSimpleName())) {
-            return new TaurusParser(filePath);
+            return new TaurusParser(glob);
         } else if (parserName.equals(WrkSummarizerParser.class.getSimpleName())) {
-            return new WrkSummarizerParser(filePath);
+            return new WrkSummarizerParser(glob);
         } else if (parserName.equals(JmeterSummarizerParser.class.getSimpleName())) {
-            return new JmeterSummarizerParser(filePath);
+            return new JmeterSummarizerParser(glob);
         } else if (parserName.equals(IagoParser.class.getSimpleName())) {
-            return new IagoParser(filePath);
+            return new IagoParser(glob);
         } else {
             throw new IllegalArgumentException("Unknown parser type: " + parserName);
         }
