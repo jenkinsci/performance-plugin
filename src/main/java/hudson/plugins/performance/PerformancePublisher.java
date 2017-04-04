@@ -18,6 +18,7 @@ import hudson.plugins.performance.constraints.ConstraintChecker;
 import hudson.plugins.performance.descriptors.ConstraintDescriptor;
 import hudson.plugins.performance.constraints.ConstraintEvaluation;
 import hudson.plugins.performance.constraints.ConstraintFactory;
+import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.ParserFactory;
 import hudson.plugins.performance.reports.ConstraintReport;
 import hudson.plugins.performance.data.ConstraintSettings;
@@ -211,6 +212,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                                 List<PerformanceReportParser> parsers) {
         this.parsers = parsers;
         this.reportFiles = reportFiles;
+        migrateParsers();
 
         this.errorFailedThreshold = errorFailedThreshold;
         this.errorUnstableThreshold = errorUnstableThreshold;
@@ -337,40 +339,37 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     /**
      * Used for migrate from user choose of parser to autodetect parser
      */
-    @Deprecated
     private void migrateParsers() {
-        this.reportFiles = getDefaultReportFilesFromParser();
-        this.parsers = null;
-    }
-
-    /**
-     * Used for showing default value of reportFiles in GUI
-     */
-    public String getDefaultReportFilesFromParser() {
         if (parsers != null && !this.parsers.isEmpty()) {
             StringBuilder builder = new StringBuilder();
             for (PerformanceReportParser p : this.parsers) {
                 builder.append(p.glob).append(';');
             }
             builder.setLength(builder.length() - 1);
-            return builder.toString();
+            this.reportFiles = builder.toString();
+            this.parsers = null;
         }
-        return this.reportFiles;
     }
 
     /**
-     * Now use for support previous pipeline jobs.
+     * This method, invoked after object is resurrected from persistence
      */
-    @Deprecated
-    public List<PerformanceReportParser> getParsers() {
-        return parsers;
+    public Object readResolve() {
+        // data format migration
+        if (parsers == null)
+            parsers = new ArrayList<PerformanceReportParser>();
+        if (filename != null) {
+            parsers.add(new JMeterParser(filename));
+            filename = null;
+        }
+        // Migrate parsers to simple field reportFiles.
+        migrateParsers();
+        return this;
     }
 
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener)
             throws InterruptedException, IOException {
-        // Migrate config when run job
-        migrateParsers();
 
         final List<PerformanceReportParser> parsers = getParsers(workspace);
 

@@ -2,7 +2,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
    <f:entry title="${%Report files}" field="reportFiles">
-      <f:textbox default="${instance.getDefaultReportFilesFromParser()}" />
+      <f:textbox />
    </f:entry>
 
   <f:entry title="${%Performance display}">
