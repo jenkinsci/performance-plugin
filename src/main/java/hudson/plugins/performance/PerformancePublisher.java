@@ -339,16 +339,25 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      */
     @Deprecated
     private void migrateParsers() {
+        this.reportFiles = getDefaultReportFilesFromParser();
+        this.parsers = null;
+    }
+
+    /**
+     * Used for showing default value of reportFiles in GUI
+     */
+    public String getDefaultReportFilesFromParser() {
         if (parsers != null && !this.parsers.isEmpty()) {
             StringBuilder builder = new StringBuilder();
             for (PerformanceReportParser p : this.parsers) {
                 builder.append(p.glob).append(';');
             }
             builder.setLength(builder.length() - 1);
-            this.reportFiles = builder.toString();
-            this.parsers = null;
+            return builder.toString();
         }
+        return this.reportFiles;
     }
+
     /**
      * Now use for support previous pipeline jobs.
      */
