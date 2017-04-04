@@ -217,7 +217,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         final double DELTA = 0.001;
         PerformancePublisher publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
                 true, true, true, true, null);
-        assertEquals("reportFile.xml", publisher.getReportFiles());
+        assertEquals("reportFile.xml", publisher.getSourceDataFiles());
         assertEquals(15, publisher.getErrorFailedThreshold());
         assertEquals(16, publisher.getErrorUnstableThreshold());
         assertEquals("reportFile.xml:100", publisher.getErrorUnstableResponseTimeThreshold());
@@ -233,7 +233,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         assertTrue(publisher.getCompareBuildPrevious());
         assertTrue(publisher.isModeThroughput());
 
-        publisher.setReportFiles("newReportFile.xml");
+        publisher.setSourceDataFiles("newReportFile.xml");
         publisher.setErrorFailedThreshold(0);
         publisher.setErrorUnstableThreshold(0);
         publisher.setErrorUnstableResponseTimeThreshold("newReportFile.xml:101");
@@ -249,7 +249,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         publisher.setCompareBuildPrevious(false);
         publisher.setModeThroughput(false);
 
-        assertEquals("newReportFile.xml", publisher.getReportFiles());
+        assertEquals("newReportFile.xml", publisher.getSourceDataFiles());
         assertEquals(0, publisher.getErrorFailedThreshold());
         assertEquals(0, publisher.getErrorUnstableThreshold());
         assertEquals("newReportFile.xml:101", publisher.getErrorUnstableResponseTimeThreshold());

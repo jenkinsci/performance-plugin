@@ -188,10 +188,10 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @Deprecated
     private transient List<PerformanceReportParser> parsers;
 
-    private String reportFiles;
+    private String sourceDataFiles;
 
     @DataBoundConstructor
-    public PerformancePublisher(String reportFiles,
+    public PerformancePublisher(String sourceDataFiles,
                                 int errorFailedThreshold,
                                 int errorUnstableThreshold,
                                 String errorUnstableResponseTimeThreshold,
@@ -211,7 +211,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                                  */
                                 List<PerformanceReportParser> parsers) {
         this.parsers = parsers;
-        this.reportFiles = reportFiles;
+        this.sourceDataFiles = sourceDataFiles;
         migrateParsers();
 
         this.errorFailedThreshold = errorFailedThreshold;
@@ -326,8 +326,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     protected List<PerformanceReportParser> getParsers(FilePath workspace) throws IOException {
         final List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
-        if (reportFiles != null) {
-            for (String filePath : reportFiles.split(";")) {
+        if (sourceDataFiles != null) {
+            for (String filePath : sourceDataFiles.split(";")) {
                 if (!filePath.isEmpty()) {
                     parsers.add(ParserFactory.getParser(workspace, filePath));
                 }
@@ -346,7 +346,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 builder.append(p.glob).append(';');
             }
             builder.setLength(builder.length() - 1);
-            this.reportFiles = builder.toString();
+            this.sourceDataFiles = builder.toString();
             this.parsers = null;
         }
     }
@@ -362,7 +362,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             parsers.add(new JMeterParser(filename));
             filename = null;
         }
-        // Migrate parsers to simple field reportFiles.
+        // Migrate parsers to simple field sourceDataFiles.
         migrateParsers();
         return this;
     }
@@ -1169,13 +1169,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         this.modeEvaluation = modeEvaluation;
     }
 
-    public String getReportFiles() {
-        return reportFiles;
+    public String getSourceDataFiles() {
+        return sourceDataFiles;
     }
 
     @DataBoundSetter
-    public void setReportFiles(String reportFiles) {
-        this.reportFiles = reportFiles;
+    public void setSourceDataFiles(String sourceDataFiles) {
+        this.sourceDataFiles = sourceDataFiles;
     }
 
 }
