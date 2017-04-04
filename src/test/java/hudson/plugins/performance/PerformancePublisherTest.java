@@ -4,9 +4,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
-import hudson.plugins.performance.parsers.JMeterParser;
-import hudson.plugins.performance.parsers.JUnitParser;
-import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.plugins.performance.constraints.AbstractConstraint;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
@@ -16,36 +14,14 @@ import org.jvnet.hudson.test.TestBuilder;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 public class PerformancePublisherTest extends HudsonTestCase {
-    public void testConfigRoundtrip() throws Exception {
-        PerformancePublisher before = new PerformancePublisher(10, 20, "", 0, 0, 0, 0, 0, false, "", false, false, false,
-                Collections.<PerformanceReportParser>singletonList(new JMeterParser("**/*.jtl")), false);
 
-        FreeStyleProject p = createFreeStyleProject();
-        p.getPublishersList().add(before);
-
-        try {
-            submit(createWebClient().getPage(p, "configure")
-                    .getFormByName("config"));
-            PerformancePublisher after = p.getPublishersList().get(
-                    PerformancePublisher.class);
-            assertEqualBeans(before, after,
-                    "errorFailedThreshold,errorUnstableThreshold");
-            assertEquals(before.getParsers().size(), after.getParsers().size());
-            assertEqualBeans(before.getParsers().get(0), after.getParsers().get(0),
-                    "glob");
-            assertEquals(before.getParsers().get(0).getClass(), after.getParsers()
-                    .get(0).getClass());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    @Test
     public void testBuild() throws Exception {
         FreeStyleProject p = createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
@@ -59,8 +35,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher(0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
-                        "**/*.jtl")), false));
+                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -76,6 +51,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         }
     }
 
+    @Test
     public void testBuildWithParameters() throws Exception {
         FreeStyleProject p = createFreeStyleProject("JobTest");
         p.getBuildersList().add(new TestBuilder() {
@@ -89,8 +65,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher(0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
-                        "${JOB_NAME}/*.jtl")), false));
+                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -107,6 +82,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
     }
 
+    @Test
     public void testBuildUnstableResponseThreshold() throws Exception {
         FreeStyleProject p = createFreeStyleProject("TestJob");
         p.getBuildersList().add(new TestBuilder() {
@@ -120,8 +96,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher(0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
-                        "**/*.jtl")), false));
+                new PerformancePublisher("test.jtl", 0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
 
         FreeStyleBuild b = assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -138,6 +113,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         }
     }
 
+    @Test
     public void testBuildStableResponseThreshold() throws Exception {
         FreeStyleProject p = createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
@@ -151,8 +127,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher(0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false, Collections.<PerformanceReportParser>singletonList(new JMeterParser(
-                        "**/*.jtl")), false));
+                new PerformancePublisher("", 0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -180,8 +155,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         FreeStyleProject p = createFreeStyleProject();
 
         p.getPublishersList().add(
-                new PerformancePublisher(0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, Collections.<PerformanceReportParser>singletonList(new JUnitParser(
-                        "**/*.xml")), false));
+                new PerformancePublisher("", 0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, false, null));
         // first build
         p.getBuildersList().add(new TestBuilder() {
             @Override
@@ -215,8 +189,8 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
     @Test
     public void testEmptyReportParsersList() throws Exception {
-        PerformancePublisher publisher = new PerformancePublisher(0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, true, "MRT",
-                true, true, true, Collections.<PerformanceReportParser>emptyList(), true);
+        PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, true, "MRT",
+                true, true, true, true, null);
         RunExt run = new RunExt( createFreeStyleProject());
         run.onStartBuilding();
         try {
@@ -236,5 +210,74 @@ public class PerformancePublisherTest extends HudsonTestCase {
         protected void onStartBuilding() {
             super.onStartBuilding();
         }
+    }
+
+    @Test
+    public void testOptionMethods() throws Exception {
+        final double DELTA = 0.001;
+        PerformancePublisher publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
+                true, true, true, true, null);
+        assertEquals("reportFile.xml", publisher.getSourceDataFiles());
+        assertEquals(15, publisher.getErrorFailedThreshold());
+        assertEquals(16, publisher.getErrorUnstableThreshold());
+        assertEquals("reportFile.xml:100", publisher.getErrorUnstableResponseTimeThreshold());
+        assertEquals(9.0, publisher.getRelativeFailedThresholdPositive(), DELTA);
+        assertEquals(8.0, publisher.getRelativeFailedThresholdNegative(), DELTA);
+        assertEquals(7.0, publisher.getRelativeUnstableThresholdPositive(), DELTA);
+        assertEquals(6.0, publisher.getRelativeUnstableThresholdNegative(), DELTA);
+        assertEquals(3, publisher.getNthBuildNumber());
+        assertTrue(publisher.getModePerformancePerTestCase());
+        assertEquals("MRT", publisher.getConfigType());
+        assertTrue(publisher.getModeOfThreshold());
+        assertTrue(publisher.isFailBuildIfNoResultFile());
+        assertTrue(publisher.getCompareBuildPrevious());
+        assertTrue(publisher.isModeThroughput());
+
+        publisher.setSourceDataFiles("newReportFile.xml");
+        publisher.setErrorFailedThreshold(0);
+        publisher.setErrorUnstableThreshold(0);
+        publisher.setErrorUnstableResponseTimeThreshold("newReportFile.xml:101");
+        publisher.setRelativeFailedThresholdPositive(0.0);
+        publisher.setRelativeFailedThresholdNegative(0.0);
+        publisher.setRelativeUnstableThresholdPositive(0.0);
+        publisher.setRelativeUnstableThresholdNegative(0.0);
+        publisher.setNthBuildNumber(0);
+        publisher.setModePerformancePerTestCase(false);
+        publisher.setConfigType("ART");
+        publisher.setModeOfThreshold(false);
+        publisher.setFailBuildIfNoResultFile(false);
+        publisher.setCompareBuildPrevious(false);
+        publisher.setModeThroughput(false);
+
+        assertEquals("newReportFile.xml", publisher.getSourceDataFiles());
+        assertEquals(0, publisher.getErrorFailedThreshold());
+        assertEquals(0, publisher.getErrorUnstableThreshold());
+        assertEquals("newReportFile.xml:101", publisher.getErrorUnstableResponseTimeThreshold());
+        assertEquals(0.0, publisher.getRelativeFailedThresholdPositive(), DELTA);
+        assertEquals(0.0, publisher.getRelativeFailedThresholdNegative(), DELTA);
+        assertEquals(0.0, publisher.getRelativeUnstableThresholdPositive(), DELTA);
+        assertEquals(0.0, publisher.getRelativeUnstableThresholdNegative(), DELTA);
+        assertEquals(0, publisher.getNthBuildNumber());
+        assertFalse(publisher.getModePerformancePerTestCase());
+        assertEquals("ART", publisher.getConfigType());
+        assertFalse(publisher.getModeOfThreshold());
+        assertFalse(publisher.isFailBuildIfNoResultFile());
+        assertFalse(publisher.getCompareBuildPrevious());
+        assertFalse(publisher.isModeThroughput());
+
+        publisher.setModeEvaluation(true);
+        assertTrue(publisher.isModeEvaluation());
+        publisher.setPersistConstraintLog(true);
+        assertTrue(publisher.isPersistConstraintLog());
+        publisher.setIgnoreUnstableBuilds(true);
+        assertTrue(publisher.isIgnoreUnstableBuilds());
+        publisher.setIgnoreFailedBuilds(true);
+        assertTrue(publisher.isIgnoreFailedBuilds());
+        publisher.setModeRelativeThresholds(true);
+        assertTrue(publisher.getModeRelativeThresholds());
+        List<AbstractConstraint> allConstraints = AbstractConstraint.all();
+        publisher.setConstraints(allConstraints);
+        assertEquals(allConstraints, publisher.getConstraints());
+        assertEquals(PerformancePublisher.optionType, PerformancePublisher.getOptionType());
     }
 }

@@ -26,9 +26,6 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,9 +37,6 @@ import java.util.regex.Pattern;
 public class IagoParser extends AbstractParser {
 
     public String statsDateFormat;
-    public String delimiter;
-    public String pattern;
-    public String[] patterns;
 
     @Extension
     public static class DescriptorImpl extends PerformanceReportParserDescriptor {
@@ -53,12 +47,9 @@ public class IagoParser extends AbstractParser {
     }
 
     @DataBoundConstructor
-    public IagoParser(String glob, String pattern, String delimiter) {
+    public IagoParser(String glob) {
         super(glob);
         this.statsDateFormat = getStatsDateFormat();
-        this.delimiter = (delimiter == null) ? "" : delimiter;
-        this.pattern = (pattern == null) ? "" : pattern;
-        patterns = this.pattern.split(this.delimiter);
     }
 
     @Override
@@ -127,7 +118,7 @@ public class IagoParser extends AbstractParser {
 
         //Now we need to parse the stats json
         GsonBuilder gsonBuilder = new GsonBuilder();
-        StatsDeserializer deserializer = new StatsDeserializer(this.patterns);
+        StatsDeserializer deserializer = new StatsDeserializer();
         gsonBuilder.registerTypeAdapter(Stats.class, deserializer);
         Gson gson = gsonBuilder.create();
 
@@ -253,12 +244,6 @@ public class IagoParser extends AbstractParser {
      */
     private static class StatsDeserializer implements JsonDeserializer<Stats> {
 
-        private String[] errorFields;
-
-        public StatsDeserializer(String[] errorFields) {
-            this.errorFields = errorFields;
-        }
-
         private static final String[] requiredFields = new String[]{
                 "client/request_latency_ms_minimum",
                 "client/request_latency_ms_maximum",
@@ -280,29 +265,7 @@ public class IagoParser extends AbstractParser {
                 }
             }
 
-            statsObj = new Gson().fromJson(json, Stats.class);
-
-            //If user requested errors then add them in
-            for (String fieldName : this.errorFields) {
-                Set<Map.Entry<String, JsonElement>> elementSet = jsonObject.entrySet();
-                Iterator<Map.Entry<String, JsonElement>> elementSetIt = elementSet.iterator();
-                while (elementSetIt.hasNext()) {
-                    Map.Entry<String, JsonElement> nextElement = elementSetIt.next();
-                    String key = nextElement.getKey();
-                    if (key.matches(fieldName)) {
-                        JsonElement element = nextElement.getValue();
-
-                        //Element is not null and is a base primitive
-                        if (element != null && element.isJsonPrimitive()) {
-                            long fieldValue = element.getAsLong();
-                            statsObj.addValidationError(fieldName, fieldValue);
-                        }
-                        break;
-                    }
-                }
-            }
-
-            return statsObj;
+            return new Gson().fromJson(json, Stats.class);
         }
 
     }

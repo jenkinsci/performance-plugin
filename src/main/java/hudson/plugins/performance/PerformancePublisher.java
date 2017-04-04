@@ -18,9 +18,10 @@ import hudson.plugins.performance.constraints.ConstraintChecker;
 import hudson.plugins.performance.descriptors.ConstraintDescriptor;
 import hudson.plugins.performance.constraints.ConstraintEvaluation;
 import hudson.plugins.performance.constraints.ConstraintFactory;
+import hudson.plugins.performance.parsers.JMeterParser;
+import hudson.plugins.performance.parsers.ParserFactory;
 import hudson.plugins.performance.reports.ConstraintReport;
 import hudson.plugins.performance.data.ConstraintSettings;
-import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
@@ -160,11 +161,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      */
     private transient String filename;
 
-    /**
-     * Configured report parsers.
-     */
-    private List<PerformanceReportParser> parsers;
-
     private boolean modeThroughput;
 
     /**
@@ -184,8 +180,19 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private boolean ignoreUnstableBuilds;
     private boolean persistConstraintLog;
 
+    /**
+     * @deprecated as of 2.2. for compatibility
+     * Migrate into String reportFiles with autodetect parser type.
+     * Now this param use for restore previous job configs in GUI mode.
+     */
+    @Deprecated
+    private transient List<PerformanceReportParser> parsers;
+
+    private String sourceDataFiles;
+
     @DataBoundConstructor
-    public PerformancePublisher(int errorFailedThreshold,
+    public PerformancePublisher(String sourceDataFiles,
+                                int errorFailedThreshold,
                                 int errorUnstableThreshold,
                                 String errorUnstableResponseTimeThreshold,
                                 double relativeFailedThresholdPositive,
@@ -198,8 +205,14 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                                 boolean modeOfThreshold,
                                 boolean failBuildIfNoResultFile,
                                 boolean compareBuildPrevious,
-                                List<PerformanceReportParser> parsers,
-                                boolean modeThroughput) {
+                                boolean modeThroughput,
+                                /**
+                                 * Deprecated. Now use for support previous pipeline jobs.
+                                 */
+                                List<PerformanceReportParser> parsers) {
+        this.parsers = parsers;
+        this.sourceDataFiles = sourceDataFiles;
+        migrateParsers();
 
         this.errorFailedThreshold = errorFailedThreshold;
         this.errorUnstableThreshold = errorUnstableThreshold;
@@ -217,9 +230,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         this.failBuildIfNoResultFile = failBuildIfNoResultFile;
         this.compareBuildPrevious = compareBuildPrevious;
 
-        if (parsers == null)
-            parsers = Collections.emptyList();
-        this.parsers = new ArrayList<PerformanceReportParser>(parsers);
         this.modePerformancePerTestCase = modePerformancePerTestCase;
         this.modeThroughput = modeThroughput;
     }
@@ -239,9 +249,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return BuildStepMonitor.NONE;
     }
 
-    public List<PerformanceReportParser> getParsers() {
-        return parsers;
-    }
 
     /**
      * <p>
@@ -317,9 +324,54 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return files;
     }
 
+    protected List<PerformanceReportParser> getParsers(FilePath workspace) throws IOException {
+        final List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
+        if (sourceDataFiles != null) {
+            for (String filePath : sourceDataFiles.split(";")) {
+                if (!filePath.isEmpty()) {
+                    parsers.add(ParserFactory.getParser(workspace, filePath));
+                }
+            }
+        }
+        return parsers;
+    }
+
+    /**
+     * Used for migrate from user choose of parser to autodetect parser
+     */
+    private void migrateParsers() {
+        if (parsers != null && !this.parsers.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (PerformanceReportParser p : this.parsers) {
+                builder.append(p.glob).append(';');
+            }
+            builder.setLength(builder.length() - 1);
+            this.sourceDataFiles = builder.toString();
+            this.parsers = null;
+        }
+    }
+
+    /**
+     * This method, invoked after object is resurrected from persistence
+     */
+    public Object readResolve() {
+        // data format migration
+        if (parsers == null)
+            parsers = new ArrayList<PerformanceReportParser>();
+        if (filename != null) {
+            parsers.add(new JMeterParser(filename));
+            filename = null;
+        }
+        // Migrate parsers to simple field sourceDataFiles.
+        migrateParsers();
+        return this;
+    }
+
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener)
             throws InterruptedException, IOException {
+
+        final List<PerformanceReportParser> parsers = getParsers(workspace);
 
         PrintStream logger = listener.getLogger();
         double thresholdTolerance = 0.00000001;
@@ -407,7 +459,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     }
 
                     // add the report to the build object.
-                    for (PerformanceReportParser parser : parsers) {
                         // mark the build as unstable or failure depending on the outcome.
                         for (PerformanceReport r : parsedReports) {
 
@@ -514,7 +565,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                             bw.close();
                             fw.close();
                         }
-                    }
                 } catch (Exception e) {
                     logger.println("ERROR: Exception while determining absolute error/unstable threshold evaluation");
                     e.printStackTrace(logger);
@@ -876,16 +926,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return localReports;
     }
 
-    public Object readResolve() {
-        // data format migration
-        if (parsers == null)
-            parsers = new ArrayList<PerformanceReportParser>();
-        if (filename != null) {
-            parsers.add(new JMeterParser(filename));
-            filename = null;
-        }
-        return this;
-    }
 
     public int getErrorFailedThreshold() {
         return errorFailedThreshold;
@@ -1127,6 +1167,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setModeEvaluation(boolean modeEvaluation) {
         this.modeEvaluation = modeEvaluation;
+    }
+
+    public String getSourceDataFiles() {
+        return sourceDataFiles;
+    }
+
+    @DataBoundSetter
+    public void setSourceDataFiles(String sourceDataFiles) {
+        this.sourceDataFiles = sourceDataFiles;
     }
 
 }

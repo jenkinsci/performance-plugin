@@ -1,0 +1,38 @@
+<div>
+    <p>
+        Specify the path to the Performance report files, relative to the <a href='ws/'>workspace root</a>.
+        Plugin will be automatically detect parser for each report file.
+    </p>
+
+    <ul>
+        <li>You can specify multiple files and directories separated by semicolon.
+        <li>You use an Ant 'fileset' pattern.
+    </ul>
+    <p>
+        Default Values are:
+    </p>
+    <ul>
+        <li>JMeter reports: "**/*.jtl"</li>
+        <li>JMeter csv reports: "**/*.csv"</li>
+        <li>JMeter Summariser reports: "**/*.log"</li>
+        <li>Taurus reports: "**/*.xml"</li>
+        <li>JUnit report:   "**/TEST-*.xml"</li>
+        <li>wrk report:  "**/*.wrk"</li>
+    </ul>
+
+    <ul>
+        * By default jmeter writes summariser statistics to jmeter.log. To enable logging
+        summariser statistics to separate log file add the property to jmeter.properties file to #Logging Configuration block : "log_file.jmeter.reporters.Summariser=filename.log"
+    </ul>
+
+    <ul>
+        ** Default time format, that JMeter used for logging is "yyyy/mm/dd HH:mm:ss". See "log_format" property  in jmeter.properties file in #Logging Configuration block.
+    </ul>
+
+    <ul>
+        *** By default wrk does not write output files. You'll
+        need to redirect the STDOUT output for a file as in
+        <pre>wrk [options] [url] > results.wrk</pre>
+    </ul>
+</div>
+

@@ -18,8 +18,6 @@ import java.util.regex.Pattern;
  */
 public class JmeterSummarizerParser extends AbstractParser {
 
-    public final String logDateFormat;
-
     @Extension
     public static class DescriptorImpl extends PerformanceReportParserDescriptor {
         @Override
@@ -29,14 +27,8 @@ public class JmeterSummarizerParser extends AbstractParser {
     }
 
     @DataBoundConstructor
-    public JmeterSummarizerParser(String glob, String logDateFormat) {
+    public JmeterSummarizerParser(String glob) {
         super(glob);
-
-        if (logDateFormat == null || logDateFormat.length() == 0) {
-            this.logDateFormat = getDefaultDatePattern();
-        } else {
-            this.logDateFormat = logDateFormat;
-        }
     }
 
     @Override
@@ -58,7 +50,7 @@ public class JmeterSummarizerParser extends AbstractParser {
             fileScanner = new Scanner(reportFile);
             String key;
             String line;
-            SimpleDateFormat dateFormat = new SimpleDateFormat(logDateFormat);
+            SimpleDateFormat dateFormat = new SimpleDateFormat(getDefaultDatePattern());
             String lastEqualsLine = null;
             while (fileScanner.hasNextLine()) {
                 line = fileScanner.nextLine();
