@@ -27,7 +27,6 @@ import java.util.Map;
  */
 public class PerformanceReport extends AbstractReport implements Serializable,
         Comparable<PerformanceReport> {
-
     private static final long serialVersionUID = 675698410989941826L;
     private static final double ZERO_PERCENT = 0;
     private static final double ONE_HUNDRED_PERCENT = 100;
@@ -69,6 +68,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     /**
      * The amount of samples in all uriReports combined.
      */
+    private transient int size;
     private int samplesCount;
 
     /**
@@ -91,6 +91,14 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private Long perc50;
     private Long perc90;
     private Long perc100;
+
+    public Object readResolve() {
+        if (size != 0) {
+            samplesCount = size;
+        }
+
+        return this;
+    }
 
     public static String asStaplerURI(String uri) {
         return uri.replace("http:", "").replace("https:", "").replaceAll("/", "_").replaceAll(":", "_");
