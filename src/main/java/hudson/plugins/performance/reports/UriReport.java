@@ -184,7 +184,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
     public long getAverage() {
         if (average == null) {
-            average = totalDuration / samplesCount();
+            int samplesCount = samplesCount();
+            average = (samplesCount == 0) ? 0 : totalDuration / samplesCount;
         }
         return average;
     }

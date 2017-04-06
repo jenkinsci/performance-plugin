@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -13,10 +14,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -107,7 +111,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
             try {
                 PerformanceReport report = CACHE.getIfPresent(serialized);
                 if (report == null) {
-                    in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(serialized)));
+                    in = new ObjectInputStreamWithClassMapping(new BufferedInputStream(new FileInputStream(serialized)));
                     report = (PerformanceReport) in.readObject();
                     CACHE.put(serialized, report);
                 }
@@ -166,4 +170,24 @@ public abstract class AbstractParser extends PerformanceReportParser {
             }
         }
     }
+
+    public static class  ObjectInputStreamWithClassMapping extends ObjectInputStream {
+        protected Hashtable<String, Class> classMapping = new Hashtable<String, Class>();
+
+        public ObjectInputStreamWithClassMapping(InputStream in) throws IOException {
+            super(in);
+            classMapping.put("hudson.plugins.performance.PerformanceReport", PerformanceReport.class);
+            classMapping.put("hudson.plugins.performance.UriReport", UriReport.class);
+            classMapping.put("hudson.plugins.performance.UriReport$Sample", UriReport.Sample.class);
+        }
+
+        @Override
+        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException,
+                ClassNotFoundException {
+            return (classMapping.containsKey(desc.getName())) ?
+                    classMapping.get(desc.getName()) :
+                    super.resolveClass(desc);
+        }
+    }
+
 }

@@ -140,13 +140,13 @@ public class PerformanceReportTest {
         Map<String, UriReport> uriReportMap = performanceReport
                 .getUriReportMap();
         assertEquals(5, uriReportMap.size());
-        String firstUri = "hudson.plugins.performance.reports.UriReportTest.testGetMin";
+        String firstUri = "hudson.plugins.performance.UriReportTest.testGetMin";
         UriReport firstUriReport = uriReportMap.get(firstUri);
         assertEquals(firstUri, firstUriReport.getUri());
         assertEquals(31, firstUriReport.getDurations().get(0).longValue());
         assertEquals(0L, firstUriReport.getStart().getTime());
         assertFalse(firstUriReport.isFailed());
-        String lastUri = "hudson.plugins.performance.reports.UriReportTest.testGetMax";
+        String lastUri = "hudson.plugins.performance.UriReportTest.testGetMax";
         UriReport secondUriReport = uriReportMap.get(lastUri);
         assertEquals(lastUri, secondUriReport.getUri());
         assertEquals(26, secondUriReport.getDurations().get(0).longValue());

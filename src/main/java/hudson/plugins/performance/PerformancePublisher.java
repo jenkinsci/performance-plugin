@@ -4,9 +4,12 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
+import hudson.model.Items;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -15,17 +18,36 @@ import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
 import hudson.plugins.performance.constraints.AbstractConstraint;
 import hudson.plugins.performance.constraints.ConstraintChecker;
+import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import hudson.plugins.performance.cookie.CookieHandler;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.data.PerformanceReportPosition;
+import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.descriptors.ConstraintDescriptor;
 import hudson.plugins.performance.constraints.ConstraintEvaluation;
 import hudson.plugins.performance.constraints.ConstraintFactory;
+import hudson.plugins.performance.details.GraphConfigurationDetail;
+import hudson.plugins.performance.details.TestSuiteReportDetail;
+import hudson.plugins.performance.details.TrendReportDetail;
+import hudson.plugins.performance.parsers.AbstractParser;
+import hudson.plugins.performance.parsers.IagoParser;
+import hudson.plugins.performance.parsers.JMeterCsvParser;
 import hudson.plugins.performance.parsers.JMeterParser;
+import hudson.plugins.performance.parsers.JUnitParser;
+import hudson.plugins.performance.parsers.JmeterSummarizerParser;
 import hudson.plugins.performance.parsers.ParserFactory;
+import hudson.plugins.performance.parsers.TaurusParser;
+import hudson.plugins.performance.parsers.WrkSummarizerParser;
+import hudson.plugins.performance.reports.AbstractReport;
 import hudson.plugins.performance.reports.ConstraintReport;
 import hudson.plugins.performance.data.ConstraintSettings;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
+import hudson.plugins.performance.reports.throughput.ThroughputReport;
+import hudson.plugins.performance.reports.throughput.ThroughputUriReport;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -52,6 +74,91 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PerformancePublisher extends Recorder implements SimpleBuildStep {
+
+    /**
+     * Mapping classes after refactoring for backward compatibility.
+     */
+    @Initializer(before = InitMilestone.PLUGINS_STARTED)
+    public static void addAliases() {
+        // Items.XSTREAM2 is used for serializing project configuration,
+        // and Run.XSTREAM2 is used for serializing build and its associated Actions.
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceBuildAction", PerformanceBuildAction.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceProjectAction", PerformanceProjectAction.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ExternalBuildReport", ExternalBuildReportAction.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.PreviousResultsBlock", PreviousResultsBlock.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.TestCaseBlock", TestCaseBlock.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.CookieHandler", CookieHandler.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintSettings", ConstraintSettings.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.HttpSample", HttpSample.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportPosition", PerformanceReportPosition.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusStatusReport", TaurusFinalStats.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintDescriptor", ConstraintDescriptor.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParserDescriptor", PerformanceReportParserDescriptor.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.GraphConfigurationDetail", GraphConfigurationDetail.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TestSuiteReportDetail", TestSuiteReportDetail.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TrendReportDetail", TrendReportDetail.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractParser", AbstractParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.IagoParser", IagoParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterCsvParser", JMeterCsvParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterParser", JMeterParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JmeterSummarizerParser", JmeterSummarizerParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JUnitParser", JUnitParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParser", PerformanceReportParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusParser", TaurusParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.WrkSummarizerParser", WrkSummarizerParser.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputReport", ThroughputReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputUriReport", ThroughputUriReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractReport", AbstractReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintReport", ConstraintReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReport", PerformanceReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.UriReport", UriReport.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceBuildAction", PerformanceBuildAction.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceProjectAction", PerformanceProjectAction.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ExternalBuildReport", ExternalBuildReportAction.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.PreviousResultsBlock", PreviousResultsBlock.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.TestCaseBlock", TestCaseBlock.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.CookieHandler", CookieHandler.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintSettings", ConstraintSettings.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.HttpSample", HttpSample.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportPosition", PerformanceReportPosition.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusStatusReport", TaurusFinalStats.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintDescriptor", ConstraintDescriptor.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParserDescriptor", PerformanceReportParserDescriptor.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.GraphConfigurationDetail", GraphConfigurationDetail.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TestSuiteReportDetail", TestSuiteReportDetail.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TrendReportDetail", TrendReportDetail.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractParser", AbstractParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.IagoParser", IagoParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterCsvParser", JMeterCsvParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterParser", JMeterParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JmeterSummarizerParser", JmeterSummarizerParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JUnitParser", JUnitParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParser", PerformanceReportParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusParser", TaurusParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.WrkSummarizerParser", WrkSummarizerParser.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputReport", ThroughputReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputUriReport", ThroughputUriReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractReport", AbstractReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintReport", ConstraintReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReport", PerformanceReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.UriReport", UriReport.class);
+    }
 
     @Symbol("performanceReport")
     @Extension
@@ -492,7 +599,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                             avg += "<average>\n";
                             med += "<median>\n";
                             perct += "<percentile>\n";
-
                             double errorPercent = r.errorPercent();
                             calc += errorPercent;
 
@@ -617,7 +723,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     }
 
                     List<UriReport> curruriList = null;
-
                     // add the report to the build object.
                     for (PerformanceReportParser parser : parsers) {
                         glob = parser.glob;
