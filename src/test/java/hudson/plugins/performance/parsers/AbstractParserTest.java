@@ -11,7 +11,7 @@ public class AbstractParserTest {
 
     @Test
     public void testDeserialized() throws Exception {
-        File serializedFile = new File(getClass().getResource("/result.v.2.0.jtl.serialized").toURI());
+        File serializedFile = new File(getClass().getResource("/results.v.2.0.jtl.serialized").toURI());
         String reportFilePath = serializedFile.getAbsolutePath().replace(".serialized", "");
         PerformanceReport report = AbstractParser.loadSerializedReport(new File(reportFilePath));
         assertNotNull(report);
