@@ -68,7 +68,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     /**
      * The amount of samples in all uriReports combined.
      */
-    private transient int size;
+    private int size;
     private int samplesCount;
 
     /**
