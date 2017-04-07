@@ -14,7 +14,7 @@ import java.io.IOException;
 public class PerformanceTestBuildTest extends HudsonTestCase {
 
     @Test
-    public void testEmptyReportParsersList() throws Exception {
+    public void testFlow() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
         PerformanceTestBuild buildTest = new PerformanceTestBuild(path, "");

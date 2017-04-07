@@ -18,10 +18,15 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URL;
 
 /**
  * "Build step" for running performance test
@@ -30,8 +35,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     protected final static String CHECK_COMMAND = "bzt --help";
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
-    protected final String DEFAULT_REPORTING_CONFIG = getClass().getResource("defaultReport.yml").getPath();
-
+    protected final String DEFAULT_REPORTING_CONFIG;
 
     @Symbol("performanceTest")
     @Extension
@@ -53,9 +57,10 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private String testOptions;
 
     @DataBoundConstructor
-    public PerformanceTestBuild(String testConfigurationFiles, String testOptions) {
+    public PerformanceTestBuild(String testConfigurationFiles, String testOptions) throws IOException {
         this.testConfigurationFiles = (testConfigurationFiles == null) ? StringUtils.EMPTY : testConfigurationFiles;
         this.testOptions = (testOptions == null) ? StringUtils.EMPTY : testOptions;
+        this.DEFAULT_REPORTING_CONFIG = extractDefaultReport();
     }
 
     @Override
@@ -67,22 +72,24 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         final Process checkProcess = runtime.exec(CHECK_COMMAND);
         int checkProcessCode = checkProcess.waitFor();
         if (checkProcessCode != 0) {
+            logger.println("'" + CHECK_COMMAND + "' exit with code: " + checkProcessCode);
             printStreamToLogger(checkProcess.getErrorStream(), logger);
             run.setResult(Result.FAILURE);
             return;
         }
 
-        final Process runPerformanceTestProcess = runtime.exec(PERFORMANCE_TEST_COMMAND + ' ' +
+        String bztExecution = PERFORMANCE_TEST_COMMAND + ' ' +
                 DEFAULT_REPORTING_CONFIG + " " +
                 testConfigurationFiles + " " +
-                testOptions);
+                testOptions;
 
+        final Process runPerformanceTestProcess = runtime.exec(bztExecution);
         runPerformanceTestProcess.getOutputStream().close(); // Taurus =(
-
         int code = runPerformanceTestProcess.waitFor();
 
         printStreamToLogger(checkProcess.getInputStream(), logger);
         if (code != 0) {
+            logger.println("'" + bztExecution + "' exit with code: " + code);
             printStreamToLogger(checkProcess.getErrorStream(), logger);
             run.setResult(Result.FAILURE);
             return;
@@ -90,6 +97,38 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
         run.setResult(Result.SUCCESS);
         // TODO: add post build action
+    }
+
+    protected String extractDefaultReport() throws IOException {
+        InputStream fileStream = getClass().getResourceAsStream("defaultReport.yml");
+
+        if (fileStream == null) {
+            return StringUtils.EMPTY;
+        }
+
+        OutputStream out = null;
+        try {
+
+            File configFile = File.createTempFile("defaultConfig.yml", "");
+            configFile.deleteOnExit();
+
+            out = new FileOutputStream(configFile);
+
+            byte[] buffer = new byte[1024];
+            int len = fileStream.read(buffer);
+            while (len != -1) {
+                out.write(buffer, 0, len);
+                len = fileStream.read(buffer);
+            }
+
+            return configFile.getAbsolutePath();
+        } finally {
+            // Close the streams
+            fileStream.close();
+            if (out != null) {
+                out.close();
+            }
+        }
     }
 
     protected static void printStreamToLogger(InputStream source, PrintStream target) {
