@@ -76,6 +76,9 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                 DEFAULT_REPORTING_CONFIG + " " +
                 testConfigurationFiles + " " +
                 testOptions);
+
+        runPerformanceTestProcess.getOutputStream().close(); // Taurus =(
+
         int code = runPerformanceTestProcess.waitFor();
 
         printStreamToLogger(checkProcess.getInputStream(), logger);

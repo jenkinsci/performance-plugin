@@ -5,12 +5,11 @@ import hudson.model.Job;
 import hudson.model.Run;
 import org.junit.Test;
 import org.jvnet.hudson.test.HudsonTestCase;
+import hudson.model.Result;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
-
-import static org.junit.Assert.*;
 
 public class PerformanceTestBuildTest extends HudsonTestCase {
 
@@ -21,11 +20,8 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         PerformanceTestBuild buildTest = new PerformanceTestBuild(path, "");
         PerformanceTestBuildTest.RunExt run = new PerformanceTestBuildTest.RunExt(createFreeStyleProject());
         run.onStartBuilding();
-        try {
-            buildTest.perform(run, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
-        } catch (NullPointerException ex) {
-            fail("Plugin must work with empty parser list" + ex.getMessage());
-        }
+        buildTest.perform(run, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
+        assertEquals(Result.SUCCESS, run.getResult());
     }
 
     private class RunExt extends Run {
