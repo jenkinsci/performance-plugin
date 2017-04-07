@@ -1,0 +1,4 @@
+---
+reporting:
+- module: final_stats
+  dump-xml: report.xml
