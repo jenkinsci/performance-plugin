@@ -1,15 +1,17 @@
 package hudson.plugins.performance.build;
 
 import hudson.FilePath;
-import hudson.model.Job;
-import hudson.model.Run;
+import hudson.model.AbstractBuild;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import jenkins.util.BuildListenerAdapter;
 import org.junit.Test;
 import org.jvnet.hudson.test.HudsonTestCase;
-import hudson.model.Result;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
+
 
 public class PerformanceTestBuildTest extends HudsonTestCase {
 
@@ -18,21 +20,22 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
         PerformanceTestBuild buildTest = new PerformanceTestBuild(path, "");
-        PerformanceTestBuildTest.RunExt run = new PerformanceTestBuildTest.RunExt(createFreeStyleProject());
-        run.onStartBuilding();
-        buildTest.perform(run, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
-        assertEquals(Result.SUCCESS, run.getResult());
+        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleBuildExt ext = new FreeStyleBuildExt(project);
+        ext.setWorkspace(new FilePath(new File(".")));
+
+        assertTrue(buildTest.perform((AbstractBuild<?,?>) ext, createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener())));
     }
 
-    private class RunExt extends Run {
+    public static class FreeStyleBuildExt extends FreeStyleBuild {
 
-        protected RunExt(@Nonnull Job job) throws IOException {
-            super(job);
+        public FreeStyleBuildExt(FreeStyleProject project) throws IOException {
+            super(project);
         }
 
         @Override
-        protected void onStartBuilding() {
-            super.onStartBuilding();
+        protected void setWorkspace(@Nonnull FilePath ws) {
+            super.setWorkspace(ws);
         }
     }
 }
