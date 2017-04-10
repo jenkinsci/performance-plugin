@@ -1283,5 +1283,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         this.sourceDataFiles = sourceDataFiles;
     }
 
+    public List<PerformanceReportParser> getParsers() {
+        return parsers;
+    }
+
+    @DataBoundSetter
+    public void setParsers(List<PerformanceReportParser> parsers) {
+        this.parsers = parsers;
+    }
 }
 
