@@ -87,10 +87,10 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         runPerformanceTestProcess.getOutputStream().close(); // Taurus =(
         int code = runPerformanceTestProcess.waitFor();
 
-        printStreamToLogger(checkProcess.getInputStream(), logger);
+        printStreamToLogger(runPerformanceTestProcess.getInputStream(), logger);
         if (code != 0) {
             logger.println("'" + bztExecution + "' exit with code: " + code);
-            printStreamToLogger(checkProcess.getErrorStream(), logger);
+            printStreamToLogger(runPerformanceTestProcess.getErrorStream(), logger);
             run.setResult(Result.FAILURE);
             return;
         }
