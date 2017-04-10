@@ -2,36 +2,38 @@ package hudson.plugins.performance.build;
 
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.Functions;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.model.BuildListener;
+import hudson.model.Computer;
+import hudson.model.Node;
 import hudson.plugins.performance.Messages;
+import hudson.tasks.BatchFile;
+import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
-import jenkins.tasks.SimpleBuildStep;
+import hudson.tasks.Shell;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.URL;
 
 /**
  * "Build step" for running performance test
  */
-public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
+public class PerformanceTestBuild extends Builder implements BuildStep {
 
     protected final static String CHECK_COMMAND = "bzt --help";
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
@@ -63,19 +65,26 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         this.DEFAULT_REPORTING_CONFIG = extractDefaultReport();
     }
 
-    @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener)
-            throws InterruptedException, IOException {
-        PrintStream logger = listener.getLogger();
+    public static Node workspaceToNode(FilePath workspace) { // TODO https://trello.com/c/doFFMdUm/46-filepath-getcomputer
+        Jenkins j = Jenkins.getActiveInstance();
+        if (workspace != null && workspace.isRemote()) {
+            for (Computer c : j.getComputers()) {
+                if (c.getChannel() == workspace.getChannel()) {
+                    Node n = c.getNode();
+                    if (n != null) {
+                        return n;
+                    }
+                }
+            }
+        }
+        return j;
+    }
 
-        Runtime runtime = Runtime.getRuntime();
-        final Process checkProcess = runtime.exec(CHECK_COMMAND);
-        int checkProcessCode = checkProcess.waitFor();
-        if (checkProcessCode != 0) {
-            logger.println("'" + CHECK_COMMAND + "' exit with code: " + checkProcessCode);
-            printStreamToLogger(checkProcess.getErrorStream(), logger);
-            run.setResult(Result.FAILURE);
-            return;
+    @Override
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        boolean isBZTInstall = new Shell(CHECK_COMMAND).perform(build, launcher, listener); // TODO: off help output
+        if (!isBZTInstall) {
+            return false;
         }
 
         String bztExecution = PERFORMANCE_TEST_COMMAND + ' ' +
@@ -83,21 +92,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                 testConfigurationFiles + " " +
                 testOptions;
 
-        final Process runPerformanceTestProcess = runtime.exec(bztExecution);
-        runPerformanceTestProcess.getOutputStream().close(); // Taurus =(
-        int code = runPerformanceTestProcess.waitFor();
-
-        printStreamToLogger(runPerformanceTestProcess.getInputStream(), logger);
-        if (code != 0) {
-            logger.println("'" + bztExecution + "' exit with code: " + code);
-            printStreamToLogger(runPerformanceTestProcess.getErrorStream(), logger);
-            run.setResult(Result.FAILURE);
-            return;
-        }
-
-        run.setResult(Result.SUCCESS);
+        Builder builder = Functions.isWindows() ? new BatchFile(bztExecution) : new Shell(bztExecution);
+        return builder.perform(build, launcher, listener);
         // TODO: add post build action
     }
+
 
     protected String extractDefaultReport() throws IOException {
         InputStream fileStream = getClass().getResourceAsStream("defaultReport.yml");
