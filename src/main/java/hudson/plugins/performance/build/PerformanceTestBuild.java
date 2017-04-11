@@ -37,6 +37,7 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
 
     protected final static String CHECK_COMMAND = "bzt --help";
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
+    protected final static String DEFAULT_CONFIG_FILE = "defaultReport.yml";
     protected final String DEFAULT_REPORTING_CONFIG;
 
     @Symbol("performanceTest")
@@ -63,21 +64,6 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
         this.testConfigurationFiles = (testConfigurationFiles == null) ? StringUtils.EMPTY : testConfigurationFiles;
         this.testOptions = (testOptions == null) ? StringUtils.EMPTY : testOptions;
         this.DEFAULT_REPORTING_CONFIG = extractDefaultReport();
-    }
-
-    public static Node workspaceToNode(FilePath workspace) { // TODO https://trello.com/c/doFFMdUm/46-filepath-getcomputer
-        Jenkins j = Jenkins.getActiveInstance();
-        if (workspace != null && workspace.isRemote()) {
-            for (Computer c : j.getComputers()) {
-                if (c.getChannel() == workspace.getChannel()) {
-                    Node n = c.getNode();
-                    if (n != null) {
-                        return n;
-                    }
-                }
-            }
-        }
-        return j;
     }
 
     @Override
@@ -129,19 +115,7 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
             }
         }
     }
-
-    protected static void printStreamToLogger(InputStream source, PrintStream target) {
-        BufferedReader input = new BufferedReader(new InputStreamReader(source));
-        String line;
-
-        try {
-            while ((line = input.readLine()) != null)
-                target.println(line);
-        } catch (IOException e) {
-            target.println("Reading of error stream caused next exception: " + e.getMessage());
-        }
-    }
-
+    
     public String getTestConfigurationFiles() {
         return testConfigurationFiles;
     }
