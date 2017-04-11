@@ -3,6 +3,7 @@ package hudson.plugins.performance.parsers;
 import hudson.EnvVars;
 import hudson.FilePath;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 
 import java.io.File;
 import java.util.HashMap;
@@ -49,5 +50,15 @@ public class ParserFactoryTest {
         assertTrue(ParserFactory.getParser(null, "**/*.wrk", envVars) instanceof WrkSummarizerParser);
         assertTrue(ParserFactory.getParser(null, "**/*.csv", envVars) instanceof JMeterCsvParser);
         assertTrue(ParserFactory.getParser(null, "**/*.log", envVars) instanceof JmeterSummarizerParser);
+    }
+
+    @Test
+    @Issue("43503")
+    public void test43503() throws Exception {
+        EnvVars envVars = new EnvVars(new HashMap<String, String>());
+        File report = new File(getClass().getResource("/WrkResultsQuick.wrk").getPath());
+        FilePath workspace = new FilePath(new File(report.getParentFile().getParent()));
+        String glob = "**/test-classes/*.wrk";
+        assertTrue(ParserFactory.getParser(workspace, glob, envVars) instanceof WrkSummarizerParser);
     }
 }
