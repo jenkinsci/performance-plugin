@@ -1,7 +1,10 @@
 package hudson.plugins.performance.parsers;
 
+import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.plugins.performance.PerformancePublisher;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
@@ -20,10 +23,20 @@ public class ParserFactory {
         defaultGlobPatterns.put("**/*.wrk", WrkSummarizerParser.class.getSimpleName());
     }
 
-    public static PerformanceReportParser getParser(FilePath workspace, String glob) throws IOException {
-        return (defaultGlobPatterns.containsKey(glob)) ?
-                getParser(defaultGlobPatterns.get(glob), glob) :
-                getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob);
+    public static PerformanceReportParser getParser(FilePath workspace, String glob, EnvVars env) throws IOException, InterruptedException {
+        if (defaultGlobPatterns.containsKey(glob)) {
+            return getParser(defaultGlobPatterns.get(glob), glob);
+        }
+
+        String expandGlob = env.expand(glob);
+        try {
+            for (FilePath path : workspace.list(expandGlob)) {
+                return getParser(ParserDetector.detect(path.getRemote()), glob);
+            }
+        } catch (IOException ignored) {
+        }
+
+        return getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob);
     }
 
     private static PerformanceReportParser getParser(String parserName, String glob) {
