@@ -38,7 +38,6 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
     protected final static String CHECK_COMMAND = "bzt --help";
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
     protected final static String DEFAULT_CONFIG_FILE = "defaultReport.yml";
-    protected final String DEFAULT_REPORTING_CONFIG;
 
     @Symbol("performanceTest")
     @Extension
@@ -63,7 +62,6 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
     public PerformanceTestBuild(String testConfigurationFiles, String testOptions) throws IOException {
         this.testConfigurationFiles = (testConfigurationFiles == null) ? StringUtils.EMPTY : testConfigurationFiles;
         this.testOptions = (testOptions == null) ? StringUtils.EMPTY : testOptions;
-        this.DEFAULT_REPORTING_CONFIG = extractDefaultReport();
     }
 
     @Override
@@ -74,7 +72,7 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
         }
 
         String bztExecution = PERFORMANCE_TEST_COMMAND + ' ' +
-                DEFAULT_REPORTING_CONFIG + " " +
+                extractDefaultReportToWorkspace(build.getWorkspace()) + " " +
                 testConfigurationFiles + " " +
                 testOptions;
 
@@ -84,38 +82,12 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
     }
 
 
-    protected String extractDefaultReport() throws IOException {
-        InputStream fileStream = getClass().getResourceAsStream("defaultReport.yml");
-
-        if (fileStream == null) {
-            return StringUtils.EMPTY;
-        }
-
-        OutputStream out = null;
-        try {
-
-            File configFile = File.createTempFile("defaultConfig.yml", "");
-            configFile.deleteOnExit();
-
-            out = new FileOutputStream(configFile);
-
-            byte[] buffer = new byte[1024];
-            int len = fileStream.read(buffer);
-            while (len != -1) {
-                out.write(buffer, 0, len);
-                len = fileStream.read(buffer);
-            }
-
-            return configFile.getAbsolutePath();
-        } finally {
-            // Close the streams
-            fileStream.close();
-            if (out != null) {
-                out.close();
-            }
-        }
+    protected String extractDefaultReportToWorkspace(FilePath workspace) throws IOException, InterruptedException {
+        FilePath defaultConfig = workspace.child(DEFAULT_CONFIG_FILE);
+        defaultConfig.copyFrom(getClass().getResourceAsStream(DEFAULT_CONFIG_FILE));
+        return defaultConfig.getRemote();
     }
-    
+
     public String getTestConfigurationFiles() {
         return testConfigurationFiles;
     }

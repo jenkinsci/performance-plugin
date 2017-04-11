@@ -1,5 +1,6 @@
 package hudson.plugins.performance.build;
 
+import com.google.common.io.Files;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.FreeStyleBuild;
@@ -9,7 +10,6 @@ import org.junit.Test;
 import org.jvnet.hudson.test.HudsonTestCase;
 
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
 
 
@@ -22,7 +22,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         PerformanceTestBuild buildTest = new PerformanceTestBuild(path, "");
         FreeStyleProject project = createFreeStyleProject();
         FreeStyleBuildExt ext = new FreeStyleBuildExt(project);
-        ext.setWorkspace(new FilePath(new File(".")));
+        ext.setWorkspace(new FilePath(Files.createTempDir()));
 
         assertTrue(buildTest.perform((AbstractBuild<?,?>) ext, createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener())));
     }
