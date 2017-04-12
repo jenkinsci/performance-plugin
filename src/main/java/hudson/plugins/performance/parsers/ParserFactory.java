@@ -3,7 +3,6 @@ package hudson.plugins.performance.parsers;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
-import hudson.plugins.performance.PerformancePublisher;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +33,8 @@ public class ParserFactory {
         try {
             FilePath[] pathList = workspace.list(expandGlob);
             for (FilePath src : pathList) {
-                final File localReport = PerformancePublisher.getPerformanceReport(build, "Parser Factory", src.getName());
+                // copy file (it can be on remote slave) to "../build/../temp/" folder
+                final File localReport = new File(build.getRootDir(), "/temp/" + src.getName());
                 if (src.isDirectory()) {
                     logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
                     continue;
