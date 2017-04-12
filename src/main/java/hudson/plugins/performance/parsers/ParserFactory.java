@@ -2,10 +2,11 @@ package hudson.plugins.performance.parsers;
 
 import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.plugins.performance.PerformancePublisher;
+import hudson.model.Run;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -23,17 +24,33 @@ public class ParserFactory {
         defaultGlobPatterns.put("**/*.wrk", WrkSummarizerParser.class.getSimpleName());
     }
 
-    public static PerformanceReportParser getParser(FilePath workspace, String glob, EnvVars env) throws IOException, InterruptedException {
+    public static PerformanceReportParser getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env) throws IOException, InterruptedException {
         if (defaultGlobPatterns.containsKey(glob)) {
             return getParser(defaultGlobPatterns.get(glob), glob);
         }
 
         String expandGlob = env.expand(glob);
         try {
-            for (FilePath path : workspace.list(expandGlob)) {
-                return getParser(ParserDetector.detect(path.getRemote()), glob);
+            FilePath[] pathList = workspace.list(expandGlob);
+            for (FilePath src : pathList) {
+                // copy file (it can be on remote slave) to "../build/../temp/" folder
+                final File localReport = new File(build.getRootDir(), "/temp/" + src.getName());
+                if (src.isDirectory()) {
+                    logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
+                    continue;
+                }
+                src.copyTo(new FilePath(localReport));
+                return getParser(ParserDetector.detect(localReport.getPath()), glob);
             }
         } catch (IOException ignored) {
+        }
+
+        File report = new File(workspace.getRemote() + '/' + glob);
+        if (!report.exists()) {
+            // if report on remote slave
+            FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + glob));
+            localReport.copyFrom(new FilePath(workspace, glob));
+            return getParser(ParserDetector.detect(localReport.getRemote()), glob);
         }
 
         return getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob);
