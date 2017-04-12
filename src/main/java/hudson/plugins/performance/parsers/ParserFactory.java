@@ -2,8 +2,12 @@ package hudson.plugins.performance.parsers;
 
 import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.model.Run;
+import hudson.plugins.performance.PerformancePublisher;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -21,7 +25,7 @@ public class ParserFactory {
         defaultGlobPatterns.put("**/*.wrk", WrkSummarizerParser.class.getSimpleName());
     }
 
-    public static PerformanceReportParser getParser(FilePath workspace, String glob, EnvVars env) throws IOException, InterruptedException {
+    public static PerformanceReportParser getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env) throws IOException, InterruptedException {
         if (defaultGlobPatterns.containsKey(glob)) {
             return getParser(defaultGlobPatterns.get(glob), glob);
         }
@@ -29,9 +33,14 @@ public class ParserFactory {
         String expandGlob = env.expand(glob);
         try {
             FilePath[] pathList = workspace.list(expandGlob);
-            if (pathList.length > 0) {
-                return getParser(ParserDetector.detect(pathList[0].getRemote()), glob);
-
+            for (FilePath src : pathList) {
+                final File localReport = PerformancePublisher.getPerformanceReport(build, "Parser Factory", src.getName());
+                if (src.isDirectory()) {
+                    logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
+                    continue;
+                }
+                src.copyTo(new FilePath(localReport));
+                return getParser(ParserDetector.detect(localReport.getPath()), glob);
             }
         } catch (IOException ignored) {
         }

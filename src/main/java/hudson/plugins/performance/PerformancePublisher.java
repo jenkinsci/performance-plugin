@@ -431,12 +431,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return files;
     }
 
-    protected List<PerformanceReportParser> getParsers(FilePath workspace, EnvVars env) throws IOException, InterruptedException {
+    protected List<PerformanceReportParser> getParsers(Run<?, ?> build, FilePath workspace, PrintStream logger, EnvVars env) throws IOException, InterruptedException {
         final List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
         if (sourceDataFiles != null) {
             for (String filePath : sourceDataFiles.split(";")) {
                 if (!filePath.isEmpty()) {
-                    parsers.add(ParserFactory.getParser(workspace, filePath, env));
+                    parsers.add(ParserFactory.getParser(build, workspace, logger, filePath, env));
                 }
             }
         }
@@ -484,7 +484,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         Result result = Result.SUCCESS;
         run.setResult(Result.SUCCESS);
         EnvVars env = run.getEnvironment(listener);
-        final List<PerformanceReportParser> parsers = getParsers(workspace, env);
+        final List<PerformanceReportParser> parsers = getParsers(run, workspace, logger, env);
 
         Collection<PerformanceReport> parsedReports = Collections.emptyList();
         String glob = null;
