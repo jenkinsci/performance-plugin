@@ -2,9 +2,7 @@ package hudson.plugins.performance.parsers;
 
 import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.plugins.performance.PerformancePublisher;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
@@ -30,8 +28,10 @@ public class ParserFactory {
 
         String expandGlob = env.expand(glob);
         try {
-            for (FilePath path : workspace.list(expandGlob)) {
-                return getParser(ParserDetector.detect(path.getRemote()), glob);
+            FilePath[] pathList = workspace.list(expandGlob);
+            if (pathList.length > 0) {
+                return getParser(ParserDetector.detect(pathList[0].getRemote()), glob);
+
             }
         } catch (IOException ignored) {
         }
