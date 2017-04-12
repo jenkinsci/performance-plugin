@@ -45,6 +45,14 @@ public class ParserFactory {
         } catch (IOException ignored) {
         }
 
+        File report = new File(workspace.getRemote() + '/' + glob);
+        if (!report.exists()) {
+            // if report on remote slave
+            FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + glob));
+            localReport.copyFrom(new FilePath(workspace, glob));
+            return getParser(ParserDetector.detect(localReport.getRemote()), glob);
+        }
+
         return getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob);
     }
 
