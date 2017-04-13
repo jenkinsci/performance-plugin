@@ -30,7 +30,7 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
     protected final static String CHECK_VIRTUALENV_COMMAND = "virtualenv --help";
     protected final static String CREATE_LOCAL_PYTHON_COMMAND = "virtualenv --clear --system-site-packages taurus-venv";
     protected final static String VIRTUALENV_PATH = "taurus-venv/bin/";
-    protected final static String INSTALL_BZT_COMMAND = VIRTUALENV_PATH + "pip install bzt";
+    protected final static String INSTALL_BZT_COMMAND = VIRTUALENV_PATH + "pip --no-cache-dir install bzt";
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
     protected final static String DEFAULT_CONFIG_FILE = "defaultReport.yml";
 
