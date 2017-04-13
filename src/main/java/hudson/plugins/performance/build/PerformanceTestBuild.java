@@ -19,6 +19,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * "Build step" for running performance test
@@ -60,17 +61,24 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        PrintStream logger = listener.getLogger();
         boolean isVirtualenvInstallation = false;
+        logger.println("Performance test: Checking bzt installed on your machine.");
         // Step 1: Check bzt using "bzt --help".
         if (!runCommand(CHECK_BZT_COMMAND, build, launcher, listener)) {                                                 // TODO: off help output?
+            logger.println("Performance test: You have not got bzt on your machine. Next step is checking virtualenv.");
             // Step 1.1: If bzt not installed check virtualenv using "virtualenv --help".
             if (runCommand(CHECK_VIRTUALENV_COMMAND, build, launcher, listener)) {                                       // TODO: off help output?
+                logger.println("Performance test: Checking virtualenv is OK. Next step is creation local python.");
                 // Step 1.2: Create local python using "virtualenv --clear --system-site-packages taurus-venv".
                 if (runCommand(CREATE_LOCAL_PYTHON_COMMAND, build, launcher, listener)) {                                // TODO: off help output?
+                    logger.println("Performance test: Creation local python is OK. Next step is install bzt.");
                     // Step 1.3: Install bzt in virtualenv using "taurus-venv/bin/pip install bzt".
                     if (runCommand(INSTALL_BZT_COMMAND, build, launcher, listener)) {                                    // TODO: off help output?
+                        logger.println("Performance test: bzt installed successfully. Checking bzt.");
                         // Step 1.4: Check bzt using "taurus-venv/bin/bzt --help"
                         if (runCommand(VIRTUALENV_PATH + CHECK_BZT_COMMAND, build, launcher, listener)) {                // TODO: off help output?
+                            logger.println("Performance test: bzt is working.");
                             isVirtualenvInstallation = true;
                         } else {
                             // TODO: what we do when bzt in virtualenv doesn't work?
