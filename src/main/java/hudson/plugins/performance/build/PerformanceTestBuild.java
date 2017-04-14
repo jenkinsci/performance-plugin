@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -111,7 +112,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                 }
             }
             testCommand.add(extractDefaultReportToWorkspace(workspace));
-
+            logger.println("Performance test: run " + Arrays.toString(testCommand.toArray()));
             if (runCmd(testCommand.toArray(new String[testCommand.size()]), workspace, logger, false)) {
                 run.setResult(Result.SUCCESS);
                 return;
