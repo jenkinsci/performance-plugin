@@ -7,24 +7,28 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.performance.Messages;
 import hudson.tasks.BatchFile;
-import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.tasks.Shell;
+import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 
 /**
  * "Build step" for running performance test
  */
-public class PerformanceTestBuild extends Builder implements BuildStep {
+public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     protected final static String CHECK_BZT_COMMAND = "bzt --help";
     protected final static String CHECK_VIRTUALENV_COMMAND = "virtualenv --help";
@@ -34,7 +38,8 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
     protected final static String DEFAULT_CONFIG_FILE = "defaultReport.yml";
 
-    @Symbol("performanceTest")
+
+    @Symbol("bzt")
     @Extension
     public static class Descriptor extends BuildStepDescriptor<Builder> {
 
@@ -60,9 +65,12 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+
         PrintStream logger = listener.getLogger();
         boolean isVirtualenvInstallation = false;
+        boolean isBztInstalled = false;
+
         logger.println("Performance test: Checking bzt installed on your machine.");
         // Step 1: Check bzt using "bzt --help".
         if (!runCommand(CHECK_BZT_COMMAND, build, launcher, listener)) {                                                 // TODO: off help output?
@@ -82,38 +90,43 @@ public class PerformanceTestBuild extends Builder implements BuildStep {
                             isVirtualenvInstallation = true;
                         } else {
                             // TODO: what we do when bzt in virtualenv doesn't work?
-                            return false;
                         }
                     } else {
                         // TODO: what we do when bzt doesn't install in virtualenv?
-                        return false;
                     }
                 } else {
                     // TODO: what we do when virtualenv does create local python?
-                    return false;
                 }
             } else {
                 // TODO: what we do when virtualenv does not installed?
-                return false;
             }
-//            return false;
+        } else {
+            isBztInstalled = true;
         }
 
-        String bztExecution =
-                (isVirtualenvInstallation ? VIRTUALENV_PATH : "") +
-                PERFORMANCE_TEST_COMMAND + ' ' +
-                extractDefaultReportToWorkspace(build.getWorkspace()) + " " +
-                testConfigurationFiles + " " +
-                testOptions;
+        if (isBztInstalled || isVirtualenvInstallation) {
+            String bztExecution =
+                    (isVirtualenvInstallation ? VIRTUALENV_PATH : "") +
+                            PERFORMANCE_TEST_COMMAND + ' ' +
+                            extractDefaultReportToWorkspace(workspace) + " " +
+                            testConfigurationFiles + " " +
+                            testOptions;
 
-        // Step 2: Run performance test.
-        return runCommand(bztExecution, build, launcher, listener);
+            // Step 2: Run performance test.
+            if (runCommand(bztExecution, build, launcher, listener)) {
+                build.setResult(Result.SUCCESS);
+                return;
+            }
+        }
+
+        build.setResult(Result.FAILURE);
+
         // TODO: add post build action
     }
 
-    public static boolean runCommand(String command, AbstractBuild<?,?> build, Launcher launcher, BuildListener listener)
+    public static boolean runCommand(String command, Run<?, ?> build, Launcher launcher, TaskListener listener)
             throws IOException, InterruptedException {
-        return createCommand(command).perform(build, launcher, listener);
+        return createCommand(command).perform((AbstractBuild<?, ?>) build, launcher, (BuildListener) listener);
     }
 
     public static Builder createCommand(String command) {
