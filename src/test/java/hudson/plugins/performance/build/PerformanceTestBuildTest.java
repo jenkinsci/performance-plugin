@@ -19,7 +19,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     public void testFlow() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(path, "");
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(path);
         FreeStyleProject project = createFreeStyleProject();
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         buildExt.setWorkspace(new FilePath(Files.createTempDir()));
