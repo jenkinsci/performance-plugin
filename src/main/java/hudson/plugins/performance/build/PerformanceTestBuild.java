@@ -4,7 +4,6 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Proc;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -18,7 +17,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,10 +40,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
     protected final static String[] CHECK_VIRTUALENV_BZT_COMMAND = new String[]{VIRTUALENV_PATH + PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
     protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_COMMAND};
-    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", "--system-site-packages", "taurus-venv"};
+    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", /*"--system-site-packages",*/ "taurus-venv"};
     protected final static String[] INSTALL_BZT_COMMAND = new String[]{VIRTUALENV_PATH + "pip", "--no-cache-dir", "install", PERFORMANCE_TEST_COMMAND};
     protected final static String DEFAULT_CONFIG_FILE = "defaultReport.yml";
 
+    protected final static String PERFORMANCE_TEST_LOG_FILE = "performanceTest.log";
 
     @Symbol("performanceTest")
     @Extension
@@ -71,28 +76,37 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         boolean isVirtualenvInstallation = false;
         boolean isBztInstalled = false;
 
+        OutputStream performanceTestLogger = getPerformanceTestLogger(run, logger);
+
         EnvVars envVars = run.getEnvironment(listener);
 
         logger.println("Performance test: Checking bzt installed on your machine.");
+        performanceTestLogger.write("Performance test: Checking bzt installed on your machine.\r\n".getBytes());
         // Step 1: Check bzt using "bzt --help".
-        if (!runCmd(CHECK_BZT_COMMAND, workspace, logger, launcher, envVars, true)) {
+        if (!runCmd(CHECK_BZT_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
             logger.println("Performance test: You have not bzt on your machine. Next step is checking virtualenv.");
+            performanceTestLogger.write("Performance test: You have not bzt on your machine. Next step is checking virtualenv.\n".getBytes());
             // Step 1.1: If bzt not installed check virtualenv using "virtualenv --help".
-            if (runCmd(CHECK_VIRTUALENV_COMMAND, workspace, logger, launcher, envVars, true)) {
+            if (runCmd(CHECK_VIRTUALENV_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
                 logger.println("Performance test: Checking virtualenv is OK. Next step is creation isolated Python environments.");
+                performanceTestLogger.write("Performance test: Checking virtualenv is OK. Next step is creation isolated Python environments.\n".getBytes());
                 // Step 1.2: Create local python using "virtualenv --clear --system-site-packages taurus-venv".
-                if (runCmd(CREATE_LOCAL_PYTHON_COMMAND, workspace, logger, launcher, envVars, true)) {
+                if (runCmd(CREATE_LOCAL_PYTHON_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
                     logger.println("Performance test: Creation isolated Python environments is OK. Next step is install bzt.");
+                    performanceTestLogger.write("Performance test: Creation isolated Python environments is OK. Next step is install bzt.\n".getBytes());
                     // Step 1.3: Install bzt in virtualenv using "taurus-venv/bin/pip install bzt".
-                    if (runCmd(INSTALL_BZT_COMMAND, workspace, logger, launcher, envVars, true)) {
+                    if (runCmd(INSTALL_BZT_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
                         logger.println("Performance test: bzt installed successfully. Checking bzt.");
+                        performanceTestLogger.write("Performance test: bzt installed successfully. Checking bzt.\n".getBytes());
                         // Step 1.4: Check bzt using "taurus-venv/bin/bzt --help"
-                        if (runCmd(CHECK_VIRTUALENV_BZT_COMMAND, workspace, logger, launcher, envVars, true)) {
+                        if (runCmd(CHECK_VIRTUALENV_BZT_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
                             logger.println("Performance test: bzt is working.");
                             isVirtualenvInstallation = true;
                         }
                     } else {
                         logger.println("Performance test: Failed to install bzt into isolated Python environments \"taurus-venv\"");
+                        performanceTestLogger.close();
+                        printPerformanceTestLog(run, logger);
                     }
                 } else {
                     logger.println("Performance test: Failed to create isolated Python environments \"taurus-venv\"");
@@ -104,6 +118,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
             logger.println("Performance test: bzt is installed on your machine.");
             isBztInstalled = true;
         }
+
 
         if (isBztInstalled || isVirtualenvInstallation) {
             // Step 2: Run performance test.
@@ -117,21 +132,42 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
             }
             testCommand.add(extractDefaultReportToWorkspace(workspace));
             logger.println("Performance test: run " + Arrays.toString(testCommand.toArray()));
-            if (runCmd(testCommand.toArray(new String[testCommand.size()]), workspace, logger, launcher, envVars, false)) {
+            if (runCmd(testCommand.toArray(new String[testCommand.size()]), workspace, logger, launcher, envVars)) {
                 run.setResult(Result.SUCCESS);
+                performanceTestLogger.close();
                 return;
             }
         }
 
         run.setResult(Result.FAILURE);
+        performanceTestLogger.close();
     }
 
-    public static boolean runCmd(String[] commands, FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean skipOutput) throws InterruptedException {
+    protected void printPerformanceTestLog(Run<?, ?> run, PrintStream logger) throws IOException {
+        File perfLog = new File(run.getRootDir(), PERFORMANCE_TEST_LOG_FILE);
+        BufferedReader reader = new BufferedReader(new FileReader(perfLog));
         try {
-            Proc proc = (skipOutput) ?
-                    launcher.launch().cmds(commands).envs(envVars).pwd(workspace).start() :
-                    launcher.launch().cmds(commands).envs(envVars).stderr(logger).stdout(logger).pwd(workspace).start();
-            return proc.join() == 0;
+            String line = reader.readLine();
+            while (reader != null) {
+                logger.println(line);
+                line = reader.readLine();
+            }
+        } finally {
+            reader.close();
+        }
+    }
+
+    protected OutputStream getPerformanceTestLogger(Run<?, ?> run, PrintStream logger) throws IOException {
+        File perfLog = new File(run.getRootDir(), PERFORMANCE_TEST_LOG_FILE);
+        perfLog.delete();
+        perfLog.createNewFile();
+        logger.println("Create performance test log file: " + perfLog.getAbsolutePath());
+        return new FileOutputStream(perfLog);
+    }
+
+    public static boolean runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException {
+        try {
+            return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join() == 0;
         } catch (IOException ex) {
             return false;
         }

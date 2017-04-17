@@ -25,6 +25,8 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildExt.setWorkspace(new FilePath(Files.createTempDir()));
         buildExt.onStartBuilding();
 
+        buildExt.getRootDir().mkdirs();
+
         buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
         assertEquals(Result.SUCCESS, buildExt.getResult());
     }
