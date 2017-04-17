@@ -2,7 +2,7 @@
 execution:
 - hold-for: 5s
   ramp-up: 5s
-  concurrency: 5
+  concurrency: 2
   scenario:
     retrieve-resources: false
     requests:
