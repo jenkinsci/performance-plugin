@@ -148,7 +148,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         BufferedReader reader = new BufferedReader(new FileReader(perfLog));
         try {
             String line = reader.readLine();
-            while (reader != null) {
+            while (line != null) {
                 logger.println(line);
                 line = reader.readLine();
             }
