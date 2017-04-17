@@ -79,23 +79,23 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         EnvVars envVars = run.getEnvironment(listener);
 
         logger.println("Performance test: Checking bzt installed on your machine.");
-        performanceTestLogger.println("Performance test: Checking bzt installed on your machine.");
+        performanceTestLogger.println("Dump performance logger:\r\nPerformance logger: Checking bzt installed on your machine.");
         // Step 1: Check bzt using "bzt --help".
         if (!runCmd(CHECK_BZT_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
             logger.println("Performance test: You have not bzt on your machine. Next step is checking virtualenv.");
-            performanceTestLogger.println("Performance test: You have not bzt on your machine. Next step is checking virtualenv.");
+            performanceTestLogger.println("Performance logger: You have not bzt on your machine. Next step is checking virtualenv.");
             // Step 1.1: If bzt not installed check virtualenv using "virtualenv --help".
             if (runCmd(CHECK_VIRTUALENV_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
                 logger.println("Performance test: Checking virtualenv is OK. Next step is creation isolated Python environments.");
-                performanceTestLogger.println("Performance test: Checking virtualenv is OK. Next step is creation isolated Python environments.");
+                performanceTestLogger.println("Performance logger: Checking virtualenv is OK. Next step is creation isolated Python environments.");
                 // Step 1.2: Create local python using "virtualenv --clear --system-site-packages taurus-venv".
                 if (runCmd(CREATE_LOCAL_PYTHON_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
                     logger.println("Performance test: Creation isolated Python environments is OK. Next step is install bzt.");
-                    performanceTestLogger.println("Performance test: Creation isolated Python environments is OK. Next step is install bzt.");
+                    performanceTestLogger.println("Performance logger: Creation isolated Python environments is OK. Next step is install bzt.");
                     // Step 1.3: Install bzt in virtualenv using "taurus-venv/bin/pip install bzt".
                     if (runCmd(INSTALL_BZT_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
                         logger.println("Performance test: bzt installed successfully. Checking bzt.");
-                        performanceTestLogger.println("Performance test: bzt installed successfully. Checking bzt.");
+                        performanceTestLogger.println("Performance logger: bzt installed successfully. Checking bzt.");
                         // Step 1.4: Check bzt using "taurus-venv/bin/bzt --help"
                         if (runCmd(CHECK_VIRTUALENV_BZT_COMMAND, workspace, performanceTestLogger, launcher, envVars)) {
                             logger.println("Performance test: bzt is working.");
