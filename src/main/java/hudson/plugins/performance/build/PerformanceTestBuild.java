@@ -79,10 +79,10 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
             logger.println("Performance test: You have not bzt on your machine. Next step is checking virtualenv.");
             // Step 1.1: If bzt not installed check virtualenv using "virtualenv --help".
             if (runCmd(CHECK_VIRTUALENV_COMMAND, workspace, logger, launcher, envVars, true)) {
-                logger.println("Performance test: Checking virtualenv is OK. Next step is creation local python.");
+                logger.println("Performance test: Checking virtualenv is OK. Next step is creation isolated Python environments.");
                 // Step 1.2: Create local python using "virtualenv --clear --system-site-packages taurus-venv".
                 if (runCmd(CREATE_LOCAL_PYTHON_COMMAND, workspace, logger, launcher, envVars, true)) {
-                    logger.println("Performance test: Creation local python is OK. Next step is install bzt.");
+                    logger.println("Performance test: Creation isolated Python environments is OK. Next step is install bzt.");
                     // Step 1.3: Install bzt in virtualenv using "taurus-venv/bin/pip install bzt".
                     if (runCmd(INSTALL_BZT_COMMAND, workspace, logger, launcher, envVars, true)) {
                         logger.println("Performance test: bzt installed successfully. Checking bzt.");
@@ -91,7 +91,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                             logger.println("Performance test: bzt is working.");
                             isVirtualenvInstallation = true;
                         }
+                    } else {
+                        logger.println("Performance test: Failed to install bzt into isolated Python environments \"taurus-venv\"");
                     }
+                } else {
+                    logger.println("Performance test: Failed to create isolated Python environments \"taurus-venv\"");
                 }
             } else {
                 logger.println("Performance test: You have not virtualenv on your machine. Please, install virtualenv on your machine.");
@@ -122,11 +126,15 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         run.setResult(Result.FAILURE);
     }
 
-    public static boolean runCmd(String[] commands, FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean skipOutput) throws IOException, InterruptedException {
-        Proc proc = (skipOutput) ?
-                launcher.launch().cmds(commands).envs(envVars).pwd(workspace).start() :
-                launcher.launch().cmds(commands).envs(envVars).stderr(logger).stdout(logger).pwd(workspace).start();
-        return proc.join() == 0;
+    public static boolean runCmd(String[] commands, FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean skipOutput) throws InterruptedException {
+        try {
+            Proc proc = (skipOutput) ?
+                    launcher.launch().cmds(commands).envs(envVars).pwd(workspace).start() :
+                    launcher.launch().cmds(commands).envs(envVars).stderr(logger).stdout(logger).pwd(workspace).start();
+            return proc.join() == 0;
+        } catch (IOException ex) {
+            return false;
+        }
     }
 
     protected String extractDefaultReportToWorkspace(FilePath workspace) throws IOException, InterruptedException {
