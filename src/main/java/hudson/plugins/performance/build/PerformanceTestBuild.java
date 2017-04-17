@@ -19,10 +19,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +39,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String[] CHECK_VIRTUALENV_BZT_COMMAND = new String[]{VIRTUALENV_PATH + PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
     protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_COMMAND};
     protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", /*"--system-site-packages",*/ "taurus-venv"};
-    protected final static String[] INSTALL_BZT_COMMAND = new String[]{VIRTUALENV_PATH + "pip", "--no-cache-dir", "install", PERFORMANCE_TEST_COMMAND};
+    protected final static String[] INSTALL_BZT_COMMAND = new String[]{VIRTUALENV_PATH + "pip", /*"--no-cache-dir",*/ "install", PERFORMANCE_TEST_COMMAND};
     protected final static String DEFAULT_CONFIG_FILE = "defaultReport.yml";
 
     protected final static String PERFORMANCE_TEST_LOG_FILE = "performanceTest.log";
