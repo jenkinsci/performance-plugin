@@ -32,7 +32,20 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildExt.getRootDir().mkdirs();
 
         buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
-        assertEquals(Result.SUCCESS, buildExt.getResult());
+
+        File tmpFile = File.createTempFile("temp.log", "");
+        PrintStream actualLog = new PrintStream(tmpFile);
+        buildTest.printPerformanceTestLog(buildExt, actualLog);
+        actualLog.close();
+
+        StringBuilder performanceLog = new StringBuilder("\r\n");
+        BufferedReader reader = new BufferedReader(new FileReader(tmpFile));
+        String line = reader.readLine();
+        while (line != null) {
+            performanceLog.append(line).append("\r\n");
+            line = reader.readLine();
+        }
+        assertEquals(performanceLog.toString(), Result.SUCCESS, buildExt.getResult());
     }
 
     @Test
