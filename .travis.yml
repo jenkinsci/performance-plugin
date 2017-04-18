@@ -1,6 +1,7 @@
 sudo: false
 language: java
 install:
+- pip install --upgrade pip
 - pip install virtualenv
 - "mvn -Dmaven.test.skip=true clean install --batch-mode"
 script: "mvn -Djava.awt.headless=true -Dmaven.test.redirectTestOutputToFile=true -Dcobertura.report.format=xml --fail-at-end --batch-mode cobertura:cobertura test "
