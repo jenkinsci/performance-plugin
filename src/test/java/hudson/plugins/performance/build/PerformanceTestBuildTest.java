@@ -53,4 +53,16 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
             super.onStartBuilding();
         }
     }
+
+    @Test
+    public void testGetters() throws Exception {
+        PerformanceTestBuild.Descriptor descriptor = new PerformanceTestBuild.Descriptor();
+        assertTrue(descriptor.isApplicable(null));
+
+        PerformanceTestBuild testBuild = new PerformanceTestBuild("test option");
+        assertEquals("test option", testBuild.getParams());
+        testBuild.setParams("test1");
+        assertEquals("test1", testBuild.getParams());
+
+    }
 }
