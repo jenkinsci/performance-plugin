@@ -1,14 +1,16 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.util.FormValidation;
+import hudson.plugins.performance.reports.UriReport;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 public class JMeterCsvParserTest {
     private static final String NO_GLOB = null;
@@ -53,11 +55,11 @@ public class JMeterCsvParserTest {
 
     @Test
     public void testLookingForDelimeter() throws Exception {
-        assertEquals(",", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc,adzxcAZZAAZ"));
-        assertEquals("\t", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc\tadzxcAZZAAZ"));
-        assertEquals(";", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc;adzxcAZZAAZ"));
-        assertEquals("^", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc^adzxcAZZAAZ"));
-        assertEquals(":", JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc:tadzxcAZZAAZ"));
+        assertEquals(',', JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc,adzxcAZZAAZ"));
+        assertEquals('\t', JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc\tadzxcAZZAAZ"));
+        assertEquals(';', JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc;adzxcAZZAAZ"));
+        assertEquals('^', JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc^adzxcAZZAAZ"));
+        assertEquals(':', JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc:tadzxcAZZAAZ"));
 
         try {
             JMeterCsvParser.lookingForDelimiter("asdadadadasd");
@@ -65,5 +67,32 @@ public class JMeterCsvParserTest {
         } catch (Exception ex) {
             assertEquals("Cannot find delimiter in header asdadadadasd", ex.getMessage());
         }
+    }
+    @Test
+    public void testMultiLineCSV() throws Exception {
+
+        // Setup fixture.
+        final JMeterCsvParser parser = new JMeterCsvParser(null);
+        final File reportFile = new File(getClass().getResource("/multiLineCSV.jtl").toURI());
+
+        // Execute system under test.
+        PerformanceReport performanceReport = parser.parse(reportFile);
+
+        Map<String, UriReport> reportMap = performanceReport.getUriReportMap();
+
+        assertEquals(2, reportMap.size());
+        for (UriReport report : reportMap.values()) {
+            if (report.getHttpCode().equals("200")) {
+                assertEquals("Preparation: Login", report.getUri());
+            } else if (report.getHttpCode().equals("500")) {
+                assertEquals("no such element: Unable to locate element: {\"method\":\"id\",\"selector\":\"reviewBAD\"}\n" +
+                        "                  Session ID: 89a1a36b52e184afb01963257d8739e8\n" +
+                        "                  *** Element info: {Using=id, value=reviewBAD}", report.getUri());
+            } else {
+                fail("Wrong uri sampler");
+            }
+
+        }
+
     }
 }

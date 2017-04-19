@@ -1,0 +1,5 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,Latency,IdleTime,Connect
+1492260110340,1898,Preparation: Login,200,OK,Review Date test 1-1,text,true,,15338,0,1,1,0,0,0
+1492260112271,118,"no such element: Unable to locate element: {""method"":""id"",""selector"":""reviewBAD""}
+                  Session ID: 89a1a36b52e184afb01963257d8739e8
+                  *** Element info: {Using=id, value=reviewBAD}",500,NOTOK,Review Date test 1-1,text,false,,5815,0,1,1,0,0,0
