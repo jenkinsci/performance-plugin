@@ -33,44 +33,8 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
 
-        File tmpFile = File.createTempFile("temp.log", "");
-        PrintStream actualLog = new PrintStream(tmpFile);
-        buildTest.printPerformanceTestLog(buildExt, actualLog);
-        actualLog.close();
 
-        StringBuilder performanceLog = new StringBuilder("\r\n");
-        BufferedReader reader = new BufferedReader(new FileReader(tmpFile));
-        String line = reader.readLine();
-        while (line != null) {
-            performanceLog.append(line).append("\r\n");
-            line = reader.readLine();
-        }
-        assertEquals(performanceLog.toString(), Result.SUCCESS, buildExt.getResult());
-    }
-
-    @Test
-    public void testLogging() throws Exception {
-
-        PerformanceTestBuild buildTest = new PerformanceTestBuild("--help");
-
-        FreeStyleProject project = createFreeStyleProject();
-        FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
-        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
-        buildExt.onStartBuilding();
-        buildExt.getRootDir().mkdirs();
-
-
-        PrintStream out = buildTest.getPerformanceTestLogger(buildExt, System.out);
-        out.println("Test log!");
-        out.close();
-
-        File tmpFile = File.createTempFile("temp.log", "");
-        PrintStream actualLog = new PrintStream(tmpFile);
-        buildTest.printPerformanceTestLog(buildExt, actualLog);
-        actualLog.close();
-
-        String actualLine = new BufferedReader(new FileReader(tmpFile)).readLine();
-        assertEquals("Test log!", actualLine);
+        assertEquals(Result.SUCCESS, buildExt.getResult());
     }
 
     public static class FreeStyleBuildExt extends FreeStyleBuild {
