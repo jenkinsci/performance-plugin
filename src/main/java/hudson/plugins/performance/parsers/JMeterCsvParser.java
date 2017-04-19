@@ -4,12 +4,16 @@ import hudson.Extension;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -17,14 +21,12 @@ import java.util.Date;
 
 public class JMeterCsvParser extends AbstractParser {
 
-    public static final String COMMAS_NOT_INSIDE_QUOTES = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
-    public String delimiter;
+    public char delimiter;
     public int timestampIdx = -1;
     public int elapsedIdx = -1;
     public int responseCodeIdx = -1;
     public int successIdx = -1;
     public int urlIdx = -1;
-    public String pattern;
 
 
     @DataBoundConstructor
@@ -53,40 +55,50 @@ public class JMeterCsvParser extends AbstractParser {
         final PerformanceReport report = new PerformanceReport();
         report.setReportFileName(reportFile.getName());
 
+        String[] header = null;
         final BufferedReader reader = new BufferedReader(new FileReader(reportFile));
         try {
             String line = reader.readLine();
             if (line != null) {
-                // skip the header line
-                readCSVHeader(line);
-                line = reader.readLine();
+                header = readCSVHeader(line);
             }
-            while (line != null) {
-                final HttpSample sample = getSample(line);
-                if (sample != null) {
-                    try {
-                        report.addSample(sample);
-                    } catch (SAXException e) {
-                        throw new RuntimeException("Error parsing file '" + reportFile + "': Unable to add sample for line " + line, e);
-                    }
-                }
-                line = reader.readLine();
-            }
-
-            return report;
         } finally {
             if (reader != null) {
                 reader.close();
             }
         }
+
+        Reader fileReader = new FileReader(reportFile);
+        try {
+            parseCSV(fileReader, header, report);
+        } finally {
+            if (fileReader != null) {
+                fileReader.close();
+            }
+        }
+
+        return report;
     }
 
-    protected void readCSVHeader(String line) throws Exception {
+    protected void parseCSV(Reader in, String[] header, PerformanceReport report) throws IOException {
+        CSVFormat csvFormat = CSVFormat.newFormat(delimiter).withHeader(header).withQuote('"').withSkipHeaderRecord();
+        Iterable<CSVRecord> records = csvFormat.parse(in);
+        for (CSVRecord record : records) {
+            final HttpSample sample = getSample(record);
+            try {
+                report.addSample(sample);
+            } catch (SAXException e) {
+                throw new RuntimeException("Error parsing file '" + report.getReportFileName() + "': Unable to add sample for CSVRecord " + record, e);
+
+            }
+        }
+    }
+
+    protected String[] readCSVHeader(String line) throws Exception {
         this.delimiter = lookingForDelimiter(line);
-        this.pattern = line;
-        String[] fields = pattern.split(delimiter);
-        for (int i = 0; i < fields.length; i++) {
-            String field = fields[i];
+        final String[] header = line.split(String.valueOf(delimiter));
+        for (int i = 0; i < header.length; i++) {
+            String field = header[i];
             if ("timestamp".equalsIgnoreCase(field)) {
                 timestampIdx = i;
             } else if ("elapsed".equalsIgnoreCase(field)) {
@@ -101,16 +113,19 @@ public class JMeterCsvParser extends AbstractParser {
                 urlIdx = i;
             }
         }
+
         if (timestampIdx < 0 || elapsedIdx < 0 || responseCodeIdx < 0
                 || successIdx < 0 || urlIdx < 0) {
             throw new Exception("Missing required column");
         }
+
+        return header;
     }
 
-    protected static String lookingForDelimiter(String line) throws Exception {
+    protected static char lookingForDelimiter(String line) throws Exception {
         for (char ch : line.toCharArray()) {
             if (!Character.isLetter(ch)) {
-                return String.valueOf(ch);
+                return ch;
             }
         }
         throw new Exception("Cannot find delimiter in header " + line);
@@ -118,19 +133,18 @@ public class JMeterCsvParser extends AbstractParser {
 
 
     /**
-     * Parses a single HttpSample instance from a single CSV line.
+     * Parses a single HttpSample instance from a single CSV Record.
      *
-     * @param line file line with the provided pattern (cannot be null).
+     * @param record csv record from report file (cannot be null).
      * @return An sample instance (never null).
      */
-    private HttpSample getSample(String line) {
+    private HttpSample getSample(CSVRecord record) {
         final HttpSample sample = new HttpSample();
-        final String[] values = line.split(COMMAS_NOT_INSIDE_QUOTES);
-        sample.setDate(parseTimestamp(values[timestampIdx]));
-        sample.setDuration(Long.valueOf(values[elapsedIdx]));
-        sample.setHttpCode(values[responseCodeIdx]);
-        sample.setSuccessful(Boolean.valueOf(values[successIdx]));
-        sample.setUri(values[urlIdx]);
+        sample.setDate(parseTimestamp(record.get(timestampIdx)));
+        sample.setDuration(Long.valueOf(record.get(elapsedIdx)));
+        sample.setHttpCode(record.get(responseCodeIdx));
+        sample.setSuccessful(Boolean.valueOf(record.get(successIdx)));
+        sample.setUri(record.get(urlIdx));
         return sample;
     }
 
