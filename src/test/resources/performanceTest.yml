@@ -1,0 +1,10 @@
+---
+execution:
+- hold-for: 5s
+  ramp-up: 5s
+  concurrency: 2
+  scenario:
+    retrieve-resources: false
+    requests:
+    - http://blazedemo.com/
+    - http://blazedemo.com/reserve.php

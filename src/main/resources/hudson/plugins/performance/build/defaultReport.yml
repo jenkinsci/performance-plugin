@@ -1,0 +1,6 @@
+---
+settings:
+  artifacts-dir: taurus-artifacts
+reporting:
+- module: final-stats
+  dump-xml: taurus-artifacts/report.xml
