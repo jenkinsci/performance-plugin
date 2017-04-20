@@ -1,14 +1,15 @@
 package hudson.plugins.performance.dsl;
 
-import hudson.model.Result;
+import hudson.model.queue.QueueTaskFuture;
 import hudson.slaves.DumbSlave;
 import org.jenkinsci.plugins.workflow.SingleJobTestBase;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
-import org.jenkinsci.plugins.workflow.cps.CpsFlowExecution;
-import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
+
+import java.util.Arrays;
 
 
 public class PerfTestDSLVariableTest extends SingleJobTestBase {
@@ -26,12 +27,11 @@ public class PerfTestDSLVariableTest extends SingleJobTestBase {
                 p = jenkins().createProject(WorkflowJob.class, "demo");
                 p.setDefinition(new CpsFlowDefinition(
                         "node{ bzt '" + bztParams + "' }"));
-                startBuilding();
-                waitForWorkflowToSuspend();
-
-                FlowExecution execution = p.getLastBuild().getExecution();
-                assertTrue(execution instanceof CpsFlowExecution);
-                assertEquals(Result.SUCCESS, ((CpsFlowExecution) execution).getResult());
+                QueueTaskFuture<WorkflowRun> task = startBuilding();
+                WorkflowRun run = task.get();
+                String log = Arrays.toString(p.getBuilds().getLastBuild().getLog(Integer.MAX_VALUE).toArray());
+                // means that jenkins called method in bzt.groovy
+                assertTrue(log.contains("No such DSL method 'performanceTest'"));
             }
         });
     }
