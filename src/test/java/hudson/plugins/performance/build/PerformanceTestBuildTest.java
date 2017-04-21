@@ -64,5 +64,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         testBuild.setParams("test1");
         assertEquals("test1", testBuild.getParams());
 
+        assertFalse(testBuild.isUseSystemSitePackages());
+        assertFalse(testBuild.isPrintDebugOutput());
+        testBuild.setPrintDebugOutput(true);
+        testBuild.setUseSystemSitePackages(true);
+        assertTrue(testBuild.isUseSystemSitePackages());
+        assertTrue(testBuild.isPrintDebugOutput());
     }
 }
