@@ -74,14 +74,10 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         EnvVars envVars = run.getEnvironment(listener);
 
         boolean isVirtualenvInstallation = false;
-        boolean isBztInstalled = isGlobalBztInstalled(workspace, logger, launcher, envVars);
-        if (!isBztInstalled) {
-            isVirtualenvInstallation = installBztAndCheck(workspace, logger, launcher, envVars);
-        }
+        if (isGlobalBztInstalled(workspace, logger, launcher, envVars) ||
+                (isVirtualenvInstallation = installBztAndCheck(workspace, logger, launcher, envVars))) {
 
-        if (isBztInstalled || isVirtualenvInstallation) {
-            boolean result = runPerformanceTest(workspace, logger, launcher, envVars, isVirtualenvInstallation);
-            if (result) {
+            if (runPerformanceTest(workspace, logger, launcher, envVars, isVirtualenvInstallation)) {
                 run.setResult(Result.SUCCESS);
                 return;
             }
