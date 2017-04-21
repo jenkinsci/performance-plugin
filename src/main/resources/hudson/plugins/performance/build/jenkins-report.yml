@@ -1,4 +1,4 @@
 ---
 reporting:
 - module: final-stats
-  dump-xml: taurus-venv/aggregate-results.xml
+  dump-xml: aggregate-results.xml
