@@ -23,7 +23,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     public void testFlow() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(path + ' ' + "-o modules.jmeter.plugins=[] -o services=[]");
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(path + ' ' + "-o modules.jmeter.plugins=[] -o services=[]", false, false);
         FreeStyleProject project = createFreeStyleProject();
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         buildExt.setWorkspace(new FilePath(Files.createTempDir()));
@@ -59,7 +59,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         PerformanceTestBuild.Descriptor descriptor = new PerformanceTestBuild.Descriptor();
         assertTrue(descriptor.isApplicable(null));
 
-        PerformanceTestBuild testBuild = new PerformanceTestBuild("test option");
+        PerformanceTestBuild testBuild = new PerformanceTestBuild("test option", false, false);
         assertEquals("test option", testBuild.getParams());
         testBuild.setParams("test1");
         assertEquals("test1", testBuild.getParams());

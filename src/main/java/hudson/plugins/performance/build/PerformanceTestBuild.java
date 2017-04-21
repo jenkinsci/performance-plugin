@@ -61,10 +61,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
 
     private String params;
+    private boolean printDebugOutput;
+    private boolean useSystemSitePackages;
 
     @DataBoundConstructor
-    public PerformanceTestBuild(String params) throws IOException {
+    public PerformanceTestBuild(String params, boolean printDebugOutput, boolean useSystemSitePackages) throws IOException {
         this.params = params;
+        this.printDebugOutput = printDebugOutput;
+        this.useSystemSitePackages = useSystemSitePackages;
     }
 
 
@@ -208,5 +212,23 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setParams(String params) {
         this.params = params;
+    }
+
+    public boolean isPrintDebugOutput() {
+        return printDebugOutput;
+    }
+
+    @DataBoundSetter
+    public void setPrintDebugOutput(boolean printDebugOutput) {
+        this.printDebugOutput = printDebugOutput;
+    }
+
+    public boolean isUseSystemSitePackages() {
+        return useSystemSitePackages;
+    }
+
+    @DataBoundSetter
+    public void setUseSystemSitePackages(boolean useSystemSitePackages) {
+        this.useSystemSitePackages = useSystemSitePackages;
     }
 }
