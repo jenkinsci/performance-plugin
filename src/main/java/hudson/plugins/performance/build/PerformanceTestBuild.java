@@ -40,7 +40,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String[] CHECK_VIRTUALENV_BZT_COMMAND = new String[]{VIRTUALENV_PATH + PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
     protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_COMMAND};
     protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", /*"--system-site-packages",*/ "taurus-venv"};
-    protected final static String[] INSTALL_BZT_COMMAND = new String[]{VIRTUALENV_PATH + "pip", /*"--no-cache-dir",*/ "install", PERFORMANCE_TEST_COMMAND};
+    protected final static String[] INSTALL_BZT_COMMAND = new String[]{VIRTUALENV_PATH + "pip", "install", PERFORMANCE_TEST_COMMAND};
     protected final static String DEFAULT_CONFIG_FILE = "jenkins-report.yml";
 
 
@@ -103,24 +103,24 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     // Step 1.1: Check bzt using "bzt --help".
     private boolean isGlobalBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
-        logger.println("Performance test: Checking bzt installed on your machine.");
+        logger.println("Performance test: Checking global bzt installation...");
         boolean result = runCmd(CHECK_BZT_COMMAND, workspace, new NullOutputStream(), launcher, envVars);
         logger.println(result ?
-                "Performance test: bzt is installed on your machine." :
-                "Performance test: You didn't have bzt on your machine."
+                "Performance test: Found global bzt installation." :
+                "Performance test: You don't have global bzt installed on this Jenkins host. Installing it globally will speed up job. Run 'sudo pip install bzt' to install it."
         );
         return result;
     }
 
     // Step 1.2: If bzt not installed check virtualenv using "virtualenv --help".
     private boolean isVirtualenvInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
-        logger.println("Performance test: Next step is checking virtualenv.");
+        logger.println("Performance test: Checking virtualenv tool availability...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         boolean result = runCmd(CHECK_VIRTUALENV_COMMAND, workspace, outputStream, launcher, envVars);
         if (result) {
-            logger.println("Performance test: The virtualenv check completed successfully.");
+            logger.println("Performance test: Found virtualenv tool.");
         } else {
-            logger.println("Performance test: You have not virtualenv on your machine. Please, install virtualenv on your machine.");
+            logger.println("Performance test: No virtualenv found on this Jenkins host. Install it with 'sudo pip install virtualenv'.");
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -128,13 +128,13 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     // Step 1.3: Create local python using "virtualenv --clear taurus-venv".
     private boolean createIsolatedPython(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
-        logger.println("Performance test: Next step is creation isolated Python environments.");
+        logger.println("Performance test: Creating virtualev at 'taurus-venv'...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         boolean result = runCmd(CREATE_LOCAL_PYTHON_COMMAND, workspace, outputStream, launcher, envVars);
         if (result) {
-            logger.println("Performance test: The creation of isolated python was successful.");
+            logger.println("Performance test: Done creating virtualenv.");
         } else {
-            logger.println("Performance test: Failed to create isolated Python environments \"taurus-venv\"");
+            logger.println("Performance test: Failed to create virtualenv at 'taurus-venv'");
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -142,13 +142,13 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     // Step 1.4: Install bzt in virtualenv using "taurus-venv/bin/pip install bzt".
     private boolean installBztInVirtualenv(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
-        logger.println("Performance test: Next step is install bzt.");
+        logger.println("Performance test: Installing bzt into 'taurus-venv'");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         boolean result = runCmd(INSTALL_BZT_COMMAND, workspace, outputStream, launcher, envVars);
         if (result) {
             logger.println("Performance test: bzt installed successfully.");
         } else {
-            logger.println("Performance test: Failed to install bzt into isolated Python environments \"taurus-venv\"");
+            logger.println("Performance test: Failed to install bzt into 'taurus-venv'");
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -156,13 +156,13 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     // Step 1.5: Check bzt using "taurus-venv/bin/bzt --help"
     private boolean isVirtualenvBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
-        logger.println("Performance test: Checking bzt installed in virtualenv.");
+        logger.println("Performance test: Checking installed bzt...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         boolean result = runCmd(CHECK_VIRTUALENV_BZT_COMMAND, workspace, outputStream, launcher, envVars);
         if (result) {
-            logger.println("Performance test: bzt is installed in virtualenv.");
+            logger.println("Performance test: bzt is operational.");
         } else {
-            logger.println("Performance test: You didn't have bzt in virtualenv.");
+            logger.println("Performance test: Failed to run bzt inside virtualenv.");
             logger.write(outputStream.toByteArray());
         }
         return result;
