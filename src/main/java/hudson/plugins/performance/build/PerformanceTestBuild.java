@@ -1,5 +1,6 @@
 package hudson.plugins.performance.build;
 
+import com.google.common.base.Throwables;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -12,15 +13,15 @@ import hudson.plugins.performance.Messages;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import jenkins.tasks.SimpleBuildStep;
+import org.apache.commons.io.output.NullOutputStream;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +74,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         EnvVars envVars = run.getEnvironment(listener);
 
         boolean isVirtualenvInstallation = false;
-        boolean isBztInstalled = isBztInstalled(CHECK_BZT_COMMAND, workspace, logger, launcher, envVars);
+        boolean isBztInstalled = isGlobalBztInstalled(workspace, logger, launcher, envVars);
         if (!isBztInstalled) {
             isVirtualenvInstallation = installBztAndCheck(workspace, logger, launcher, envVars);
         }
@@ -89,65 +90,85 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         run.setResult(Result.FAILURE);
     }
 
-    private boolean installBztAndCheck(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException {
-        boolean isInstalled = installBzt(workspace, logger, launcher, envVars);
-        return isInstalled && isBztInstalled(CHECK_VIRTUALENV_BZT_COMMAND, workspace, logger, launcher, envVars);
+    private boolean installBztAndCheck(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+        return installBzt(workspace, logger, launcher, envVars) &&
+                isVirtualenvBztInstalled(workspace, logger, launcher, envVars);
     }
 
-    private boolean installBzt(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException {
-        boolean isVirtualenvInstalled = isVirtualenvInstalled(workspace, logger, launcher, envVars);
-        return isVirtualenvInstalled && createVirtualenvAndInstallBzt(workspace, logger, launcher, envVars);
+    private boolean installBzt(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+        return isVirtualenvInstalled(workspace, logger, launcher, envVars) &&
+                createVirtualenvAndInstallBzt(workspace, logger, launcher, envVars);
     }
 
-    private boolean createVirtualenvAndInstallBzt(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException {
-        boolean isVirtualenvCreated = createIsolatedPython(workspace, logger, launcher, envVars);
-        return isVirtualenvCreated && installBztInVirtualenv(workspace, logger, launcher, envVars);
+    private boolean createVirtualenvAndInstallBzt(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+        return createIsolatedPython(workspace, logger, launcher, envVars) &&
+                installBztInVirtualenv(workspace, logger, launcher, envVars);
     }
 
-    // Step 1: Check bzt using "bzt --help".
-    // or
-    // Step 1.4: Check bzt using "taurus-venv/bin/bzt --help"
-    private boolean isBztInstalled(String[] bztCheckCommand, FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException {
+    // Step 1.1: Check bzt using "bzt --help".
+    private boolean isGlobalBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Checking bzt installed on your machine.");
-        boolean result = runCmd(bztCheckCommand, workspace, logger, launcher, envVars);
+        boolean result = runCmd(CHECK_BZT_COMMAND, workspace, new NullOutputStream(), launcher, envVars);
         logger.println(result ?
                 "Performance test: bzt is installed on your machine." :
-                "Performance test: You have not bzt on your machine."
+                "Performance test: You didn't have bzt on your machine."
         );
         return result;
     }
 
-
-    // Step 1.1: If bzt not installed check virtualenv using "virtualenv --help".
-    private boolean isVirtualenvInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException {
+    // Step 1.2: If bzt not installed check virtualenv using "virtualenv --help".
+    private boolean isVirtualenvInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Next step is checking virtualenv.");
-        boolean result = runCmd(CHECK_VIRTUALENV_COMMAND, workspace, logger, launcher, envVars);
-        logger.println(result ?
-                "Performance test: The virtualenv check completed successfully." :
-                "Performance test: You have not virtualenv on your machine. Please, install virtualenv on your machine."
-        );
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        boolean result = runCmd(CHECK_VIRTUALENV_COMMAND, workspace, outputStream, launcher, envVars);
+        if (result) {
+            logger.println("Performance test: The virtualenv check completed successfully.");
+        } else {
+            logger.println("Performance test: You have not virtualenv on your machine. Please, install virtualenv on your machine.");
+            logger.write(outputStream.toByteArray());
+        }
         return result;
     }
 
-    // Step 1.2: Create local python using "virtualenv --clear taurus-venv".
-    private boolean createIsolatedPython(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException {
+    // Step 1.3: Create local python using "virtualenv --clear taurus-venv".
+    private boolean createIsolatedPython(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Next step is creation isolated Python environments.");
-        boolean result = runCmd(CREATE_LOCAL_PYTHON_COMMAND, workspace, logger, launcher, envVars);
-        logger.println(result ?
-                "Performance test: The creation of isolated python was successful." :
-                "Performance test: Failed to create isolated Python environments \"taurus-venv\""
-        );
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        boolean result = runCmd(CREATE_LOCAL_PYTHON_COMMAND, workspace, outputStream, launcher, envVars);
+        if (result) {
+            logger.println("Performance test: The creation of isolated python was successful.");
+        } else {
+            logger.println("Performance test: Failed to create isolated Python environments \"taurus-venv\"");
+            logger.write(outputStream.toByteArray());
+        }
         return result;
     }
 
-    // Step 1.3: Install bzt in virtualenv using "taurus-venv/bin/pip install bzt".
-    private boolean installBztInVirtualenv(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException {
+    // Step 1.4: Install bzt in virtualenv using "taurus-venv/bin/pip install bzt".
+    private boolean installBztInVirtualenv(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Next step is install bzt.");
-        boolean result = runCmd(INSTALL_BZT_COMMAND, workspace, logger, launcher, envVars);
-        logger.println(result ?
-                "Performance test: bzt installed successfully." :
-                "Performance test: Failed to install bzt into isolated Python environments \"taurus-venv\""
-        );
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        boolean result = runCmd(INSTALL_BZT_COMMAND, workspace, outputStream, launcher, envVars);
+        if (result) {
+            logger.println("Performance test: bzt installed successfully.");
+        } else {
+            logger.println("Performance test: Failed to install bzt into isolated Python environments \"taurus-venv\"");
+            logger.write(outputStream.toByteArray());
+        }
+        return result;
+    }
+
+    // Step 1.5: Check bzt using "taurus-venv/bin/bzt --help"
+    private boolean isVirtualenvBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+        logger.println("Performance test: Checking bzt installed in virtualenv.");
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        boolean result = runCmd(CHECK_VIRTUALENV_BZT_COMMAND, workspace, outputStream, launcher, envVars);
+        if (result) {
+            logger.println("Performance test: bzt is installed in virtualenv.");
+        } else {
+            logger.println("Performance test: You didn't have bzt in virtualenv.");
+            logger.write(outputStream.toByteArray());
+        }
         return result;
     }
 
@@ -167,11 +188,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
 
-    public static boolean runCmd(String[] commands, FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException {
+    public static boolean runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         try {
             return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join() == 0;
         } catch (IOException ex) {
-            ex.printStackTrace(logger);
+            logger.write(Throwables.getStackTraceAsString(ex).getBytes());
             return false;
         }
     }
