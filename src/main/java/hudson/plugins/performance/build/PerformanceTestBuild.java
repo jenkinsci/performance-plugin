@@ -1,6 +1,5 @@
 package hudson.plugins.performance.build;
 
-import com.google.common.base.Throwables;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -126,10 +125,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         logger.println("Performance test: Checking virtualenv tool availability...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         boolean result = runCmd(CHECK_VIRTUALENV_COMMAND, workspace, outputStream, launcher, envVars);
-        if (result) {
-            logger.println("Performance test: Found virtualenv tool.");
-        } else {
-            logger.println("Performance test: No virtualenv found on this Jenkins host. Install it with 'sudo pip install virtualenv'.");
+        logger.println(result ?
+                "Performance test: Found virtualenv tool." :
+                "Performance test: No virtualenv found on this Jenkins host. Install it with 'sudo pip install virtualenv'."
+        );
+        if (!result || printDebugOutput) {
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -143,10 +143,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                 CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION :
                 CREATE_LOCAL_PYTHON_COMMAND,
                 workspace, outputStream, launcher, envVars);
-        if (result) {
-            logger.println("Performance test: Done creating virtualenv.");
-        } else {
-            logger.println("Performance test: Failed to create virtualenv at 'taurus-venv'");
+        logger.println(result ?
+                "Performance test: Done creating virtualenv." :
+                "Performance test: Failed to create virtualenv at 'taurus-venv'"
+        );
+        if (!result || printDebugOutput) {
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -157,10 +158,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         logger.println("Performance test: Installing bzt into 'taurus-venv'");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         boolean result = runCmd(INSTALL_BZT_COMMAND, workspace, outputStream, launcher, envVars);
-        if (result) {
-            logger.println("Performance test: bzt installed successfully.");
-        } else {
-            logger.println("Performance test: Failed to install bzt into 'taurus-venv'");
+        logger.println(result ?
+                "Performance test: bzt installed successfully." :
+                "Performance test: Failed to install bzt into 'taurus-venv'"
+        );
+        if (!result || printDebugOutput) {
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -171,10 +173,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         logger.println("Performance test: Checking installed bzt...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         boolean result = runCmd(CHECK_VIRTUALENV_BZT_COMMAND, workspace, outputStream, launcher, envVars);
-        if (result) {
-            logger.println("Performance test: bzt is operational.");
-        } else {
-            logger.println("Performance test: Failed to run bzt inside virtualenv.");
+        logger.println(result ?
+                "Performance test: bzt is operational." :
+                "Performance test: Failed to run bzt inside virtualenv."
+        );
+        if (!result || printDebugOutput) {
             logger.write(outputStream.toByteArray());
         }
         return result;
