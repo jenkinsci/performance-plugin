@@ -37,7 +37,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String VIRTUALENV_COMMAND = "virtualenv";
     protected final static String HELP_COMMAND = "--help";
     protected final static String VIRTUALENV_PATH_UNIX = "taurus-venv/bin/";
-    protected final static String VIRTUALENV_PATH_WINDOWS = "taurus-venv\\Scripts";
+    protected final static String VIRTUALENV_PATH_WINDOWS = "taurus-venv\\Scripts\\";
     protected final static String VIRTUALENV_PATH = Functions.isWindows() ? VIRTUALENV_PATH_WINDOWS : VIRTUALENV_PATH_UNIX;
     protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
     protected final static String[] CHECK_VIRTUALENV_BZT_COMMAND = new String[]{VIRTUALENV_PATH + PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
