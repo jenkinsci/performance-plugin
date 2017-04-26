@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
@@ -35,11 +36,15 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
     protected final static String VIRTUALENV_COMMAND = "virtualenv";
     protected final static String HELP_COMMAND = "--help";
-    protected final static String VIRTUALENV_PATH = "taurus-venv/bin/";
+    protected final static String VIRTUALENV_PATH_UNIX = "taurus-venv/bin/";
+    protected final static String VIRTUALENV_PATH_WINDOWS = "taurus-venv\\Scripts";
+    protected final static String VIRTUALENV_PATH = Functions.isWindows() ? VIRTUALENV_PATH_WINDOWS : VIRTUALENV_PATH_UNIX;
     protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
     protected final static String[] CHECK_VIRTUALENV_BZT_COMMAND = new String[]{VIRTUALENV_PATH + PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
     protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_COMMAND};
-    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", /*"--system-site-packages",*/ "taurus-venv"};
+    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION =
+            new String[]{VIRTUALENV_COMMAND, "--clear", "--system-site-packages", "taurus-venv"};
+    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", "taurus-venv"};
     protected final static String[] INSTALL_BZT_COMMAND = new String[]{VIRTUALENV_PATH + "pip", "install", PERFORMANCE_TEST_COMMAND};
     protected final static String DEFAULT_CONFIG_FILE = "jenkins-report.yml";
 
@@ -134,7 +139,10 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean createIsolatedPython(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Creating virtualev at 'taurus-venv'...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(CREATE_LOCAL_PYTHON_COMMAND, workspace, outputStream, launcher, envVars);
+        boolean result = runCmd(useSystemSitePackages ?
+                CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION :
+                CREATE_LOCAL_PYTHON_COMMAND,
+                workspace, outputStream, launcher, envVars);
         if (result) {
             logger.println("Performance test: Done creating virtualenv.");
         } else {
