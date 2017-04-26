@@ -200,9 +200,8 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         try {
             return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join() == 0;
         } catch (IOException ex) {
-            // TODO: write only message to output
             // TODO: write stacktrace to jenkins log
-            logger.write(Throwables.getStackTraceAsString(ex).getBytes());
+            logger.write(ex.getMessage().getBytes());
             return false;
         }
     }
