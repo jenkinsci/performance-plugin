@@ -1,5 +1,6 @@
 package hudson.plugins.performance.build;
 
+import com.google.common.base.Throwables;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -199,12 +200,15 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
 
-    public static boolean runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+    public boolean runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         try {
             return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join() == 0;
         } catch (IOException ex) {
             // TODO: write stacktrace to jenkins log
             logger.write(ex.getMessage().getBytes());
+            if (printDebugOutput) {
+                logger.write(Throwables.getStackTraceAsString(ex).getBytes());
+            }
             return false;
         }
     }
