@@ -1,3 +1,4 @@
+sudo: false
 language: java
 install: "mvn -Dmaven.test.skip=true clean install --batch-mode"
 script: "mvn -Djava.awt.headless=true -Dmaven.test.redirectTestOutputToFile=true -Dcobertura.report.format=xml --fail-at-end --batch-mode cobertura:cobertura cobertura:dump-datafile"
