@@ -35,17 +35,17 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
     protected final static String VIRTUALENV_COMMAND = "virtualenv";
-    protected final static String HELP_COMMAND = "--help";
+    protected final static String HELP_OPTION = "--help";
     protected final static String VIRTUALENV_PATH_UNIX = "taurus-venv/bin/";
-    protected final static String VIRTUALENV_PATH_WINDOWS = "taurus-venv\\Scripts\\";
-    protected final static String VIRTUALENV_PATH = Functions.isWindows() ? VIRTUALENV_PATH_WINDOWS : VIRTUALENV_PATH_UNIX;
-    protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
-    protected final static String[] CHECK_VIRTUALENV_BZT_COMMAND = new String[]{VIRTUALENV_PATH + PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
-    protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_COMMAND};
+    protected final static String VIRTUALENV_PATH_WINDOWS = "\\taurus-venv\\Scripts\\";
+    
+    protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_OPTION};
+    protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_OPTION};
+
     protected final static String[] CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION =
             new String[]{VIRTUALENV_COMMAND, "--clear", "--system-site-packages", "taurus-venv"};
     protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", "taurus-venv"};
-    protected final static String[] INSTALL_BZT_COMMAND = new String[]{VIRTUALENV_PATH + "pip", "install", PERFORMANCE_TEST_COMMAND};
+
     protected final static String DEFAULT_CONFIG_FILE = "jenkins-report.yml";
 
 
@@ -158,7 +158,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean installBztInVirtualenv(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Installing bzt into 'taurus-venv'");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(INSTALL_BZT_COMMAND, workspace, outputStream, launcher, envVars);
+        boolean result = runCmd(getBztInstallCommand(workspace), workspace, outputStream, launcher, envVars);
         logger.println(result ?
                 "Performance test: bzt installed successfully." :
                 "Performance test: Failed to install bzt into 'taurus-venv'"
@@ -173,7 +173,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean isVirtualenvBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Checking installed bzt...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(CHECK_VIRTUALENV_BZT_COMMAND, workspace, outputStream, launcher, envVars);
+        boolean result = runCmd(getBztCheckCommand(workspace), workspace, outputStream, launcher, envVars);
         logger.println(result ?
                 "Performance test: bzt is operational." :
                 "Performance test: Failed to run bzt inside virtualenv."
@@ -188,7 +188,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean runPerformanceTest(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean isVirtualenvInstallation) throws InterruptedException, IOException {
         String[] params = this.params.split(" ");
         final List<String> testCommand = new ArrayList<String>(params.length + 2);
-        testCommand.add((isVirtualenvInstallation ? VIRTUALENV_PATH : "") + PERFORMANCE_TEST_COMMAND);
+        testCommand.add((isVirtualenvInstallation ? getVirtualenvPath(workspace) : "") + PERFORMANCE_TEST_COMMAND);
         for (String param : params) {
             if (!param.isEmpty()) {
                 testCommand.add(param);
@@ -199,6 +199,21 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         return runCmd(testCommand.toArray(new String[testCommand.size()]), workspace, logger, launcher, envVars);
     }
 
+    private String getVirtualenvPath(FilePath workspace) {
+        return Functions.isWindows() ?
+                workspace.getRemote() + VIRTUALENV_PATH_WINDOWS :
+                VIRTUALENV_PATH_UNIX;
+    }
+
+    // return bzt install command
+    private String[] getBztInstallCommand(FilePath workspace) {
+        return new String[]{getVirtualenvPath(workspace) + "pip", "install", PERFORMANCE_TEST_COMMAND};
+    }
+
+    // return bzt check command
+    private String[] getBztCheckCommand(FilePath workspace) {
+        return new String[]{getVirtualenvPath(workspace) + "bzt", HELP_OPTION};
+    }
 
     public boolean runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         try {
