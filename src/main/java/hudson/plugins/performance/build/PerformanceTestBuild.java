@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
@@ -34,13 +35,17 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
     protected final static String VIRTUALENV_COMMAND = "virtualenv";
-    protected final static String HELP_COMMAND = "--help";
-    protected final static String VIRTUALENV_PATH = "taurus-venv/bin/";
-    protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
-    protected final static String[] CHECK_VIRTUALENV_BZT_COMMAND = new String[]{VIRTUALENV_PATH + PERFORMANCE_TEST_COMMAND, HELP_COMMAND};
-    protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_COMMAND};
-    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", /*"--system-site-packages",*/ "taurus-venv"};
-    protected final static String[] INSTALL_BZT_COMMAND = new String[]{VIRTUALENV_PATH + "pip", "install", PERFORMANCE_TEST_COMMAND};
+    protected final static String HELP_OPTION = "--help";
+    protected final static String VIRTUALENV_PATH_UNIX = "taurus-venv/bin/";
+    protected final static String VIRTUALENV_PATH_WINDOWS = "\\taurus-venv\\Scripts\\";
+    
+    protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_OPTION};
+    protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_OPTION};
+
+    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION =
+            new String[]{VIRTUALENV_COMMAND, "--clear", "--system-site-packages", "taurus-venv"};
+    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", "taurus-venv"};
+
     protected final static String DEFAULT_CONFIG_FILE = "jenkins-report.yml";
 
 
@@ -61,10 +66,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
 
     private String params;
+    private boolean printDebugOutput;
+    private boolean useSystemSitePackages;
 
     @DataBoundConstructor
-    public PerformanceTestBuild(String params) throws IOException {
+    public PerformanceTestBuild(String params, boolean printDebugOutput, boolean useSystemSitePackages) throws IOException {
         this.params = params;
+        this.printDebugOutput = printDebugOutput;
+        this.useSystemSitePackages = useSystemSitePackages;
     }
 
 
@@ -117,10 +126,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         logger.println("Performance test: Checking virtualenv tool availability...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         boolean result = runCmd(CHECK_VIRTUALENV_COMMAND, workspace, outputStream, launcher, envVars);
-        if (result) {
-            logger.println("Performance test: Found virtualenv tool.");
-        } else {
-            logger.println("Performance test: No virtualenv found on this Jenkins host. Install it with 'sudo pip install virtualenv'.");
+        logger.println(result ?
+                "Performance test: Found virtualenv tool." :
+                "Performance test: No virtualenv found on this Jenkins host. Install it with 'sudo pip install virtualenv'."
+        );
+        if (!result || printDebugOutput) {
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -130,11 +140,15 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean createIsolatedPython(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Creating virtualev at 'taurus-venv'...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(CREATE_LOCAL_PYTHON_COMMAND, workspace, outputStream, launcher, envVars);
-        if (result) {
-            logger.println("Performance test: Done creating virtualenv.");
-        } else {
-            logger.println("Performance test: Failed to create virtualenv at 'taurus-venv'");
+        boolean result = runCmd(useSystemSitePackages ?
+                CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION :
+                CREATE_LOCAL_PYTHON_COMMAND,
+                workspace, outputStream, launcher, envVars);
+        logger.println(result ?
+                "Performance test: Done creating virtualenv." :
+                "Performance test: Failed to create virtualenv at 'taurus-venv'"
+        );
+        if (!result || printDebugOutput) {
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -144,11 +158,12 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean installBztInVirtualenv(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Installing bzt into 'taurus-venv'");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(INSTALL_BZT_COMMAND, workspace, outputStream, launcher, envVars);
-        if (result) {
-            logger.println("Performance test: bzt installed successfully.");
-        } else {
-            logger.println("Performance test: Failed to install bzt into 'taurus-venv'");
+        boolean result = runCmd(getBztInstallCommand(workspace), workspace, outputStream, launcher, envVars);
+        logger.println(result ?
+                "Performance test: bzt installed successfully." :
+                "Performance test: Failed to install bzt into 'taurus-venv'"
+        );
+        if (!result || printDebugOutput) {
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -158,11 +173,12 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean isVirtualenvBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Checking installed bzt...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(CHECK_VIRTUALENV_BZT_COMMAND, workspace, outputStream, launcher, envVars);
-        if (result) {
-            logger.println("Performance test: bzt is operational.");
-        } else {
-            logger.println("Performance test: Failed to run bzt inside virtualenv.");
+        boolean result = runCmd(getBztCheckCommand(workspace), workspace, outputStream, launcher, envVars);
+        logger.println(result ?
+                "Performance test: bzt is operational." :
+                "Performance test: Failed to run bzt inside virtualenv."
+        );
+        if (!result || printDebugOutput) {
             logger.write(outputStream.toByteArray());
         }
         return result;
@@ -172,7 +188,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean runPerformanceTest(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean isVirtualenvInstallation) throws InterruptedException, IOException {
         String[] params = this.params.split(" ");
         final List<String> testCommand = new ArrayList<String>(params.length + 2);
-        testCommand.add((isVirtualenvInstallation ? VIRTUALENV_PATH : "") + PERFORMANCE_TEST_COMMAND);
+        testCommand.add((isVirtualenvInstallation ? getVirtualenvPath(workspace) : "") + PERFORMANCE_TEST_COMMAND);
         for (String param : params) {
             if (!param.isEmpty()) {
                 testCommand.add(param);
@@ -183,12 +199,30 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         return runCmd(testCommand.toArray(new String[testCommand.size()]), workspace, logger, launcher, envVars);
     }
 
+    private String getVirtualenvPath(FilePath workspace) {
+        return Functions.isWindows() ?
+                workspace.getRemote() + VIRTUALENV_PATH_WINDOWS :
+                VIRTUALENV_PATH_UNIX;
+    }
 
-    public static boolean runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+    // return bzt install command
+    private String[] getBztInstallCommand(FilePath workspace) {
+        return new String[]{getVirtualenvPath(workspace) + "pip", "install", PERFORMANCE_TEST_COMMAND};
+    }
+
+    // return bzt check command
+    private String[] getBztCheckCommand(FilePath workspace) {
+        return new String[]{getVirtualenvPath(workspace) + "bzt", HELP_OPTION};
+    }
+
+    public boolean runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         try {
             return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join() == 0;
         } catch (IOException ex) {
-            logger.write(Throwables.getStackTraceAsString(ex).getBytes());
+            logger.write(ex.getMessage().getBytes());
+            if (printDebugOutput) {
+                logger.write(Throwables.getStackTraceAsString(ex).getBytes());
+            }
             return false;
         }
     }
@@ -206,5 +240,23 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setParams(String params) {
         this.params = params;
+    }
+
+    public boolean isPrintDebugOutput() {
+        return printDebugOutput;
+    }
+
+    @DataBoundSetter
+    public void setPrintDebugOutput(boolean printDebugOutput) {
+        this.printDebugOutput = printDebugOutput;
+    }
+
+    public boolean isUseSystemSitePackages() {
+        return useSystemSitePackages;
+    }
+
+    @DataBoundSetter
+    public void setUseSystemSitePackages(boolean useSystemSitePackages) {
+        this.useSystemSitePackages = useSystemSitePackages;
     }
 }
