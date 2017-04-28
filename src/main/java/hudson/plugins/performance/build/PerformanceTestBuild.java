@@ -68,10 +68,12 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private String params;
     private boolean printDebugOutput;
     private boolean useSystemSitePackages;
+    private boolean generatePerformanceTrend;
 
     @DataBoundConstructor
-    public PerformanceTestBuild(String params, boolean printDebugOutput, boolean useSystemSitePackages) throws IOException {
+    public PerformanceTestBuild(String params, boolean generatePerformanceTrend, boolean printDebugOutput, boolean useSystemSitePackages) throws IOException {
         this.params = params;
+        this.generatePerformanceTrend = generatePerformanceTrend;
         this.printDebugOutput = printDebugOutput;
         this.useSystemSitePackages = useSystemSitePackages;
     }
@@ -258,5 +260,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setUseSystemSitePackages(boolean useSystemSitePackages) {
         this.useSystemSitePackages = useSystemSitePackages;
+    }
+
+    public boolean isGeneratePerformanceTrend() {
+        return generatePerformanceTrend;
+    }
+
+    @DataBoundSetter
+    public void setGeneratePerformanceTrend(boolean generatePerformanceTrend) {
+        this.generatePerformanceTrend = generatePerformanceTrend;
     }
 }
