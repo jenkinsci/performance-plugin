@@ -5,6 +5,7 @@ import hudson.FilePath;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.plugins.performance.PerformancePublisher;
 import jenkins.util.BuildListenerAdapter;
 import org.junit.Test;
 import org.jvnet.hudson.test.HudsonTestCase;
@@ -23,7 +24,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     public void testFlow() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]", false, true, false);
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]", true, true, false);
         FreeStyleProject project = createFreeStyleProject();
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         buildExt.setWorkspace(new FilePath(Files.createTempDir()));
@@ -33,6 +34,8 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
 
+        assertNotNull(project.getPublishersList().get(PerformancePublisher.class));
+        assertEquals("aggregate-results.xml", project.getPublishersList().get(PerformancePublisher.class).getSourceDataFiles());
 
         assertEquals(Result.SUCCESS, buildExt.getResult());
     }
