@@ -7,12 +7,16 @@ import hudson.FilePath;
 import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.performance.Messages;
+import hudson.plugins.performance.PerformancePublisher;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.tasks.Publisher;
+import hudson.util.DescribableList;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.output.NullOutputStream;
 import org.jenkinsci.Symbol;
@@ -38,7 +42,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String HELP_OPTION = "--help";
     protected final static String VIRTUALENV_PATH_UNIX = "taurus-venv/bin/";
     protected final static String VIRTUALENV_PATH_WINDOWS = "\\taurus-venv\\Scripts\\";
-    
+
     protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_OPTION};
     protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_OPTION};
 
@@ -90,11 +94,31 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
             if (runPerformanceTest(workspace, logger, launcher, envVars, isVirtualenvInstallation)) {
                 run.setResult(Result.SUCCESS);
+                if (generatePerformanceTrend) {
+                    generatePerformanceTrend(run, workspace, launcher, listener);
+                }
                 return;
             }
         }
 
         run.setResult(Result.FAILURE);
+    }
+
+    protected void generatePerformanceTrend(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
+        if (run instanceof FreeStyleBuild) {
+            // if FreeStyleProject -> add PostBuildAction
+
+            final FreeStyleBuild build = (FreeStyleBuild) run;
+            final DescribableList<Publisher, hudson.model.Descriptor<Publisher>> publishers = build.getParent().getPublishersList();
+
+            if (publishers.get(PerformancePublisher.class) == null) {
+                publishers.add(new PerformancePublisher("aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
+            }
+        } else {
+            // run for pipeline
+            new PerformancePublisher("aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null).
+                    perform(run, workspace, launcher, listener);
+        }
     }
 
     private boolean installBztAndCheck(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
@@ -143,8 +167,8 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         logger.println("Performance test: Creating virtualev at 'taurus-venv'...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         boolean result = runCmd(useSystemSitePackages ?
-                CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION :
-                CREATE_LOCAL_PYTHON_COMMAND,
+                        CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION :
+                        CREATE_LOCAL_PYTHON_COMMAND,
                 workspace, outputStream, launcher, envVars);
         logger.println(result ?
                 "Performance test: Done creating virtualenv." :
