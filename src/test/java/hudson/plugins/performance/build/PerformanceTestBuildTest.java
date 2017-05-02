@@ -38,18 +38,17 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamTaskListener taskListener = new StreamTaskListener(stream);
         buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
-//        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
 
         Iterator<Publisher> iterator = project.getPublishersList().iterator();
         StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
         while (iterator.hasNext()) {
             builder.append(iterator.next().getClass().getName()).append("\n");
         }
-        assertEquals(new String(stream.toByteArray()) + builder.toString(), "", 123);
 
-        assertNotNull(project.getPublishersList().get(PerformancePublisher.class));
-        assertEquals("aggregate-results.xml", project.getPublishersList().get(PerformancePublisher.class).getSourceDataFiles());
+        String jobLog = new String(stream.toByteArray()) + builder.toString();
 
+        assertNotNull(jobLog, project.getPublishersList().get(PerformancePublisher.class));
+        assertEquals(jobLog, "aggregate-results.xml", project.getPublishersList().get(PerformancePublisher.class).getSourceDataFiles());
         assertEquals(Result.SUCCESS, buildExt.getResult());
     }
 
@@ -109,13 +108,13 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         StreamTaskListener taskListener = new StreamTaskListener(stream);
         buildTest.perform(run, workspace, createLocalLauncher(), new BuildListenerAdapter(taskListener));
 
-//        buildTest.perform(run, workspace, createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
 
-        assertEquals(new String(stream.toByteArray()), "", 123);
-
+        String jobLog = new String(stream.toByteArray());
         File root = run.getRootDir();
-
         File reportFile = new File(root, "/performance-reports/Taurus/aggregate-results.xml");
-        assertTrue(reportFile.exists());
+
+        assertTrue(jobLog.contains("Performance: Recording Taurus reports 'aggregate-results.xml'"));
+        assertTrue(jobLog, jobLog.contains("Performance: Parsing JMeter report file '" + reportFile.getAbsolutePath() + "'."));
+        assertTrue(jobLog, reportFile.exists());
     }
 }
