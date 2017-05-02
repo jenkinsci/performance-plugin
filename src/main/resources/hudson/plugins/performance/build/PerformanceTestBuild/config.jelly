@@ -10,6 +10,13 @@
                 <tbody>
                     <tr>
                         <td>
+                            <f:checkbox name="generatePerformanceTrend" field="generatePerformanceTrend" default="true" title="Automatically generate performance trend">
+                		        Automatically generate performance trend
+                            </f:checkbox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <f:checkbox name="printDebugOutput" field="printDebugOutput" title="Print debug output from all commands">
   		                        Print debug output from all commands
                             </f:checkbox>
