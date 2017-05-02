@@ -73,13 +73,15 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean printDebugOutput;
     private boolean useSystemSitePackages;
     private boolean generatePerformanceTrend;
+    private boolean useBztFailCriteria;
 
     @DataBoundConstructor
-    public PerformanceTestBuild(String params, boolean generatePerformanceTrend, boolean printDebugOutput, boolean useSystemSitePackages) throws IOException {
+    public PerformanceTestBuild(String params, boolean generatePerformanceTrend, boolean printDebugOutput, boolean useSystemSitePackages, boolean useBztFailCriteria) throws IOException {
         this.params = params;
         this.generatePerformanceTrend = generatePerformanceTrend;
         this.printDebugOutput = printDebugOutput;
         this.useSystemSitePackages = useSystemSitePackages;
+        this.useBztFailCriteria = useBztFailCriteria;
     }
 
 
@@ -92,13 +94,18 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         if (isGlobalBztInstalled(workspace, logger, launcher, envVars) ||
                 (isVirtualenvInstallation = installBztAndCheck(workspace, logger, launcher, envVars))) {
 
-            if (runPerformanceTest(workspace, logger, launcher, envVars, isVirtualenvInstallation)) {
-                run.setResult(Result.SUCCESS);
-                if (generatePerformanceTrend) {
-                    generatePerformanceTrend(run, workspace, launcher, listener);
-                }
-                return;
+            int testExitCode = runPerformanceTest(workspace, logger, launcher, envVars, isVirtualenvInstallation);
+
+            run.setResult(useBztFailCriteria ?
+                    getBztJobResult(testExitCode) :
+                    getJobResult(testExitCode)
+            );
+
+            if (generatePerformanceTrend && run.getResult() != Result.FAILURE) {
+                generatePerformanceTrend(run, workspace, launcher, listener);
             }
+
+            return;
         }
 
         run.setResult(Result.FAILURE);
@@ -139,7 +146,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     // Step 1.1: Check bzt using "bzt --help".
     private boolean isGlobalBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Checking global bzt installation...");
-        boolean result = runCmd(CHECK_BZT_COMMAND, workspace, new NullOutputStream(), launcher, envVars);
+        boolean result = isSuccessCode(runCmd(CHECK_BZT_COMMAND, workspace, new NullOutputStream(), launcher, envVars));
         logger.println(result ?
                 "Performance test: Found global bzt installation." :
                 "Performance test: You don't have global bzt installed on this Jenkins host. Installing it globally will speed up job. Run 'sudo pip install bzt' to install it."
@@ -151,7 +158,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean isVirtualenvInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Checking virtualenv tool availability...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(CHECK_VIRTUALENV_COMMAND, workspace, outputStream, launcher, envVars);
+        boolean result = isSuccessCode(runCmd(CHECK_VIRTUALENV_COMMAND, workspace, outputStream, launcher, envVars));
         logger.println(result ?
                 "Performance test: Found virtualenv tool." :
                 "Performance test: No virtualenv found on this Jenkins host. Install it with 'sudo pip install virtualenv'."
@@ -166,10 +173,10 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean createIsolatedPython(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Creating virtualev at 'taurus-venv'...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(useSystemSitePackages ?
+        boolean result = isSuccessCode(runCmd(useSystemSitePackages ?
                         CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION :
                         CREATE_LOCAL_PYTHON_COMMAND,
-                workspace, outputStream, launcher, envVars);
+                workspace, outputStream, launcher, envVars));
         logger.println(result ?
                 "Performance test: Done creating virtualenv." :
                 "Performance test: Failed to create virtualenv at 'taurus-venv'"
@@ -184,7 +191,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean installBztInVirtualenv(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Installing bzt into 'taurus-venv'");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(getBztInstallCommand(workspace), workspace, outputStream, launcher, envVars);
+        boolean result = isSuccessCode(runCmd(getBztInstallCommand(workspace), workspace, outputStream, launcher, envVars));
         logger.println(result ?
                 "Performance test: bzt installed successfully." :
                 "Performance test: Failed to install bzt into 'taurus-venv'"
@@ -199,7 +206,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean isVirtualenvBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Checking installed bzt...");
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        boolean result = runCmd(getBztCheckCommand(workspace), workspace, outputStream, launcher, envVars);
+        boolean result = isSuccessCode(runCmd(getBztCheckCommand(workspace), workspace, outputStream, launcher, envVars));
         logger.println(result ?
                 "Performance test: bzt is operational." :
                 "Performance test: Failed to run bzt inside virtualenv."
@@ -211,7 +218,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
     // Step 2: Run performance test.
-    private boolean runPerformanceTest(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean isVirtualenvInstallation) throws InterruptedException, IOException {
+    private int runPerformanceTest(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean isVirtualenvInstallation) throws InterruptedException, IOException {
         String[] params = this.params.split(" ");
         final List<String> testCommand = new ArrayList<String>(params.length + 2);
         testCommand.add((isVirtualenvInstallation ? getVirtualenvPath(workspace) : "") + PERFORMANCE_TEST_COMMAND);
@@ -223,6 +230,29 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         testCommand.add(extractDefaultReportToWorkspace(workspace));
         logger.println("Performance test: run " + Arrays.toString(testCommand.toArray()));
         return runCmd(testCommand.toArray(new String[testCommand.size()]), workspace, logger, launcher, envVars);
+    }
+
+    public boolean isSuccessCode(int code) {
+        return code == 0;
+    }
+
+    public Result getJobResult(int code) {
+        if (code == 0) {
+            return Result.SUCCESS;
+        } else {
+            return Result.FAILURE;
+        }
+    }
+
+
+    public Result getBztJobResult(int code) {
+        if (code == 0) {
+            return Result.SUCCESS;
+        } else if (code == 1) {
+            return Result.FAILURE;
+        } else {
+            return Result.UNSTABLE;
+        }
     }
 
     private String getVirtualenvPath(FilePath workspace) {
@@ -241,15 +271,15 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         return new String[]{getVirtualenvPath(workspace) + "bzt", HELP_OPTION};
     }
 
-    public boolean runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+    public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         try {
-            return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join() == 0;
+            return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join();
         } catch (IOException ex) {
             logger.write(ex.getMessage().getBytes());
             if (printDebugOutput) {
                 logger.write(Throwables.getStackTraceAsString(ex).getBytes());
             }
-            return false;
+            return 1;
         }
     }
 
@@ -293,5 +323,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setGeneratePerformanceTrend(boolean generatePerformanceTrend) {
         this.generatePerformanceTrend = generatePerformanceTrend;
+    }
+
+    public boolean isUseBztFailCriteria() {
+        return useBztFailCriteria;
+    }
+
+    @DataBoundSetter
+    public void setUseBztFailCriteria(boolean useBztFailCriteria) {
+        this.useBztFailCriteria = useBztFailCriteria;
     }
 }

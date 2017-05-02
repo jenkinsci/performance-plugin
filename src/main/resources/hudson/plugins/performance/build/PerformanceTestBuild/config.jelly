@@ -17,6 +17,13 @@
                     </tr>
                     <tr>
                         <td>
+                            <f:checkbox name="useBztFailCriteria" field="useBztFailCriteria" title="Use bzt pass/fail criteria">
+                                Use bzt pass/fail criteria
+                            </f:checkbox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <f:checkbox name="printDebugOutput" field="printDebugOutput" title="Print debug output from all commands">
   		                        Print debug output from all commands
                             </f:checkbox>
