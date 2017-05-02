@@ -7,14 +7,18 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.plugins.performance.PerformancePublisher;
+import hudson.tasks.Publisher;
+import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Test;
 import org.jvnet.hudson.test.HudsonTestCase;
 
 import javax.annotation.Nonnull;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
 
 public class PerformanceTestBuildTest extends HudsonTestCase {
@@ -31,7 +35,17 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         buildExt.getRootDir().mkdirs();
 
-        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+//        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
+
+        Iterator<Publisher> iterator = project.getPublishersList().iterator();
+        StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
+        while (iterator.hasNext()) {
+            builder.append(iterator.next().getClass().getName()).append("\n");
+        }
+        assertEquals(new String(stream.toByteArray()) + builder.toString(), "", 123);
 
         assertNotNull(project.getPublishersList().get(PerformancePublisher.class));
         assertEquals("aggregate-results.xml", project.getPublishersList().get(PerformancePublisher.class).getSourceDataFiles());
@@ -90,7 +104,14 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         Run run = p.getFirstBuild();
 
         PerformanceTestBuild buildTest = new PerformanceTestBuild(args, true, true, false);
-        buildTest.perform(run, workspace, createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        buildTest.perform(run, workspace, createLocalLauncher(), new BuildListenerAdapter(taskListener));
+
+//        buildTest.perform(run, workspace, createLocalLauncher(), BuildListenerAdapter.wrap(createTaskListener()));
+
+        assertEquals(new String(stream.toByteArray()), "", 123);
 
         File root = run.getRootDir();
 
