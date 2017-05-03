@@ -83,15 +83,15 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         assertFalse(testBuild.isUseSystemSitePackages());
         assertFalse(testBuild.isPrintDebugOutput());
         assertFalse(testBuild.isGeneratePerformanceTrend());
-        assertFalse(testBuild.isUseBztFailCriteria());
+        assertFalse(testBuild.isUseBztExitCode());
         testBuild.setGeneratePerformanceTrend(true);
         testBuild.setPrintDebugOutput(true);
         testBuild.setUseSystemSitePackages(true);
-        testBuild.setUseBztFailCriteria(true);
+        testBuild.setUseBztExitCode(true);
         assertTrue(testBuild.isUseSystemSitePackages());
         assertTrue(testBuild.isPrintDebugOutput());
         assertTrue(testBuild.isGeneratePerformanceTrend());
-        assertTrue(testBuild.isUseBztFailCriteria());
+        assertTrue(testBuild.isUseBztExitCode());
     }
 
 

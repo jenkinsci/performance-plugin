@@ -73,7 +73,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean printDebugOutput;
     private boolean useSystemSitePackages;
     private boolean generatePerformanceTrend;
-    private boolean useBztFailCriteria;
+    private boolean useBztExitCode;
 
     @DataBoundConstructor
     public PerformanceTestBuild(String params, boolean generatePerformanceTrend, boolean printDebugOutput, boolean useSystemSitePackages, boolean useBztFailCriteria) throws IOException {
@@ -81,7 +81,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         this.generatePerformanceTrend = generatePerformanceTrend;
         this.printDebugOutput = printDebugOutput;
         this.useSystemSitePackages = useSystemSitePackages;
-        this.useBztFailCriteria = useBztFailCriteria;
+        this.useBztExitCode = useBztFailCriteria;
     }
 
 
@@ -96,12 +96,12 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
             int testExitCode = runPerformanceTest(workspace, logger, launcher, envVars, isVirtualenvInstallation);
 
-            run.setResult(useBztFailCriteria ?
+            run.setResult(useBztExitCode ?
                     getBztJobResult(testExitCode) :
                     getJobResult(testExitCode)
             );
 
-            if (generatePerformanceTrend && run.getResult() != Result.FAILURE) {
+            if (generatePerformanceTrend) {
                 generatePerformanceTrend(run, workspace, launcher, listener);
             }
 
@@ -325,12 +325,12 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         this.generatePerformanceTrend = generatePerformanceTrend;
     }
 
-    public boolean isUseBztFailCriteria() {
-        return useBztFailCriteria;
+    public boolean isUseBztExitCode() {
+        return useBztExitCode;
     }
 
     @DataBoundSetter
-    public void setUseBztFailCriteria(boolean useBztFailCriteria) {
-        this.useBztFailCriteria = useBztFailCriteria;
+    public void setUseBztExitCode(boolean useBztExitCode) {
+        this.useBztExitCode = useBztExitCode;
     }
 }
