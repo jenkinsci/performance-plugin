@@ -17,6 +17,13 @@
                     </tr>
                     <tr>
                         <td>
+                            <f:checkbox name="useBztExitCode" field="useBztExitCode" default="true" title="Mark build unstable or failed based on bzt exit code">
+                                Mark build unstable or failed based on bzt exit code
+                            </f:checkbox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <f:checkbox name="printDebugOutput" field="printDebugOutput" title="Print debug output from all commands">
   		                        Print debug output from all commands
                             </f:checkbox>

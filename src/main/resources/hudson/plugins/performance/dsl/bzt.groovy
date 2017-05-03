@@ -10,5 +10,5 @@ bzt test1.yml test2.yml
 
 
 def call(params) {
-    performanceTest generatePerformanceTrend: true, params: params, useSystemSitePackages: true
+    performanceTest generatePerformanceTrend: true, params: params, useBztExitCode: true, useSystemSitePackages: true
 }
