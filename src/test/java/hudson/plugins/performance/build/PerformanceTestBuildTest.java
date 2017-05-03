@@ -121,6 +121,28 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         assertTrue(jobLog, reportFile.exists());
     }
 
+
+    @Test
+    public void testFailCriteria() throws Exception {
+        String path = getClass().getResource("/performanceTestWithFailCriteria.yml").getPath();
+        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]";
+
+        WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
+        FilePath workspace = new FilePath(Files.createTempDir());
+        p.createExecutable();
+        Run run = p.getFirstBuild();
+
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(args, false, true, false, true);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        buildTest.perform(run, workspace, createLocalLauncher(), new BuildListenerAdapter(taskListener));
+
+        String jobLog = new String(stream.toByteArray());
+        assertEquals(jobLog, Result.UNSTABLE, run.getResult());
+        assertTrue(jobLog, jobLog.contains("Done performing with code: 3"));
+    }
+
     @Test
     public void testResutsChecker() throws Exception {
         PerformanceTestBuild testBuild = new PerformanceTestBuild("test option", false, false, false, false);

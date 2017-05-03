@@ -1,0 +1,17 @@
+execution:
+- concurrency: 2
+  ramp-up: 5s
+  hold-for: 5s
+  scenario: quick-test
+
+scenarios:
+  quick-test:
+    retrieve-resources: false
+    requests:
+    - url: http://blazedemo.com/
+      label: index
+    
+reporting:
+- module: passfail
+  criteria:
+  - avg-rt of index>1ms for 1s, stop as failed    

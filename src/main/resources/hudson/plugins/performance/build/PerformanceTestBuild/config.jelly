@@ -17,7 +17,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <f:checkbox name="useBztExitCode" field="useBztExitCode" title="Mark build unstable or failed based on bzt exit code">
+                            <f:checkbox name="useBztExitCode" field="useBztExitCode" default="true" title="Mark build unstable or failed based on bzt exit code">
                                 Mark build unstable or failed based on bzt exit code
                             </f:checkbox>
                         </td>
