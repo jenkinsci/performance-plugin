@@ -120,4 +120,19 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         assertTrue(jobLog, jobLog.contains("Performance: Parsing JMeter report file '" + reportFile.getAbsolutePath() + "'."));
         assertTrue(jobLog, reportFile.exists());
     }
+
+    @Test
+    public void testResutsChecker() throws Exception {
+        PerformanceTestBuild testBuild = new PerformanceTestBuild("test option", false, false, false, false);
+
+        assertEquals(Result.SUCCESS, testBuild.getBztJobResult(0));
+        assertEquals(Result.FAILURE, testBuild.getBztJobResult(1));
+        assertEquals(Result.UNSTABLE, testBuild.getBztJobResult(3));
+
+        assertEquals(Result.SUCCESS, testBuild.getJobResult(0));
+        assertEquals(Result.FAILURE, testBuild.getJobResult(1));
+
+        assertTrue(testBuild.isSuccessCode(0));
+        assertFalse(testBuild.isSuccessCode(1));
+    }
 }
