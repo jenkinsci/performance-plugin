@@ -52,22 +52,4 @@ public class PerformanceProjectActionTest {
         Object testSuiteReportDetail = performanceProjectAction.getDynamic("testsuiteReport", staplerRequest, null);
         assertTrue(testSuiteReportDetail instanceof TestSuiteReportDetail);
     }
-
-
-    @Test
-    public void testDuplicatedProjectActionLinks() throws Exception {
-        FreeStyleProject freeStyleProject = j.createFreeStyleProject("duplicated_links");
-        String path = getClass().getResource("/performanceTest.yml").getPath();
-
-        freeStyleProject.getBuildersList().add(new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]", true, true, false, false));
-        assertEquals(1, freeStyleProject.getActions().size());
-
-        freeStyleProject.getPublishersList().add(new PerformancePublisher("aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
-        assertEquals(1, freeStyleProject.getActions().size());
-
-        freeStyleProject.getBuildersList().clear();
-        freeStyleProject.getPublishersList().clear();
-        freeStyleProject.getPublishersList().add(new PerformancePublisher("aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
-        assertEquals(1, freeStyleProject.getActions().size());
-    }
 }

@@ -85,12 +85,6 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
-        final List<Action> actions = project.getActions();
-        for (Action action : actions) {
-            if (action.getClass() == PerformanceProjectAction.class) {
-                return null;
-            }
-        }
         return new PerformanceProjectAction(project);
     }
 
