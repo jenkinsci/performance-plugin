@@ -1,6 +1,7 @@
 package hudson.plugins.performance.actions;
 
 import hudson.model.FreeStyleProject;
+import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
@@ -14,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,5 +49,12 @@ public class PerformanceProjectActionTest {
 
         Object testSuiteReportDetail = performanceProjectAction.getDynamic("testsuiteReport", staplerRequest, null);
         assertTrue(testSuiteReportDetail instanceof TestSuiteReportDetail);
+
+        assertTrue(performanceProjectAction.ifModePerformancePerTestCaseUsed());
+        assertFalse(performanceProjectAction.ifModeThroughputUsed());
+
+        freeStyleProject.getPublishersList().add(new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, false, "", true, false, false, true, null));
+        assertFalse(performanceProjectAction.ifModePerformancePerTestCaseUsed());
+        assertTrue(performanceProjectAction.ifModeThroughputUsed());
     }
 }
