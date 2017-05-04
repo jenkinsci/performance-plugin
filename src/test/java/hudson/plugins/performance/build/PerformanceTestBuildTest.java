@@ -47,9 +47,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
-        assertNotNull(jobLog, project.getPublishersList().get(PerformancePublisher.class));
-        assertEquals(jobLog, "aggregate-results.xml", project.getPublishersList().get(PerformancePublisher.class).getSourceDataFiles());
-        assertEquals(Result.SUCCESS, buildExt.getResult());
+        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
     }
 
 
