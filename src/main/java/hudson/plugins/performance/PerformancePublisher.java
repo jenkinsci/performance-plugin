@@ -480,13 +480,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             throws InterruptedException, IOException {
         run.setResult(Result.SUCCESS);
 
-        Collection<PerformanceReport> parsedReports = prepareEvaluation(run, workspace, listener);
+        final List<PerformanceReportParser> parsers = getParsers(run, workspace, listener.getLogger(), run.getEnvironment(listener));
+
+        Collection<PerformanceReport> parsedReports = prepareEvaluation(run, workspace, listener, parsers);
         if (parsedReports == null) {
             return;
         }
 
         if (!modeEvaluation) {
-            evaluateInStandardMode(run, workspace, parsedReports, listener);
+            evaluateInStandardMode(run, workspace, parsedReports, listener, parsers);
         } else {
             evaluateInExpertMode(run, listener);
         }
@@ -496,14 +498,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      * preparing evaluation - this is necessary regardless of the mode of
      * evaluation
      */
-    public Collection<PerformanceReport> prepareEvaluation(Run<?, ?> run, FilePath workspace, TaskListener listener)
+    public Collection<PerformanceReport> prepareEvaluation(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers)
             throws IOException, InterruptedException {
 
         PrintStream logger = listener.getLogger();
         EnvVars env = run.getEnvironment(listener);
         String glob;
 
-        final List<PerformanceReportParser> parsers = getParsers(run, workspace, logger, env);
         Collection<PerformanceReport> parsedReports = Collections.emptyList();
         // add the report to the build object.
         PerformanceBuildAction a = new PerformanceBuildAction(run, logger, parsers);
@@ -547,7 +548,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
 
     // for mode "standard evaluation"
-    public void evaluateInStandardMode(Run<?, ?> run, FilePath workspace, Collection<PerformanceReport> parsedReports, TaskListener listener)
+    public void evaluateInStandardMode(Run<?, ?> run, FilePath workspace, Collection<PerformanceReport> parsedReports,
+                                       TaskListener listener, List<PerformanceReportParser> parsers)
             throws IOException, InterruptedException {
 
         EnvVars env = run.getEnvironment(listener);
