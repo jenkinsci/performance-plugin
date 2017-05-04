@@ -1,18 +1,39 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core">
-  <td>${it.samplesCount()}</td>
-  <td class="${h.ifThenElse(it.getSizeDiff()>=0,'green','red')}">${it.getSamplesCountDiff()}</td>
-  <td>${it.getAverage()}</td>
-  <td class="${h.ifThenElse(it.getAverageDiff()>0,'red','green')}">${it.getAverageDiff()}</td>
-  <td>${it.getMedian()}</td>
-  <td class="${h.ifThenElse(it.getMedianDiff()>0,'red','green')}">${it.getMedianDiff()}</td>
-  <td>${it.get90Line()}</td>
-  <td>${it.getMin()}</td>
-  <td>${it.getMax()}</td>
-  <td>${it.getHttpCode()}</td>
-  <td>${it.getLastBuildHttpCodeIfChanged()}</td>
-  <td>${it.errorPercent()} %</td>
-  <td class="${h.ifThenElse(it.getErrorPercentDiff()>0,'red','green')}">${it.getErrorPercentDiff()} %</td>
-  <td>${it.getAverageSizeInKb()}</td>
-  <td>${it.getTotalTrafficInKb()}</td>
+    <td>
+        ${it.samplesCount()}
+        <sup class="${h.ifThenElse(it.getSamplesCountDiff()>=0,'green','red')}">
+            ${h.ifThenElse(it.getSamplesCountDiff()>=0,'+','')}${it.getSamplesCountDiff()}
+        </sup>
+    </td>
+
+    <td>
+        ${it.getAverage()}
+        <sup class="${h.ifThenElse(it.getAverageDiff()>0,'red','green')}">
+            ${h.ifThenElse(it.getAverageDiff()>0,'+','')}${it.getAverageDiff()}
+        </sup>
+    </td>
+
+    <td>
+        ${it.getMedian()}
+        <sup class="${h.ifThenElse(it.getMedianDiff()>0,'red','green')}">
+            ${h.ifThenElse(it.getMedianDiff()>0,'+','')}${it.getMedianDiff()}
+        </sup>
+    </td>
+
+    <td>${it.get90Line()}</td>
+    <td>${it.getMin()}</td>
+    <td>${it.getMax()}</td>
+    <td>${it.getHttpCode()}</td>
+    <td>${it.getLastBuildHttpCodeIfChanged()}</td>
+
+    <td>
+        ${it.errorPercent()} %
+        <sup class="${h.ifThenElse(it.getErrorPercentDiff()>0,'red','green')}">
+            ${h.ifThenElse(it.getErrorPercentDiff()>0,'+','')}${it.getErrorPercentDiff()} %
+        </sup>
+    </td>
+
+    <td>${it.getAverageSizeInKb()}</td>
+    <td>${it.getTotalTrafficInKb()}</td>
 </j:jelly>
