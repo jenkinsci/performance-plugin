@@ -13,7 +13,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -49,5 +48,4 @@ public class PerformanceProjectActionTest {
         Object testSuiteReportDetail = performanceProjectAction.getDynamic("testsuiteReport", staplerRequest, null);
         assertTrue(testSuiteReportDetail instanceof TestSuiteReportDetail);
     }
-
 }
