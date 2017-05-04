@@ -101,7 +101,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                     getJobResult(testExitCode)
             );
 
-            if (generatePerformanceTrend) {
+            if (generatePerformanceTrend && run.getResult().isBetterThan(Result.FAILURE)) {
                 generatePerformanceTrend(run, workspace, launcher, listener);
             }
 
