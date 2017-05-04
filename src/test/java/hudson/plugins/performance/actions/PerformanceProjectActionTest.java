@@ -1,8 +1,6 @@
 package hudson.plugins.performance.actions;
 
 import hudson.model.FreeStyleProject;
-import hudson.plugins.performance.PerformancePublisher;
-import hudson.plugins.performance.build.PerformanceTestBuild;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
@@ -14,8 +12,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
