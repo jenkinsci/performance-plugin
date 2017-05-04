@@ -812,11 +812,13 @@ public final class PerformanceProjectAction implements Action {
     }
 
     public boolean ifModePerformancePerTestCaseUsed() {
-        return project.getPublishersList().get(PerformancePublisher.class).isModePerformancePerTestCase();
+        PerformancePublisher publisher = project.getPublishersList().get(PerformancePublisher.class);
+        return publisher == null || publisher.isModePerformancePerTestCase();
     }
 
     public boolean ifModeThroughputUsed() {
-        return project.getPublishersList().get(PerformancePublisher.class).isModeThroughput();
+        PerformancePublisher publisher = project.getPublishersList().get(PerformancePublisher.class);
+        return publisher != null && publisher.isModeThroughput();
     }
 
     public static class Range {
