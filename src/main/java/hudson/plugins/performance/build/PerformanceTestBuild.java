@@ -7,12 +7,14 @@ import hudson.FilePath;
 import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.PerformancePublisher;
+import hudson.plugins.performance.actions.PerformanceProjectAction;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
@@ -84,6 +86,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         this.useBztExitCode = useBztFailCriteria;
     }
 
+    @Override
+    public Action getProjectAction(AbstractProject<?, ?> project) {
+        return new PerformanceProjectAction(project);
+    }
+
 
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
@@ -112,20 +119,8 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
     protected void generatePerformanceTrend(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
-        if (run instanceof FreeStyleBuild) {
-            // if FreeStyleProject -> add PostBuildAction
-
-            final FreeStyleBuild build = (FreeStyleBuild) run;
-            final DescribableList<Publisher, hudson.model.Descriptor<Publisher>> publishers = build.getParent().getPublishersList();
-
-            if (publishers.get(PerformancePublisher.class) == null) {
-                publishers.add(new PerformancePublisher("aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
-            }
-        } else {
-            // run for pipeline
-            new PerformancePublisher("aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null).
-                    perform(run, workspace, launcher, listener);
-        }
+        new PerformancePublisher("aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null).
+                perform(run, workspace, launcher, listener);
     }
 
     private boolean installBztAndCheck(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
