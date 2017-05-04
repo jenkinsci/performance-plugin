@@ -1,6 +1,8 @@
 package hudson.plugins.performance.actions;
 
 import hudson.model.FreeStyleProject;
+import hudson.plugins.performance.PerformancePublisher;
+import hudson.plugins.performance.build.PerformanceTestBuild;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
@@ -13,6 +15,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -50,4 +53,15 @@ public class PerformanceProjectActionTest {
         assertTrue(testSuiteReportDetail instanceof TestSuiteReportDetail);
     }
 
+
+    @Test
+    public void testDuplicatedProjectActionLinks() throws Exception {
+        FreeStyleProject freeStyleProject = j.createFreeStyleProject("duplicated_links");
+        String path = getClass().getResource("/performanceTest.yml").getPath();
+
+        freeStyleProject.getBuildersList().add(new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]", true, true, false, false));
+        freeStyleProject.getPublishersList().add(new PerformancePublisher("aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
+
+        assertEquals(1, freeStyleProject.getActions().size());
+    }
 }
