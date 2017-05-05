@@ -1,6 +1,14 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
+## v3.0
+
+- FEATURE: add build step to run performance test
+- FIX: compact table stats to fit into screen
+- FIX: fix FileNotFound error
+- FIX: use proper CSV reader to read multiline and quoted CSV values
+- FIX: Pipeline Snippet Generator shows broken config
+
 ## v2.2
 - FEATURE: make plugin to autodetect input file formats
 - FEATURE: add "perfReport" Groovy command
