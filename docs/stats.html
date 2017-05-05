@@ -51,6 +51,80 @@
         return values;
     }
 
+
+    function installations(data) {
+        var counts = [];
+        var percents = [];
+        for (var key1 in data.installations) {
+            counts.push([parseInt(key1), data.installations[key1]])
+        }
+
+        for (var key2 in data.installationsPercentage) {
+            percents.push([parseInt(key2), data.installationsPercentage[key2]])
+        }
+
+        return {
+            series: [{
+                name: 'Percentage',
+                data: percents,
+                yAxis: 1,
+                color: "silver",
+                dashStyle: "LongDash",
+                lineWidth: 1
+            },
+                {
+                    name: 'Count',
+                    data: counts,
+                    lineWidth: 3
+                }],
+            title: {
+                text: 'Installations History'
+            },
+            xAxis: {
+                type: "datetime"
+            },
+            yAxis: [{
+                title: {
+                    text: 'Installations count'
+                },
+                endOnTick: false,
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            }, {
+                title: {
+                    text: '% of Jenkins installations'
+                },
+                labels: {
+                    formatter: function () {
+                        return this.value + ' %';
+                    }
+                },
+                endOnTick: false,
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }],
+                opposite: true
+            }],
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'left',
+                x: 120,
+                verticalAlign: 'top',
+                y: 50,
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            }
+        };
+    }
+
     function versions(data) {
         data = data.installationsPercentagePerVersion;
 
@@ -66,7 +140,7 @@
         for (var n = 0; n < keys.length; n++) {
             var ver = keys[n];
             var val = Math.round(1000 * data[ver] / sum) / 10;
-            if (ver.indexOf('-') < 0 && val>1) {
+            if (ver.indexOf('-') < 0 && val > 1) {
                 series.push(['v ' + ver, val]);
             } else {
                 other += val;
@@ -89,9 +163,6 @@
 
             title: {
                 text: 'Installations by Version'
-            },
-            subtitle: {
-                text: 'Source: Jenkins Statistics'
             },
             xAxis: {
                 type: 'category'
@@ -125,8 +196,6 @@
         };
     }
 
-    function installations(data) {
-    }
 
     $(document).ready(function () {
         $.getJSON("http://stats.jenkins.io/plugin-installation-trend/performance.stats.json").success(function (data) {
