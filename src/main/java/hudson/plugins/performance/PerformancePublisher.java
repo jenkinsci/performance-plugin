@@ -565,7 +565,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     public void compareWithAbsoluteThreshold(Run<?, ?> run, TaskListener listener, Collection<PerformanceReport> parsedReports) {
         PrintStream logger = listener.getLogger();
         try {
-            printInfoAboutThreshold(logger);
+            printInfoAboutErrorThreshold(logger);
             HashMap<String, String> responseTimeThresholdMap = getResponseTimeThresholdMap(logger);
             // add the report to the build object.
             // mark the build as unstable or failure depending on the outcome.
@@ -691,7 +691,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     // Print information about Unstable & Failed Threshold
-    private void printInfoAboutThreshold(PrintStream logger) {
+    private void printInfoAboutErrorThreshold(PrintStream logger) {
         logger.println(
             (errorUnstableThreshold >= 0 && errorUnstableThreshold <= 100) ?
                 "Performance: Percentage of errors greater or equal than " + errorUnstableThreshold
@@ -733,6 +733,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         EnvVars env = run.getEnvironment(listener);
 
         try {
+            printInfoAboutRelativeThreshold(logger);
+
             Result result = Result.SUCCESS;
             String glob;
             String name = "";
@@ -760,23 +762,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             med += "<median>\n";
             perct += "<percentile>\n";
 
-            if (relativeFailedThresholdNegative <= 100 && relativeFailedThresholdPositive <= 100) {
-                logger.println("Performance: Percentage of relative difference outside -" + relativeFailedThresholdNegative
-                        + " to +" + relativeFailedThresholdPositive + " % sets the build as "
-                        + Result.FAILURE.toString().toLowerCase());
-            } else {
-                logger.println(
-                        "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase());
-            }
 
-            if (relativeUnstableThresholdNegative <= 100 && relativeUnstableThresholdPositive <= 100) {
-                logger.println("Performance: Percentage of relative difference outside -"
-                        + relativeUnstableThresholdNegative + " to +" + relativeUnstableThresholdPositive
-                        + " % sets the build as " + Result.UNSTABLE.toString().toLowerCase());
-            } else {
-                logger.println(
-                        "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase());
-            }
 
             List<UriReport> curruriList = null;
             // add the report to the build object.
@@ -1045,6 +1031,24 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             e.printStackTrace(logger);
         }
 
+    }
+
+    private void printInfoAboutRelativeThreshold(PrintStream logger) {
+        logger.println(
+            (relativeFailedThresholdNegative <= 100 && relativeFailedThresholdPositive <= 100) ?
+                "Performance: Percentage of relative difference outside -" + relativeFailedThresholdNegative
+                    + " to +" + relativeFailedThresholdPositive + " % sets the build as "
+                    + Result.FAILURE.toString().toLowerCase() :
+                "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase()
+        );
+
+        logger.println(
+            (relativeUnstableThresholdNegative <= 100 && relativeUnstableThresholdPositive <= 100) ?
+                "Performance: Percentage of relative difference outside -"
+                    + relativeUnstableThresholdNegative + " to +" + relativeUnstableThresholdPositive
+                    + " % sets the build as " + Result.UNSTABLE.toString().toLowerCase() :
+                "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase()
+        );
     }
 
     /*
