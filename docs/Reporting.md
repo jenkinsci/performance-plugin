@@ -7,11 +7,13 @@ Performance Report post-build step allows you to generate reports from popular t
 It includes the feature of setting the final build status as good, unstable or failed, based on the reported error percentage.
 
 Report formats supported:
-- JMeter XML and CSV format, also Summarizer log output
-- Taurus Tool Final Stats XML (through it, you can publish summaries from JMeter, Gatling, Grinder, Siege, ab, Selenium and many others)
-- JUnit format (used by SoapUI for example)
-- Twitter's Iago
-- wrk
+- Taurus Tool's [Final Stats XML](http://gettaurus.org/docs/Reporting/?utm_source=jenkins&utm_medium=link&utm_campaign=wiki#BlazeMeter-Reporter) - through it, you can publish summaries from JMeter, Gatling, Grinder, Siege, ab, Selenium and many others
+- [Apache JMeter](http://jmeter.apache.org/) XML and CSV format, also its Summarizer log output
+- [JUnit](http://www.junit.org/) format (used by SoapUI for example)
+- Twitter's [Iago](https://github.com/twitter/iago)
+- [wrk](https://github.com/wg/wrk)
+
+## Browsing Reports
 
 As soon as you have configured Jenkins to run this post-build action and launched a first build, you'll notice that a new entry is appearing in the left pane: Performance Trend.
 
@@ -44,9 +46,15 @@ In the performance trend page, the links to Trend report shows a report with the
 
 ## Jenkins GUI Configuration
 
-Specify the report files, separated by semicolon. Plugin will autodetect file format for each file. You can use Jenkins globs like `**/*.jtl`.
+If you are using GUI to configure Jenkins jobs, start with adding "Publisth Pefrormance test result report" item into your post-build actions:
 
-You can configure the error percentage thresholds which would make the project unstable or failed or leave them blank to disable the feature.
+![](report_step_choice.png)
+
+Specify the report files into "Source data files" field, separate multiple entries with semicolon. Plugin will autodetect file format for each file. You can use Jenkins globs like `**/*.jtl`.
+
+You can configure the error percentage thresholds which would make the project unstable or failed or set them to `-1` to disable the feature:
+
+![](report_constraints.png)
 
 ## Using from Pipeline Scripts
 

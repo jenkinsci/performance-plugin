@@ -24,3 +24,26 @@ Report building supports many formats from popular testing tools and explained i
 - [Changelog](Changelog.md)
 - [Usage Stats](stats.html)
 - [Jenkins Plugins Entry](https://wiki.jenkins-ci.org/display/JENKINS/Performance+Plugin)
+
+
+## Troubleshooting
+
+
+
+If you get the error `java.lang.NoClassDefFoundError: Could not initialize class org.jfree.chart.JFreeChart` when the plugin generates the charts, is because you have running an XServer in the jenkins machine. Set the property `-Djava.awt.headless=true` when starting your servlet container. Note that this normally does not happen when running the embedded servlet container Jenkins is packaged with (Jetty).
+
+https://groups.google.com/forum/#!topic/jenkinsci-users/o_Dr7Tn0i3U
+
+## Compiling
+To use the latest plugin release, you need to download, compile and install by hand. To do it, you need git, maven and java installed in your computer.
+```bash
+$ git clone https://github.com/jenkinsci/performance-plugin.git performance
+$ cd performance
+$ mvn package
+$ cp target/performance.hpi <path_to_jenkins>/data/plugins
+```
+Remember to restart jenkins in order to use reload the plugin.
+You could read more about plugins reading these pages :
+- http://wiki.jenkins-ci.org/display/JENKINS/Checking+out+existing+plugins
+- http://wiki.jenkins-ci.org/display/JENKINS/Plugin+tutorial
+- http://wiki.jenkins-ci.org/display/JENKINS/Hosting+Plugins
