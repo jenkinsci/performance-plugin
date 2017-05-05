@@ -1,4 +1,4 @@
-[<< Back to main page](./)
+<small>[<< Back to main page](./)</small>
 # Changelog 
 
 ## v2.2
