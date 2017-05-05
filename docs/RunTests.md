@@ -1,12 +1,10 @@
 <small>[<< Back to main page](./)</small>
-# Running Tests
+# Running Performance Tests
 
 ## Features
-Performance plugin uses [Taurus Tool](http://gettaurus.org/?utm_source=jenkins&utm_medium=link&utm_campaign=run_doc_main) to execute load tests. Main benefit of Taurus is that it provides abstraction layer over popular Open Source tools, including: [Apache JMeter](http://gettaurus.org/docs/JMeter/), [Gatling Tool](http://gettaurus.org/docs/Gatling.md), [Grinder](http://gettaurus.org/docs/Grinder.md), [Locust.io](http://gettaurus.org/docs/Locust.md) and even [Selenium](http://gettaurus.org/docs/Selenium/). You can run any of these load injectors from Jenkins build step with minimal prerequisites.
+Performance Plugin for Jenkins uses [Taurus Tool](http://gettaurus.org/?utm_source=jenkins&utm_medium=link&utm_campaign=run_doc_main) to execute load tests. Main benefit of Taurus is that it provides abstraction layer over popular Open Source tools, including: [Apache JMeter](http://gettaurus.org/docs/JMeter/?utm_source=jenkins&utm_medium=link&utm_campaign=run_doc_jmeter), [Gatling Tool](http://gettaurus.org/docs/Gatling.md?utm_source=jenkins&utm_medium=link&utm_campaign=run_doc_gatling), [Grinder](http://gettaurus.org/docs/Grinder.md?utm_source=jenkins&utm_medium=link&utm_campaign=run_doc_grinder), [Locust.io](http://gettaurus.org/docs/Locust.md?utm_source=jenkins&utm_medium=link&utm_campaign=run_doc_locust) and even [Selenium](http://gettaurus.org/docs/Selenium/?utm_source=jenkins&utm_medium=link&utm_campaign=run_doc_selenium). You can run any of these load injectors from Jenkins build step with minimal prerequisites.
 
-_Prerequisites on Jenkins server: have Python 2.7+ installed together with one of [virtualenv](https://pypi.python.org/pypi/virtualenv) or [bzt](https://pypi.python.org/pypi/bzt) PyPi packages_
-
-Test runner step works with Jenkins slave, as well as with Pipeline syntax (see section below.)
+_Prerequisites for Jenkins server: have Python 2.7+ installed together with one of [virtualenv](https://pypi.python.org/pypi/virtualenv) or [bzt](https://pypi.python.org/pypi/bzt) PyPi packages installed._
 
 Internally, build step will run Taurus tool, doing some extra work around it:
 
@@ -17,6 +15,9 @@ Internally, build step will run Taurus tool, doing some extra work around it:
 
 Build step tries to minimally interfere with Taurus tool to let you use its full capabilities (Taurus is pretty feature-rich thing for running tests).
 
+Test runner step works fine with Jenkins slaves, as well as with Pipeline syntax (see section below.)
+
+
 ## Jenkins GUI Configuration
 If you are using GUI-based job configs for Jenkins, choose "Run Performance Test" step from "Add build step" menu:
 ![](run_step_choice.png)
@@ -25,7 +26,7 @@ In the field that appears, you can simply specify path to your JMeter test plan 
 
 ![](run_jmeter.png)
 
-If you want to use extended capabilities of Taurus, you can specify its config files and options in that field. Generally, value of that field is what will go into command line parameters of `bzt` program.
+If you want to use extended capabilities of Taurus, you can specify its config files and options in 'Taurus Tool parameters' field. Generally, value of that field is what will go into command line parameters of `bzt` program.
 
 ![](run_extended_config.png)
 
