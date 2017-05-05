@@ -5,8 +5,10 @@
 Performance Plugin allows you to run performance tests as build step of your Jenkins job, or build reports from pre-existing test result files. 
 
 ## Running Tests
+[Running](RunTests.md)
 
 ## Building Reports
+[Reporting](Reporting.md)
 
 ## Links
 
