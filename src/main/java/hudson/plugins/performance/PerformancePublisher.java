@@ -614,6 +614,26 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 + "% of errors [" + result + "]. Build status is: " + run.getResult());
     }
 
+    private Result checkAverageResponseTime(PerformanceReport performanceReport, HashMap<String, String> responseTimeThresholdMap, PrintStream logger) {
+        Result result = null;
+        long average = performanceReport.getAverage();
+        try {
+            if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(performanceReport.getReportFileName()) != null) {
+                if (Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) <= average) {
+                    logger.println("UNSTABLE: " + performanceReport.getReportFileName() + " has exceeded the threshold of ["
+                            + Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) + "] with the time of ["
+                            + Long.toString(average) + "]");
+                    result = Result.UNSTABLE;
+                }
+            }
+        } catch (NumberFormatException nfe) {
+            logger.println("ERROR: Threshold set to a non-number ["
+                    + responseTimeThresholdMap.get(performanceReport.getReportFileName()) + "]");
+            result = Result.FAILURE;
+        }
+        return result;
+    }
+
     // write report in xml, when checked Error Threshold comparison
     private void writeErrorThresholdReportInXML(Run<?, ?> run, PerformanceReport performanceReport) throws IOException {
         xmlDir = run.getRootDir().getAbsolutePath();
@@ -690,22 +710,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         fw.close();
     }
 
-    // Print information about Unstable & Failed Threshold
-    private void printInfoAboutErrorThreshold(PrintStream logger) {
-        logger.println(
-                (errorUnstableThreshold >= 0 && errorUnstableThreshold <= 100) ?
-                        "Performance: Percentage of errors greater or equal than " + errorUnstableThreshold
-                                + "% sets the build as " + Result.UNSTABLE.toString().toLowerCase() :
-                        "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase()
-        );
-
-        logger.println(
-                (errorFailedThreshold >= 0 && errorFailedThreshold <= 100) ?
-                        "Performance: Percentage of errors greater or equal than " + errorFailedThreshold
-                                + "% sets the build as " + Result.FAILURE.toString().toLowerCase() :
-                        "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase()
-        );
-    }
 
     private HashMap<String, String> getResponseTimeThresholdMap(PrintStream logger) {
         HashMap<String, String> responseTimeThresholdMap = null;
@@ -780,10 +784,16 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                         // getting files related to the previous build selected
                         getBuildUriReports(buildForComparison, listener, parsers),
                         logger,
+                        // open xml tags
                         (averageBuffer = new StringBuilder("<average>\n")),
                         (medianBuffer = new StringBuilder("<median>\n")),
                         (percentileBuffer = new StringBuilder("<percentile>\n"))
                 );
+
+                // close xml tags
+                averageBuffer.append("</average>\n");
+                medianBuffer.append("</median>\n");
+                percentileBuffer.append("</percentile>");
             }
 
             writeRelativeThresholdReportInXML(run, glob, averageBuffer, medianBuffer, percentileBuffer);
@@ -810,76 +820,81 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 return r.getUriListOrdered();
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     // Comparing both builds based on either average, median or 90
     // percentile response time...
-    private void compareUriReports(Run<?, ?> run, List<UriReport> currentUriReports, List<UriReport> previousUriReports, PrintStream logger,
+    private void compareUriReports(Run<?, ?> run, List<UriReport> currentUriReports, List<UriReport> reportsForComparison, PrintStream logger,
                                    StringBuilder averageBuffer, StringBuilder medianBuffer, StringBuilder percentileBuffer) {
-        String failedLabel = null, unStableLabel = null;
-
-        Result result = Result.SUCCESS;
 
         // comparing the labels and calculating the differences...
-        for (int i = 0; i < previousUriReports.size(); i++) {
-            for (int j = 0; j < currentUriReports.size(); j++) {
-                if (previousUriReports.get(i).getStaplerUri().equalsIgnoreCase(currentUriReports.get(j).getStaplerUri())) {
+        for (UriReport reportForComparison : reportsForComparison) {
+            for (UriReport currentUriReport : currentUriReports) {
+                if (reportForComparison.getStaplerUri().equalsIgnoreCase(currentUriReport.getStaplerUri())) {
 
-                    UriReport currentReport = currentUriReports.get(j);
-                    UriReport reportForComparison = previousUriReports.get(i);
+                    appendRelativeInfoAboutAverage(currentUriReport, reportForComparison, averageBuffer);
+                    appendRelativeInfoAboutMedian(currentUriReport, reportForComparison, medianBuffer);
+                    appendRelativeInfoAbout90Line(currentUriReport, reportForComparison, percentileBuffer);
 
-                    appendRelativeInfoAboutAverage(currentReport, reportForComparison, averageBuffer);
-                    appendRelativeInfoAboutMedian(currentReport, reportForComparison, averageBuffer);
-                    appendRelativeInfoAbout90Line(currentReport, reportForComparison, averageBuffer);
-
-                    double relativeDiffPercent = calculateRelativeDiffInPercent(currentReport, reportForComparison, logger);
-
-                    // setting the build status based on the differences
-                    // calculated...
-                    if (relativeDiffPercent < 0) {
-                        if (relativeFailedThresholdNegative >= 0
-                                && Math.abs(relativeDiffPercent) - relativeFailedThresholdNegative > THRESHOLD_TOLERANCE) {
-
-                            result = Result.FAILURE;
-                            failedLabel = previousUriReports.get(i).getStaplerUri();
-
-                        } else if (relativeUnstableThresholdNegative >= 0
-                                && Math.abs(relativeDiffPercent) - relativeUnstableThresholdNegative > THRESHOLD_TOLERANCE) {
-
-                            result = Result.UNSTABLE;
-                            unStableLabel = previousUriReports.get(i).getStaplerUri();
-                        }
-                    } else if (relativeDiffPercent >= 0) {
-
-                        if (relativeFailedThresholdPositive >= 0
-                                && Math.abs(relativeDiffPercent) - relativeFailedThresholdPositive > THRESHOLD_TOLERANCE) {
-
-                            result = Result.FAILURE;
-                            failedLabel = previousUriReports.get(i).getStaplerUri();
-
-                        } else if (relativeUnstableThresholdPositive >= 0
-                                && Math.abs(relativeDiffPercent) - relativeUnstableThresholdPositive > THRESHOLD_TOLERANCE) {
-
-                            result = Result.UNSTABLE;
-                            unStableLabel = previousUriReports.get(i).getStaplerUri();
-                        }
-                    }
-                    run.setResult(result);
+                    calculateBuildStatus(run, logger, reportForComparison.getStaplerUri(),
+                            calculateRelativeDiffInPercent(currentUriReport, reportForComparison, logger));
                 }
             }
         }
+    }
 
-        averageBuffer.append("</average>\n");
-        medianBuffer.append("</median>\n");
-        percentileBuffer.append("</percentile>");
+    // setting the build status based on the differences
+    // calculated...
+    private void calculateBuildStatus(Run<?, ?> run, PrintStream logger, String staplerUri, double relativeDiffPercent) {
+        Result result = null;
+        if (relativeDiffPercent < 0) {
+            if (calculateRelativeFailedThresholdNegative(relativeDiffPercent)) {
+                result = Result.FAILURE;
+            } else if (calculateRelativeUnstableThresholdNegative(relativeDiffPercent)) {
+                result = Result.UNSTABLE;
+            }
+        } else if (relativeDiffPercent >= 0) {
+            if (calculateRelativeFailedThresholdPositive(relativeDiffPercent)) {
+                result = Result.FAILURE;
+            } else if (calculateRelativeUnstableThresholdPositive(relativeDiffPercent)) {
+                result = Result.UNSTABLE;
+            }
+        }
 
-        logger.println(
-                "------------------------------------------------------------------------------------------------------------------------------------");
-        String labelResult = "\nThe label ";
-        logger.print((failedLabel != null) ? labelResult + "\"" + failedLabel + "\"" + " caused the build to fail\n"
-                : (unStableLabel != null) ? labelResult + "\"" + unStableLabel + "\"" + " made the build unstable\n"
-                : "");
+        if (result != null) {
+            // set result. It'll be set only when result is worse
+            run.setResult(result);
+            logger.print(
+                    (result == Result.FAILURE) ?
+                            "\nThe label \"" + staplerUri + "\"" + " caused the build to fail\n" :
+                            "\nThe label \"" + staplerUri + "\"" + " made the build unstable\n"
+            );
+        }
+    }
+
+    private double calculateDiffInPercents(double value1, double value2) {
+        return (Math.round((value1 * 100) / value2)) / 100;
+    }
+
+    private boolean calculateRelativeFailedThresholdNegative(double relativeDiffPercent) {
+        return (relativeFailedThresholdNegative >= 0
+                && Math.abs(relativeDiffPercent) - relativeFailedThresholdNegative > THRESHOLD_TOLERANCE);
+    }
+
+    private boolean calculateRelativeUnstableThresholdNegative(double relativeDiffPercent) {
+        return (relativeUnstableThresholdNegative >= 0
+                && Math.abs(relativeDiffPercent) - relativeUnstableThresholdNegative > THRESHOLD_TOLERANCE);
+    }
+
+    private boolean calculateRelativeFailedThresholdPositive(double relativeDiffPercent) {
+        return (relativeFailedThresholdPositive >= 0
+                && Math.abs(relativeDiffPercent) - relativeFailedThresholdPositive > THRESHOLD_TOLERANCE);
+    }
+
+    private boolean calculateRelativeUnstableThresholdPositive(double relativeDiffPercent) {
+        return (relativeUnstableThresholdPositive >= 0
+                && Math.abs(relativeDiffPercent) - relativeUnstableThresholdPositive > THRESHOLD_TOLERANCE);
     }
 
     private double calculateRelativeDiffInPercent(UriReport currentReport, UriReport reportForComparison, PrintStream logger) {
@@ -912,49 +927,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return relativeDiffPercent;
     }
 
-    private void appendRelativeInfoAboutAverage(UriReport currentReport, UriReport reportForComparison, StringBuilder averageBuffer) {
-        double relativeDiff = currentReport.getAverage() - reportForComparison.getAverage();
-        double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getAverage());
-
-        averageBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
-        averageBuffer.append("\t\t<previousBuildAvg>").append(reportForComparison.getAverage()).append("</previousBuildAvg>\n");
-        averageBuffer.append("\t\t<currentBuildAvg>").append(currentReport.getAverage()).append("</currentBuildAvg>\n");
-        averageBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
-        averageBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
-        averageBuffer.append("\t</").append(currentReport.getStaplerUri()).append(">\n");
-    }
-
-    private void appendRelativeInfoAboutMedian(UriReport currentReport, UriReport reportForComparison, StringBuilder medianBuffer) {
-        double relativeDiff = currentReport.getMedian() - reportForComparison.getMedian();
-        double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getMedian());
-
-        medianBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
-        medianBuffer.append("\t\t<previousBuildMed>").append(reportForComparison.getMedian()).append("</previousBuildMed>\n");
-        medianBuffer.append("\t\t<currentBuildMed>").append(currentReport.getMedian()).append("</currentBuildMed>\n");
-        medianBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
-        medianBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
-        medianBuffer.append("\t</").append(currentReport.getStaplerUri()).append(">\n");
-    }
-
-    private void appendRelativeInfoAbout90Line(UriReport currentReport, UriReport reportForComparison, StringBuilder percentileBuffer) {
-        double relativeDiff = currentReport.get90Line() - reportForComparison.get90Line();
-        double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.get90Line());
-
-        percentileBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
-        percentileBuffer.append("\t\t<previousBuild90Line>").append(reportForComparison.get90Line()).append("</previousBuild90Line>\n");
-        percentileBuffer.append("\t\t<currentBuild90Line>").append(currentReport.get90Line()).append("</currentBuild90Line>\n");
-        percentileBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
-        percentileBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
-        percentileBuffer.append("\t</").append(currentReport.getStaplerUri()).append(">\n");
-    }
-
-    private double calculateDiffInPercents(double value1, double value2) {
-        return (Math.round((value1 * 100) / value2)) / 100;
-    }
-
-
-    private void writeRelativeThresholdReportInXML(Run<?, ?> run, String name,
-                                                   StringBuilder averageBuffer, StringBuilder medianBuffer, StringBuilder percentileBuffer) throws IOException {
+    private void writeRelativeThresholdReportInXML(
+            Run<?, ?> run, String name,
+            StringBuilder averageBuffer, StringBuilder medianBuffer, StringBuilder percentileBuffer) throws IOException {
 
         FileWriter fw = null;
         BufferedWriter bw = null;
@@ -1016,6 +991,61 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         }
     }
 
+
+    private void appendRelativeInfoAboutAverage(UriReport currentReport, UriReport reportForComparison, StringBuilder averageBuffer) {
+        double relativeDiff = currentReport.getAverage() - reportForComparison.getAverage();
+        double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getAverage());
+
+        averageBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
+        averageBuffer.append("\t\t<previousBuildAvg>").append(reportForComparison.getAverage()).append("</previousBuildAvg>\n");
+        averageBuffer.append("\t\t<currentBuildAvg>").append(currentReport.getAverage()).append("</currentBuildAvg>\n");
+        averageBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
+        averageBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
+        averageBuffer.append("\t</").append(currentReport.getStaplerUri()).append(">\n");
+    }
+
+    private void appendRelativeInfoAboutMedian(UriReport currentReport, UriReport reportForComparison, StringBuilder medianBuffer) {
+        double relativeDiff = currentReport.getMedian() - reportForComparison.getMedian();
+        double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getMedian());
+
+        medianBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
+        medianBuffer.append("\t\t<previousBuildMed>").append(reportForComparison.getMedian()).append("</previousBuildMed>\n");
+        medianBuffer.append("\t\t<currentBuildMed>").append(currentReport.getMedian()).append("</currentBuildMed>\n");
+        medianBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
+        medianBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
+        medianBuffer.append("\t</").append(currentReport.getStaplerUri()).append(">\n");
+    }
+
+    private void appendRelativeInfoAbout90Line(UriReport currentReport, UriReport reportForComparison, StringBuilder percentileBuffer) {
+        double relativeDiff = currentReport.get90Line() - reportForComparison.get90Line();
+        double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.get90Line());
+
+        percentileBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
+        percentileBuffer.append("\t\t<previousBuild90Line>").append(reportForComparison.get90Line()).append("</previousBuild90Line>\n");
+        percentileBuffer.append("\t\t<currentBuild90Line>").append(currentReport.get90Line()).append("</currentBuild90Line>\n");
+        percentileBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
+        percentileBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
+        percentileBuffer.append("\t</").append(currentReport.getStaplerUri()).append(">\n");
+    }
+
+    // Print information about Unstable & Failed Threshold
+    private void printInfoAboutErrorThreshold(PrintStream logger) {
+        logger.println(
+                (errorUnstableThreshold >= 0 && errorUnstableThreshold <= 100) ?
+                        "Performance: Percentage of errors greater or equal than " + errorUnstableThreshold
+                                + "% sets the build as " + Result.UNSTABLE.toString().toLowerCase() :
+                        "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase()
+        );
+
+        logger.println(
+                (errorFailedThreshold >= 0 && errorFailedThreshold <= 100) ?
+                        "Performance: Percentage of errors greater or equal than " + errorFailedThreshold
+                                + "% sets the build as " + Result.FAILURE.toString().toLowerCase() :
+                        "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase()
+        );
+    }
+
+    // Print information about Relative Threshold
     private void printInfoAboutRelativeThreshold(PrintStream logger) {
         logger.println(
                 (relativeFailedThresholdNegative <= 100 && relativeFailedThresholdPositive <= 100) ?
@@ -1034,34 +1064,20 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         );
     }
 
+
     private void printInfoAboutCompareBasedOn(PrintStream logger) {
         if (configType.equalsIgnoreCase("ART")) {
-
             logger.println("Average response time\n\n");
             logger.println(
-                    "====================================================================================================================================");
-            logger.println(
                     "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURIAvg\t\tCurrentBuildURIAvg\tRelativeDiff\tRelativeDiffPercentage ");
-            logger.println(
-                    "====================================================================================================================================");
         } else if (configType.equalsIgnoreCase("MRT")) {
-
             logger.println("Median response time\n\n");
             logger.println(
-                    "====================================================================================================================================");
-            logger.println(
                     "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURIMed\t\tCurrentBuildURIMed\tRelativeDiff\tRelativeDiffPercentage ");
-            logger.println(
-                    "====================================================================================================================================");
         } else if (configType.equalsIgnoreCase("PRT")) {
-
             logger.println("90 Percentile response time\n\n");
             logger.println(
-                    "====================================================================================================================================");
-            logger.println(
                     "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURI90%\t\tCurrentBuildURI90%\tRelativeDiff\tRelativeDiffPercentage ");
-            logger.println(
-                    "====================================================================================================================================");
         }
     }
 
