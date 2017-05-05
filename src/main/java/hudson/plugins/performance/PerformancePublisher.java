@@ -18,15 +18,17 @@ import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
 import hudson.plugins.performance.constraints.AbstractConstraint;
 import hudson.plugins.performance.constraints.ConstraintChecker;
+import hudson.plugins.performance.constraints.ConstraintEvaluation;
+import hudson.plugins.performance.constraints.ConstraintFactory;
 import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
 import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
 import hudson.plugins.performance.cookie.CookieHandler;
+import hudson.plugins.performance.data.ConstraintSettings;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.PerformanceReportPosition;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.descriptors.ConstraintDescriptor;
-import hudson.plugins.performance.constraints.ConstraintEvaluation;
-import hudson.plugins.performance.constraints.ConstraintFactory;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
@@ -37,13 +39,11 @@ import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.JUnitParser;
 import hudson.plugins.performance.parsers.JmeterSummarizerParser;
 import hudson.plugins.performance.parsers.ParserFactory;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.parsers.TaurusParser;
 import hudson.plugins.performance.parsers.WrkSummarizerParser;
 import hudson.plugins.performance.reports.AbstractReport;
 import hudson.plugins.performance.reports.ConstraintReport;
-import hudson.plugins.performance.data.ConstraintSettings;
-import hudson.plugins.performance.parsers.PerformanceReportParser;
-import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.plugins.performance.reports.throughput.ThroughputReport;
@@ -159,6 +159,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReport", PerformanceReport.class);
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.UriReport", UriReport.class);
     }
+
+    public static final double THRESHOLD_TOLERANCE = 0.00000001;
+
 
     @Symbol("performanceReport")
     @Extension
@@ -544,246 +547,53 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return parsedReports;
     }
 
-
-
-
-    // for mode "standard evaluation"
-    public void evaluateInStandardMode(Run<?, ?> run, FilePath workspace, Collection<PerformanceReport> parsedReports,
-                                       TaskListener listener, List<PerformanceReportParser> parsers)
-            throws IOException, InterruptedException {
-
-        EnvVars env = run.getEnvironment(listener);
-        PrintStream logger = listener.getLogger();
-        double thresholdTolerance = 0.00000001;
+    // For absolute error/unstable threshold..
+    public void compareWithAbsoluteThreshold(Run<?, ?> run, TaskListener listener, Collection<PerformanceReport> parsedReports) {
+        String glob;
         Result result = Result.SUCCESS;
-        String glob = null;
+        PrintStream logger = listener.getLogger();
+        try {
+            List<UriReport> curruriList = null;
+            HashMap<String, String> responseTimeThresholdMap = null;
 
-        // For absolute error/unstable threshold..
-        if (!modeOfThreshold) {
-            try {
-                List<UriReport> curruriList = null;
-                HashMap<String, String> responseTimeThresholdMap = null;
+            if (!"".equals(this.errorUnstableResponseTimeThreshold) && this.errorUnstableResponseTimeThreshold != null) {
 
-                if (!"".equals(this.errorUnstableResponseTimeThreshold) && this.errorUnstableResponseTimeThreshold != null) {
+                responseTimeThresholdMap = new HashMap<String, String>();
+                String[] lines = this.errorUnstableResponseTimeThreshold.split("\n");
 
-                    responseTimeThresholdMap = new HashMap<String, String>();
-                    String[] lines = this.errorUnstableResponseTimeThreshold.split("\n");
-
-                    for (String line : lines) {
-                        String[] components = line.split(":");
-                        if (components.length == 2) {
-                            logger.println("Setting threshold: " + components[0] + ":" + components[1]);
-                            responseTimeThresholdMap.put(components[0], components[1]);
-                        }
+                for (String line : lines) {
+                    String[] components = line.split(":");
+                    if (components.length == 2) {
+                        logger.println("Setting threshold: " + components[0] + ":" + components[1]);
+                        responseTimeThresholdMap.put(components[0], components[1]);
                     }
                 }
-
-                if (errorUnstableThreshold >= 0 && errorUnstableThreshold <= 100) {
-                    logger.println("Performance: Percentage of errors greater or equal than " + errorUnstableThreshold
-                            + "% sets the build as " + Result.UNSTABLE.toString().toLowerCase());
-                } else {
-                    logger.println(
-                            "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase());
-                }
-                if (errorFailedThreshold >= 0 && errorFailedThreshold <= 100) {
-                    logger.println("Performance: Percentage of errors greater or equal than " + errorFailedThreshold
-                            + "% sets the build as " + Result.FAILURE.toString().toLowerCase());
-                } else {
-                    logger.println(
-                            "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase());
-                }
-
-                // add the report to the build object.
-                // mark the build as unstable or failure depending on the outcome.
-                for (PerformanceReport r : parsedReports) {
-
-                    xmlDir = run.getRootDir().getAbsolutePath();
-                    xmlDir += "/" + archive_directory;
-
-                    glob = r.getReportFileName();
-                    String[] arr = glob.split("/");
-                    if (!new File(xmlDir).exists()) {
-                        new File(xmlDir).mkdirs();
-                    }
-
-                    xmlfile = new File(xmlDir + "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
-                    xmlfile.createNewFile();
-
-                    FileWriter fw = new FileWriter(xmlfile.getAbsoluteFile());
-                    BufferedWriter bw = new BufferedWriter(fw);
-
-                    xml = "<?xml version=\"1.0\"?>\n";
-                    xml += "<results>\n";
-                    xml += "<absoluteDefinition>\n";
-
-                    String unstable = "\t<unstable>";
-                    String failed = "\t<failed>";
-                    String calc = "\t<calculated>";
-
-                    unstable += errorUnstableThreshold;
-                    failed += errorFailedThreshold;
-
-                    String avg = "", med = "", perct = "";
-
-                    avg += "<average>\n";
-                    med += "<median>\n";
-                    perct += "<percentile>\n";
-                    double errorPercent = r.errorPercent();
-                    calc += errorPercent;
-
-                    curruriList = r.getUriListOrdered();
-
-                    if (errorFailedThreshold >= 0 && errorPercent - errorFailedThreshold > thresholdTolerance) {
-                        result = Result.FAILURE;
-                        run.setResult(Result.FAILURE);
-                    } else if (errorUnstableThreshold >= 0 && errorPercent - errorUnstableThreshold > thresholdTolerance) {
-                        result = Result.UNSTABLE;
-                        run.setResult(Result.UNSTABLE);
-                    }
-
-                    long average = r.getAverage();
-                    try {
-                        if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(r.getReportFileName()) != null) {
-                            if (Long.parseLong(responseTimeThresholdMap.get(r.getReportFileName())) <= average) {
-                                logger.println("UNSTABLE: " + r.getReportFileName() + " has exceeded the threshold of ["
-                                        + Long.parseLong(responseTimeThresholdMap.get(r.getReportFileName())) + "] with the time of ["
-                                        + Long.toString(average) + "]");
-                                result = Result.UNSTABLE;
-                            }
-                        }
-                    } catch (NumberFormatException nfe) {
-                        logger.println("ERROR: Threshold set to a non-number ["
-                                + responseTimeThresholdMap.get(r.getReportFileName()) + "]");
-                        result = Result.FAILURE;
-                        run.setResult(Result.FAILURE);
-
-                    }
-                    if (result.isWorseThan(run.getResult())) {
-                        run.setResult(result);
-                    }
-                    logger.println("Performance: File " + r.getReportFileName() + " reported " + errorPercent
-                            + "% of errors [" + result + "]. Build status is: " + run.getResult());
-
-                    for (int i = 0; i < curruriList.size(); i++) {
-                        avg += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
-                        avg += "\t\t<currentBuildAvg>" + curruriList.get(i).getAverage() + "</currentBuildAvg>\n";
-                        avg += "\t</" + curruriList.get(i).getStaplerUri() + ">\n";
-
-                        med += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
-                        med += "\t\t<currentBuildMed>" + curruriList.get(i).getMedian() + "</currentBuildMed>\n";
-                        med += "\t</" + curruriList.get(i).getStaplerUri() + ">\n";
-
-                        perct += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
-                        perct += "\t\t<currentBuild90Line>" + curruriList.get(i).get90Line() + "</currentBuild90Line>\n";
-                        perct += "\t</" + curruriList.get(i).getStaplerUri() + ">\n";
-
-                    }
-                    unstable += "</unstable>";
-                    failed += "</failed>";
-                    calc += "</calculated>";
-
-                    avg += "</average>\n";
-                    med += "</median>\n";
-                    perct += "</percentile>\n";
-
-                    xml += unstable + "\n";
-                    xml += failed + "\n";
-                    xml += calc + "\n";
-                    xml += "</absoluteDefinition>\n";
-
-                    xml += avg;
-                    xml += med;
-                    xml += perct;
-                    xml += "</results>";
-
-                    bw.write(xml);
-                    bw.close();
-                    fw.close();
-                }
-            } catch (Exception e) {
-                logger.println("ERROR: Exception while determining absolute error/unstable threshold evaluation");
-                e.printStackTrace(logger);
             }
-        } else {
-            // For relative comparisons between builds...
-            try {
 
-                String name = "";
-                FileWriter fw = null;
-                BufferedWriter bw = null;
+            if (errorUnstableThreshold >= 0 && errorUnstableThreshold <= 100) {
+                logger.println("Performance: Percentage of errors greater or equal than " + errorUnstableThreshold
+                        + "% sets the build as " + Result.UNSTABLE.toString().toLowerCase());
+            } else {
+                logger.println(
+                        "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase());
+            }
+            if (errorFailedThreshold >= 0 && errorFailedThreshold <= 100) {
+                logger.println("Performance: Percentage of errors greater or equal than " + errorFailedThreshold
+                        + "% sets the build as " + Result.FAILURE.toString().toLowerCase());
+            } else {
+                logger.println(
+                        "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase());
+            }
 
-                String relative = "<relativeDefinition>\n";
-                String unstable = "\t<unstable>\n";
-                String failed = "\t<failed>\n";
-                String buildNo = "\t<buildNum>";
-
-                String inside = "";
-                String avg = "", med = "", perct = "";
-
-                unstable += "\t\t<negative>" + relativeUnstableThresholdNegative + "</negative>\n";
-                unstable += "\t\t<positive>" + relativeUnstableThresholdPositive + "</positive>\n";
-
-                failed += "\t\t<negative>" + relativeFailedThresholdNegative + "</negative>\n";
-                failed += "\t\t<positive>" + relativeFailedThresholdPositive + "</positive>\n";
-
-                unstable += "\t</unstable>\n";
-                failed += "\t</failed>\n";
-
-                avg += "<average>\n";
-                med += "<median>\n";
-                perct += "<percentile>\n";
-
-                if (relativeFailedThresholdNegative <= 100 && relativeFailedThresholdPositive <= 100) {
-                    logger.println("Performance: Percentage of relative difference outside -" + relativeFailedThresholdNegative
-                            + " to +" + relativeFailedThresholdPositive + " % sets the build as "
-                            + Result.FAILURE.toString().toLowerCase());
-                } else {
-                    logger.println(
-                            "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase());
-                }
-
-                if (relativeUnstableThresholdNegative <= 100 && relativeUnstableThresholdPositive <= 100) {
-                    logger.println("Performance: Percentage of relative difference outside -"
-                            + relativeUnstableThresholdNegative + " to +" + relativeUnstableThresholdPositive
-                            + " % sets the build as " + Result.UNSTABLE.toString().toLowerCase());
-                } else {
-                    logger.println(
-                            "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase());
-                }
-
-                List<UriReport> curruriList = null;
-                // add the report to the build object.
-                for (PerformanceReportParser parser : parsers) {
-                    glob = parser.glob;
-                    glob = env.expand(glob);
-                    name = glob;
-                    List<FilePath> files = locatePerformanceReports(workspace, glob);
-
-                    if (files.isEmpty()) {
-                        if (run.getResult().isWorseThan(Result.UNSTABLE)) {
-                            return;
-                        }
-                        run.setResult(Result.FAILURE);
-                        logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob
-                                + "' have been found. Has the report generated?. Setting Build to " + run.getResult());
-                    }
-
-                    List<File> localReports = copyReportsToMaster(run, logger, files,
-                            parser.getDescriptor().getDisplayName());
-                    parsedReports = parser.parse(run, localReports, listener);
-
-                    for (PerformanceReport r : parsedReports) {
-                        // URI list is the list of labels in the current JMeter results
-                        // file
-                        curruriList = r.getUriListOrdered();
-                        break;
-                    }
-                }
+            // add the report to the build object.
+            // mark the build as unstable or failure depending on the outcome.
+            for (PerformanceReport r : parsedReports) {
 
                 xmlDir = run.getRootDir().getAbsolutePath();
                 xmlDir += "/" + archive_directory;
 
-                String[] arr = name.split("/");
+                glob = r.getReportFileName();
+                String[] arr = glob.split("/");
                 if (!new File(xmlDir).exists()) {
                     new File(xmlDir).mkdirs();
                 }
@@ -791,232 +601,433 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 xmlfile = new File(xmlDir + "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
                 xmlfile.createNewFile();
 
-                fw = new FileWriter(xmlfile.getAbsoluteFile());
-                bw = new BufferedWriter(fw);
+                FileWriter fw = new FileWriter(xmlfile.getAbsoluteFile());
+                BufferedWriter bw = new BufferedWriter(fw);
 
-                bw.write("<?xml version=\"1.0\"?>\n");
-                bw.write("<results>\n");
+                xml = "<?xml version=\"1.0\"?>\n";
+                xml += "<results>\n";
+                xml += "<absoluteDefinition>\n";
 
-                // getting previous build/nth previous build..
-                Run<?, ?> prevBuild;
+                String unstable = "\t<unstable>";
+                String failed = "\t<failed>";
+                String calc = "\t<calculated>";
 
-                if (compareBuildPrevious) {
-                    buildNo += "previous";
-                    prevBuild = run.getPreviousSuccessfulBuild();
-                } else {
-                    buildNo += nthBuildNumber;
-                    prevBuild = getnthBuild(run);
+                unstable += errorUnstableThreshold;
+                failed += errorFailedThreshold;
+
+                String avg = "", med = "", perct = "";
+
+                avg += "<average>\n";
+                med += "<median>\n";
+                perct += "<percentile>\n";
+                double errorPercent = r.errorPercent();
+                calc += errorPercent;
+
+                curruriList = r.getUriListOrdered();
+
+                if (errorFailedThreshold >= 0 && errorPercent - errorFailedThreshold > THRESHOLD_TOLERANCE) {
+                    result = Result.FAILURE;
+                    run.setResult(Result.FAILURE);
+                } else if (errorUnstableThreshold >= 0 && errorPercent - errorUnstableThreshold > THRESHOLD_TOLERANCE) {
+                    result = Result.UNSTABLE;
+                    run.setResult(Result.UNSTABLE);
                 }
 
-                buildNo += "</buildNum>\n";
-                relative += buildNo + unstable + failed;
-                relative += "</relativeDefinition>";
-
-                bw.write(relative + "\n");
-
-                List<UriReport> prevuriList = null;
-
-                if (prevBuild != null) {
-                    // getting files related to the previous build selected
-                    for (PerformanceReportParser parser : parsers) {
-                        glob = parser.glob;
-                        logger.println("Performance: Recording " + parser.getReportName() + " reports '" + glob + "'");
-
-                        List<File> localReports = getExistingReports(prevBuild, logger, parser.getDescriptor().getDisplayName());
-                        parsedReports = parser.parse(prevBuild, localReports, listener);
-
-                        for (PerformanceReport r : parsedReports) {
-                            // uri list is the list of labels in the previous jmeter results
-                            // file
-                            prevuriList = r.getUriListOrdered();
-                            break;
+                long average = r.getAverage();
+                try {
+                    if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(r.getReportFileName()) != null) {
+                        if (Long.parseLong(responseTimeThresholdMap.get(r.getReportFileName())) <= average) {
+                            logger.println("UNSTABLE: " + r.getReportFileName() + " has exceeded the threshold of ["
+                                    + Long.parseLong(responseTimeThresholdMap.get(r.getReportFileName())) + "] with the time of ["
+                                    + Long.toString(average) + "]");
+                            result = Result.UNSTABLE;
                         }
                     }
+                } catch (NumberFormatException nfe) {
+                    logger.println("ERROR: Threshold set to a non-number ["
+                            + responseTimeThresholdMap.get(r.getReportFileName()) + "]");
+                    result = Result.FAILURE;
+                    run.setResult(Result.FAILURE);
 
-                    result = Result.SUCCESS;
-                    String failedLabel = null, unStableLabel = null;
-                    double relativeDiff = 0, relativeDiffPercent = 0;
+                }
+                if (result.isWorseThan(run.getResult())) {
+                    run.setResult(result);
+                }
+                logger.println("Performance: File " + r.getReportFileName() + " reported " + errorPercent
+                        + "% of errors [" + result + "]. Build status is: " + run.getResult());
 
-                    logger.print("\nComparison build no. - " + prevBuild.number + " and " + run.number + " using ");
+                for (int i = 0; i < curruriList.size(); i++) {
+                    avg += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
+                    avg += "\t\t<currentBuildAvg>" + curruriList.get(i).getAverage() + "</currentBuildAvg>\n";
+                    avg += "\t</" + curruriList.get(i).getStaplerUri() + ">\n";
 
-                    // Comparing both builds based on either average, median or 90
-                    // percentile response time...
-                    if (configType.equalsIgnoreCase("ART")) {
+                    med += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
+                    med += "\t\t<currentBuildMed>" + curruriList.get(i).getMedian() + "</currentBuildMed>\n";
+                    med += "\t</" + curruriList.get(i).getStaplerUri() + ">\n";
 
-                        logger.println("Average response time\n\n");
-                        logger.println(
-                                "====================================================================================================================================");
-                        logger.println(
-                                "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURIAvg\t\tCurrentBuildURIAvg\tRelativeDiff\tRelativeDiffPercentage ");
-                        logger.println(
-                                "====================================================================================================================================");
-                    } else if (configType.equalsIgnoreCase("MRT")) {
+                    perct += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
+                    perct += "\t\t<currentBuild90Line>" + curruriList.get(i).get90Line() + "</currentBuild90Line>\n";
+                    perct += "\t</" + curruriList.get(i).getStaplerUri() + ">\n";
 
-                        logger.println("Median response time\n\n");
-                        logger.println(
-                                "====================================================================================================================================");
-                        logger.println(
-                                "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURIMed\t\tCurrentBuildURIMed\tRelativeDiff\tRelativeDiffPercentage ");
-                        logger.println(
-                                "====================================================================================================================================");
-                    } else if (configType.equalsIgnoreCase("PRT")) {
+                }
+                unstable += "</unstable>";
+                failed += "</failed>";
+                calc += "</calculated>";
 
-                        logger.println("90 Percentile response time\n\n");
-                        logger.println(
-                                "====================================================================================================================================");
-                        logger.println(
-                                "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURI90%\t\tCurrentBuildURI90%\tRelativeDiff\tRelativeDiffPercentage ");
-                        logger.println(
-                                "====================================================================================================================================");
+                avg += "</average>\n";
+                med += "</median>\n";
+                perct += "</percentile>\n";
+
+                xml += unstable + "\n";
+                xml += failed + "\n";
+                xml += calc + "\n";
+                xml += "</absoluteDefinition>\n";
+
+                xml += avg;
+                xml += med;
+                xml += perct;
+                xml += "</results>";
+
+                bw.write(xml);
+                bw.close();
+                fw.close();
+            }
+        } catch (Exception e) {
+            logger.println("ERROR: Exception while determining absolute error/unstable threshold evaluation");
+            e.printStackTrace(logger);
+        }
+    }
+
+    // For relative comparisons between builds...
+    public void compareWithRelativeThreshold(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers)
+            throws IOException, InterruptedException {
+        PrintStream logger = listener.getLogger();
+        EnvVars env = run.getEnvironment(listener);
+
+        try {
+            Result result = Result.SUCCESS;
+            String glob;
+            String name = "";
+            FileWriter fw = null;
+            BufferedWriter bw = null;
+
+            String relative = "<relativeDefinition>\n";
+            String unstable = "\t<unstable>\n";
+            String failed = "\t<failed>\n";
+            String buildNo = "\t<buildNum>";
+
+            String inside = "";
+            String avg = "", med = "", perct = "";
+
+            unstable += "\t\t<negative>" + relativeUnstableThresholdNegative + "</negative>\n";
+            unstable += "\t\t<positive>" + relativeUnstableThresholdPositive + "</positive>\n";
+
+            failed += "\t\t<negative>" + relativeFailedThresholdNegative + "</negative>\n";
+            failed += "\t\t<positive>" + relativeFailedThresholdPositive + "</positive>\n";
+
+            unstable += "\t</unstable>\n";
+            failed += "\t</failed>\n";
+
+            avg += "<average>\n";
+            med += "<median>\n";
+            perct += "<percentile>\n";
+
+            if (relativeFailedThresholdNegative <= 100 && relativeFailedThresholdPositive <= 100) {
+                logger.println("Performance: Percentage of relative difference outside -" + relativeFailedThresholdNegative
+                        + " to +" + relativeFailedThresholdPositive + " % sets the build as "
+                        + Result.FAILURE.toString().toLowerCase());
+            } else {
+                logger.println(
+                        "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase());
+            }
+
+            if (relativeUnstableThresholdNegative <= 100 && relativeUnstableThresholdPositive <= 100) {
+                logger.println("Performance: Percentage of relative difference outside -"
+                        + relativeUnstableThresholdNegative + " to +" + relativeUnstableThresholdPositive
+                        + " % sets the build as " + Result.UNSTABLE.toString().toLowerCase());
+            } else {
+                logger.println(
+                        "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase());
+            }
+
+            List<UriReport> curruriList = null;
+            // add the report to the build object.
+
+            for (PerformanceReportParser parser : parsers) {
+                glob = parser.glob;
+                glob = env.expand(glob);
+                name = glob;
+                List<FilePath> files = locatePerformanceReports(workspace, glob);
+
+                if (files.isEmpty()) {
+                    if (run.getResult().isWorseThan(Result.UNSTABLE)) {
+                        return;
                     }
+                    run.setResult(Result.FAILURE);
+                    logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob
+                            + "' have been found. Has the report generated?. Setting Build to " + run.getResult());
+                }
 
-                    // comparing the labels and calculating the differences...
-                    for (int i = 0; i < prevuriList.size(); i++) {
-                        for (int j = 0; j < curruriList.size(); j++) {
-                            if (prevuriList.get(i).getStaplerUri().equalsIgnoreCase(curruriList.get(j).getStaplerUri())) {
+                List<File> localReports = copyReportsToMaster(run, logger, files,
+                        parser.getDescriptor().getDisplayName());
+                Collection<PerformanceReport> parsedReports = parser.parse(run, localReports, listener);
+
+                for (PerformanceReport r : parsedReports) {
+                    // URI list is the list of labels in the current JMeter results
+                    // file
+                    curruriList = r.getUriListOrdered();
+                    break;
+                }
+            }
+
+            xmlDir = run.getRootDir().getAbsolutePath();
+            xmlDir += "/" + archive_directory;
+
+            String[] arr = name.split("/");
+            if (!new File(xmlDir).exists()) {
+                new File(xmlDir).mkdirs();
+            }
+
+            xmlfile = new File(xmlDir + "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
+            xmlfile.createNewFile();
+
+            fw = new FileWriter(xmlfile.getAbsoluteFile());
+            bw = new BufferedWriter(fw);
+
+            bw.write("<?xml version=\"1.0\"?>\n");
+            bw.write("<results>\n");
+
+            // getting previous build/nth previous build..
+            Run<?, ?> prevBuild;
+
+            if (compareBuildPrevious) {
+                buildNo += "previous";
+                prevBuild = run.getPreviousSuccessfulBuild();
+            } else {
+                buildNo += nthBuildNumber;
+                prevBuild = getnthBuild(run);
+            }
+
+            buildNo += "</buildNum>\n";
+            relative += buildNo + unstable + failed;
+            relative += "</relativeDefinition>";
+
+            bw.write(relative + "\n");
+
+            List<UriReport> prevuriList = null;
+
+            if (prevBuild != null) {
+                // getting files related to the previous build selected
+                for (PerformanceReportParser parser : parsers) {
+                    glob = parser.glob;
+                    logger.println("Performance: Recording " + parser.getReportName() + " reports '" + glob + "'");
+
+                    List<File> localReports = getExistingReports(prevBuild, logger, parser.getDescriptor().getDisplayName());
+                    Collection<PerformanceReport> parsedReports = parser.parse(prevBuild, localReports, listener);
+
+                    for (PerformanceReport r : parsedReports) {
+                        // uri list is the list of labels in the previous jmeter results
+                        // file
+                        prevuriList = r.getUriListOrdered();
+                        break;
+                    }
+                }
+
+                result = Result.SUCCESS;
+                String failedLabel = null, unStableLabel = null;
+                double relativeDiff = 0, relativeDiffPercent = 0;
+
+                logger.print("\nComparison build no. - " + prevBuild.number + " and " + run.number + " using ");
+
+                // Comparing both builds based on either average, median or 90
+                // percentile response time...
+                if (configType.equalsIgnoreCase("ART")) {
+
+                    logger.println("Average response time\n\n");
+                    logger.println(
+                            "====================================================================================================================================");
+                    logger.println(
+                            "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURIAvg\t\tCurrentBuildURIAvg\tRelativeDiff\tRelativeDiffPercentage ");
+                    logger.println(
+                            "====================================================================================================================================");
+                } else if (configType.equalsIgnoreCase("MRT")) {
+
+                    logger.println("Median response time\n\n");
+                    logger.println(
+                            "====================================================================================================================================");
+                    logger.println(
+                            "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURIMed\t\tCurrentBuildURIMed\tRelativeDiff\tRelativeDiffPercentage ");
+                    logger.println(
+                            "====================================================================================================================================");
+                } else if (configType.equalsIgnoreCase("PRT")) {
+
+                    logger.println("90 Percentile response time\n\n");
+                    logger.println(
+                            "====================================================================================================================================");
+                    logger.println(
+                            "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURI90%\t\tCurrentBuildURI90%\tRelativeDiff\tRelativeDiffPercentage ");
+                    logger.println(
+                            "====================================================================================================================================");
+                }
+
+                // comparing the labels and calculating the differences...
+                for (int i = 0; i < prevuriList.size(); i++) {
+                    for (int j = 0; j < curruriList.size(); j++) {
+                        if (prevuriList.get(i).getStaplerUri().equalsIgnoreCase(curruriList.get(j).getStaplerUri())) {
+
+                            relativeDiff = curruriList.get(j).getAverage() - prevuriList.get(i).getAverage();
+                            relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getAverage();
+                            relativeDiffPercent = Math.round(relativeDiffPercent * 100);
+                            relativeDiffPercent = relativeDiffPercent / 100;
+
+                            avg += "\t<" + curruriList.get(j).getStaplerUri() + ">\n";
+                            avg += "\t\t<previousBuildAvg>" + prevuriList.get(i).getAverage() + "</previousBuildAvg>\n";
+                            avg += "\t\t<currentBuildAvg>" + curruriList.get(j).getAverage() + "</currentBuildAvg>\n";
+                            avg += "\t\t<relativeDiff>" + relativeDiff + "</relativeDiff>\n";
+                            avg += "\t\t<relativeDiffPercent>" + relativeDiffPercent + "</relativeDiffPercent>\n";
+                            avg += "\t</" + curruriList.get(j).getStaplerUri() + ">\n";
+
+                            relativeDiff = curruriList.get(j).getMedian() - prevuriList.get(i).getMedian();
+                            relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getMedian();
+                            relativeDiffPercent = Math.round(relativeDiffPercent * 100);
+                            relativeDiffPercent = relativeDiffPercent / 100;
+
+                            med += "\t<" + curruriList.get(j).getStaplerUri() + ">\n";
+                            med += "\t\t<previousBuildMed>" + prevuriList.get(i).getMedian() + "</previousBuildMed>\n";
+                            med += "\t\t<currentBuildMed>" + curruriList.get(j).getMedian() + "</currentBuildMed>\n";
+                            med += "\t\t<relativeDiff>" + relativeDiff + "</relativeDiff>\n";
+                            med += "\t\t<relativeDiffPercent>" + relativeDiffPercent + "</relativeDiffPercent>\n";
+                            med += "\t</" + curruriList.get(j).getStaplerUri() + ">\n";
+
+                            relativeDiff = curruriList.get(j).get90Line() - prevuriList.get(i).get90Line();
+                            relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).get90Line();
+                            relativeDiffPercent = Math.round(relativeDiffPercent * 100);
+                            relativeDiffPercent = relativeDiffPercent / 100;
+
+                            perct += "\t<" + curruriList.get(j).getStaplerUri() + ">\n";
+                            perct += "\t\t<previousBuild90Line>" + prevuriList.get(i).get90Line() + "</previousBuild90Line>\n";
+                            perct += "\t\t<currentBuild90Line>" + curruriList.get(j).get90Line() + "</currentBuild90Line>\n";
+                            perct += "\t\t<relativeDiff>" + relativeDiff + "</relativeDiff>\n";
+                            perct += "\t\t<relativeDiffPercent>" + relativeDiffPercent + "</relativeDiffPercent>\n";
+                            perct += "\t</" + curruriList.get(j).getStaplerUri() + ">\n";
+
+                            if (configType.equalsIgnoreCase("ART")) {
 
                                 relativeDiff = curruriList.get(j).getAverage() - prevuriList.get(i).getAverage();
                                 relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getAverage();
+
                                 relativeDiffPercent = Math.round(relativeDiffPercent * 100);
                                 relativeDiffPercent = relativeDiffPercent / 100;
 
-                                avg += "\t<" + curruriList.get(j).getStaplerUri() + ">\n";
-                                avg += "\t\t<previousBuildAvg>" + prevuriList.get(i).getAverage() + "</previousBuildAvg>\n";
-                                avg += "\t\t<currentBuildAvg>" + curruriList.get(j).getAverage() + "</currentBuildAvg>\n";
-                                avg += "\t\t<relativeDiff>" + relativeDiff + "</relativeDiff>\n";
-                                avg += "\t\t<relativeDiffPercent>" + relativeDiffPercent + "</relativeDiffPercent>\n";
-                                avg += "\t</" + curruriList.get(j).getStaplerUri() + ">\n";
+                                logger.println(prevuriList.get(i).getStaplerUri() + "\t" + curruriList.get(j).getStaplerUri()
+                                        + "\t\t" + prevuriList.get(i).getAverage() + "\t\t\t" + curruriList.get(j).getAverage()
+                                        + "\t\t\t" + relativeDiff + "\t\t" + relativeDiffPercent);
+
+                            } else if (configType.equalsIgnoreCase("MRT")) {
 
                                 relativeDiff = curruriList.get(j).getMedian() - prevuriList.get(i).getMedian();
                                 relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getMedian();
+
                                 relativeDiffPercent = Math.round(relativeDiffPercent * 100);
                                 relativeDiffPercent = relativeDiffPercent / 100;
 
-                                med += "\t<" + curruriList.get(j).getStaplerUri() + ">\n";
-                                med += "\t\t<previousBuildMed>" + prevuriList.get(i).getMedian() + "</previousBuildMed>\n";
-                                med += "\t\t<currentBuildMed>" + curruriList.get(j).getMedian() + "</currentBuildMed>\n";
-                                med += "\t\t<relativeDiff>" + relativeDiff + "</relativeDiff>\n";
-                                med += "\t\t<relativeDiffPercent>" + relativeDiffPercent + "</relativeDiffPercent>\n";
-                                med += "\t</" + curruriList.get(j).getStaplerUri() + ">\n";
+                                logger.println(prevuriList.get(i).getStaplerUri() + "\t" + curruriList.get(j).getStaplerUri()
+                                        + "\t\t" + prevuriList.get(i).getMedian() + "\t\t\t" + curruriList.get(j).getMedian() + "\t\t\t"
+                                        + relativeDiff + "\t\t" + relativeDiffPercent);
+
+                            } else if (configType.equalsIgnoreCase("PRT")) {
 
                                 relativeDiff = curruriList.get(j).get90Line() - prevuriList.get(i).get90Line();
                                 relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).get90Line();
+
                                 relativeDiffPercent = Math.round(relativeDiffPercent * 100);
                                 relativeDiffPercent = relativeDiffPercent / 100;
 
-                                perct += "\t<" + curruriList.get(j).getStaplerUri() + ">\n";
-                                perct += "\t\t<previousBuild90Line>" + prevuriList.get(i).get90Line() + "</previousBuild90Line>\n";
-                                perct += "\t\t<currentBuild90Line>" + curruriList.get(j).get90Line() + "</currentBuild90Line>\n";
-                                perct += "\t\t<relativeDiff>" + relativeDiff + "</relativeDiff>\n";
-                                perct += "\t\t<relativeDiffPercent>" + relativeDiffPercent + "</relativeDiffPercent>\n";
-                                perct += "\t</" + curruriList.get(j).getStaplerUri() + ">\n";
-
-                                if (configType.equalsIgnoreCase("ART")) {
-
-                                    relativeDiff = curruriList.get(j).getAverage() - prevuriList.get(i).getAverage();
-                                    relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getAverage();
-
-                                    relativeDiffPercent = Math.round(relativeDiffPercent * 100);
-                                    relativeDiffPercent = relativeDiffPercent / 100;
-
-                                    logger.println(prevuriList.get(i).getStaplerUri() + "\t" + curruriList.get(j).getStaplerUri()
-                                            + "\t\t" + prevuriList.get(i).getAverage() + "\t\t\t" + curruriList.get(j).getAverage()
-                                            + "\t\t\t" + relativeDiff + "\t\t" + relativeDiffPercent);
-
-                                } else if (configType.equalsIgnoreCase("MRT")) {
-
-                                    relativeDiff = curruriList.get(j).getMedian() - prevuriList.get(i).getMedian();
-                                    relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).getMedian();
-
-                                    relativeDiffPercent = Math.round(relativeDiffPercent * 100);
-                                    relativeDiffPercent = relativeDiffPercent / 100;
-
-                                    logger.println(prevuriList.get(i).getStaplerUri() + "\t" + curruriList.get(j).getStaplerUri()
-                                            + "\t\t" + prevuriList.get(i).getMedian() + "\t\t\t" + curruriList.get(j).getMedian() + "\t\t\t"
-                                            + relativeDiff + "\t\t" + relativeDiffPercent);
-
-                                } else if (configType.equalsIgnoreCase("PRT")) {
-
-                                    relativeDiff = curruriList.get(j).get90Line() - prevuriList.get(i).get90Line();
-                                    relativeDiffPercent = ((double) relativeDiff * 100) / prevuriList.get(i).get90Line();
-
-                                    relativeDiffPercent = Math.round(relativeDiffPercent * 100);
-                                    relativeDiffPercent = relativeDiffPercent / 100;
-
-                                    logger.println(prevuriList.get(i).getStaplerUri() + "\t" + curruriList.get(j).getStaplerUri()
-                                            + "\t\t" + prevuriList.get(i).get90Line() + "\t\t\t" + curruriList.get(j).get90Line() + "\t\t\t"
-                                            + relativeDiff + "\t\t" + relativeDiffPercent);
-
-                                }
-
-                                // setting the build status based on the differences
-                                // calculated...
-                                if (relativeDiffPercent < 0) {
-                                    if (relativeFailedThresholdNegative >= 0
-                                            && Math.abs(relativeDiffPercent) - relativeFailedThresholdNegative > thresholdTolerance) {
-
-                                        result = Result.FAILURE;
-                                        run.setResult(Result.FAILURE);
-                                        failedLabel = prevuriList.get(i).getStaplerUri();
-
-                                    } else if (relativeUnstableThresholdNegative >= 0
-                                            && Math.abs(relativeDiffPercent) - relativeUnstableThresholdNegative > thresholdTolerance) {
-
-                                        result = Result.UNSTABLE;
-                                        run.setResult(Result.UNSTABLE);
-                                        unStableLabel = prevuriList.get(i).getStaplerUri();
-                                    }
-                                } else if (relativeDiffPercent >= 0) {
-
-                                    if (relativeFailedThresholdPositive >= 0
-                                            && Math.abs(relativeDiffPercent) - relativeFailedThresholdPositive > thresholdTolerance) {
-
-                                        result = Result.FAILURE;
-                                        run.setResult(Result.FAILURE);
-                                        failedLabel = prevuriList.get(i).getStaplerUri();
-
-                                    } else if (relativeUnstableThresholdPositive >= 0
-                                            && Math.abs(relativeDiffPercent) - relativeUnstableThresholdPositive > thresholdTolerance) {
-
-                                        result = Result.UNSTABLE;
-                                        run.setResult(Result.UNSTABLE);
-                                        unStableLabel = prevuriList.get(i).getStaplerUri();
-                                    }
-                                }
-
-                                if (result.isWorseThan(run.getResult())) {
-                                    run.setResult(result);
-                                }
+                                logger.println(prevuriList.get(i).getStaplerUri() + "\t" + curruriList.get(j).getStaplerUri()
+                                        + "\t\t" + prevuriList.get(i).get90Line() + "\t\t\t" + curruriList.get(j).get90Line() + "\t\t\t"
+                                        + relativeDiff + "\t\t" + relativeDiffPercent);
 
                             }
 
+                            // setting the build status based on the differences
+                            // calculated...
+                            if (relativeDiffPercent < 0) {
+                                if (relativeFailedThresholdNegative >= 0
+                                        && Math.abs(relativeDiffPercent) - relativeFailedThresholdNegative > THRESHOLD_TOLERANCE) {
+
+                                    result = Result.FAILURE;
+                                    run.setResult(Result.FAILURE);
+                                    failedLabel = prevuriList.get(i).getStaplerUri();
+
+                                } else if (relativeUnstableThresholdNegative >= 0
+                                        && Math.abs(relativeDiffPercent) - relativeUnstableThresholdNegative > THRESHOLD_TOLERANCE) {
+
+                                    result = Result.UNSTABLE;
+                                    run.setResult(Result.UNSTABLE);
+                                    unStableLabel = prevuriList.get(i).getStaplerUri();
+                                }
+                            } else if (relativeDiffPercent >= 0) {
+
+                                if (relativeFailedThresholdPositive >= 0
+                                        && Math.abs(relativeDiffPercent) - relativeFailedThresholdPositive > THRESHOLD_TOLERANCE) {
+
+                                    result = Result.FAILURE;
+                                    run.setResult(Result.FAILURE);
+                                    failedLabel = prevuriList.get(i).getStaplerUri();
+
+                                } else if (relativeUnstableThresholdPositive >= 0
+                                        && Math.abs(relativeDiffPercent) - relativeUnstableThresholdPositive > THRESHOLD_TOLERANCE) {
+
+                                    result = Result.UNSTABLE;
+                                    run.setResult(Result.UNSTABLE);
+                                    unStableLabel = prevuriList.get(i).getStaplerUri();
+                                }
+                            }
+
+                            if (result.isWorseThan(run.getResult())) {
+                                run.setResult(result);
+                            }
+
                         }
+
                     }
-
-                    logger.println(
-                            "------------------------------------------------------------------------------------------------------------------------------------");
-                    String labelResult = "\nThe label ";
-                    logger.print((failedLabel != null) ? labelResult + "\"" + failedLabel + "\"" + " caused the build to fail\n"
-                            : (unStableLabel != null) ? labelResult + "\"" + unStableLabel + "\"" + " made the build unstable\n"
-                            : "");
-
-                    avg += "</average>\n";
-                    med += "</median>\n";
-                    perct += "</percentile>";
-
-                    inside += avg + med + perct;
-                    bw.write(inside + "\n");
-
                 }
-                bw.write("</results>");
-                bw.close();
-                fw.close();
 
-            } catch (Exception e) {
-                logger.println("ERROR: Exception while determining relative comparison between builds");
-                e.printStackTrace(logger);
+                logger.println(
+                        "------------------------------------------------------------------------------------------------------------------------------------");
+                String labelResult = "\nThe label ";
+                logger.print((failedLabel != null) ? labelResult + "\"" + failedLabel + "\"" + " caused the build to fail\n"
+                        : (unStableLabel != null) ? labelResult + "\"" + unStableLabel + "\"" + " made the build unstable\n"
+                        : "");
+
+                avg += "</average>\n";
+                med += "</median>\n";
+                perct += "</percentile>";
+
+                inside += avg + med + perct;
+                bw.write(inside + "\n");
+
             }
+            bw.write("</results>");
+            bw.close();
+            fw.close();
 
+        } catch (Exception e) {
+            logger.println("ERROR: Exception while determining relative comparison between builds");
+            e.printStackTrace(logger);
+        }
+
+    }
+
+    // for mode "standard evaluation"
+    public void evaluateInStandardMode(Run<?, ?> run, FilePath workspace, Collection<PerformanceReport> parsedReports,
+                                       TaskListener listener, List<PerformanceReportParser> parsers)
+            throws IOException, InterruptedException {
+
+        if (!modeOfThreshold) {
+            compareWithAbsoluteThreshold(run, listener, parsedReports);
+        } else {
+            compareWithRelativeThreshold(run, workspace, listener, parsers);
         }
     }
 
