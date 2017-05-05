@@ -547,6 +547,20 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return parsedReports;
     }
 
+
+    // for mode "standard evaluation"
+    public void evaluateInStandardMode(Run<?, ?> run, FilePath workspace, Collection<PerformanceReport> parsedReports,
+                                       TaskListener listener, List<PerformanceReportParser> parsers)
+            throws IOException, InterruptedException {
+
+        if (!modeOfThreshold) {
+            compareWithAbsoluteThreshold(run, listener, parsedReports);
+        } else {
+            compareWithRelativeThreshold(run, workspace, listener, parsers);
+        }
+    }
+
+
     // For absolute error/unstable threshold..
     public void compareWithAbsoluteThreshold(Run<?, ?> run, TaskListener listener, Collection<PerformanceReport> parsedReports) {
         String glob;
@@ -554,36 +568,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         PrintStream logger = listener.getLogger();
         try {
             List<UriReport> curruriList = null;
-            HashMap<String, String> responseTimeThresholdMap = null;
 
-            if (!"".equals(this.errorUnstableResponseTimeThreshold) && this.errorUnstableResponseTimeThreshold != null) {
+            HashMap<String, String> responseTimeThresholdMap = getResponseTimeThresholdMap(logger);
 
-                responseTimeThresholdMap = new HashMap<String, String>();
-                String[] lines = this.errorUnstableResponseTimeThreshold.split("\n");
+            printInfoAboutThreshold(logger);
 
-                for (String line : lines) {
-                    String[] components = line.split(":");
-                    if (components.length == 2) {
-                        logger.println("Setting threshold: " + components[0] + ":" + components[1]);
-                        responseTimeThresholdMap.put(components[0], components[1]);
-                    }
-                }
-            }
-
-            if (errorUnstableThreshold >= 0 && errorUnstableThreshold <= 100) {
-                logger.println("Performance: Percentage of errors greater or equal than " + errorUnstableThreshold
-                        + "% sets the build as " + Result.UNSTABLE.toString().toLowerCase());
-            } else {
-                logger.println(
-                        "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase());
-            }
-            if (errorFailedThreshold >= 0 && errorFailedThreshold <= 100) {
-                logger.println("Performance: Percentage of errors greater or equal than " + errorFailedThreshold
-                        + "% sets the build as " + Result.FAILURE.toString().toLowerCase());
-            } else {
-                logger.println(
-                        "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase());
-            }
 
             // add the report to the build object.
             // mark the build as unstable or failure depending on the outcome.
@@ -650,9 +639,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     run.setResult(Result.FAILURE);
 
                 }
+
                 if (result.isWorseThan(run.getResult())) {
                     run.setResult(result);
                 }
+
                 logger.println("Performance: File " + r.getReportFileName() + " reported " + errorPercent
                         + "% of errors [" + result + "]. Build status is: " + run.getResult());
 
@@ -697,6 +688,42 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             e.printStackTrace(logger);
         }
     }
+
+    // Print information about Unstable & Failed Threshold
+    private void printInfoAboutThreshold(PrintStream logger) {
+        logger.println(
+            (errorUnstableThreshold >= 0 && errorUnstableThreshold <= 100) ?
+                "Performance: Percentage of errors greater or equal than " + errorUnstableThreshold
+                    + "% sets the build as " + Result.UNSTABLE.toString().toLowerCase() :
+                "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase()
+        );
+
+        logger.println(
+            (errorFailedThreshold >= 0 && errorFailedThreshold <= 100) ?
+                "Performance: Percentage of errors greater or equal than " + errorFailedThreshold
+                    + "% sets the build as " + Result.FAILURE.toString().toLowerCase() :
+                "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase()
+        );
+    }
+
+    private HashMap<String, String> getResponseTimeThresholdMap(PrintStream logger) {
+        HashMap<String, String> responseTimeThresholdMap = null;
+        if (!"".equals(this.errorUnstableResponseTimeThreshold) && this.errorUnstableResponseTimeThreshold != null) {
+
+            responseTimeThresholdMap = new HashMap<String, String>();
+            String[] lines = this.errorUnstableResponseTimeThreshold.split("\n");
+
+            for (String line : lines) {
+                String[] components = line.split(":");
+                if (components.length == 2) {
+                    logger.println("Setting threshold: " + components[0] + ":" + components[1]);
+                    responseTimeThresholdMap.put(components[0], components[1]);
+                }
+            }
+        }
+        return responseTimeThresholdMap;
+    }
+
 
     // For relative comparisons between builds...
     public void compareWithRelativeThreshold(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers)
@@ -1018,19 +1045,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         }
 
     }
-
-    // for mode "standard evaluation"
-    public void evaluateInStandardMode(Run<?, ?> run, FilePath workspace, Collection<PerformanceReport> parsedReports,
-                                       TaskListener listener, List<PerformanceReportParser> parsers)
-            throws IOException, InterruptedException {
-
-        if (!modeOfThreshold) {
-            compareWithAbsoluteThreshold(run, listener, parsedReports);
-        } else {
-            compareWithRelativeThreshold(run, workspace, listener, parsers);
-        }
-    }
-
 
     /*
      * For mode "expert evaluation"
