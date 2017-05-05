@@ -1,4 +1,5 @@
-# Changelog
+[<< Back to main page](./)
+# Changelog 
 
 ## v2.2
 - FEATURE: make plugin to autodetect input file formats

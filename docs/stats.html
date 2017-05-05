@@ -8,6 +8,7 @@
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet"
           href="http://jenkinsci.github.io/performance-plugin/assets/css/style.css?v=ae639cea1586341f89b4711f8e51ffa156d402b6">
+
 </head>
 <body>
 <section class="page-header">
@@ -22,6 +23,10 @@
 <section class="main-content">
     <h1 id="test">Usage Statistics</h1>
 
+    <div id="installations" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+    <hr/>
+    <div id="versions" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
 
     <footer class="site-footer">
 
@@ -32,10 +37,101 @@
     </footer>
 </section>
 
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
 <script>
+    function values(dict) {
+        var values = [];
+        var keys = Object.keys(dict).sort();
+        for (var k = 0; k < keys.length; k++) {
+            values.push(dict[keys[k]]);
+        }
+        return values;
+    }
+
+    function versions(data) {
+        data = data.installationsPercentagePerVersion;
+
+        var series = [];
+        var sum = values(data).reduce(function (a, b) {
+            return a + b;
+        }, 0);
+
+        var keys = Object.keys(data);
+        keys.sort();
+
+        var other = 0;
+        for (var n = 0; n < keys.length; n++) {
+            var ver = keys[n];
+            var val = Math.round(1000 * data[ver] / sum) / 10;
+            if (ver.indexOf('-') < 0 && val>1) {
+                series.push(['v ' + ver, val]);
+            } else {
+                other += val;
+            }
+        }
+
+        if (other) {
+            series.push(['Other', other]);
+        }
+
+        return {
+            plotOptions: {
+                series: {
+                    animation: false
+                }
+            },
+            chart: {
+                type: 'column'
+            },
+
+            title: {
+                text: 'Installations by Version'
+            },
+            subtitle: {
+                text: 'Source: Jenkins Statistics'
+            },
+            xAxis: {
+                type: 'category'
+            },
+            yAxis: {
+                title: {
+                    text: '% of known installations'
+                },
+                labels: {
+                    formatter: function () {
+                        return this.value + ' %';
+                    }
+                },
+                endOnTick: false,
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                valueSuffix: '%'
+            },
+            legend: {
+                enabled: false
+            },
+            series: [{
+                name: 'Percentage',
+                data: series
+            }]
+        };
+    }
+
+    function installations(data) {
+    }
+
     $(document).ready(function () {
         $.getJSON("http://stats.jenkins.io/plugin-installation-trend/performance.stats.json").success(function (data) {
-            console.log(data)
+            $('#installations').highcharts(installations(data));
+            $('#versions').highcharts(versions(data));
         }).fail(function () {
             alert("failed to get data")
         });
