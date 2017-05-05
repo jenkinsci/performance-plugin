@@ -1,10 +1,60 @@
+<small>[<< Back to main page](./)</small>
 # Running Tests
 
 ## Features
+Performance plugin uses [Taurus Tool](http://gettaurus.org/?utm_source=jenkins&utm_medium=link&utm_campaign=run_doc_main) to execute load tests. Main benefit of Taurus is that it provides abstraction layer over popular Open Source tools, including: [Apache JMeter](http://gettaurus.org/docs/JMeter/), [Gatling Tool](http://gettaurus.org/docs/Gatling.md), [Grinder](http://gettaurus.org/docs/Grinder.md), [Locust.io](http://gettaurus.org/docs/Locust.md) and even [Selenium](http://gettaurus.org/docs/Selenium/). You can run any of these load injectors from Jenkins build step with minimal prerequisites.
+
+_Prerequisites on Jenkins server: have Python 2.7+ installed together with one of [virtualenv](https://pypi.python.org/pypi/virtualenv) or [bzt](https://pypi.python.org/pypi/bzt) PyPi packages_
+
+Test runner step works with Jenkins slave, as well as with Pipeline syntax (see section below.)
+
+Internally, build step will run Taurus tool, doing some extra work around it:
+
+- it will search for global `bzt` available, if none found it will try to use `virtualenv` to install one locally into workspace
+- it will run `bzt` with provided configs and options
+- it will set job status based on `bzt` exit code, making it unstable or failed 
+- it will automatically generate [performance trend report](Reporting.md) after `bzt` finishes
+
+Build step tries to minimally interfere with Taurus tool to let you use its full capabilities (Taurus is pretty feature-rich thing for running tests).
 
 ## Jenkins GUI Configuration
+If you are using GUI-based job configs for Jenkins, choose "Run Performance Test" step from "Add build step" menu:
+![](run_step_choice.png)
 
-## Pipeline
+In the field that appears, you can simply specify path to your JMeter test plan file. This is Taurus' capability due to high popularity of JMeter:
+
+![](run_jmeter.png)
+
+If you want to use extended capabilities of Taurus, you can specify its config files and options in that field. Generally, value of that field is what will go into command line parameters of `bzt` program.
+
+![](run_extended_config.png)
+
+Clicking on "Advanced..." will open several flags that can alter build step behavior:
+
+- _Automatically generate performance report_ - enabled by default, builds performance trend report from Taurus execution results, you can turn it off
+- _Mark build unstable/failed based on exit code_ - enabled by default, will mark build step failed if Taurus exit code is 1, and will mark it unstable if it's another non-zero exit code
+- _Print debug output from all commands_ - enable this flag if you are experiencing `bzt` installation issues and want to get more debugging information into console log
+- _Use '--system-site-packages' option for `virtualenv`_ - enabled by default, it speeds up automatic installation of `bzt` into workspace, advanced users might want to turn it off
+
+## Using from Pipeline Scripts
+
+Here's example pipeline script to use build step with `bzt` command that maps to Taurus Tool invocation.
+
+```groovy
+node {
+    stage("clean") {
+        cleanWs()   // requires workspace cleanup plugin to be installed
+    }
+    
+    stage('get config file') {
+            sh "wget https://raw.githubusercontent.com/Blazemeter/taurus/master/examples/jmeter/stepping.yml"
+    }
+    
+    stage("run test") {
+        bzt "stepping.yml"
+    }
+}
+```
 
 ## Other Ways to Run Test in Jenkins (deprecated)
 

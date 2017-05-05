@@ -1,3 +1,4 @@
+<small>[<< Back to main page](./)</small>
 # Performance Trend Reporting
 
 ## Features
