@@ -32,7 +32,7 @@ If you want to use extended capabilities of Taurus, you can specify its config f
 
 Clicking on "Advanced..." will open several flags that can alter build step behavior:
 
-- _Automatically generate performance report_ - enabled by default, builds performance trend report from Taurus execution results, you can turn it off
+- _Automatically generate performance report_ - enabled by default, builds [performance trend report](Reporting.md) from Taurus execution results, you can turn it off if you don't need report
 - _Mark build unstable/failed based on exit code_ - enabled by default, will mark build step failed if Taurus exit code is 1, and will mark it unstable if it's another non-zero exit code
 - _Print debug output from all commands_ - enable this flag if you are experiencing `bzt` installation issues and want to get more debugging information into console log
 - _Use '--system-site-packages' option for `virtualenv`_ - enabled by default, it speeds up automatic installation of `bzt` into workspace, advanced users might want to turn it off
