@@ -2,4 +2,4 @@
 
 Links: 
  - [Jenkins Plugins List Entry](https://wiki.jenkins-ci.org/display/JENKINS/Performance+Plugin)
- - [Changelog]()
+ - [Changelog](http://jenkinsci.github.io/performance-plugin/Changelog.html)
