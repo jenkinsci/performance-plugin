@@ -563,130 +563,127 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     // For absolute error/unstable threshold..
     public void compareWithAbsoluteThreshold(Run<?, ?> run, TaskListener listener, Collection<PerformanceReport> parsedReports) {
-        String glob;
-        Result result = Result.SUCCESS;
         PrintStream logger = listener.getLogger();
         try {
-            List<UriReport> curruriList = null;
-
-            HashMap<String, String> responseTimeThresholdMap = getResponseTimeThresholdMap(logger);
-
             printInfoAboutThreshold(logger);
-
-
+            HashMap<String, String> responseTimeThresholdMap = getResponseTimeThresholdMap(logger);
             // add the report to the build object.
             // mark the build as unstable or failure depending on the outcome.
-            for (PerformanceReport r : parsedReports) {
-
-                xmlDir = run.getRootDir().getAbsolutePath();
-                xmlDir += "/" + archive_directory;
-
-                glob = r.getReportFileName();
-                String[] arr = glob.split("/");
-                if (!new File(xmlDir).exists()) {
-                    new File(xmlDir).mkdirs();
-                }
-
-                xmlfile = new File(xmlDir + "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
-                xmlfile.createNewFile();
-
-                FileWriter fw = new FileWriter(xmlfile.getAbsoluteFile());
-                BufferedWriter bw = new BufferedWriter(fw);
-
-                xml = "<?xml version=\"1.0\"?>\n";
-                xml += "<results>\n";
-                xml += "<absoluteDefinition>\n";
-
-                String unstable = "\t<unstable>";
-                String failed = "\t<failed>";
-                String calc = "\t<calculated>";
-
-                unstable += errorUnstableThreshold;
-                failed += errorFailedThreshold;
-
-                String avg = "", med = "", perct = "";
-
-                avg += "<average>\n";
-                med += "<median>\n";
-                perct += "<percentile>\n";
-                double errorPercent = r.errorPercent();
-                calc += errorPercent;
-
-                curruriList = r.getUriListOrdered();
-
-                if (errorFailedThreshold >= 0 && errorPercent - errorFailedThreshold > THRESHOLD_TOLERANCE) {
-                    result = Result.FAILURE;
-                    run.setResult(Result.FAILURE);
-                } else if (errorUnstableThreshold >= 0 && errorPercent - errorUnstableThreshold > THRESHOLD_TOLERANCE) {
-                    result = Result.UNSTABLE;
-                    run.setResult(Result.UNSTABLE);
-                }
-
-                long average = r.getAverage();
-                try {
-                    if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(r.getReportFileName()) != null) {
-                        if (Long.parseLong(responseTimeThresholdMap.get(r.getReportFileName())) <= average) {
-                            logger.println("UNSTABLE: " + r.getReportFileName() + " has exceeded the threshold of ["
-                                    + Long.parseLong(responseTimeThresholdMap.get(r.getReportFileName())) + "] with the time of ["
-                                    + Long.toString(average) + "]");
-                            result = Result.UNSTABLE;
-                        }
-                    }
-                } catch (NumberFormatException nfe) {
-                    logger.println("ERROR: Threshold set to a non-number ["
-                            + responseTimeThresholdMap.get(r.getReportFileName()) + "]");
-                    result = Result.FAILURE;
-                    run.setResult(Result.FAILURE);
-
-                }
-
-                if (result.isWorseThan(run.getResult())) {
-                    run.setResult(result);
-                }
-
-                logger.println("Performance: File " + r.getReportFileName() + " reported " + errorPercent
-                        + "% of errors [" + result + "]. Build status is: " + run.getResult());
-
-                for (int i = 0; i < curruriList.size(); i++) {
-                    avg += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
-                    avg += "\t\t<currentBuildAvg>" + curruriList.get(i).getAverage() + "</currentBuildAvg>\n";
-                    avg += "\t</" + curruriList.get(i).getStaplerUri() + ">\n";
-
-                    med += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
-                    med += "\t\t<currentBuildMed>" + curruriList.get(i).getMedian() + "</currentBuildMed>\n";
-                    med += "\t</" + curruriList.get(i).getStaplerUri() + ">\n";
-
-                    perct += "\t<" + curruriList.get(i).getStaplerUri() + ">\n";
-                    perct += "\t\t<currentBuild90Line>" + curruriList.get(i).get90Line() + "</currentBuild90Line>\n";
-                    perct += "\t</" + curruriList.get(i).getStaplerUri() + ">\n";
-
-                }
-                unstable += "</unstable>";
-                failed += "</failed>";
-                calc += "</calculated>";
-
-                avg += "</average>\n";
-                med += "</median>\n";
-                perct += "</percentile>\n";
-
-                xml += unstable + "\n";
-                xml += failed + "\n";
-                xml += calc + "\n";
-                xml += "</absoluteDefinition>\n";
-
-                xml += avg;
-                xml += med;
-                xml += perct;
-                xml += "</results>";
-
-                bw.write(xml);
-                bw.close();
-                fw.close();
+            for (PerformanceReport performanceReport : parsedReports) {
+                analyzeErrorThreshold(run, performanceReport, responseTimeThresholdMap, logger);
+                writeErrorThresholdReportInXML(run, performanceReport);
             }
         } catch (Exception e) {
             logger.println("ERROR: Exception while determining absolute error/unstable threshold evaluation");
             e.printStackTrace(logger);
         }
+    }
+
+    // analyze Unstable and Failed thresholds values and set build result to UNSTABLE or FAILURE if needed
+    private void analyzeErrorThreshold(Run<?, ?> run, PerformanceReport performanceReport, HashMap<String, String> responseTimeThresholdMap, PrintStream logger) {
+        Result result = Result.SUCCESS;
+        double errorPercent = performanceReport.errorPercent();
+        if (errorFailedThreshold >= 0 && errorPercent - errorFailedThreshold > THRESHOLD_TOLERANCE) {
+            result = Result.FAILURE;
+        } else if (errorUnstableThreshold >= 0 && errorPercent - errorUnstableThreshold > THRESHOLD_TOLERANCE) {
+            result = Result.UNSTABLE;
+        }
+
+        long average = performanceReport.getAverage();
+        try {
+            if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(performanceReport.getReportFileName()) != null) {
+                if (Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) <= average) {
+                    logger.println("UNSTABLE: " + performanceReport.getReportFileName() + " has exceeded the threshold of ["
+                            + Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) + "] with the time of ["
+                            + Long.toString(average) + "]");
+                    result = Result.UNSTABLE;
+                }
+            }
+        } catch (NumberFormatException nfe) {
+            logger.println("ERROR: Threshold set to a non-number ["
+                    + responseTimeThresholdMap.get(performanceReport.getReportFileName()) + "]");
+            result = Result.FAILURE;
+        }
+        run.setResult(result);
+
+        logger.println("Performance: File " + performanceReport.getReportFileName() + " reported " + errorPercent
+                + "% of errors [" + result + "]. Build status is: " + run.getResult());
+    }
+
+    // write report in xml, when checked Error Threshold comparison
+    private void writeErrorThresholdReportInXML(Run<?, ?> run, PerformanceReport performanceReport) throws IOException {
+        xmlDir = run.getRootDir().getAbsolutePath();
+        xmlDir += "/" + archive_directory;
+
+        String glob = performanceReport.getReportFileName();
+        String[] arr = glob.split("/");
+        if (!new File(xmlDir).exists()) {
+            new File(xmlDir).mkdirs();
+        }
+
+        xmlfile = new File(xmlDir + "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
+        xmlfile.createNewFile();
+
+        FileWriter fw = new FileWriter(xmlfile.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+
+        xml = "<?xml version=\"1.0\"?>\n";
+        xml += "<results>\n";
+        xml += "<absoluteDefinition>\n";
+
+        String unstable = "\t<unstable>";
+        String failed = "\t<failed>";
+        String calc = "\t<calculated>";
+
+        unstable += errorUnstableThreshold;
+        failed += errorFailedThreshold;
+
+        String avg = "", med = "", perct = "";
+
+        avg += "<average>\n";
+        med += "<median>\n";
+        perct += "<percentile>\n";
+        double errorPercent = performanceReport.errorPercent();
+        calc += errorPercent;
+
+        List<UriReport> uriReports = performanceReport.getUriListOrdered();
+
+
+        for (int i = 0; i < uriReports.size(); i++) {
+            avg += "\t<" + uriReports.get(i).getStaplerUri() + ">\n";
+            avg += "\t\t<currentBuildAvg>" + uriReports.get(i).getAverage() + "</currentBuildAvg>\n";
+            avg += "\t</" + uriReports.get(i).getStaplerUri() + ">\n";
+
+            med += "\t<" + uriReports.get(i).getStaplerUri() + ">\n";
+            med += "\t\t<currentBuildMed>" + uriReports.get(i).getMedian() + "</currentBuildMed>\n";
+            med += "\t</" + uriReports.get(i).getStaplerUri() + ">\n";
+
+            perct += "\t<" + uriReports.get(i).getStaplerUri() + ">\n";
+            perct += "\t\t<currentBuild90Line>" + uriReports.get(i).get90Line() + "</currentBuild90Line>\n";
+            perct += "\t</" + uriReports.get(i).getStaplerUri() + ">\n";
+
+        }
+        unstable += "</unstable>";
+        failed += "</failed>";
+        calc += "</calculated>";
+
+        avg += "</average>\n";
+        med += "</median>\n";
+        perct += "</percentile>\n";
+
+        xml += unstable + "\n";
+        xml += failed + "\n";
+        xml += calc + "\n";
+        xml += "</absoluteDefinition>\n";
+
+        xml += avg;
+        xml += med;
+        xml += perct;
+        xml += "</results>";
+
+        bw.write(xml);
+        bw.close();
+        fw.close();
     }
 
     // Print information about Unstable & Failed Threshold
