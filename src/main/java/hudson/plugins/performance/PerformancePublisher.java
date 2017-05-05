@@ -746,7 +746,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
                 if (files.isEmpty()) {
                     if (run.getResult().isWorseThan(Result.UNSTABLE)) {
-                        //TODO: !!!!!!!!
                         return;
                     }
                     run.setResult(Result.FAILURE);
@@ -819,7 +818,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private void compareUriReports(Run<?, ?> run, List<UriReport> currentUriReports, List<UriReport> previousUriReports, PrintStream logger,
                                    StringBuilder averageBuffer, StringBuilder medianBuffer, StringBuilder percentileBuffer) {
         String failedLabel = null, unStableLabel = null;
-        double relativeDiff = 0, relativeDiffPercent = 0;
+
         Result result = Result.SUCCESS;
 
         // comparing the labels and calculating the differences...
@@ -827,79 +826,14 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             for (int j = 0; j < currentUriReports.size(); j++) {
                 if (previousUriReports.get(i).getStaplerUri().equalsIgnoreCase(currentUriReports.get(j).getStaplerUri())) {
 
-                    relativeDiff = currentUriReports.get(j).getAverage() - previousUriReports.get(i).getAverage();
-                    relativeDiffPercent = ((double) relativeDiff * 100) / previousUriReports.get(i).getAverage();
-                    relativeDiffPercent = Math.round(relativeDiffPercent * 100);
-                    relativeDiffPercent = relativeDiffPercent / 100;
+                    UriReport currentReport = currentUriReports.get(j);
+                    UriReport reportForComparison = previousUriReports.get(i);
 
-                    averageBuffer.append("\t<").append(currentUriReports.get(j).getStaplerUri()).append(">\n");
-                    averageBuffer.append("\t\t<previousBuildAvg>").append(previousUriReports.get(i).getAverage()).append("</previousBuildAvg>\n");
-                    averageBuffer.append("\t\t<currentBuildAvg>").append(currentUriReports.get(j).getAverage()).append("</currentBuildAvg>\n");
-                    averageBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
-                    averageBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
-                    averageBuffer.append("\t</").append(currentUriReports.get(j).getStaplerUri()).append(">\n");
+                    appendRelativeInfoAboutAverage(currentReport, reportForComparison, averageBuffer);
+                    appendRelativeInfoAboutMedian(currentReport, reportForComparison, averageBuffer);
+                    appendRelativeInfoAbout90Line(currentReport, reportForComparison, averageBuffer);
 
-                    relativeDiff = currentUriReports.get(j).getMedian() - previousUriReports.get(i).getMedian();
-                    relativeDiffPercent = ((double) relativeDiff * 100) / previousUriReports.get(i).getMedian();
-                    relativeDiffPercent = Math.round(relativeDiffPercent * 100);
-                    relativeDiffPercent = relativeDiffPercent / 100;
-
-                    medianBuffer.append("\t<").append(currentUriReports.get(j).getStaplerUri()).append(">\n");
-                    medianBuffer.append("\t\t<previousBuildMed>").append(previousUriReports.get(i).getMedian()).append("</previousBuildMed>\n");
-                    medianBuffer.append("\t\t<currentBuildMed>").append(currentUriReports.get(j).getMedian()).append("</currentBuildMed>\n");
-                    medianBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
-                    medianBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
-                    medianBuffer.append("\t</").append(currentUriReports.get(j).getStaplerUri()).append(">\n");
-
-                    relativeDiff = currentUriReports.get(j).get90Line() - previousUriReports.get(i).get90Line();
-                    relativeDiffPercent = ((double) relativeDiff * 100) / previousUriReports.get(i).get90Line();
-                    relativeDiffPercent = Math.round(relativeDiffPercent * 100);
-                    relativeDiffPercent = relativeDiffPercent / 100;
-
-                    percentileBuffer.append("\t<").append(currentUriReports.get(j).getStaplerUri()).append(">\n");
-                    percentileBuffer.append("\t\t<previousBuild90Line>").append(previousUriReports.get(i).get90Line()).append("</previousBuild90Line>\n");
-                    percentileBuffer.append("\t\t<currentBuild90Line>").append(currentUriReports.get(j).get90Line()).append("</currentBuild90Line>\n");
-                    percentileBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
-                    percentileBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
-                    percentileBuffer.append("\t</").append(currentUriReports.get(j).getStaplerUri()).append(">\n");
-
-                    if (configType.equalsIgnoreCase("ART")) {
-
-                        relativeDiff = currentUriReports.get(j).getAverage() - previousUriReports.get(i).getAverage();
-                        relativeDiffPercent = ((double) relativeDiff * 100) / previousUriReports.get(i).getAverage();
-
-                        relativeDiffPercent = Math.round(relativeDiffPercent * 100);
-                        relativeDiffPercent = relativeDiffPercent / 100;
-
-                        logger.println(previousUriReports.get(i).getStaplerUri() + "\t" + currentUriReports.get(j).getStaplerUri()
-                                + "\t\t" + previousUriReports.get(i).getAverage() + "\t\t\t" + currentUriReports.get(j).getAverage()
-                                + "\t\t\t" + relativeDiff + "\t\t" + relativeDiffPercent);
-
-                    } else if (configType.equalsIgnoreCase("MRT")) {
-
-                        relativeDiff = currentUriReports.get(j).getMedian() - previousUriReports.get(i).getMedian();
-                        relativeDiffPercent = ((double) relativeDiff * 100) / previousUriReports.get(i).getMedian();
-
-                        relativeDiffPercent = Math.round(relativeDiffPercent * 100);
-                        relativeDiffPercent = relativeDiffPercent / 100;
-
-                        logger.println(previousUriReports.get(i).getStaplerUri() + "\t" + currentUriReports.get(j).getStaplerUri()
-                                + "\t\t" + previousUriReports.get(i).getMedian() + "\t\t\t" + currentUriReports.get(j).getMedian() + "\t\t\t"
-                                + relativeDiff + "\t\t" + relativeDiffPercent);
-
-                    } else if (configType.equalsIgnoreCase("PRT")) {
-
-                        relativeDiff = currentUriReports.get(j).get90Line() - previousUriReports.get(i).get90Line();
-                        relativeDiffPercent = ((double) relativeDiff * 100) / previousUriReports.get(i).get90Line();
-
-                        relativeDiffPercent = Math.round(relativeDiffPercent * 100);
-                        relativeDiffPercent = relativeDiffPercent / 100;
-
-                        logger.println(previousUriReports.get(i).getStaplerUri() + "\t" + currentUriReports.get(j).getStaplerUri()
-                                + "\t\t" + previousUriReports.get(i).get90Line() + "\t\t\t" + currentUriReports.get(j).get90Line() + "\t\t\t"
-                                + relativeDiff + "\t\t" + relativeDiffPercent);
-
-                    }
+                    double relativeDiffPercent = calculateRelativeDiffInPercent(currentReport, reportForComparison, logger);
 
                     // setting the build status based on the differences
                     // calculated...
@@ -931,10 +865,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                             unStableLabel = previousUriReports.get(i).getStaplerUri();
                         }
                     }
-
                     run.setResult(result);
                 }
-
             }
         }
 
@@ -948,6 +880,76 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         logger.print((failedLabel != null) ? labelResult + "\"" + failedLabel + "\"" + " caused the build to fail\n"
                 : (unStableLabel != null) ? labelResult + "\"" + unStableLabel + "\"" + " made the build unstable\n"
                 : "");
+    }
+
+    private double calculateRelativeDiffInPercent(UriReport currentReport, UriReport reportForComparison, PrintStream logger) {
+        double relativeDiff, relativeDiffPercent = 0;
+
+        if (configType.equalsIgnoreCase("ART")) {
+            relativeDiff = currentReport.getAverage() - reportForComparison.getAverage();
+            relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getAverage());
+
+            logger.println(reportForComparison.getStaplerUri() + "\t" + currentReport.getStaplerUri()
+                    + "\t\t" + reportForComparison.getAverage() + "\t\t\t" + currentReport.getAverage()
+                    + "\t\t\t" + relativeDiff + "\t\t" + relativeDiffPercent);
+
+        } else if (configType.equalsIgnoreCase("MRT")) {
+            relativeDiff = currentReport.getMedian() - reportForComparison.getMedian();
+            relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getMedian());
+
+            logger.println(reportForComparison.getStaplerUri() + "\t" + currentReport.getStaplerUri()
+                    + "\t\t" + reportForComparison.getMedian() + "\t\t\t" + currentReport.getMedian() + "\t\t\t"
+                    + relativeDiff + "\t\t" + relativeDiffPercent);
+
+        } else if (configType.equalsIgnoreCase("PRT")) {
+            relativeDiff = currentReport.get90Line() - reportForComparison.get90Line();
+            relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.get90Line());
+
+            logger.println(reportForComparison.getStaplerUri() + "\t" + currentReport.getStaplerUri()
+                    + "\t\t" + reportForComparison.get90Line() + "\t\t\t" + currentReport.get90Line() + "\t\t\t"
+                    + relativeDiff + "\t\t" + relativeDiffPercent);
+        }
+        return relativeDiffPercent;
+    }
+
+    private void appendRelativeInfoAboutAverage(UriReport currentReport, UriReport reportForComparison, StringBuilder averageBuffer) {
+        double relativeDiff = currentReport.getAverage() - reportForComparison.getAverage();
+        double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getAverage());
+
+        averageBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
+        averageBuffer.append("\t\t<previousBuildAvg>").append(reportForComparison.getAverage()).append("</previousBuildAvg>\n");
+        averageBuffer.append("\t\t<currentBuildAvg>").append(currentReport.getAverage()).append("</currentBuildAvg>\n");
+        averageBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
+        averageBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
+        averageBuffer.append("\t</").append(currentReport.getStaplerUri()).append(">\n");
+    }
+
+    private void appendRelativeInfoAboutMedian(UriReport currentReport, UriReport reportForComparison, StringBuilder medianBuffer) {
+        double relativeDiff = currentReport.getMedian() - reportForComparison.getMedian();
+        double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getMedian());
+
+        medianBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
+        medianBuffer.append("\t\t<previousBuildMed>").append(reportForComparison.getMedian()).append("</previousBuildMed>\n");
+        medianBuffer.append("\t\t<currentBuildMed>").append(currentReport.getMedian()).append("</currentBuildMed>\n");
+        medianBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
+        medianBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
+        medianBuffer.append("\t</").append(currentReport.getStaplerUri()).append(">\n");
+    }
+
+    private void appendRelativeInfoAbout90Line(UriReport currentReport, UriReport reportForComparison, StringBuilder percentileBuffer) {
+        double relativeDiff = currentReport.get90Line() - reportForComparison.get90Line();
+        double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.get90Line());
+
+        percentileBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
+        percentileBuffer.append("\t\t<previousBuild90Line>").append(reportForComparison.get90Line()).append("</previousBuild90Line>\n");
+        percentileBuffer.append("\t\t<currentBuild90Line>").append(currentReport.get90Line()).append("</currentBuild90Line>\n");
+        percentileBuffer.append("\t\t<relativeDiff>").append(relativeDiff).append("</relativeDiff>\n");
+        percentileBuffer.append("\t\t<relativeDiffPercent>").append(relativeDiffPercent).append("</relativeDiffPercent>\n");
+        percentileBuffer.append("\t</").append(currentReport.getStaplerUri()).append(">\n");
+    }
+
+    private double calculateDiffInPercents(double value1, double value2) {
+        return (Math.round((value1 * 100) / value2)) / 100;
     }
 
 
