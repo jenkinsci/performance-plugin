@@ -2,11 +2,12 @@ package hudson.plugins.performance.build;
 
 import com.google.common.io.Files;
 import hudson.FilePath;
+import hudson.model.AbstractProject;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.plugins.performance.PerformancePublisher;
+import hudson.plugins.performance.actions.PerformanceProjectAction;
 import hudson.tasks.Publisher;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
@@ -29,6 +30,9 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]", true, true, false, false);
         FreeStyleProject project = createFreeStyleProject();
+
+        assertEquals(PerformanceProjectAction.class, buildTest.getProjectAction((AbstractProject) project).getClass());
+
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         buildExt.setWorkspace(new FilePath(Files.createTempDir()));
         buildExt.onStartBuilding();
