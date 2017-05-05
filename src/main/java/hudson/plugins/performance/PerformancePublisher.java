@@ -583,12 +583,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private void analyzeErrorThreshold(Run<?, ?> run, PerformanceReport performanceReport, HashMap<String, String> responseTimeThresholdMap, PrintStream logger) {
         Result result = Result.SUCCESS;
         double errorPercent = performanceReport.errorPercent();
+
+        // check failed and unstable values
         if (errorFailedThreshold >= 0 && errorPercent - errorFailedThreshold > THRESHOLD_TOLERANCE) {
             result = Result.FAILURE;
         } else if (errorUnstableThreshold >= 0 && errorPercent - errorUnstableThreshold > THRESHOLD_TOLERANCE) {
             result = Result.UNSTABLE;
         }
 
+        // check average response time values
         long average = performanceReport.getAverage();
         try {
             if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(performanceReport.getReportFileName()) != null) {
@@ -604,6 +607,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     + responseTimeThresholdMap.get(performanceReport.getReportFileName()) + "]");
             result = Result.FAILURE;
         }
+        // set result. It'll be set only when result is worse
         run.setResult(result);
 
         logger.println("Performance: File " + performanceReport.getReportFileName() + " reported " + errorPercent
