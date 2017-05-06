@@ -504,15 +504,37 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     public Collection<PerformanceReport> prepareEvaluation(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers)
             throws IOException, InterruptedException {
 
+        // add the report to the build object.
+        PerformanceBuildAction a = new PerformanceBuildAction(run, listener.getLogger(), parsers);
+        run.addAction(a);
+
+        Collection<PerformanceReport> parsedReports = locatePerformanceReports(run, workspace, listener, parsers);
+        if (parsedReports == null) {
+            return null;
+        }
+
+        addExternalReportActionsToBuild(run, parsers);
+
+        for (PerformanceReport r : parsedReports) {
+            r.setBuildAction(a);
+        }
+
+        return parsedReports;
+    }
+
+    private void addExternalReportActionsToBuild(Run<?, ?> run, List<PerformanceReportParser> parsers) {
+        for (PerformanceReportParser parser : parsers) {
+            if (parser.reportURL != null && !parser.reportURL.isEmpty()) {
+                run.addAction(new ExternalBuildReportAction(parser.reportURL));
+            }
+        }
+    }
+
+    private Collection<PerformanceReport> locatePerformanceReports(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers) throws IOException, InterruptedException {
+        Collection<PerformanceReport> performanceReports = Collections.emptyList();
         PrintStream logger = listener.getLogger();
         EnvVars env = run.getEnvironment(listener);
         String glob;
-
-        Collection<PerformanceReport> parsedReports = Collections.emptyList();
-        // add the report to the build object.
-        PerformanceBuildAction a = new PerformanceBuildAction(run, logger, parsers);
-        run.addAction(a);
-
         for (PerformanceReportParser parser : parsers) {
             glob = parser.glob;
             // Replace any runtime environment variables such as ${sample_var}
@@ -533,20 +555,41 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             }
 
             List<File> localReports = copyReportsToMaster(run, logger, files, parser.getDescriptor().getDisplayName());
-            parsedReports = parser.parse(run, localReports, listener);
-
-            if (parser.reportURL != null && !parser.reportURL.isEmpty()) {
-                run.addAction(new ExternalBuildReportAction(parser.reportURL));
-            }
+            performanceReports = parser.parse(run, localReports, listener); // TODO: WHY NOT .ADD() ?????
         }
-
-        for (PerformanceReport r : parsedReports) {
-            r.setBuildAction(a);
-        }
-
-        return parsedReports;
+        return performanceReports;
     }
 
+    private List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
+                                               List<PerformanceReportParser> parsers, boolean locatePerformanceReports)
+            throws IOException, InterruptedException {
+
+        if (locatePerformanceReports) {
+            Collection<PerformanceReport> performanceReports = locatePerformanceReports(build, workspace, listener, parsers);
+            if (performanceReports == null) {
+                return null;
+            }
+            for (PerformanceReport r : performanceReports) {
+                // URI list is the list of labels in the current JMeter results
+                // file
+                return r.getUriListOrdered();
+            }
+        } else {
+            for (PerformanceReportParser parser : parsers) {
+                // add the report to the build object.
+                List<File> localReports = getExistingReports(build, listener.getLogger(), parser.getDescriptor().getDisplayName());
+                Collection<PerformanceReport> parsedReports = parser.parse(build, localReports, listener);
+
+                for (PerformanceReport r : parsedReports) {
+                    // uri list is the list of labels in the previous jmeter results
+                    // file
+                    return r.getUriListOrdered();
+                }
+
+            }
+        }
+        return Collections.emptyList();
+    }
 
     // for mode "standard evaluation"
     public void evaluateInStandardMode(Run<?, ?> run, FilePath workspace, Collection<PerformanceReport> parsedReports,
@@ -697,7 +740,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
 
-
     private HashMap<String, String> getResponseTimeThresholdMap(PrintStream logger) {
         HashMap<String, String> responseTimeThresholdMap = null;
         if (!"".equals(this.errorUnstableResponseTimeThreshold) && this.errorUnstableResponseTimeThreshold != null) {
@@ -765,43 +807,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     }
 
-    private List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
-                                               List<PerformanceReportParser> parsers, boolean locatePerformanceReports)
-            throws IOException, InterruptedException {
-
-        PrintStream logger = listener.getLogger();
-        for (PerformanceReportParser parser : parsers) {
-            // add the report to the build object.
-
-            if (locatePerformanceReports) {
-                String glob = parser.glob;
-                EnvVars env = build.getEnvironment(listener);
-                glob = env.expand(glob);
-                List<FilePath> files = locatePerformanceReports(workspace, glob);
-
-                if (files.isEmpty()) {
-                    if (build.getResult().isWorseThan(Result.UNSTABLE)) {
-                        return null;
-                    }
-                    build.setResult(Result.FAILURE);
-                    logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob
-                            + "' have been found. Has the report generated?. Setting Build to " + build.getResult());
-                }
-            }
-
-            logger.println("Performance: Recording " + parser.getReportName() + " reports '" + parser.glob + "'");
-
-            List<File> localReports = getExistingReports(build, logger, parser.getDescriptor().getDisplayName());
-            Collection<PerformanceReport> parsedReports = parser.parse(build, localReports, listener);
-
-            for (PerformanceReport r : parsedReports) {
-                // uri list is the list of labels in the previous jmeter results
-                // file
-                return r.getUriListOrdered();
-            }
-        }
-        return Collections.emptyList();
-    }
 
     // Comparing both builds based on either average, median or 90
     // percentile response time...
