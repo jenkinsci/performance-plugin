@@ -741,34 +741,10 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
             String glob = "";
 
-            List<UriReport> currentUriReports = null;
-            // add the report to the build object.
-            for (PerformanceReportParser parser : parsers) {
-                glob = parser.glob;
-                glob = env.expand(glob);
-                List<FilePath> files = locatePerformanceReports(workspace, glob);
-
-                if (files.isEmpty()) {
-                    if (run.getResult().isWorseThan(Result.UNSTABLE)) {
-                        return;
-                    }
-                    run.setResult(Result.FAILURE);
-                    logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob
-                            + "' have been found. Has the report generated?. Setting Build to " + run.getResult());
-                }
-
-                List<File> localReports = copyReportsToMaster(run, logger, files,
-                        parser.getDescriptor().getDisplayName());
-                Collection<PerformanceReport> parsedReports = parser.parse(run, localReports, listener);
-
-                for (PerformanceReport r : parsedReports) {
-                    // URI list is the list of labels in the current JMeter results
-                    // file
-                    currentUriReports = r.getUriListOrdered();
-                    break;
-                }
+            List<UriReport> currentUriReports = getBuildUriReports(run, workspace, listener, parsers, true);
+            if (currentUriReports == null) {
+                return;
             }
-
 
             StringBuilder averageBuffer = null, medianBuffer = null, percentileBuffer = null;
 
@@ -782,7 +758,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 compareUriReports(run,
                         currentUriReports,
                         // getting files related to the previous build selected
-                        getBuildUriReports(buildForComparison, listener, parsers),
+                        getBuildUriReports(buildForComparison, workspace, listener, parsers, false),
                         logger,
                         // open xml tags
                         (averageBuffer = new StringBuilder("<average>\n")),
@@ -806,9 +782,30 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     }
 
-    private List<UriReport> getBuildUriReports(Run<?, ?> build, TaskListener listener, List<PerformanceReportParser> parsers) throws IOException, InterruptedException {
+    private List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
+                                               List<PerformanceReportParser> parsers, boolean locatePerformanceReports)
+            throws IOException, InterruptedException {
+
         PrintStream logger = listener.getLogger();
         for (PerformanceReportParser parser : parsers) {
+            // add the report to the build object.
+
+            if (locatePerformanceReports) {
+                String glob = parser.glob;
+                EnvVars env = build.getEnvironment(listener);
+                glob = env.expand(glob);
+                List<FilePath> files = locatePerformanceReports(workspace, glob);
+
+                if (files.isEmpty()) {
+                    if (build.getResult().isWorseThan(Result.UNSTABLE)) {
+                        return null;
+                    }
+                    build.setResult(Result.FAILURE);
+                    logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob
+                            + "' have been found. Has the report generated?. Setting Build to " + build.getResult());
+                }
+            }
+
             logger.println("Performance: Recording " + parser.getReportName() + " reports '" + parser.glob + "'");
 
             List<File> localReports = getExistingReports(build, logger, parser.getDescriptor().getDisplayName());
