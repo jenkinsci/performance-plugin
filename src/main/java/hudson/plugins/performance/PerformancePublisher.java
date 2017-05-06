@@ -644,61 +644,49 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         xml = "<?xml version=\"1.0\"?>\n";
         xml += "<results>\n";
         xml += "<absoluteDefinition>\n";
-
-        String unstable = "\t<unstable>";
-        String failed = "\t<failed>";
-        String calc = "\t<calculated>";
-
-        unstable += errorUnstableThreshold;
-        failed += errorFailedThreshold;
-
-        String avg = "", med = "", perct = "";
-
-        avg += "<average>\n";
-        med += "<median>\n";
-        perct += "<percentile>\n";
-        double errorPercent = performanceReport.errorPercent();
-        calc += errorPercent;
-
-        List<UriReport> uriReports = performanceReport.getUriListOrdered();
-
-
-        for (int i = 0; i < uriReports.size(); i++) {
-            avg += "\t<" + uriReports.get(i).getStaplerUri() + ">\n";
-            avg += "\t\t<currentBuildAvg>" + uriReports.get(i).getAverage() + "</currentBuildAvg>\n";
-            avg += "\t</" + uriReports.get(i).getStaplerUri() + ">\n";
-
-            med += "\t<" + uriReports.get(i).getStaplerUri() + ">\n";
-            med += "\t\t<currentBuildMed>" + uriReports.get(i).getMedian() + "</currentBuildMed>\n";
-            med += "\t</" + uriReports.get(i).getStaplerUri() + ">\n";
-
-            perct += "\t<" + uriReports.get(i).getStaplerUri() + ">\n";
-            perct += "\t\t<currentBuild90Line>" + uriReports.get(i).get90Line() + "</currentBuild90Line>\n";
-            perct += "\t</" + uriReports.get(i).getStaplerUri() + ">\n";
-
-        }
-        unstable += "</unstable>";
-        failed += "</failed>";
-        calc += "</calculated>";
-
-        avg += "</average>\n";
-        med += "</median>\n";
-        perct += "</percentile>\n";
-
-        xml += unstable + "\n";
-        xml += failed + "\n";
-        xml += calc + "\n";
+        xml += "\t<unstable>" + errorUnstableThreshold + "</unstable>\n";
+        xml += "\t<failed>" + errorFailedThreshold + "</failed>\n";
+        xml += "\t<calculated>" + performanceReport.errorPercent() + "</calculated>\n";
         xml += "</absoluteDefinition>\n";
 
-        xml += avg;
-        xml += med;
-        xml += perct;
+        appendStatsToXml(performanceReport.getUriListOrdered());
+
         xml += "</results>";
 
         bw.write(xml);
         bw.close();
         fw.close();
     }
+
+    private void appendStatsToXml(List<UriReport> reports) {
+        final StringBuilder averageBuffer = new StringBuilder("<average>\n");
+        final StringBuilder medianBuffer = new StringBuilder("<median>\n");
+        final StringBuilder percentileBuffer = new StringBuilder("<percentile>\n");
+
+        for (UriReport uriReport : reports) {
+            averageBuffer.append("\t<").append(uriReport.getStaplerUri()).append(">\n");
+            averageBuffer.append("\t\t<currentBuildAvg>").append(uriReport.getAverage()).append("</currentBuildAvg>\n");
+            averageBuffer.append("\t</").append(uriReport.getStaplerUri()).append(">\n");
+
+            medianBuffer.append("\t<").append(uriReport.getStaplerUri()).append(">\n");
+            medianBuffer.append("\t\t<currentBuildMed>").append(uriReport.getMedian()).append("</currentBuildMed>\n");
+            medianBuffer.append("\t</").append(uriReport.getStaplerUri()).append(">\n");
+
+            percentileBuffer.append("\t<").append(uriReport.getStaplerUri()).append(">\n");
+            percentileBuffer.append("\t\t<currentBuild90Line>").append(uriReport.get90Line()).append("</currentBuild90Line>\n");
+            percentileBuffer.append("\t</").append(uriReport.getStaplerUri()).append(">\n");
+
+        }
+
+        averageBuffer.append("</average>\n");
+        medianBuffer.append("</median>\n");
+        percentileBuffer.append("</percentile>\n");
+
+        xml += averageBuffer;
+        xml += medianBuffer;
+        xml += percentileBuffer;
+    }
+
 
 
     private HashMap<String, String> getResponseTimeThresholdMap(PrintStream logger) {
