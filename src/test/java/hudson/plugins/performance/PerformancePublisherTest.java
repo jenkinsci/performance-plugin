@@ -427,4 +427,138 @@ public class PerformancePublisherTest extends HudsonTestCase {
         assertNull(publisher.getParsers());
     }
 
+    @Test
+    public void testRelativeThresholdUnstableNegative() throws Exception {
+
+        FreeStyleProject p = createFreeStyleProject();
+
+        PerformancePublisher publisher = new PerformancePublisher("JMeterCsvResults.csv", -1, -1, "", -0.1, -0.1, -0.1,
+                5.0, // relativeUnstableThresholdNegative
+                1, true, "MRT",
+                true, // modeOfThreshold (true = Relative Threshold)
+                true, true, true, null);
+
+        p.getPublishersList().add(publisher);
+        // first build
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
+                        getClass().getResource("/JMeterCsvResults.csv"));
+                build.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                        getClass().getResource("/JMeterPublisher.csv"));
+
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+
+        publisher.setSourceDataFiles("JMeterPublisher.csv");
+        assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
+    }
+
+    @Test
+    public void testRelativeThresholdUnstablePositive() throws Exception {
+
+        FreeStyleProject p = createFreeStyleProject();
+
+        PerformancePublisher publisher = new PerformancePublisher("JMeterPublisher.csv", -1, -1, "", -0.1, -0.1,
+                9.0, // relativeUnstableThresholdPositive
+                -0.1, // relativeUnstableThresholdNegative
+                1, true, "ART",
+                true, // modeOfThreshold (true = Relative Threshold)
+                true, true, true, null);
+
+        p.getPublishersList().add(publisher);
+        // first build
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
+                        getClass().getResource("/JMeterCsvResults.csv"));
+                build.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                        getClass().getResource("/JMeterPublisher.csv"));
+
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+
+        publisher.setSourceDataFiles("JMeterCsvResults.csv");
+        assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
+    }
+
+    @Test
+    public void testRelativeThresholdFailedNegative() throws Exception {
+
+        FreeStyleProject p = createFreeStyleProject();
+
+        PerformancePublisher publisher = new PerformancePublisher("JMeterCsvResults.csv", -1, -1, "", -0.1,
+                5.1, // relativeFailedThresholdNegative
+                -0.1, -0.1, 1, true, "PRT",
+                true, // modeOfThreshold (true = Relative Threshold)
+                true, false, // false - means compare with Build Number
+                true, null);
+
+        p.getPublishersList().add(publisher);
+        // first build
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
+                        getClass().getResource("/JMeterCsvResults.csv"));
+                build.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                        getClass().getResource("/JMeterPublisher.csv"));
+
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+
+        publisher.setSourceDataFiles("JMeterPublisher.csv");
+        assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+    }
+
+    @Test
+    public void testRelativeThresholdFailedPositive() throws Exception {
+
+        FreeStyleProject p = createFreeStyleProject();
+
+        PerformancePublisher publisher = new PerformancePublisher("JMeterPublisher.csv", -1, -1, "",
+                5.1, // relativeFailedThresholdPositive
+                -0.1, -0.1, -0.1, 1, true, "PRT",
+                true, // modeOfThreshold (true = Relative Threshold)
+                true, false, // false - means compare with Build Number
+                true, null);
+
+        p.getPublishersList().add(publisher);
+        // first build
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
+                        getClass().getResource("/JMeterCsvResults.csv"));
+                build.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                        getClass().getResource("/JMeterPublisher.csv"));
+
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+
+        publisher.setSourceDataFiles("JMeterCsvResults.csv");
+        assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+    }
 }
