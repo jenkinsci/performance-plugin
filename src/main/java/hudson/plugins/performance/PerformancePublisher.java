@@ -626,36 +626,45 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     // write report in xml, when checked Error Threshold comparison
     private void writeErrorThresholdReportInXML(Run<?, ?> run, PerformanceReport performanceReport) throws IOException {
-        xmlDir = run.getRootDir().getAbsolutePath();
-        xmlDir += "/" + archive_directory;
+        FileWriter fw = null;
+        BufferedWriter bw = null;
+        try {
+            xmlDir = run.getRootDir().getAbsolutePath();
+            xmlDir += "/" + archive_directory;
 
-        String glob = performanceReport.getReportFileName();
-        String[] arr = glob.split("/");
-        if (!new File(xmlDir).exists()) {
-            new File(xmlDir).mkdirs();
+            String glob = performanceReport.getReportFileName();
+            String[] arr = glob.split("/");
+            if (!new File(xmlDir).exists()) {
+                new File(xmlDir).mkdirs();
+            }
+
+            xmlfile = new File(xmlDir + "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
+            xmlfile.createNewFile();
+
+            fw = new FileWriter(xmlfile.getAbsoluteFile());
+            bw = new BufferedWriter(fw);
+
+            xml = "<?xml version=\"1.0\"?>\n";
+            xml += "<results>\n";
+            xml += "<absoluteDefinition>\n";
+            xml += "\t<unstable>" + errorUnstableThreshold + "</unstable>\n";
+            xml += "\t<failed>" + errorFailedThreshold + "</failed>\n";
+            xml += "\t<calculated>" + performanceReport.errorPercent() + "</calculated>\n";
+            xml += "</absoluteDefinition>\n";
+
+            appendStatsToXml(performanceReport.getUriListOrdered());
+
+            xml += "</results>";
+
+            bw.write(xml);
+        } finally {
+            if (bw != null) {
+                bw.close();
+            }
+            if (fw != null) {
+                fw.close();
+            }
         }
-
-        xmlfile = new File(xmlDir + "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
-        xmlfile.createNewFile();
-
-        FileWriter fw = new FileWriter(xmlfile.getAbsoluteFile());
-        BufferedWriter bw = new BufferedWriter(fw);
-
-        xml = "<?xml version=\"1.0\"?>\n";
-        xml += "<results>\n";
-        xml += "<absoluteDefinition>\n";
-        xml += "\t<unstable>" + errorUnstableThreshold + "</unstable>\n";
-        xml += "\t<failed>" + errorFailedThreshold + "</failed>\n";
-        xml += "\t<calculated>" + performanceReport.errorPercent() + "</calculated>\n";
-        xml += "</absoluteDefinition>\n";
-
-        appendStatsToXml(performanceReport.getUriListOrdered());
-
-        xml += "</results>";
-
-        bw.write(xml);
-        bw.close();
-        fw.close();
     }
 
     private void appendStatsToXml(List<UriReport> reports) {
