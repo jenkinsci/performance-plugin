@@ -860,7 +860,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     private double calculateDiffInPercents(double value1, double value2) {
-        return (Math.round((value1 * 100) / value2)) / 100;
+        return Math.round(((value1 * 100) / value2) * 100)  / 100;
     }
 
     private boolean calculateRelativeFailedThresholdNegative(double relativeDiffPercent) {
