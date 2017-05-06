@@ -394,7 +394,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
         String log = new String(stream.toByteArray());
         assertEquals(log, Result.UNSTABLE, buildExt.getResult());
-        assertTrue(log, log.contains("UNSTABLE: JMeterPublisher.csv has exceeded the threshold of [1000] with the time of [1944]"));
+        assertTrue(log, log.contains("UNSTABLE: JMeterPublisher.csv has exceeded the threshold of [1000] with the time of [1433]"));
 
 
         // For Number Format Exception
