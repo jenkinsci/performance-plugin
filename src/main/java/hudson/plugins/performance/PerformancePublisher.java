@@ -75,6 +75,8 @@ import java.util.regex.Pattern;
 
 public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
+    public static final double THRESHOLD_TOLERANCE = 0.00000001;
+
     /**
      * Mapping classes after refactoring for backward compatibility.
      */
@@ -159,8 +161,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReport", PerformanceReport.class);
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.UriReport", UriReport.class);
     }
-
-    public static final double THRESHOLD_TOLERANCE = 0.00000001;
 
 
     @Symbol("performanceReport")
@@ -651,13 +651,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private Result checkAverageResponseTime(PerformanceReport performanceReport, HashMap<String, String> responseTimeThresholdMap, PrintStream logger) {
         long average = performanceReport.getAverage();
         try {
-            if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(performanceReport.getReportFileName()) != null) {
-                if (Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) <= average) {
-                    logger.println("UNSTABLE: " + performanceReport.getReportFileName() + " has exceeded the threshold of ["
-                            + Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) + "] with the time of ["
-                            + Long.toString(average) + "]");
-                    return Result.UNSTABLE;
-                }
+            if ((responseTimeThresholdMap != null && responseTimeThresholdMap.get(performanceReport.getReportFileName()) != null) &&
+                    (Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) <= average)) {
+                logger.println("UNSTABLE: " + performanceReport.getReportFileName() + " has exceeded the threshold of ["
+                        + Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) + "] with the time of ["
+                        + Long.toString(average) + "]");
+                return Result.UNSTABLE;
             }
         } catch (NumberFormatException nfe) {
             logger.println("ERROR: Threshold set to a non-number ["
@@ -771,7 +770,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 return;
             }
 
-            StringBuilder averageBuffer = null, medianBuffer = null, percentileBuffer = null;
+            StringBuilder averageBuffer = null;
+            StringBuilder medianBuffer = null;
+            StringBuilder percentileBuffer = null;
 
             // getting previous build/nth previous build..
             Run<?, ?> buildForComparison = compareBuildPrevious ? run.getPreviousSuccessfulBuild() : getnthBuild(run);
@@ -883,7 +884,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     private double calculateRelativeDiffInPercent(UriReport currentReport, UriReport reportForComparison, PrintStream logger) {
-        double relativeDiff, relativeDiffPercent = 0;
+        double relativeDiff;
+        double relativeDiffPercent = 0;
 
         if (configType.equalsIgnoreCase("ART")) {
             relativeDiff = currentReport.getAverage() - reportForComparison.getAverage();
