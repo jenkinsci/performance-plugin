@@ -3,10 +3,18 @@ package hudson.plugins.performance;
 import com.google.common.io.Files;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.Job;
+import hudson.model.Result;
+import hudson.model.Run;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.build.PerformanceTestBuildTest;
 import hudson.plugins.performance.constraints.AbstractConstraint;
+import hudson.plugins.performance.parsers.JMeterCsvParser;
+import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
@@ -20,6 +28,7 @@ import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -397,4 +406,25 @@ public class PerformancePublisherTest extends HudsonTestCase {
         assertEquals(log, Result.FAILURE, buildExt.getResult());
         assertTrue(log, log.contains("ERROR: Threshold set to a non-number [1!00]"));
     }
+
+    @Test
+    public void testMigration() throws Exception {
+        List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
+        parsers.add(new JMeterCsvParser("test1"));
+        parsers.add(new JMeterParser("test2"));
+
+        PerformancePublisher publisher = new PerformancePublisher("", -1, -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT", false, true, true, true, parsers);
+
+        assertEquals("test1;test2", publisher.getSourceDataFiles());
+        assertNull(publisher.getParsers());
+        publisher.setSourceDataFiles("");
+        assertEquals("", publisher.getSourceDataFiles());
+
+        publisher.setParsers(parsers);
+        publisher.setFilename("test3");
+        publisher.readResolve();
+        assertEquals("test1;test2;test3", publisher.getSourceDataFiles());
+        assertNull(publisher.getParsers());
+    }
+
 }
