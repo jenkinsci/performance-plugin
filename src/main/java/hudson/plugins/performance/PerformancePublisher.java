@@ -592,21 +592,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         }
 
         // check average response time values
-        long average = performanceReport.getAverage();
-        try {
-            if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(performanceReport.getReportFileName()) != null) {
-                if (Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) <= average) {
-                    logger.println("UNSTABLE: " + performanceReport.getReportFileName() + " has exceeded the threshold of ["
-                            + Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) + "] with the time of ["
-                            + Long.toString(average) + "]");
-                    result = Result.UNSTABLE;
-                }
-            }
-        } catch (NumberFormatException nfe) {
-            logger.println("ERROR: Threshold set to a non-number ["
-                    + responseTimeThresholdMap.get(performanceReport.getReportFileName()) + "]");
-            result = Result.FAILURE;
+        Result res = checkAverageResponseTime(performanceReport, responseTimeThresholdMap, logger);
+        if (res != null) {
+            result = res;
         }
+
         // set result. It'll be set only when result is worse
         run.setResult(result);
 
@@ -614,8 +604,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 + "% of errors [" + result + "]. Build status is: " + run.getResult());
     }
 
+    // check average response time values
     private Result checkAverageResponseTime(PerformanceReport performanceReport, HashMap<String, String> responseTimeThresholdMap, PrintStream logger) {
-        Result result = null;
         long average = performanceReport.getAverage();
         try {
             if (responseTimeThresholdMap != null && responseTimeThresholdMap.get(performanceReport.getReportFileName()) != null) {
@@ -623,15 +613,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     logger.println("UNSTABLE: " + performanceReport.getReportFileName() + " has exceeded the threshold of ["
                             + Long.parseLong(responseTimeThresholdMap.get(performanceReport.getReportFileName())) + "] with the time of ["
                             + Long.toString(average) + "]");
-                    result = Result.UNSTABLE;
+                    return Result.UNSTABLE;
                 }
             }
         } catch (NumberFormatException nfe) {
             logger.println("ERROR: Threshold set to a non-number ["
                     + responseTimeThresholdMap.get(performanceReport.getReportFileName()) + "]");
-            result = Result.FAILURE;
+            return Result.FAILURE;
         }
-        return result;
+        return null;
     }
 
     // write report in xml, when checked Error Threshold comparison
@@ -734,12 +724,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     public void compareWithRelativeThreshold(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers)
             throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
-        EnvVars env = run.getEnvironment(listener);
-
         try {
             printInfoAboutRelativeThreshold(logger);
-
-            String glob = "";
 
             List<UriReport> currentUriReports = getBuildUriReports(run, workspace, listener, parsers, true);
             if (currentUriReports == null) {
@@ -772,7 +758,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 percentileBuffer.append("</percentile>");
             }
 
-            writeRelativeThresholdReportInXML(run, glob, averageBuffer, medianBuffer, percentileBuffer);
+            writeRelativeThresholdReportInXML(run, averageBuffer, medianBuffer, percentileBuffer);
 
 
         } catch (Exception e) {
@@ -924,9 +910,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return relativeDiffPercent;
     }
 
-    private void writeRelativeThresholdReportInXML(
-            Run<?, ?> run, String name,
-            StringBuilder averageBuffer, StringBuilder medianBuffer, StringBuilder percentileBuffer) throws IOException {
+    private void writeRelativeThresholdReportInXML(Run<?, ?> run, StringBuilder averageBuffer,
+                                                   StringBuilder medianBuffer, StringBuilder percentileBuffer) throws IOException {
 
         FileWriter fw = null;
         BufferedWriter bw = null;
@@ -934,12 +919,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             xmlDir = run.getRootDir().getAbsolutePath();
             xmlDir += "/" + archive_directory;
 
-            String[] arr = name.split("/");
             if (!new File(xmlDir).exists()) {
                 new File(xmlDir).mkdirs();
             }
 
-            xmlfile = new File(xmlDir + "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
+            xmlfile = new File(xmlDir + "/dashBoard_results.xml");
             xmlfile.createNewFile();
 
             fw = new FileWriter(xmlfile.getAbsoluteFile());
