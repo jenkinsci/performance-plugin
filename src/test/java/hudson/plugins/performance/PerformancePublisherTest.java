@@ -1,10 +1,16 @@
 package hudson.plugins.performance;
 
+import com.google.common.io.Files;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.actions.PerformanceProjectAction;
+import hudson.plugins.performance.build.PerformanceTestBuildTest;
 import hudson.plugins.performance.constraints.AbstractConstraint;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.util.StreamTaskListener;
+import jenkins.util.BuildListenerAdapter;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
@@ -12,8 +18,10 @@ import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
 import javax.annotation.Nonnull;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -259,6 +267,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         assertEquals(0.0, publisher.getRelativeUnstableThresholdNegative(), DELTA);
         assertEquals(0, publisher.getNthBuildNumber());
         assertFalse(publisher.getModePerformancePerTestCase());
+        assertFalse(publisher.isModePerformancePerTestCase());
         assertEquals("ART", publisher.getConfigType());
         assertFalse(publisher.getModeOfThreshold());
         assertFalse(publisher.isFailBuildIfNoResultFile());
@@ -279,5 +288,80 @@ public class PerformancePublisherTest extends HudsonTestCase {
         publisher.setConstraints(allConstraints);
         assertEquals(allConstraints, publisher.getConstraints());
         assertEquals(PerformancePublisher.optionType, PerformancePublisher.getOptionType());
+
+
+        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
+                true, true, true, true, null);
+        assertTrue(publisher.isMRT());
+        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "ART",
+                true, true, true, true, null);
+        assertTrue(publisher.isART());
+        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "PRT",
+                true, true, true, true, null);
+        assertTrue(publisher.isPRT());
+
+        publisher.setFilename("testfilename");
+        assertEquals("testfilename", publisher.getFilename());
+
+        List<PerformanceReportParser> emptyList = Collections.emptyList();
+        publisher.setParsers(emptyList);
+        assertEquals(emptyList, publisher.getParsers());
+    }
+
+    @Test
+    public void testErrorThresholdUnstable() throws Exception {
+
+        PerformancePublisher publisherUnstable = new PerformancePublisher(getClass().getResource("/JMeterPublisher.csv").getFile(),
+                -1,
+                1,  // errorUnstableThreshold
+                "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
+                false, // modeOfThreshold (false = Error Threshold)
+                true, true, true, null);
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
+        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
+        buildExt.onStartBuilding();
+
+        buildExt.getRootDir().mkdirs();
+        buildExt.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                getClass().getResource("/JMeterPublisher.csv"));
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        publisherUnstable.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+
+        String log = new String(stream.toByteArray());
+        assertEquals(log, Result.UNSTABLE, buildExt.getResult());
+        assertTrue(log, log.contains("Performance: File JMeterPublisher.csv reported 33.333% of errors [UNSTABLE]. Build status is: UNSTABLE"));
+    }
+
+    @Test
+    public void testErrorThresholdFailed() throws Exception {
+
+        PerformancePublisher publisherFailed = new PerformancePublisher(getClass().getResource("/JMeterPublisher.csv").getFile(),
+                 2, //errorFailedThreshold
+                -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
+                false, // modeOfThreshold (false = Error Threshold)
+                true, true, true, null);
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
+        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
+        buildExt.onStartBuilding();
+
+        buildExt.getRootDir().mkdirs();
+        buildExt.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                getClass().getResource("/JMeterPublisher.csv"));
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        publisherFailed.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+
+        String log = new String(stream.toByteArray());
+        assertEquals(log, Result.FAILURE, buildExt.getResult());
+        assertTrue(log, log.contains("Performance: File JMeterPublisher.csv reported 33.333% of errors [FAILURE]. Build status is: FAILURE"));
     }
 }

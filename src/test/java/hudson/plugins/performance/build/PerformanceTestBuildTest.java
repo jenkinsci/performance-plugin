@@ -62,12 +62,12 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         }
 
         @Override
-        protected void setWorkspace(@Nonnull FilePath ws) {
+        public void setWorkspace(@Nonnull FilePath ws) {
             super.setWorkspace(ws);
         }
 
         @Override
-        protected void onStartBuilding() {
+        public void onStartBuilding() {
             super.onStartBuilding();
         }
     }
