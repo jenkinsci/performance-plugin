@@ -85,7 +85,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
-        return new PerformanceProjectAction(project);
+        return generatePerformanceTrend  ? new PerformanceProjectAction(project) : null;
     }
 
 
@@ -219,7 +219,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                 testCommand.add(param);
             }
         }
-        testCommand.add(extractDefaultReportToWorkspace(workspace));
+
+        if (generatePerformanceTrend) {
+            testCommand.add(extractDefaultReportToWorkspace(workspace));
+        }
+
         logger.println("Performance test: run " + Arrays.toString(testCommand.toArray()));
         return runCmd(testCommand.toArray(new String[testCommand.size()]), workspace, logger, launcher, envVars);
     }
