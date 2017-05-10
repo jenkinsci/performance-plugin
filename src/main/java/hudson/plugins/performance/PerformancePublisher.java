@@ -542,7 +542,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             logger.println("Performance: Recording " + parser.getReportName() + " reports '" + glob + "'");
 
             List<FilePath> files = locatePerformanceReports(workspace, glob);
-
+            // TODO: where using failBuildIfNoResultFile flag?
             if (files.isEmpty()) {
                 if (run.getResult().isWorseThan(Result.UNSTABLE)) {
                     return null;
