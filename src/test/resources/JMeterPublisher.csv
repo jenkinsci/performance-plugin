@@ -1,0 +1,4 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,bytes
+1393227741256,1300,GET /ordermgmt/login - Login Page,501,FAIL,Thread Group 1-1,text,false,3478
+1393227741257,2000,GET /ordermgmt/pre-logout,200,OK,Thread Group 1-1,text,true,19714
+1393227741258,1000,GET /ordermgmt/pre-logout,200,OK,Thread Group 1-1,text,true,19714

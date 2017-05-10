@@ -1,10 +1,23 @@
 package hudson.plugins.performance;
 
+import com.google.common.io.Files;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.Job;
+import hudson.model.Result;
+import hudson.model.Run;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.build.PerformanceTestBuildTest;
 import hudson.plugins.performance.constraints.AbstractConstraint;
+import hudson.plugins.performance.parsers.JMeterCsvParser;
+import hudson.plugins.performance.parsers.JMeterParser;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.util.StreamTaskListener;
+import jenkins.util.BuildListenerAdapter;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
@@ -12,8 +25,11 @@ import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
 import javax.annotation.Nonnull;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -259,6 +275,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         assertEquals(0.0, publisher.getRelativeUnstableThresholdNegative(), DELTA);
         assertEquals(0, publisher.getNthBuildNumber());
         assertFalse(publisher.getModePerformancePerTestCase());
+        assertFalse(publisher.isModePerformancePerTestCase());
         assertEquals("ART", publisher.getConfigType());
         assertFalse(publisher.getModeOfThreshold());
         assertFalse(publisher.isFailBuildIfNoResultFile());
@@ -279,5 +296,269 @@ public class PerformancePublisherTest extends HudsonTestCase {
         publisher.setConstraints(allConstraints);
         assertEquals(allConstraints, publisher.getConstraints());
         assertEquals(PerformancePublisher.optionType, PerformancePublisher.getOptionType());
+
+
+        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
+                true, true, true, true, null);
+        assertTrue(publisher.isMRT());
+        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "ART",
+                true, true, true, true, null);
+        assertTrue(publisher.isART());
+        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "PRT",
+                true, true, true, true, null);
+        assertTrue(publisher.isPRT());
+
+        publisher.setFilename("testfilename");
+        assertEquals("testfilename", publisher.getFilename());
+
+        List<PerformanceReportParser> emptyList = Collections.emptyList();
+        publisher.setParsers(emptyList);
+        assertEquals(emptyList, publisher.getParsers());
+    }
+
+    @Test
+    public void testErrorThresholdUnstable() throws Exception {
+
+        PerformancePublisher publisherUnstable = new PerformancePublisher("/JMeterPublisher.csv",
+                -1,
+                1,  // errorUnstableThreshold
+                "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
+                false, // modeOfThreshold (false = Error Threshold)
+                true, true, true, null);
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
+        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
+        buildExt.onStartBuilding();
+
+        buildExt.getRootDir().mkdirs();
+        buildExt.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                getClass().getResource("/JMeterPublisher.csv"));
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        publisherUnstable.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(new StreamTaskListener(stream)));
+
+        String log = new String(stream.toByteArray());
+        assertEquals(log, Result.UNSTABLE, buildExt.getResult());
+        assertTrue(log, log.contains("Performance: File JMeterPublisher.csv reported 33.333% of errors [UNSTABLE]. Build status is: UNSTABLE"));
+    }
+
+    @Test
+    public void testErrorThresholdFailed() throws Exception {
+
+        PerformancePublisher publisherFailed = new PerformancePublisher("/JMeterPublisher.csv",
+                 2, //errorFailedThreshold
+                -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
+                false, // modeOfThreshold (false = Error Threshold)
+                true, true, true, null);
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
+        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
+        buildExt.onStartBuilding();
+
+        buildExt.getRootDir().mkdirs();
+        buildExt.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                getClass().getResource("/JMeterPublisher.csv"));
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        publisherFailed.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(new StreamTaskListener(stream)));
+
+        String log = new String(stream.toByteArray());
+        assertEquals(log, Result.FAILURE, buildExt.getResult());
+        assertTrue(log, log.contains("Performance: File JMeterPublisher.csv reported 33.333% of errors [FAILURE]. Build status is: FAILURE"));
+    }
+
+    @Test
+    public void testErrorThresholdAverageResponseTime() throws Exception {
+
+        PerformancePublisher publisherART = new PerformancePublisher("/JMeterPublisher.csv", -1, -1,
+                "JMeterPublisher.csv:1000", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
+                false, // modeOfThreshold (false = Error Threshold)
+                true, true, true, null);
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
+        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
+        buildExt.onStartBuilding();
+
+        buildExt.getRootDir().mkdirs();
+        buildExt.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                getClass().getResource("/JMeterPublisher.csv"));
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        publisherART.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(new StreamTaskListener(stream)));
+
+        String log = new String(stream.toByteArray());
+        assertEquals(log, Result.UNSTABLE, buildExt.getResult());
+        assertTrue(log, log.contains("UNSTABLE: JMeterPublisher.csv has exceeded the threshold of [1000] with the time of [1433]"));
+
+
+        // For Number Format Exception
+        publisherART.setErrorUnstableResponseTimeThreshold("JMeterPublisher.csv:1!00");
+        stream = new ByteArrayOutputStream();
+        publisherART.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(new StreamTaskListener(stream)));
+
+        log = new String(stream.toByteArray());
+        assertEquals(log, Result.FAILURE, buildExt.getResult());
+        assertTrue(log, log.contains("ERROR: Threshold set to a non-number [1!00]"));
+    }
+
+    @Test
+    public void testMigration() throws Exception {
+        List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
+        parsers.add(new JMeterCsvParser("test1"));
+        parsers.add(new JMeterParser("test2"));
+
+        PerformancePublisher publisher = new PerformancePublisher("", -1, -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT", false, true, true, true, parsers);
+
+        assertEquals("test1;test2", publisher.getSourceDataFiles());
+        assertNull(publisher.getParsers());
+        publisher.setSourceDataFiles("");
+        assertEquals("", publisher.getSourceDataFiles());
+
+        publisher.setParsers(parsers);
+        publisher.setFilename("test3");
+        publisher.readResolve();
+        assertEquals("test1;test2;test3", publisher.getSourceDataFiles());
+        assertNull(publisher.getParsers());
+    }
+
+    @Test
+    public void testRelativeThresholdUnstableNegative() throws Exception {
+
+        FreeStyleProject p = createFreeStyleProject();
+
+        PerformancePublisher publisher = new PerformancePublisher("JMeterCsvResults.csv", -1, -1, "", -0.1, -0.1, -0.1,
+                5.0, // relativeUnstableThresholdNegative
+                1, true, "MRT",
+                true, // modeOfThreshold (true = Relative Threshold)
+                true, true, true, null);
+
+        p.getPublishersList().add(publisher);
+        // first build
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
+                        getClass().getResource("/JMeterCsvResults.csv"));
+                build.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                        getClass().getResource("/JMeterPublisher.csv"));
+
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+
+        publisher.setSourceDataFiles("JMeterPublisher.csv");
+        assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
+    }
+
+    @Test
+    public void testRelativeThresholdUnstablePositive() throws Exception {
+
+        FreeStyleProject p = createFreeStyleProject();
+
+        PerformancePublisher publisher = new PerformancePublisher("JMeterPublisher.csv", -1, -1, "", -0.1, -0.1,
+                9.0, // relativeUnstableThresholdPositive
+                -0.1, // relativeUnstableThresholdNegative
+                1, true, "ART",
+                true, // modeOfThreshold (true = Relative Threshold)
+                true, true, true, null);
+
+        p.getPublishersList().add(publisher);
+        // first build
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
+                        getClass().getResource("/JMeterCsvResults.csv"));
+                build.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                        getClass().getResource("/JMeterPublisher.csv"));
+
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+
+        publisher.setSourceDataFiles("JMeterCsvResults.csv");
+        assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
+    }
+
+    @Test
+    public void testRelativeThresholdFailedNegative() throws Exception {
+
+        FreeStyleProject p = createFreeStyleProject();
+
+        PerformancePublisher publisher = new PerformancePublisher("JMeterCsvResults.csv", -1, -1, "", -0.1,
+                5.1, // relativeFailedThresholdNegative
+                -0.1, -0.1, 1, true, "PRT",
+                true, // modeOfThreshold (true = Relative Threshold)
+                true, false, // false - means compare with Build Number
+                true, null);
+
+        p.getPublishersList().add(publisher);
+        // first build
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
+                        getClass().getResource("/JMeterCsvResults.csv"));
+                build.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                        getClass().getResource("/JMeterPublisher.csv"));
+
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+
+        publisher.setSourceDataFiles("JMeterPublisher.csv");
+        assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+    }
+
+    @Test
+    public void testRelativeThresholdFailedPositive() throws Exception {
+
+        FreeStyleProject p = createFreeStyleProject();
+
+        PerformancePublisher publisher = new PerformancePublisher("JMeterPublisher.csv", -1, -1, "",
+                5.1, // relativeFailedThresholdPositive
+                -0.1, -0.1, -0.1, 1, true, "PRT",
+                true, // modeOfThreshold (true = Relative Threshold)
+                true, false, // false - means compare with Build Number
+                true, null);
+
+        p.getPublishersList().add(publisher);
+        // first build
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
+                        getClass().getResource("/JMeterCsvResults.csv"));
+                build.getWorkspace().child("JMeterPublisher.csv").copyFrom(
+                        getClass().getResource("/JMeterPublisher.csv"));
+
+                return true;
+            }
+        });
+
+        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+
+        publisher.setSourceDataFiles("JMeterCsvResults.csv");
+        assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
     }
 }
