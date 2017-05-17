@@ -75,12 +75,12 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean useBztExitCode;
 
     @DataBoundConstructor
-    public PerformanceTestBuild(String params, boolean generatePerformanceTrend, boolean printDebugOutput, boolean useSystemSitePackages, boolean useBztFailCriteria) throws IOException {
+    public PerformanceTestBuild(String params, boolean generatePerformanceTrend, boolean printDebugOutput, boolean useSystemSitePackages, boolean useBztExitCode) throws IOException {
         this.params = params;
         this.generatePerformanceTrend = generatePerformanceTrend;
         this.printDebugOutput = printDebugOutput;
         this.useSystemSitePackages = useSystemSitePackages;
-        this.useBztExitCode = useBztFailCriteria;
+        this.useBztExitCode = useBztExitCode;
     }
 
     @Override
