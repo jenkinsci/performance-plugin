@@ -25,7 +25,7 @@ public class ParserDetector {
         }
 
         if (line.startsWith("<?xml")) {
-            return detectXMLFileType(reader);
+            return detectXMLFileType(reader, null);
         } else if (isIagoFileType(line)) {
             return IagoParser.class.getSimpleName();
         } else if (isWRKFileType(line)) {
@@ -35,7 +35,11 @@ public class ParserDetector {
         } else if (isJMeterSummarizerFileType(line, reader)) {
             return JmeterSummarizerParser.class.getSimpleName();
         } else {
-            throw new IllegalArgumentException("Can not detect file type: " + reportPath);
+            try {
+                return detectXMLFileType(reader, line);
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException("Can not detect file type: " + reportPath, ex);
+            }
         }
     }
 
@@ -100,8 +104,8 @@ public class ParserDetector {
      *  <testsuite> - JUNIT;
      *  <FinalStatus> - TAURUS.
      */
-    private static String detectXMLFileType(final BufferedReader reader) throws IOException {
-        String line = reader.readLine();
+    private static String detectXMLFileType(final BufferedReader reader, String lineToAnalyze) throws IOException {
+        String line = (lineToAnalyze != null) ? lineToAnalyze : reader.readLine();
         if (line == null) {
             throw new IllegalArgumentException("File contains only xml header");
         }

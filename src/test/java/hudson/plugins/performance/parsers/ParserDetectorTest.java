@@ -1,6 +1,7 @@
 package hudson.plugins.performance.parsers;
 
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 
 import static org.junit.Assert.*;
 
@@ -32,5 +33,13 @@ public class ParserDetectorTest {
 
         filePath = getClass().getResource("/summary.log").toURI().getPath();
         assertEquals(JmeterSummarizerParser.class.getSimpleName(), ParserDetector.detect(filePath));
+    }
+
+    @Issue("JENKINS-44317")
+    @Test
+    public void testIssue44317() throws Exception {
+        String filePath = getClass().getResource("/TEST-results.xml").toURI().getPath();
+        assertEquals(JUnitParser.class.getSimpleName(), ParserDetector.detect(filePath));
+
     }
 }

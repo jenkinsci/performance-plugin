@@ -1,0 +1,273 @@
+<testsuites>
+  <testsuite errors="0"
+             failures="0"
+             tests="4"
+             time="0.5798499584198"
+             name="00-compile_t">
+    <testcase time="0.262654066085815"
+              name="1 - use ACLBot::Storage;"></testcase>
+    <testcase name="2 - use ACLBot::Netmap;" time="0.00218796730041504"></testcase>
+    <testcase time="0.00153183937072754"
+              name="3 - use Cisco::Portmap;"></testcase>
+    <testcase time="0.00264906883239746"
+              name="4 - use Cisco::ACL::Generator;"></testcase>
+    <testcase time="0.23412299156189" name="(teardown)" />
+    <system-out><![CDATA[ok 1 - use ACLBot::Storage;
+ok 2 - use ACLBot::Netmap;
+ok 3 - use Cisco::Portmap;
+ok 4 - use Cisco::ACL::Generator;
+1..4
+]]></system-out>
+    <system-err></system-err>
+  </testsuite>
+  <testsuite time="0.6350998878479"
+             name="01-storage_t"
+             tests="16"
+             failures="0"
+             errors="0">
+    <testcase name="1 - fail if cant connect to db" time="0.344143867492676"></testcase>
+    <testcase time="0.00188207626342773"
+              name="2 - fail if cant create table"></testcase>
+    <testcase name="3 - An object of class 'ACLBot::Storage' isa 'ACLBot::Storage'" time="0.0179200172424316"></testcase>
+    <testcase time="0.000267982482910156" name="4 - empty input"></testcase>
+    <testcase time="0.000181913375854492" name="5 - no expire"></testcase>
+    <testcase name="6 - Add ACL" time="0.0174431800842285"></testcase>
+    <testcase time="0.00342202186584473"
+              name="7 - get single acl and validate fields"></testcase>
+    <testcase time="0.00336384773254395"
+              name="8 - get all acl and validate added one"></testcase>
+    <testcase name="9 - remove acl" time="0.0134179592132568"></testcase>
+    <testcase time="0.000571966171264648"
+              name="10 - remove successful"></testcase>
+    <testcase name="11 - Add expired ACL" time="0.0156941413879395"></testcase>
+    <testcase time="0.00052189826965332"
+              name="12 - expired acl not returned"></testcase>
+    <testcase time="0.026278018951416"
+              name="13 - do not add duplicates"></testcase>
+    <testcase name="14 - expire time should be updated if acl is duplicate but have later expiry" time="0.000694990158081055"></testcase>
+    <testcase name="15 - comment should be updated together with time" time="0.000492095947265625"></testcase>
+    <testcase time="0.00173187255859375"
+              name="16 - do not add ACL that resolve to same network range"></testcase>
+    <testcase name="(teardown)" time="0.186705827713013" />
+    <system-out><![CDATA[ok 1 - fail if cant connect to db
+ok 2 - fail if cant create table
+ok 3 - An object of class 'ACLBot::Storage' isa 'ACLBot::Storage'
+ok 4 - empty input
+ok 5 - no expire
+ok 6 - Add ACL
+    # Subtest: get single acl and validate fields
+    ok 1 - proto
+    ok 2 - src_addr
+    ok 3 - dst_addr
+    ok 4 - dst_port
+    1..4
+ok 7 - get single acl and validate fields
+    # Subtest: get all acl and validate added one
+    ok 1 - proto
+    ok 2 - src_addr
+    ok 3 - dst_addr
+    ok 4 - dst_port
+    1..4
+ok 8 - get all acl and validate added one
+ok 9 - remove acl
+ok 10 - remove successful
+ok 11 - Add expired ACL
+ok 12 - expired acl not returned
+ok 13 - do not add duplicates
+ok 14 - expire time should be updated if acl is duplicate but have later expiry
+ok 15 - comment should be updated together with time
+ok 16 - do not add ACL that resolve to same network range
+1..16
+]]></system-out>
+    <system-err></system-err>
+  </testsuite>
+  <testsuite failures="0"
+             errors="0"
+             time="0.458131074905396"
+             name="02-cisco-portmap_t"
+             tests="16">
+    <testcase time="0.279895067214966"
+              name="1 - An object of class 'Cisco::Portmap' isa 'Cisco::Portmap'"></testcase>
+    <testcase time="0.00489306449890137"
+              name="2 - TCP cisco service name to port"></testcase>
+    <testcase time="0.00535106658935547"
+              name="3 - TCP port to cisco service name"></testcase>
+    <testcase time="0.00356698036193848"
+              name="4 - UDP cisco service name to port"></testcase>
+    <testcase name="5 - UDP port to cisco service name" time="0.00378084182739258"></testcase>
+    <testcase time="0.00261497497558594"
+              name="6 - ICMP cisco service name to port"></testcase>
+    <testcase time="0.00289416313171387"
+              name="7 - ICMP port to cisco service name"></testcase>
+    <testcase name="8 - not udp service" time="0.000303030014038086"></testcase>
+    <testcase time="0.000204801559448242"
+              name="9 - nonexisting service"></testcase>
+    <testcase time="0.000207185745239258"
+              name="10 - cisco uses www instead of http because fuck cisco"></testcase>
+    <testcase name="11 - fail on unknown protocol" time="0.000885009765625"></testcase>
+    <testcase name="12 - fail on unknown protocol" time="0.00055384635925293"></testcase>
+    <testcase time="0.000611066818237305"
+              name="13 - port out of range"></testcase>
+    <testcase time="0.000683069229125977"
+              name="14 - port out of range"></testcase>
+    <testcase name="15 - code out of range" time="0.000484943389892578"></testcase>
+    <testcase name="16 - NaN" time="0.000633001327514648"></testcase>
+    <testcase time="0.150335073471069" name="(teardown)" />
+    <system-out><![CDATA[ok 1 - An object of class 'Cisco::Portmap' isa 'Cisco::Portmap'
+    # Subtest: TCP cisco service name to port
+    ok 1 - TCP: bgp to 179
+    ok 2 - TCP: chargen to 19
+    ok 3 - TCP: cmd to 514
+    ok 4 - TCP: daytime to 13
+    ok 5 - TCP: discard to 9
+    ok 6 - TCP: domain to 53
+    ok 7 - TCP: drip to 3949
+    ok 8 - TCP: ftp to 21
+    ok 9 - TCP: ftp-data to 20
+    ok 10 - TCP: pop3 to 110
+    ok 11 - TCP: smtp to 25
+    ok 12 - TCP: www to 80
+    1..12
+ok 2 - TCP cisco service name to port
+    # Subtest: TCP port to cisco service name
+    ok 1 - TCP: 9 to discard
+    ok 2 - TCP: 13 to daytime
+    ok 3 - TCP: 19 to chargen
+    ok 4 - TCP: 20 to ftp-data
+    ok 5 - TCP: 21 to ftp
+    ok 6 - TCP: 25 to smtp
+    ok 7 - TCP: 53 to domain
+    ok 8 - TCP: 80 to www
+    ok 9 - TCP: 110 to pop3
+    ok 10 - TCP: 179 to bgp
+    ok 11 - TCP: 514 to cmd
+    ok 12 - TCP: 3949 to drip
+    1..12
+ok 3 - TCP port to cisco service name
+    # Subtest: UDP cisco service name to port
+    ok 1 - UDP: bootpc to 68
+    ok 2 - UDP: bootps to 67
+    ok 3 - UDP: netbios-dgm to 138
+    ok 4 - UDP: netbios-ns to 137
+    ok 5 - UDP: netbios-ss to 139
+    ok 6 - UDP: snmp to 161
+    ok 7 - UDP: snmptrap to 162
+    ok 8 - UDP: sunrpc to 111
+    1..8
+ok 4 - UDP cisco service name to port
+    # Subtest: UDP port to cisco service name
+    ok 1 - UDP: 67 to bootps
+    ok 2 - UDP: 68 to bootpc
+    ok 3 - UDP: 111 to sunrpc
+    ok 4 - UDP: 137 to netbios-ns
+    ok 5 - UDP: 138 to netbios-dgm
+    ok 6 - UDP: 139 to netbios-ss
+    ok 7 - UDP: 161 to snmp
+    ok 8 - UDP: 162 to snmptrap
+    1..8
+ok 5 - UDP port to cisco service name
+    # Subtest: ICMP cisco service name to port
+    ok 1 - ICMP: echo to 8
+    ok 2 - ICMP: echo-reply to 0
+    ok 3 - ICMP: time-exceeded to 11
+    ok 4 - ICMP: timestamp-reply to 14
+    ok 5 - ICMP: timestamp-request to 13
+    1..5
+ok 6 - ICMP cisco service name to port
+    # Subtest: ICMP port to cisco service name
+    ok 1 - ICMP: 0 to echo-reply
+    ok 2 - ICMP: 8 to echo
+    ok 3 - ICMP: 11 to time-exceeded
+    ok 4 - ICMP: 13 to timestamp-request
+    ok 5 - ICMP: 14 to timestamp-reply
+    1..5
+ok 7 - ICMP port to cisco service name
+ok 8 - not udp service
+ok 9 - nonexisting service
+ok 10 - cisco uses www instead of http because fuck cisco
+ok 11 - fail on unknown protocol
+ok 12 - fail on unknown protocol
+ok 13 - port out of range
+ok 14 - port out of range
+ok 15 - code out of range
+ok 16 - NaN
+1..16
+]]></system-out>
+    <system-err></system-err>
+  </testsuite>
+  <testsuite tests="10"
+             name="03-aclgen_t"
+             time="0.493135929107666"
+             errors="0"
+             failures="0">
+    <testcase name="1 - An object of class 'Cisco::ACL::Generator' isa 'Cisco::ACL::Generator'" time="0.301930904388428"></testcase>
+    <testcase name="2 - destination" time="0.00803804397583008"></testcase>
+    <testcase name="3 - wildcard" time="0.000364065170288086"></testcase>
+    <testcase time="0.000561952590942383" name="4 - range"></testcase>
+    <testcase name="5 - any source" time="0.000203847885131836"></testcase>
+    <testcase name="6 - IP out of range" time="0.000225067138671875"></testcase>
+    <testcase time="0.000546932220458984"
+              name="7 - Port out of range"></testcase>
+    <testcase time="0.000221014022827148"
+              name="8 - range without operator"></testcase>
+    <testcase name="9 - range not a digit" time="0.00021815299987793"></testcase>
+    <testcase time="0.000205039978027344"
+              name="10 - invalid operator"></testcase>
+    <testcase name="(teardown)" time="0.180413007736206" />
+    <system-out><![CDATA[ok 1 - An object of class 'Cisco::ACL::Generator' isa 'Cisco::ACL::Generator'
+ok 2 - destination
+ok 3 - wildcard
+--- 80
+--- 90
+ok 4 - range
+ok 5 - any source
+ok 6 - IP out of range
+--- 80
+--- 65536
+ok 7 - Port out of range
+ok 8 - range without operator
+ok 9 - range not a digit
+ok 10 - invalid operator
+1..10
+]]></system-out>
+    <system-err></system-err>
+  </testsuite>
+  <testsuite failures="0"
+             errors="0"
+             time="0.474467992782593"
+             name="04-netmap_t"
+             tests="12">
+    <testcase time="0.34987998008728" name="1 - empty map"></testcase>
+    <testcase time="0.00766992568969727" name="2 - bad map"></testcase>
+    <testcase name="3 - Created" time="0.000236034393310547"></testcase>
+    <testcase name="4 - ip from testacl1" time="0.000212907791137695"></testcase>
+    <testcase time="0.000239133834838867" name="5 - ip from testacl2"></testcase>
+    <testcase time="0.000218868255615234" name="6 - ip from testacl3"></testcase>
+    <testcase name="7 - ip outside of acl" time="0.000190019607543945"></testcase>
+    <testcase time="0.00018620491027832"
+              name="8 - net from testacl1"></testcase>
+    <testcase time="0.000177860260009766"
+              name="9 - net from testacl2"></testcase>
+    <testcase time="0.000251054763793945"
+              name="10 - net from testacl3"></testcase>
+    <testcase time="0.00020909309387207"
+              name="11 - ip outside of acl"></testcase>
+    <testcase name="12 - not cidr" time="0.00246882438659668"></testcase>
+    <testcase time="0.112221002578735" name="(teardown)" />
+    <system-out><![CDATA[ok 1 - empty map
+ok 2 - bad map
+ok 3 - Created
+ok 4 - ip from testacl1
+ok 5 - ip from testacl2
+ok 6 - ip from testacl3
+ok 7 - ip outside of acl
+ok 8 - net from testacl1
+ok 9 - net from testacl2
+ok 10 - net from testacl3
+ok 11 - ip outside of acl
+ok 12 - not cidr
+1..12
+]]></system-out>
+    <system-err></system-err>
+  </testsuite>
+</testsuites>
