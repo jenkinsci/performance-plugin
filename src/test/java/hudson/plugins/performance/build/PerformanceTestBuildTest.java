@@ -28,7 +28,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     public void testFlow() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]", true, true, false, false);
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1", true, true, false, false);
         FreeStyleProject project = createFreeStyleProject();
 
         assertEquals(PerformanceProjectAction.class, buildTest.getProjectAction((AbstractProject) project).getClass());
@@ -100,7 +100,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     @Test
     public void testGenerateReportInPipe() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
-        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]";
+        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1";
 
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
         FilePath workspace = new FilePath(Files.createTempDir());
@@ -127,7 +127,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     @Test
     public void testFailCriteria() throws Exception {
         String path = getClass().getResource("/performanceTestWithFailCriteria.yml").getPath();
-        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]";
+        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1";
 
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
         FilePath workspace = new FilePath(Files.createTempDir());
