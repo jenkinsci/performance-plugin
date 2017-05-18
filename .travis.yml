@@ -1,5 +1,7 @@
 sudo: false
 language: java
+jdk:
+  - oraclejdk8
 install:
 - pip install bzt --user
 - "mvn -Dmaven.test.skip=true clean install --batch-mode"
