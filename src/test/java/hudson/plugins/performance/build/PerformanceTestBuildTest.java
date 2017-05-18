@@ -28,16 +28,19 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     public void testFlow() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1", true, true, false, false);
         FreeStyleProject project = createFreeStyleProject();
 
-        assertEquals(PerformanceProjectAction.class, buildTest.getProjectAction((AbstractProject) project).getClass());
-
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
-        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
+        FilePath workspace = new FilePath(Files.createTempDir());
+        buildExt.setWorkspace(workspace);
         buildExt.onStartBuilding();
 
         buildExt.getRootDir().mkdirs();
+
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote(), true, true, false, false);
+
+        assertEquals(PerformanceProjectAction.class, buildTest.getProjectAction((AbstractProject) project).getClass());
+
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamTaskListener taskListener = new StreamTaskListener(stream);
@@ -100,12 +103,13 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     @Test
     public void testGenerateReportInPipe() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
-        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1";
 
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
         FilePath workspace = new FilePath(Files.createTempDir());
         p.createExecutable();
         Run run = p.getFirstBuild();
+        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote();
+
 
         PerformanceTestBuild buildTest = new PerformanceTestBuild(args, true, true, false, false);
 
@@ -127,12 +131,12 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     @Test
     public void testFailCriteria() throws Exception {
         String path = getClass().getResource("/performanceTestWithFailCriteria.yml").getPath();
-        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1";
 
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
         FilePath workspace = new FilePath(Files.createTempDir());
         p.createExecutable();
         Run run = p.getFirstBuild();
+        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote();
 
         PerformanceTestBuild buildTest = new PerformanceTestBuild(args, false, true, false, true);
 
