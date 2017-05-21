@@ -55,6 +55,8 @@ import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -162,8 +164,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.UriReport", UriReport.class);
     }
 
-
-    @Symbol("performanceReport")
+    @Symbol({"perfReport", "performanceReport"})
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         @Override
@@ -198,25 +199,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         public ListBoxModel doFillConfigTypeItems() {
             ListBoxModel items = new ListBoxModel();
 
-            // getting the user selected value
-            String temp = getOptionType();
-
-            if (temp.equalsIgnoreCase("ART")) {
-
-                items.add("Average Response Time", "ART");
-                items.add("Median Response Time", "MRT");
-                items.add("Percentile Response Time", "PRT");
-            } else if (temp.equalsIgnoreCase("MRT")) {
-
-                items.add("Median Response Time", "MRT");
-                items.add("Percentile Response Time", "PRT");
-                items.add("Average Response Time", "ART");
-            } else if (temp.equalsIgnoreCase("PRT")) {
-
-                items.add("Percentile Response Time", "PRT");
-                items.add("Average Response Time", "ART");
-                items.add("Median Response Time", "MRT");
-            }
+            items.add("Average Response Time", "ART");
+            items.add("Median Response Time", "MRT");
+            items.add("Percentile Response Time", "PRT");
 
             return items;
         }
@@ -254,7 +239,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     public static final String PRT = "PRT";
 
-    public static String optionType = "ART";
+    public String optionType = "ART";
 
     File xmlfile = null;
 
@@ -264,7 +249,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private static final String archive_directory = "archive";
 
-    private boolean modePerformancePerTestCase = false;
+    private boolean modePerformancePerTestCase = true;
 
     /**
      * @deprecated as of 1.3. for compatibility
@@ -300,7 +285,10 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private String sourceDataFiles;
 
-    @DataBoundConstructor
+    /**
+     * Legacy constructor used for internal references.
+     */
+    @Restricted(NoExternalUse.class)
     public PerformancePublisher(String sourceDataFiles,
                                 int errorFailedThreshold,
                                 int errorUnstableThreshold,
@@ -335,13 +323,18 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
         this.nthBuildNumber = nthBuildNumber;
         this.configType = configType;
-        PerformancePublisher.optionType = configType;
         this.modeOfThreshold = modeOfThreshold;
         this.failBuildIfNoResultFile = failBuildIfNoResultFile;
         this.compareBuildPrevious = compareBuildPrevious;
 
         this.modePerformancePerTestCase = modePerformancePerTestCase;
         this.modeThroughput = modeThroughput;
+    }
+
+    @DataBoundConstructor
+    public PerformancePublisher(String sourceDataFiles) {
+        this.sourceDataFiles = sourceDataFiles;
+        migrateParsers();
     }
 
     public static File getPerformanceReport(Run<?, ?> build, String parserDisplayName,
@@ -1112,6 +1105,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return errorFailedThreshold;
     }
 
+    @DataBoundSetter
     public void setErrorFailedThreshold(int errorFailedThreshold) {
         this.errorFailedThreshold = Math.max(0, Math.min(errorFailedThreshold, 100));
     }
@@ -1120,6 +1114,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return errorUnstableThreshold;
     }
 
+    @DataBoundSetter
     public void setErrorUnstableThreshold(int errorUnstableThreshold) {
         this.errorUnstableThreshold = Math.max(0, Math.min(errorUnstableThreshold, 100));
     }
@@ -1128,6 +1123,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return this.errorUnstableResponseTimeThreshold;
     }
 
+    @DataBoundSetter
     public void setErrorUnstableResponseTimeThreshold(String errorUnstableResponseTimeThreshold) {
         this.errorUnstableResponseTimeThreshold = errorUnstableResponseTimeThreshold;
     }
@@ -1136,12 +1132,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return modePerformancePerTestCase;
     }
 
+    @DataBoundSetter
     public void setModePerformancePerTestCase(boolean modePerformancePerTestCase) {
         this.modePerformancePerTestCase = modePerformancePerTestCase;
-    }
-
-    public boolean getModePerformancePerTestCase() {
-        return modePerformancePerTestCase;
     }
 
     public String getFilename() {
@@ -1156,6 +1149,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return failBuildIfNoResultFile;
     }
 
+    @DataBoundSetter
     public void setFailBuildIfNoResultFile(boolean failBuildIfNoResultFile) {
         this.failBuildIfNoResultFile = failBuildIfNoResultFile;
     }
@@ -1221,10 +1215,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return localReports;
     }
 
-    public static String getOptionType() {
-        return optionType;
-    }
-
     public double getRelativeFailedThresholdPositive() {
         return relativeFailedThresholdPositive;
     }
@@ -1233,10 +1223,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return relativeFailedThresholdNegative;
     }
 
+    @DataBoundSetter
     public void setRelativeFailedThresholdPositive(double relativeFailedThresholdPositive) {
         this.relativeFailedThresholdPositive = Math.max(0, Math.min(relativeFailedThresholdPositive, 100));
     }
 
+    @DataBoundSetter
     public void setRelativeFailedThresholdNegative(double relativeFailedThresholdNegative) {
         this.relativeFailedThresholdNegative = Math.max(0, Math.min(relativeFailedThresholdNegative, 100));
     }
@@ -1249,6 +1241,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return relativeUnstableThresholdNegative;
     }
 
+    @DataBoundSetter
     public void setRelativeUnstableThresholdPositive(double relativeUnstableThresholdPositive) {
         this.relativeUnstableThresholdPositive = Math.max(0, Math.min(relativeUnstableThresholdPositive, 100));
     }
@@ -1261,6 +1254,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return nthBuildNumber;
     }
 
+    @DataBoundSetter
     public void setNthBuildNumber(int nthBuildNumber) {
         this.nthBuildNumber = Math.max(0, Math.min(nthBuildNumber, Integer.MAX_VALUE));
     }
@@ -1269,6 +1263,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return configType;
     }
 
+    @DataBoundSetter
     public void setConfigType(String configType) {
         this.configType = configType;
     }
@@ -1277,6 +1272,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return modeOfThreshold;
     }
 
+    @DataBoundSetter
     public void setModeOfThreshold(boolean modeOfThreshold) {
         this.modeOfThreshold = modeOfThreshold;
     }
@@ -1285,10 +1281,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return compareBuildPrevious;
     }
 
+    @DataBoundSetter
     public void setCompareBuildPrevious(boolean compareBuildPrevious) {
         this.compareBuildPrevious = compareBuildPrevious;
     }
 
+    @DataBoundSetter
     public void setModeRelativeThresholds(boolean modeRelativeThresholds) {
         this.modeRelativeThresholds = modeRelativeThresholds;
     }
@@ -1301,6 +1299,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return modeThroughput;
     }
 
+    @DataBoundSetter
     public void setModeThroughput(boolean modeThroughput) {
         this.modeThroughput = modeThroughput;
     }
@@ -1354,7 +1353,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return sourceDataFiles;
     }
 
-    @DataBoundSetter
     public void setSourceDataFiles(String sourceDataFiles) {
         this.sourceDataFiles = sourceDataFiles;
     }

@@ -52,7 +52,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String DEFAULT_CONFIG_FILE = "jenkins-report.yml";
 
 
-    @Symbol("performanceTest")
+    @Symbol({"bzt","performanceTest"})
     @Extension
     public static class Descriptor extends BuildStepDescriptor<Builder> {
 
@@ -69,18 +69,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
 
     private String params;
-    private boolean printDebugOutput;
-    private boolean useSystemSitePackages;
-    private boolean generatePerformanceTrend;
-    private boolean useBztExitCode;
+    private boolean printDebugOutput = false;
+    private boolean useSystemSitePackages = true;
+    private boolean generatePerformanceTrend = true;
+    private boolean useBztExitCode = true;
 
     @DataBoundConstructor
-    public PerformanceTestBuild(String params, boolean generatePerformanceTrend, boolean printDebugOutput, boolean useSystemSitePackages, boolean useBztExitCode) throws IOException {
+    public PerformanceTestBuild(String params) {
         this.params = params;
-        this.generatePerformanceTrend = generatePerformanceTrend;
-        this.printDebugOutput = printDebugOutput;
-        this.useSystemSitePackages = useSystemSitePackages;
-        this.useBztExitCode = useBztExitCode;
     }
 
     @Override
@@ -289,7 +285,6 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         return params;
     }
 
-    @DataBoundSetter
     public void setParams(String params) {
         this.params = params;
     }
