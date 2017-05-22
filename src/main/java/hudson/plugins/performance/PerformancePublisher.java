@@ -323,6 +323,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
         this.nthBuildNumber = nthBuildNumber;
         this.configType = configType;
+        this.optionType = configType;
         this.modeOfThreshold = modeOfThreshold;
         this.failBuildIfNoResultFile = failBuildIfNoResultFile;
         this.compareBuildPrevious = compareBuildPrevious;
