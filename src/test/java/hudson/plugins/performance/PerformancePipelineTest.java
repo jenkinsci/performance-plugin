@@ -25,7 +25,7 @@ public class PerformancePipelineTest  {
     @Test
     public void bztSmokeTests() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
-        final String bztParams =  path + ' ' + "-o modules.jmeter.plugins=[] -o services=[]";
+        final String bztParams =  path + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=";
 
         story.addStep(new Statement() {
             public void evaluate() throws Throwable {
@@ -33,7 +33,7 @@ public class PerformancePipelineTest  {
                 s.setLabelString("test performance test ");
                 WorkflowJob p = story.j.createProject(WorkflowJob.class, "demo");
                 p.setDefinition(new CpsFlowDefinition(
-                        "node{ bzt '" + bztParams + "' }", true));
+                        "node{ bzt '" + bztParams + "' + pwd() }", true));
                 WorkflowRun r = p.scheduleBuild2(0).waitForStart();
                 story.j.assertBuildStatusSuccess(story.j.waitForCompletion(r));
                 story.j.assertLogContains("File aggregate-results.xml reported 0.0% of errors [SUCCESS].", r);
