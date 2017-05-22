@@ -207,7 +207,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundConstructor
     public PerformancePublisher(String sourceDataFiles) {
         this.sourceDataFiles = sourceDataFiles;
-        migrateParsers();
     }
 
     public static File getPerformanceReport(Run<?, ?> build, String parserDisplayName,
@@ -322,7 +321,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 builder.append(p.glob).append(';');
             }
             builder.setLength(builder.length() - 1);
-            this.sourceDataFiles = builder.toString();
+            if (this.sourceDataFiles == null || this.sourceDataFiles.equals("")) {
+                this.sourceDataFiles = builder.toString();
+            } else {
+                this.sourceDataFiles = this.sourceDataFiles + ";" + builder.toString();
+            }
             this.parsers = null;
         }
     }
@@ -1237,6 +1240,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setParsers(List<PerformanceReportParser> parsers) {
         this.parsers = parsers;
+        migrateParsers();
     }
 
     /**
