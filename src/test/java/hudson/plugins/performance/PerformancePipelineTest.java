@@ -33,7 +33,8 @@ public class PerformancePipelineTest  {
                 s.setLabelString("test performance test ");
                 WorkflowJob p = story.j.createProject(WorkflowJob.class, "demo");
                 p.setDefinition(new CpsFlowDefinition(
-                        "node{ bzt '" + bztParams + "' + pwd() }", true));
+                        "node('master'){ bzt(params: '" + bztParams + "' + pwd(), useSystemSitePackages: false, printDebugOutput: true) }", true));
+                p.getRootDir().mkdirs();
                 WorkflowRun r = p.scheduleBuild2(0).waitForStart();
                 story.j.assertBuildStatusSuccess(story.j.waitForCompletion(r));
                 story.j.assertLogContains("File aggregate-results.xml reported 0.0% of errors [SUCCESS].", r);
