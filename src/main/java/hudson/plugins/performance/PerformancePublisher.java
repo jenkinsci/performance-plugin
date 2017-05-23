@@ -55,6 +55,8 @@ import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -76,151 +78,6 @@ import java.util.regex.Pattern;
 public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     public static final double THRESHOLD_TOLERANCE = 0.00000001;
-
-    /**
-     * Mapping classes after refactoring for backward compatibility.
-     */
-    @Initializer(before = InitMilestone.PLUGINS_STARTED)
-    public static void addAliases() {
-        // Items.XSTREAM2 is used for serializing project configuration,
-        // and Run.XSTREAM2 is used for serializing build and its associated Actions.
-
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceBuildAction", PerformanceBuildAction.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceProjectAction", PerformanceProjectAction.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ExternalBuildReport", ExternalBuildReportAction.class);
-
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.PreviousResultsBlock", PreviousResultsBlock.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.TestCaseBlock", TestCaseBlock.class);
-
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.CookieHandler", CookieHandler.class);
-
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintSettings", ConstraintSettings.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.HttpSample", HttpSample.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportPosition", PerformanceReportPosition.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusStatusReport", TaurusFinalStats.class);
-
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintDescriptor", ConstraintDescriptor.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParserDescriptor", PerformanceReportParserDescriptor.class);
-
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.GraphConfigurationDetail", GraphConfigurationDetail.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TestSuiteReportDetail", TestSuiteReportDetail.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TrendReportDetail", TrendReportDetail.class);
-
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractParser", AbstractParser.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.IagoParser", IagoParser.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterCsvParser", JMeterCsvParser.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterParser", JMeterParser.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JmeterSummarizerParser", JmeterSummarizerParser.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JUnitParser", JUnitParser.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParser", PerformanceReportParser.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusParser", TaurusParser.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.WrkSummarizerParser", WrkSummarizerParser.class);
-
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputReport", ThroughputReport.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputUriReport", ThroughputUriReport.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractReport", AbstractReport.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintReport", ConstraintReport.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReport", PerformanceReport.class);
-        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.UriReport", UriReport.class);
-
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceBuildAction", PerformanceBuildAction.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceProjectAction", PerformanceProjectAction.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ExternalBuildReport", ExternalBuildReportAction.class);
-
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.PreviousResultsBlock", PreviousResultsBlock.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.TestCaseBlock", TestCaseBlock.class);
-
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.CookieHandler", CookieHandler.class);
-
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintSettings", ConstraintSettings.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.HttpSample", HttpSample.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportPosition", PerformanceReportPosition.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusStatusReport", TaurusFinalStats.class);
-
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintDescriptor", ConstraintDescriptor.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParserDescriptor", PerformanceReportParserDescriptor.class);
-
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.GraphConfigurationDetail", GraphConfigurationDetail.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TestSuiteReportDetail", TestSuiteReportDetail.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TrendReportDetail", TrendReportDetail.class);
-
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractParser", AbstractParser.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.IagoParser", IagoParser.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterCsvParser", JMeterCsvParser.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterParser", JMeterParser.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JmeterSummarizerParser", JmeterSummarizerParser.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JUnitParser", JUnitParser.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParser", PerformanceReportParser.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusParser", TaurusParser.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.WrkSummarizerParser", WrkSummarizerParser.class);
-
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputReport", ThroughputReport.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputUriReport", ThroughputUriReport.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractReport", AbstractReport.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintReport", ConstraintReport.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReport", PerformanceReport.class);
-        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.UriReport", UriReport.class);
-    }
-
-
-    @Symbol("performanceReport")
-    @Extension
-    public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-        @Override
-        public String getDisplayName() {
-            return Messages.Publisher_DisplayName();
-        }
-
-        @Override
-        public String getHelpFile() {
-            return "/plugin/performance/help.html";
-        }
-
-        public List<PerformanceReportParserDescriptor> getParserDescriptors() {
-            return PerformanceReportParserDescriptor.all();
-        }
-
-        public List<ConstraintDescriptor> getConstraintDescriptors() {
-            return ConstraintDescriptor.all();
-        }
-
-        @Override
-        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return true;
-        }
-
-        /**
-         * Populate the comparison type dynamically based on the user selection from
-         * the previous time
-         *
-         * @return the name of the option selected in the previous run
-         */
-        public ListBoxModel doFillConfigTypeItems() {
-            ListBoxModel items = new ListBoxModel();
-
-            // getting the user selected value
-            String temp = getOptionType();
-
-            if (temp.equalsIgnoreCase("ART")) {
-
-                items.add("Average Response Time", "ART");
-                items.add("Median Response Time", "MRT");
-                items.add("Percentile Response Time", "PRT");
-            } else if (temp.equalsIgnoreCase("MRT")) {
-
-                items.add("Median Response Time", "MRT");
-                items.add("Percentile Response Time", "PRT");
-                items.add("Average Response Time", "ART");
-            } else if (temp.equalsIgnoreCase("PRT")) {
-
-                items.add("Percentile Response Time", "PRT");
-                items.add("Average Response Time", "ART");
-                items.add("Median Response Time", "MRT");
-            }
-
-            return items;
-        }
-    }
 
     private int errorFailedThreshold = 0;
 
@@ -254,7 +111,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     public static final String PRT = "PRT";
 
-    public static String optionType = "ART";
+    public String optionType = "ART";
 
     File xmlfile = null;
 
@@ -264,7 +121,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private static final String archive_directory = "archive";
 
-    private boolean modePerformancePerTestCase = false;
+    private boolean modePerformancePerTestCase = true;
 
     /**
      * @deprecated as of 1.3. for compatibility
@@ -300,7 +157,10 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private String sourceDataFiles;
 
-    @DataBoundConstructor
+    /**
+     * Legacy constructor used for internal references.
+     */
+    @Restricted(NoExternalUse.class)
     public PerformancePublisher(String sourceDataFiles,
                                 int errorFailedThreshold,
                                 int errorUnstableThreshold,
@@ -335,13 +195,18 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
         this.nthBuildNumber = nthBuildNumber;
         this.configType = configType;
-        PerformancePublisher.optionType = configType;
+        this.optionType = configType;
         this.modeOfThreshold = modeOfThreshold;
         this.failBuildIfNoResultFile = failBuildIfNoResultFile;
         this.compareBuildPrevious = compareBuildPrevious;
 
         this.modePerformancePerTestCase = modePerformancePerTestCase;
         this.modeThroughput = modeThroughput;
+    }
+
+    @DataBoundConstructor
+    public PerformancePublisher(String sourceDataFiles) {
+        this.sourceDataFiles = sourceDataFiles;
     }
 
     public static File getPerformanceReport(Run<?, ?> build, String parserDisplayName,
@@ -456,7 +321,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 builder.append(p.glob).append(';');
             }
             builder.setLength(builder.length() - 1);
-            this.sourceDataFiles = builder.toString();
+            if (this.sourceDataFiles == null || this.sourceDataFiles.equals("")) {
+                this.sourceDataFiles = builder.toString();
+            } else {
+                this.sourceDataFiles = this.sourceDataFiles + ";" + builder.toString();
+            }
             this.parsers = null;
         }
     }
@@ -1112,6 +981,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return errorFailedThreshold;
     }
 
+    @DataBoundSetter
     public void setErrorFailedThreshold(int errorFailedThreshold) {
         this.errorFailedThreshold = Math.max(0, Math.min(errorFailedThreshold, 100));
     }
@@ -1120,6 +990,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return errorUnstableThreshold;
     }
 
+    @DataBoundSetter
     public void setErrorUnstableThreshold(int errorUnstableThreshold) {
         this.errorUnstableThreshold = Math.max(0, Math.min(errorUnstableThreshold, 100));
     }
@@ -1128,6 +999,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return this.errorUnstableResponseTimeThreshold;
     }
 
+    @DataBoundSetter
     public void setErrorUnstableResponseTimeThreshold(String errorUnstableResponseTimeThreshold) {
         this.errorUnstableResponseTimeThreshold = errorUnstableResponseTimeThreshold;
     }
@@ -1136,12 +1008,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return modePerformancePerTestCase;
     }
 
+    @DataBoundSetter
     public void setModePerformancePerTestCase(boolean modePerformancePerTestCase) {
         this.modePerformancePerTestCase = modePerformancePerTestCase;
-    }
-
-    public boolean getModePerformancePerTestCase() {
-        return modePerformancePerTestCase;
     }
 
     public String getFilename() {
@@ -1156,6 +1025,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return failBuildIfNoResultFile;
     }
 
+    @DataBoundSetter
     public void setFailBuildIfNoResultFile(boolean failBuildIfNoResultFile) {
         this.failBuildIfNoResultFile = failBuildIfNoResultFile;
     }
@@ -1221,10 +1091,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return localReports;
     }
 
-    public static String getOptionType() {
-        return optionType;
-    }
-
     public double getRelativeFailedThresholdPositive() {
         return relativeFailedThresholdPositive;
     }
@@ -1233,10 +1099,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return relativeFailedThresholdNegative;
     }
 
+    @DataBoundSetter
     public void setRelativeFailedThresholdPositive(double relativeFailedThresholdPositive) {
         this.relativeFailedThresholdPositive = Math.max(0, Math.min(relativeFailedThresholdPositive, 100));
     }
 
+    @DataBoundSetter
     public void setRelativeFailedThresholdNegative(double relativeFailedThresholdNegative) {
         this.relativeFailedThresholdNegative = Math.max(0, Math.min(relativeFailedThresholdNegative, 100));
     }
@@ -1249,6 +1117,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return relativeUnstableThresholdNegative;
     }
 
+    @DataBoundSetter
     public void setRelativeUnstableThresholdPositive(double relativeUnstableThresholdPositive) {
         this.relativeUnstableThresholdPositive = Math.max(0, Math.min(relativeUnstableThresholdPositive, 100));
     }
@@ -1261,6 +1130,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return nthBuildNumber;
     }
 
+    @DataBoundSetter
     public void setNthBuildNumber(int nthBuildNumber) {
         this.nthBuildNumber = Math.max(0, Math.min(nthBuildNumber, Integer.MAX_VALUE));
     }
@@ -1269,6 +1139,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return configType;
     }
 
+    @DataBoundSetter
     public void setConfigType(String configType) {
         this.configType = configType;
     }
@@ -1277,6 +1148,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return modeOfThreshold;
     }
 
+    @DataBoundSetter
     public void setModeOfThreshold(boolean modeOfThreshold) {
         this.modeOfThreshold = modeOfThreshold;
     }
@@ -1285,10 +1157,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return compareBuildPrevious;
     }
 
+    @DataBoundSetter
     public void setCompareBuildPrevious(boolean compareBuildPrevious) {
         this.compareBuildPrevious = compareBuildPrevious;
     }
 
+    @DataBoundSetter
     public void setModeRelativeThresholds(boolean modeRelativeThresholds) {
         this.modeRelativeThresholds = modeRelativeThresholds;
     }
@@ -1301,6 +1175,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return modeThroughput;
     }
 
+    @DataBoundSetter
     public void setModeThroughput(boolean modeThroughput) {
         this.modeThroughput = modeThroughput;
     }
@@ -1354,7 +1229,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return sourceDataFiles;
     }
 
-    @DataBoundSetter
     public void setSourceDataFiles(String sourceDataFiles) {
         this.sourceDataFiles = sourceDataFiles;
     }
@@ -1366,6 +1240,135 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setParsers(List<PerformanceReportParser> parsers) {
         this.parsers = parsers;
+        migrateParsers();
+    }
+
+    /**
+     * Mapping classes after refactoring for backward compatibility.
+     */
+    @Initializer(before = InitMilestone.PLUGINS_STARTED)
+    public static void addAliases() {
+        // Items.XSTREAM2 is used for serializing project configuration,
+        // and Run.XSTREAM2 is used for serializing build and its associated Actions.
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceBuildAction", PerformanceBuildAction.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceProjectAction", PerformanceProjectAction.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ExternalBuildReport", ExternalBuildReportAction.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.PreviousResultsBlock", PreviousResultsBlock.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.TestCaseBlock", TestCaseBlock.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.CookieHandler", CookieHandler.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintSettings", ConstraintSettings.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.HttpSample", HttpSample.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportPosition", PerformanceReportPosition.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusStatusReport", TaurusFinalStats.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintDescriptor", ConstraintDescriptor.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParserDescriptor", PerformanceReportParserDescriptor.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.GraphConfigurationDetail", GraphConfigurationDetail.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TestSuiteReportDetail", TestSuiteReportDetail.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TrendReportDetail", TrendReportDetail.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractParser", AbstractParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.IagoParser", IagoParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterCsvParser", JMeterCsvParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterParser", JMeterParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JmeterSummarizerParser", JmeterSummarizerParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JUnitParser", JUnitParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParser", PerformanceReportParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusParser", TaurusParser.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.WrkSummarizerParser", WrkSummarizerParser.class);
+
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputReport", ThroughputReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputUriReport", ThroughputUriReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractReport", AbstractReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintReport", ConstraintReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReport", PerformanceReport.class);
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.UriReport", UriReport.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceBuildAction", PerformanceBuildAction.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceProjectAction", PerformanceProjectAction.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ExternalBuildReport", ExternalBuildReportAction.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.PreviousResultsBlock", PreviousResultsBlock.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.TestCaseBlock", TestCaseBlock.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.CookieHandler", CookieHandler.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintSettings", ConstraintSettings.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.HttpSample", HttpSample.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportPosition", PerformanceReportPosition.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusStatusReport", TaurusFinalStats.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintDescriptor", ConstraintDescriptor.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParserDescriptor", PerformanceReportParserDescriptor.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.GraphConfigurationDetail", GraphConfigurationDetail.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TestSuiteReportDetail", TestSuiteReportDetail.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TrendReportDetail", TrendReportDetail.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractParser", AbstractParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.IagoParser", IagoParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterCsvParser", JMeterCsvParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JMeterParser", JMeterParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JmeterSummarizerParser", JmeterSummarizerParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.JUnitParser", JUnitParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReportParser", PerformanceReportParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusParser", TaurusParser.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.WrkSummarizerParser", WrkSummarizerParser.class);
+
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputReport", ThroughputReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.ThroughputUriReport", ThroughputUriReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractReport", AbstractReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintReport", ConstraintReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.PerformanceReport", PerformanceReport.class);
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.UriReport", UriReport.class);
+    }
+
+    @Symbol({"perfReport", "performanceReport"})
+    @Extension
+    public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+        @Override
+        public String getDisplayName() {
+            return Messages.Publisher_DisplayName();
+        }
+
+        @Override
+        public String getHelpFile() {
+            return "/plugin/performance/help.html";
+        }
+
+        public List<PerformanceReportParserDescriptor> getParserDescriptors() {
+            return PerformanceReportParserDescriptor.all();
+        }
+
+        public List<ConstraintDescriptor> getConstraintDescriptors() {
+            return ConstraintDescriptor.all();
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+            return true;
+        }
+
+        /**
+         * Populate the comparison type dynamically based on the user selection from
+         * the previous time
+         *
+         * @return the name of the option selected in the previous run
+         */
+        public ListBoxModel doFillConfigTypeItems() {
+            ListBoxModel items = new ListBoxModel();
+
+            items.add("Average Response Time", "ART");
+            items.add("Median Response Time", "MRT");
+            items.add("Percentile Response Time", "PRT");
+
+            return items;
+        }
     }
 }
 

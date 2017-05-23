@@ -242,7 +242,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         assertEquals(7.0, publisher.getRelativeUnstableThresholdPositive(), DELTA);
         assertEquals(6.0, publisher.getRelativeUnstableThresholdNegative(), DELTA);
         assertEquals(3, publisher.getNthBuildNumber());
-        assertTrue(publisher.getModePerformancePerTestCase());
+        assertTrue(publisher.isModePerformancePerTestCase());
         assertEquals("MRT", publisher.getConfigType());
         assertTrue(publisher.getModeOfThreshold());
         assertTrue(publisher.isFailBuildIfNoResultFile());
@@ -274,7 +274,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         assertEquals(0.0, publisher.getRelativeUnstableThresholdPositive(), DELTA);
         assertEquals(0.0, publisher.getRelativeUnstableThresholdNegative(), DELTA);
         assertEquals(0, publisher.getNthBuildNumber());
-        assertFalse(publisher.getModePerformancePerTestCase());
+        assertFalse(publisher.isModePerformancePerTestCase());
         assertFalse(publisher.isModePerformancePerTestCase());
         assertEquals("ART", publisher.getConfigType());
         assertFalse(publisher.getModeOfThreshold());
@@ -295,8 +295,6 @@ public class PerformancePublisherTest extends HudsonTestCase {
         List<AbstractConstraint> allConstraints = AbstractConstraint.all();
         publisher.setConstraints(allConstraints);
         assertEquals(allConstraints, publisher.getConstraints());
-        assertEquals(PerformancePublisher.optionType, PerformancePublisher.getOptionType());
-
 
         publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
                 true, true, true, true, null);

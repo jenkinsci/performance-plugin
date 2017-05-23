@@ -37,7 +37,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         buildExt.getRootDir().mkdirs();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote(), true, true, false, false);
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote());
+        buildTest.setGeneratePerformanceTrend(true);
+        buildTest.setPrintDebugOutput(true);
+        buildTest.setUseSystemSitePackages(false);
+        buildTest.setUseBztExitCode(false);
 
         assertEquals(PerformanceProjectAction.class, buildTest.getProjectAction((AbstractProject) project).getClass());
 
@@ -80,7 +84,12 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         PerformanceTestBuild.Descriptor descriptor = new PerformanceTestBuild.Descriptor();
         assertTrue(descriptor.isApplicable(null));
 
-        PerformanceTestBuild testBuild = new PerformanceTestBuild("test option", false, false, false, false);
+        PerformanceTestBuild testBuild = new PerformanceTestBuild("test option");
+        testBuild.setGeneratePerformanceTrend(false);
+        testBuild.setUseBztExitCode(false);
+        testBuild.setUseSystemSitePackages(false);
+        testBuild.setPrintDebugOutput(false);
+
         assertEquals("test option", testBuild.getParams());
         testBuild.setParams("test1");
         assertEquals("test1", testBuild.getParams());
@@ -111,7 +120,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote();
 
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(args, true, true, false, false);
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(args);
+        buildTest.setGeneratePerformanceTrend(true);
+        buildTest.setPrintDebugOutput(true);
+        buildTest.setUseSystemSitePackages(false);
+        buildTest.setUseBztExitCode(false);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamTaskListener taskListener = new StreamTaskListener(stream);
@@ -138,7 +151,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         Run run = p.getFirstBuild();
         String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(args, false, true, false, true);
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(args);
+        buildTest.setGeneratePerformanceTrend(false);
+        buildTest.setPrintDebugOutput(true);
+        buildTest.setUseSystemSitePackages(false);
+        buildTest.setUseBztExitCode(true);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamTaskListener taskListener = new StreamTaskListener(stream);
@@ -151,7 +168,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
     @Test
     public void testResutsChecker() throws Exception {
-        PerformanceTestBuild testBuild = new PerformanceTestBuild("test option", false, false, false, false);
+        PerformanceTestBuild testBuild = new PerformanceTestBuild("test option");
+        testBuild.setGeneratePerformanceTrend(false);
+        testBuild.setPrintDebugOutput(false);
+        testBuild.setUseSystemSitePackages(false);
+        testBuild.setUseBztExitCode(false);
 
         assertEquals(Result.SUCCESS, testBuild.getBztJobResult(0));
         assertEquals(Result.FAILURE, testBuild.getBztJobResult(1));
