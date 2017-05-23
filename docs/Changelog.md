@@ -1,6 +1,9 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
+## v3.1 (upcoming)
+- FEATURE: Snippet Generator generates nice and simple pipeline scripts for Performance Test & Performance Publisher. Contributed by Andrew Bayer
+
 ## v3.0
 
 - FEATURE: add build step to run performance test
