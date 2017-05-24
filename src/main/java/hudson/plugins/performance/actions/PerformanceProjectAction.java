@@ -6,6 +6,7 @@ import hudson.model.Run;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.PerformanceReportMap;
+import hudson.plugins.performance.data.ReportValueSelector;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
@@ -375,7 +376,8 @@ public final class PerformanceProjectAction implements Action {
             response.sendRedirect2(request.getContextPath() + "/images/headless.png");
             return;
         }
-        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        ReportValueSelector valueSelector = ReportValueSelector.get(getProject());
         List<? extends Run<?, ?>> builds = getProject().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
@@ -403,13 +405,13 @@ public final class PerformanceProjectAction implements Action {
 
                 List<UriReport> uriListOrdered = performanceReport.getUriListOrdered();
                 for (UriReport uriReport : uriListOrdered) {
-                    dataSetBuilderAverage.add(uriReport.getAverage(), uriReport.getUri(), label);
+                    dataSetBuilder.add(valueSelector.getValue(uriReport), uriReport.getUri(), label);
                 }
             }
             nbBuildsToAnalyze--;
         }
         ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilderAverage.build()), 600, 200);
+                createRespondingTimeChart(dataSetBuilder.build()), 600, 200);
 
     }
 
@@ -523,6 +525,7 @@ public final class PerformanceProjectAction implements Action {
         }
         DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
         DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizerErrors = new DataSetBuilder<NumberOnlyBuildLabel, String>();
+        ReportValueSelector valueSelector = ReportValueSelector.get(getProject());
 
         List<?> builds = getProject().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
@@ -547,9 +550,9 @@ public final class PerformanceProjectAction implements Action {
                 }
 
                 for (Map.Entry<String, UriReport> entry : performanceReport.getUriReportMap().entrySet()) {
-                    Long methodAvg = entry.getValue().getAverage();
+                    long methodValue = valueSelector.getValue(entry.getValue());
                     float methodErrors = entry.getValue().getSummarizerErrors();
-                    dataSetBuilderSummarizer.add(methodAvg, label, entry.getKey());
+                    dataSetBuilderSummarizer.add(methodValue, label, entry.getKey());
                     dataSetBuilderSummarizerErrors.add(methodErrors, label, entry.getKey());
                 }
             }

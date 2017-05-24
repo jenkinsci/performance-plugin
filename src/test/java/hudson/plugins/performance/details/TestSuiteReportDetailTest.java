@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.performance.PerformanceReportMap;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
@@ -31,7 +32,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Project;
 import hudson.model.Run;
+import hudson.tasks.Publisher;
 import hudson.util.ChartUtil;
+import hudson.util.DescribableList;
 import hudson.util.RunList;
 
 
@@ -43,6 +46,8 @@ public class TestSuiteReportDetailTest {
 
     @Mock
     FreeStyleBuild run;
+    @Mock
+    Project<?, ?> project;
     @Mock
     PerformanceReportMap reportMap;
     @Mock
@@ -85,11 +90,12 @@ public class TestSuiteReportDetailTest {
     public void chartDatasetHasAverageOfSamples() throws Exception {
         run.number = 1;
         when(run.getAction(PerformanceBuildAction.class)).thenReturn(buildAction);
+        when(project.getPublishersList()).thenReturn(new DescribableList<Publisher, Descriptor<Publisher>>(project));
         when(buildAction.getPerformanceReportMap()).thenReturn(reportMap);
         when(reportMap.getPerformanceReport(FILENAME)).thenReturn(report);
         when(report.getUriReportMap()).thenReturn(uriReportMap);
 
-        final TestSuiteReportDetail reportDetail = new TestSuiteReportDetail(mock(Project.class), FILENAME, alwaysInRangeMock());
+        final TestSuiteReportDetail reportDetail = new TestSuiteReportDetail(project, FILENAME, alwaysInRangeMock());
         final CategoryDataset dataset = reportDetail.getChartDatasetBuilderForBuilds(TEST_URI, RunList.fromRuns(Collections.singletonList(run))).build();
         assertEquals(dataset.getValue(TEST_URI, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) run)), new Long(550L));
     }

@@ -99,6 +99,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private String configType = "ART";
 
+    private String graphType = "ART";
+
     private boolean modeOfThreshold = false;
 
     private boolean failBuildIfNoResultFile = false;
@@ -1144,6 +1146,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         this.configType = configType;
     }
 
+    public String getGraphType() {
+        return graphType;
+    }
+
+    @DataBoundSetter
+    public void setGraphType(String graphType) {
+        this.graphType = graphType;
+    }
+
     public boolean getModeOfThreshold() {
         return modeOfThreshold;
     }
@@ -1361,12 +1372,18 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
          * @return the name of the option selected in the previous run
          */
         public ListBoxModel doFillConfigTypeItems() {
-            ListBoxModel items = new ListBoxModel();
+            return getResponseTimeOptions();
+        }
 
+        public ListBoxModel doFillGraphTypeItems() {
+            return getResponseTimeOptions();
+        }
+
+        private ListBoxModel getResponseTimeOptions() {
+            ListBoxModel items = new ListBoxModel();
             items.add("Average Response Time", "ART");
             items.add("Median Response Time", "MRT");
             items.add("Percentile Response Time", "PRT");
-
             return items;
         }
     }
