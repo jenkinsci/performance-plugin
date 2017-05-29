@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class PerformanceProjectAction implements Action {
+public class PerformanceProjectAction implements Action {
 
     private static final String CONFIGURE_LINK = "configure";
     private static final String TRENDREPORT_LINK = "trendReport";
@@ -142,7 +142,7 @@ public final class PerformanceProjectAction implements Action {
         return chart;
     }
 
-    public static JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
+    public static JFreeChart doCreateRespondingTimeChart(CategoryDataset dataset) {
 
         final JFreeChart chart = ChartFactory.createLineChart(
                 Messages.ProjectAction_RespondingTime(), // charttitle
@@ -236,8 +236,8 @@ public final class PerformanceProjectAction implements Action {
         return chart;
     }
 
-    public static JFreeChart createSummarizerChart(CategoryDataset dataset,
-                                                      String yAxis, String chartTitle) {
+    public static JFreeChart doCreateSummarizerChart(CategoryDataset dataset,
+                                                     String yAxis, String chartTitle) {
 
         final JFreeChart chart = ChartFactory.createBarChart(chartTitle, // chart
                 // title
@@ -390,14 +390,7 @@ public final class PerformanceProjectAction implements Action {
                 if (!buildsLimits.includedByStep(build.number)) {
                     continue;
                 }
-                PerformanceBuildAction performanceBuildAction = build
-                        .getAction(PerformanceBuildAction.class);
-                if (performanceBuildAction == null) {
-                    continue;
-                }
-                PerformanceReport performanceReport = performanceBuildAction
-                        .getPerformanceReportMap().getPerformanceReport(
-                                performanceReportNameFile);
+                PerformanceReport performanceReport = getPerformanceReport(build, performanceReportNameFile);
                 if (performanceReport == null) {
                     nbBuildsToAnalyze--;
                     continue;
@@ -412,7 +405,20 @@ public final class PerformanceProjectAction implements Action {
         }
         ChartUtil.generateGraph(request, response,
                 createRespondingTimeChart(dataSetBuilder.build()), 600, 200);
+    }
 
+    protected PerformanceReport getPerformanceReport(Run<?, ?> build, String reportFileName) {
+        PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+        if (performanceBuildAction == null) {
+            return null;
+        }
+        return performanceBuildAction
+                .getPerformanceReportMap()
+                .getPerformanceReport(reportFileName);
+    }
+
+    protected JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
+        return doCreateRespondingTimeChart(dataset);
     }
 
     public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
@@ -535,15 +541,7 @@ public final class PerformanceProjectAction implements Action {
             Run<?, ?> currentBuild = (Run<?, ?>) build;
             if (buildsLimits.in(nbBuildsToAnalyze)) {
                 NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-                PerformanceBuildAction performanceBuildAction = currentBuild
-                        .getAction(PerformanceBuildAction.class);
-                if (performanceBuildAction == null) {
-                    continue;
-                }
-                PerformanceReport performanceReport = performanceBuildAction
-                        .getPerformanceReportMap().getPerformanceReport(
-                                performanceReportNameFile);
-
+                PerformanceReport performanceReport = getPerformanceReport(currentBuild, performanceReportNameFile);
                 if (performanceReport == null) {
                     nbBuildsToAnalyze--;
                     continue;
@@ -575,6 +573,10 @@ public final class PerformanceProjectAction implements Action {
                     createSummarizerChart(dataSetBuilderSummarizer.build(), "ms",
                             Messages.ProjectAction_RespondingTime()), 400, 200);
         }
+    }
+
+    protected JFreeChart createSummarizerChart(CategoryDataset dataset, String yAxis, String chartTitle) {
+        return doCreateSummarizerChart(dataset, yAxis, chartTitle);
     }
 
     /**
