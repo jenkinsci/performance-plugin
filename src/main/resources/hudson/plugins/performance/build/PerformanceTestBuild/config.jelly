@@ -10,6 +10,13 @@
                 <tbody>
                     <tr>
                         <td>
+                             <f:entry title="Change working directory" field="workspace">
+                                    <f:textbox />
+                             </f:entry>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <f:checkbox name="generatePerformanceTrend" field="generatePerformanceTrend" default="true" title="Automatically generate performance report">
                 		        Automatically generate performance trend
                             </f:checkbox>
