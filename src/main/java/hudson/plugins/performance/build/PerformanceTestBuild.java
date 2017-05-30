@@ -123,14 +123,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
     protected FilePath getBuildStepWorkspace(FilePath jobWorkspace) {
-        return (workspace == null) ?
-                jobWorkspace :
+        return (workspace != null && !workspace.isEmpty()) ?
                 (isAbsoluteFilePath() ?
                         // absolute workspace
                         new FilePath(jobWorkspace.getChannel(), workspace) :
                         //relative workspace
                         new FilePath(jobWorkspace, workspace)
-                );
+                ) :
+                jobWorkspace;
     }
 
     private boolean isAbsoluteFilePath() {
