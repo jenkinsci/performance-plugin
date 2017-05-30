@@ -6,6 +6,7 @@ import hudson.model.Run;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.PerformanceReportMap;
+import hudson.plugins.performance.data.ReportValueSelector;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
@@ -53,7 +54,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class PerformanceProjectAction implements Action {
+public class PerformanceProjectAction implements Action {
 
     private static final String CONFIGURE_LINK = "configure";
     private static final String TRENDREPORT_LINK = "trendReport";
@@ -141,7 +142,7 @@ public final class PerformanceProjectAction implements Action {
         return chart;
     }
 
-    public static JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
+    public static JFreeChart doCreateRespondingTimeChart(CategoryDataset dataset) {
 
         final JFreeChart chart = ChartFactory.createLineChart(
                 Messages.ProjectAction_RespondingTime(), // charttitle
@@ -235,8 +236,8 @@ public final class PerformanceProjectAction implements Action {
         return chart;
     }
 
-    public static JFreeChart createSummarizerChart(CategoryDataset dataset,
-                                                      String yAxis, String chartTitle) {
+    public static JFreeChart doCreateSummarizerChart(CategoryDataset dataset,
+                                                     String yAxis, String chartTitle) {
 
         final JFreeChart chart = ChartFactory.createBarChart(chartTitle, // chart
                 // title
@@ -375,7 +376,8 @@ public final class PerformanceProjectAction implements Action {
             response.sendRedirect2(request.getContextPath() + "/images/headless.png");
             return;
         }
-        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        ReportValueSelector valueSelector = ReportValueSelector.get(getProject());
         List<? extends Run<?, ?>> builds = getProject().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
@@ -388,14 +390,7 @@ public final class PerformanceProjectAction implements Action {
                 if (!buildsLimits.includedByStep(build.number)) {
                     continue;
                 }
-                PerformanceBuildAction performanceBuildAction = build
-                        .getAction(PerformanceBuildAction.class);
-                if (performanceBuildAction == null) {
-                    continue;
-                }
-                PerformanceReport performanceReport = performanceBuildAction
-                        .getPerformanceReportMap().getPerformanceReport(
-                                performanceReportNameFile);
+                PerformanceReport performanceReport = getPerformanceReport(build, performanceReportNameFile);
                 if (performanceReport == null) {
                     nbBuildsToAnalyze--;
                     continue;
@@ -403,14 +398,27 @@ public final class PerformanceProjectAction implements Action {
 
                 List<UriReport> uriListOrdered = performanceReport.getUriListOrdered();
                 for (UriReport uriReport : uriListOrdered) {
-                    dataSetBuilderAverage.add(uriReport.getAverage(), uriReport.getUri(), label);
+                    dataSetBuilder.add(valueSelector.getValue(uriReport), uriReport.getUri(), label);
                 }
             }
             nbBuildsToAnalyze--;
         }
         ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilderAverage.build()), 600, 200);
+                createRespondingTimeChart(dataSetBuilder.build()), 600, 200);
+    }
 
+    protected PerformanceReport getPerformanceReport(Run<?, ?> build, String reportFileName) {
+        PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+        if (performanceBuildAction == null) {
+            return null;
+        }
+        return performanceBuildAction
+                .getPerformanceReportMap()
+                .getPerformanceReport(reportFileName);
+    }
+
+    protected JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
+        return doCreateRespondingTimeChart(dataset);
     }
 
     public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
@@ -523,6 +531,7 @@ public final class PerformanceProjectAction implements Action {
         }
         DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
         DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizerErrors = new DataSetBuilder<NumberOnlyBuildLabel, String>();
+        ReportValueSelector valueSelector = ReportValueSelector.get(getProject());
 
         List<?> builds = getProject().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
@@ -532,24 +541,16 @@ public final class PerformanceProjectAction implements Action {
             Run<?, ?> currentBuild = (Run<?, ?>) build;
             if (buildsLimits.in(nbBuildsToAnalyze)) {
                 NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-                PerformanceBuildAction performanceBuildAction = currentBuild
-                        .getAction(PerformanceBuildAction.class);
-                if (performanceBuildAction == null) {
-                    continue;
-                }
-                PerformanceReport performanceReport = performanceBuildAction
-                        .getPerformanceReportMap().getPerformanceReport(
-                                performanceReportNameFile);
-
+                PerformanceReport performanceReport = getPerformanceReport(currentBuild, performanceReportNameFile);
                 if (performanceReport == null) {
                     nbBuildsToAnalyze--;
                     continue;
                 }
 
                 for (Map.Entry<String, UriReport> entry : performanceReport.getUriReportMap().entrySet()) {
-                    Long methodAvg = entry.getValue().getAverage();
+                    long methodValue = valueSelector.getValue(entry.getValue());
                     float methodErrors = entry.getValue().getSummarizerErrors();
-                    dataSetBuilderSummarizer.add(methodAvg, label, entry.getKey());
+                    dataSetBuilderSummarizer.add(methodValue, label, entry.getKey());
                     dataSetBuilderSummarizerErrors.add(methodErrors, label, entry.getKey());
                 }
             }
@@ -572,6 +573,10 @@ public final class PerformanceProjectAction implements Action {
                     createSummarizerChart(dataSetBuilderSummarizer.build(), "ms",
                             Messages.ProjectAction_RespondingTime()), 400, 200);
         }
+    }
+
+    protected JFreeChart createSummarizerChart(CategoryDataset dataset, String yAxis, String chartTitle) {
+        return doCreateSummarizerChart(dataset, yAxis, chartTitle);
     }
 
     /**

@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
+import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.PerformanceReportMap;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
@@ -31,7 +33,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Project;
 import hudson.model.Run;
+import hudson.tasks.Publisher;
 import hudson.util.ChartUtil;
+import hudson.util.DescribableList;
 import hudson.util.RunList;
 
 
@@ -43,6 +47,10 @@ public class TestSuiteReportDetailTest {
 
     @Mock
     FreeStyleBuild run;
+    @Mock
+    Project<?, ?> project;
+    @Mock
+    PerformancePublisher publisher;
     @Mock
     PerformanceReportMap reportMap;
     @Mock
@@ -81,17 +89,30 @@ public class TestSuiteReportDetailTest {
     }
 
     @Test
-    @SuppressWarnings("UnnecessaryBoxing")
     public void chartDatasetHasAverageOfSamples() throws Exception {
+        when(publisher.getGraphType()).thenReturn(PerformancePublisher.ART);
+        assertEquals(550L, getDatasetValue());
+    }
+
+    @Test
+    public void chartDatasetHasMedianOfSamples() throws Exception {
+        when(publisher.getGraphType()).thenReturn(PerformancePublisher.MRT);
+        assertEquals(1000L, getDatasetValue());
+    }
+
+    private Number getDatasetValue() {
+        DescribableList<Publisher, Descriptor<Publisher>> publishers = new DescribableList<>(project);
+        publishers.add(publisher);
         run.number = 1;
         when(run.getAction(PerformanceBuildAction.class)).thenReturn(buildAction);
+        when(project.getPublishersList()).thenReturn(publishers);
         when(buildAction.getPerformanceReportMap()).thenReturn(reportMap);
         when(reportMap.getPerformanceReport(FILENAME)).thenReturn(report);
         when(report.getUriReportMap()).thenReturn(uriReportMap);
 
-        final TestSuiteReportDetail reportDetail = new TestSuiteReportDetail(mock(Project.class), FILENAME, alwaysInRangeMock());
+        final TestSuiteReportDetail reportDetail = new TestSuiteReportDetail(project, FILENAME, alwaysInRangeMock());
         final CategoryDataset dataset = reportDetail.getChartDatasetBuilderForBuilds(TEST_URI, RunList.fromRuns(Collections.singletonList(run))).build();
-        assertEquals(dataset.getValue(TEST_URI, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) run)), new Long(550L));
+        return dataset.getValue(TEST_URI, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) run));
     }
 
     public static PerformanceProjectAction.Range alwaysInRangeMock() {

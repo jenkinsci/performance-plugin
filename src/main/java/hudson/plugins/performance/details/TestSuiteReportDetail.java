@@ -6,6 +6,7 @@ import hudson.model.Run;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.actions.PerformanceProjectAction.Range;
+import hudson.plugins.performance.data.ReportValueSelector;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.util.ChartUtil;
@@ -66,7 +67,8 @@ public class TestSuiteReportDetail implements ModelObject {
     }
 
     DataSetBuilder<String, NumberOnlyBuildLabel> getChartDatasetBuilderForBuilds(String testUri, List<? extends Run<?, ?>> builds) {
-        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        ReportValueSelector valueSelector = ReportValueSelector.get(getProject());
         int nbBuildsToAnalyze = builds.size();
         for (Run<?, ?> build : builds) {
             if (buildsLimits.in(nbBuildsToAnalyze)) {
@@ -90,12 +92,12 @@ public class TestSuiteReportDetail implements ModelObject {
                 String testStaplerUri = PerformanceReport.asStaplerURI(testUri);
                 UriReport reportForTestUri = performanceReport.getUriReportMap().get(testStaplerUri);
                 if (reportForTestUri != null) {
-                    dataSetBuilderAverage.add(reportForTestUri.getAverage(), testUri, label);
+                    dataSetBuilder.add(valueSelector.getValue(reportForTestUri), testUri, label);
                 }
             }
             nbBuildsToAnalyze--;
         }
-        return dataSetBuilderAverage;
+        return dataSetBuilder;
     }
 
     protected static JFreeChart createRespondingTimeChart(CategoryDataset dataset) {

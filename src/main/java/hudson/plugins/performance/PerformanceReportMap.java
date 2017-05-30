@@ -5,6 +5,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
+import hudson.plugins.performance.data.ReportValueSelector;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
@@ -14,6 +15,9 @@ import hudson.plugins.performance.reports.UriReport;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.DataSetBuilder;
+
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.category.CategoryDataset;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -192,15 +196,29 @@ public class PerformanceReportMap implements ModelObject {
         Run<?, ?> previousBuild = getBuild();
         final Map<Run<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
         // Now we should have the data necessary to generate the graphs!
-        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        ReportValueSelector valueSelector = ReportValueSelector.get(getBuild().getParent());
+        String keyLabel = getKeyLabel(valueSelector.getGraphType());
         for (Run<?, ?> currentBuild : buildReports.keySet()) {
             NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
             PerformanceReport report = buildReports.get(currentBuild).get(parameter);
-            dataSetBuilderAverage.add(report.getAverage(),
-                    Messages.ProjectAction_Average(), label);
+            dataSetBuilder.add(valueSelector.getValue(report),
+                    keyLabel, label);
         }
-        ChartUtil.generateGraph(request, response, PerformanceProjectAction
-                .createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+        ChartUtil.generateGraph(request, response,
+                createRespondingTimeChart(dataSetBuilder.build()), 400, 200);
+    }
+
+    protected JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
+        return PerformanceProjectAction.doCreateRespondingTimeChart(dataset);
+    }
+
+    private String getKeyLabel(String configType) {
+        if (configType.equals(PerformancePublisher.MRT))
+            return Messages.ProjectAction_Median();
+        if (configType.equals(PerformancePublisher.PRT))
+            return Messages.ProjectAction_Line90();
+        return Messages.ProjectAction_Average();
     }
 
     private Map<Run<?, ?>, Map<String, PerformanceReport>> getBuildReports(String parameter, Run<?, ?> previousBuild) throws IOException {
@@ -233,26 +251,29 @@ public class PerformanceReportMap implements ModelObject {
         Run<?, ?> previousBuild = getBuild();
         Map<Run<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
         DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
+        ReportValueSelector valueSelector = ReportValueSelector.get(getBuild().getParent());
         for (Run<?, ?> currentBuild : buildReports.keySet()) {
             NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
             PerformanceReport report = buildReports.get(currentBuild).get(parameter);
 
             // Now we should have the data necessary to generate the graphs!
             for (String key : report.getUriReportMap().keySet()) {
-                Long methodAvg = report.getUriReportMap().get(key).getAverage();
-                dataSetBuilderSummarizer.add(methodAvg, label, key);
+                long methodValue = valueSelector.getValue(report.getUriReportMap().get(key));
+                dataSetBuilderSummarizer.add(methodValue, label, key);
             }
             ;
         }
         ChartUtil.generateGraph(
                 request,
                 response,
-                PerformanceProjectAction.createSummarizerChart(
-                        dataSetBuilderSummarizer.build(), "ms",
-                        Messages.ProjectAction_RespondingTime()), 400, 200);
+                createSummarizerChart(dataSetBuilderSummarizer.build()), 400, 200);
     }
 
-    private void parseReports(Run<?, ?> build, TaskListener listener,
+    protected JFreeChart createSummarizerChart(CategoryDataset dataset) {
+        return PerformanceProjectAction.doCreateSummarizerChart(dataset, "ms", Messages.ProjectAction_RespondingTime());
+    }
+
+    protected void parseReports(Run<?, ?> build, TaskListener listener,
                               PerformanceReportCollector collector, final String filename)
             throws IOException {
         File repo = new File(build.getRootDir(),
@@ -348,7 +369,7 @@ public class PerformanceReportMap implements ModelObject {
         }
     }
 
-    private interface PerformanceReportCollector {
+    protected interface PerformanceReportCollector {
 
         public void addAll(Collection<PerformanceReport> parse);
     }
