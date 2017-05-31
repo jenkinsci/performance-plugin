@@ -24,6 +24,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -73,6 +74,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean useSystemSitePackages = true;
     private boolean generatePerformanceTrend = true;
     private boolean useBztExitCode = true;
+    private String workspace;
 
     @DataBoundConstructor
     public PerformanceTestBuild(String params) {
@@ -90,11 +92,20 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         PrintStream logger = listener.getLogger();
         EnvVars envVars = run.getEnvironment(listener);
 
-        boolean isVirtualenvInstallation = false;
-        if (isGlobalBztInstalled(workspace, logger, launcher, envVars) ||
-                (isVirtualenvInstallation = installBztAndCheck(workspace, logger, launcher, envVars))) {
+        FilePath buildStepWorkspace = getBuildStepWorkspace(workspace);
+        try {
+            buildStepWorkspace.mkdirs();
+        } catch (IOException ex) {
+            logger.println("Cannot create directory because of error: " + ex.getMessage());
+            run.setResult(Result.FAILURE);
+            return;
+        }
 
-            int testExitCode = runPerformanceTest(workspace, logger, launcher, envVars, isVirtualenvInstallation);
+        boolean isVirtualenvInstallation = false;
+        if (isGlobalBztInstalled(buildStepWorkspace, logger, launcher, envVars) ||
+                (isVirtualenvInstallation = installBztAndCheck(buildStepWorkspace, logger, launcher, envVars))) {
+
+            int testExitCode = runPerformanceTest(buildStepWorkspace, logger, launcher, envVars, isVirtualenvInstallation);
 
             run.setResult(useBztExitCode ?
                     getBztJobResult(testExitCode) :
@@ -102,13 +113,28 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
             );
 
             if (generatePerformanceTrend && run.getResult().isBetterThan(Result.FAILURE)) {
-                generatePerformanceTrend(run, workspace, launcher, listener);
+                generatePerformanceTrend(run, buildStepWorkspace, launcher, listener);
             }
 
             return;
         }
 
         run.setResult(Result.FAILURE);
+    }
+
+    protected FilePath getBuildStepWorkspace(FilePath jobWorkspace) {
+        return (workspace != null && !workspace.isEmpty()) ?
+                (isAbsoluteFilePath() ?
+                        // absolute workspace
+                        new FilePath(jobWorkspace.getChannel(), workspace) :
+                        //relative workspace
+                        new FilePath(jobWorkspace, workspace)
+                ) :
+                jobWorkspace;
+    }
+
+    private boolean isAbsoluteFilePath() {
+        return new File(workspace).isAbsolute();
     }
 
     protected void generatePerformanceTrend(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
@@ -323,5 +349,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setUseBztExitCode(boolean useBztExitCode) {
         this.useBztExitCode = useBztExitCode;
+    }
+
+    public String getWorkspace() {
+        return workspace;
+    }
+
+    @DataBoundSetter
+    public void setWorkspace(String workspace) {
+        this.workspace = workspace;
     }
 }

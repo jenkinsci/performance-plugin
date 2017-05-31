@@ -184,4 +184,44 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         assertTrue(testBuild.isSuccessCode(0));
         assertFalse(testBuild.isSuccessCode(1));
     }
+
+    public void testPWD() throws Exception {
+        WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
+        File buildWorkspace = Files.createTempDir();
+        FilePath workspace = new FilePath(buildWorkspace);
+        p.createExecutable();
+        Run run = p.getFirstBuild();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+
+        PerformanceTestBuild testBuild = new PerformanceTestBuild("");
+        testBuild.setPrintDebugOutput(true);
+
+        // test absolute path
+        String absoluteWorkspace = "/tmp/o/work/bzt";
+        testBuild.setWorkspace(absoluteWorkspace);
+        testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        String jobLog = new String(stream.toByteArray());
+        assertTrue(jobLog, new File(absoluteWorkspace).isDirectory());
+        assertTrue(jobLog, new File(absoluteWorkspace).exists());
+        assertTrue(jobLog, new File(absoluteWorkspace, "jenkins-report.yml").exists());
+
+        // test relative path
+        String relativeWorkspace = "oooooh/relative/path";
+        testBuild.setWorkspace(relativeWorkspace);
+        testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        jobLog = new String(stream.toByteArray());
+        assertTrue(jobLog, new File(buildWorkspace, relativeWorkspace).isDirectory());
+        assertTrue(jobLog, new File(buildWorkspace, relativeWorkspace).exists());
+        assertTrue(jobLog, new File(buildWorkspace, relativeWorkspace + "/jenkins-report.yml").exists());
+
+
+
+        // test Permission denied
+        String rootPath = "/workspace/";
+        testBuild.setWorkspace(rootPath);
+        testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        jobLog = new String(stream.toByteArray());
+        assertTrue(jobLog, jobLog.contains("Failed to mkdirs: /workspace :  Permission denied"));
+    }
 }
