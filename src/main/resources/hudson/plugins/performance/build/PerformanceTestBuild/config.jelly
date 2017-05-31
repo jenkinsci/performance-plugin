@@ -5,41 +5,37 @@
     </f:entry>
 
     <f:advanced>
+        <f:entry title="${%Change workspace}" field="workspace" >
+            <f:textbox />
+        </f:entry>
         <f:entry>
             <table>
                 <tbody>
                     <tr>
                         <td>
-                             <f:entry title="Change working directory" field="workspace">
-                                    <f:textbox />
-                             </f:entry>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <f:checkbox name="generatePerformanceTrend" field="generatePerformanceTrend" default="true" title="Automatically generate performance report">
-                		        Automatically generate performance trend
+                            <f:checkbox field="generatePerformanceTrend" default="true" title="${%Auto report}">
+                		        ${%Auto report}
                             </f:checkbox>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <f:checkbox name="useBztExitCode" field="useBztExitCode" default="true" title="Mark build unstable/failed based on exit code">
-                                Mark build unstable/failed based on exit code
+                            <f:checkbox field="useBztExitCode" default="true" title="${%Use bzt code}">
+                                ${%Use bzt code}
                             </f:checkbox>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <f:checkbox name="printDebugOutput" field="printDebugOutput" title="Print debug output from all commands">
-  		                        Print debug output from all commands
+                            <f:checkbox field="printDebugOutput" title="${%Debug mode}">
+  		                        ${%Debug mode}
                             </f:checkbox>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <f:checkbox name="useSystemSitePackages" field="useSystemSitePackages"  default="true" title="Use '--system-site-packages' option for virtualenv">
-                                Use '--system-site-packages' option for virtualenv
+                            <f:checkbox field="useSystemSitePackages"  default="true" title="${%Virtualenv option}">
+                                ${%Virtualenv option}
                            </f:checkbox>
                         </td>
                     </tr>
