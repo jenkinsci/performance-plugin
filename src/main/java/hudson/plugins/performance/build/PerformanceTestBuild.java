@@ -74,7 +74,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean useSystemSitePackages = true;
     private boolean generatePerformanceTrend = true;
     private boolean useBztExitCode = true;
-    private String workspace;
+    private String workspace = "";
 
     @DataBoundConstructor
     public PerformanceTestBuild(String params) {
