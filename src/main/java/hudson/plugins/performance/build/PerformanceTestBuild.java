@@ -96,7 +96,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         try {
             buildStepWorkspace.mkdirs();
         } catch (IOException ex) {
-            logger.println(ex.getMessage() + " :  Permission denied");
+            logger.println("Cannot create directory because of error: " + ex.getMessage());
             run.setResult(Result.FAILURE);
             return;
         }
