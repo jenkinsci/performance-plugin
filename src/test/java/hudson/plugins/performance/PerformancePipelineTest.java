@@ -33,11 +33,12 @@ public class PerformancePipelineTest  {
                 s.setLabelString("test performance test ");
                 WorkflowJob p = story.j.createProject(WorkflowJob.class, "demo");
                 p.setDefinition(new CpsFlowDefinition(
-                        "node('master'){ bzt(params: '" + bztParams + "' + pwd(), useSystemSitePackages: false, printDebugOutput: true) }", true));
+                        "node('master'){ bzt(params: '" + bztParams + "' + pwd(), useSystemSitePackages: false, printDebugOutput: true, bztVersion: '1.9.1') }", true));
                 p.getRootDir().mkdirs();
                 WorkflowRun r = p.scheduleBuild2(0).waitForStart();
                 story.j.assertBuildStatusSuccess(story.j.waitForCompletion(r));
                 story.j.assertLogContains("File aggregate-results.xml reported 0.0% of errors [SUCCESS].", r);
+                story.j.assertLogContains("Taurus CLI Tool v1.9.1", r);
             }
         });
     }
