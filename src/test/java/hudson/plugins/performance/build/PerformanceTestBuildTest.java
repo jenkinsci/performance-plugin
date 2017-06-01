@@ -89,7 +89,8 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         testBuild.setUseBztExitCode(false);
         testBuild.setUseSystemSitePackages(false);
         testBuild.setPrintDebugOutput(false);
-
+        testBuild.setBztVersion("1.0.0.0.0");
+        assertEquals("1.0.0.0.0", testBuild.getBztVersion());
         assertEquals("test option", testBuild.getParams());
         testBuild.setParams("test1");
         assertEquals("test1", testBuild.getParams());

@@ -75,6 +75,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean generatePerformanceTrend = true;
     private boolean useBztExitCode = true;
     private String workspace = "";
+    private String bztVersion = "";
 
     @DataBoundConstructor
     public PerformanceTestBuild(String params) {
@@ -358,5 +359,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setWorkspace(String workspace) {
         this.workspace = workspace;
+    }
+
+    public String getBztVersion() {
+        return bztVersion;
+    }
+
+    @DataBoundSetter
+    public void setBztVersion(String bztVersion) {
+        this.bztVersion = bztVersion;
     }
 }
