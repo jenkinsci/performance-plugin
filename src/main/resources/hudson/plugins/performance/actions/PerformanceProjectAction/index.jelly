@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
   <l:layout css="/plugin/performance/css/style.css">
-    <st:include it="${it.project}" page="sidepanel.jelly" />
+    <st:include it="${it.job}" page="sidepanel.jelly" />
     <l:main-panel>
       <h1>${%Performance Trend}</h1>
       <div>
