@@ -219,10 +219,10 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
 
         // test Permission denied
-        String rootPath = "/workspace/";
+        String rootPath = "/rootWorkspace/";
         testBuild.setWorkspace(rootPath);
         testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
         jobLog = new String(stream.toByteArray());
-        assertTrue(jobLog, jobLog.contains("Cannot create directory because of error: Failed to mkdirs: /workspace"));
+        assertTrue(jobLog, jobLog.contains("Cannot create directory because of error: Failed to mkdirs: /rootWorkspace"));
     }
 }
