@@ -51,7 +51,7 @@ public class PerformanceProjectActionTest {
         assertTrue(testSuiteReportDetail instanceof TestSuiteReportDetail);
 
         assertTrue(performanceProjectAction.ifModePerformancePerTestCaseUsed());
-        assertFalse(performanceProjectAction.ifModeThroughputUsed());
+        assertTrue(performanceProjectAction.ifModeThroughputUsed());
 
         freeStyleProject.getPublishersList().add(new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, false, "", true, false, false, true, null));
         assertFalse(performanceProjectAction.ifModePerformancePerTestCaseUsed());
