@@ -195,6 +195,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         StreamTaskListener taskListener = new StreamTaskListener(stream);
 
         PerformanceTestBuild testBuild = new PerformanceTestBuild("");
+        testBuild.setUseSystemSitePackages(false);
         testBuild.setPrintDebugOutput(true);
 
         // test absolute path
