@@ -1,7 +1,10 @@
 package hudson.plugins.performance.actions;
 
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.Job;
 import hudson.model.Run;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.PerformancePublisher;
@@ -71,7 +74,7 @@ public class PerformanceProjectAction implements Action {
     private static final Logger LOGGER = Logger
             .getLogger(PerformanceProjectAction.class.getName());
 
-    public final AbstractProject<?, ?> project;
+    public final Job<?, ?> job;
 
     private transient List<String> performanceReportList;
 
@@ -87,8 +90,8 @@ public class PerformanceProjectAction implements Action {
         return PLUGIN_NAME;
     }
 
-    public PerformanceProjectAction(AbstractProject<?, ?> project) {
-        this.project = project;
+    public PerformanceProjectAction(Job<?, ?> job) {
+        this.job = job;
     }
 
     private JFreeChart createErrorsChart(CategoryDataset dataset) {
@@ -331,7 +334,7 @@ public class PerformanceProjectAction implements Action {
             return;
         }
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderErrors = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-        List<? extends Run<?, ?>> builds = getProject().getBuilds();
+        List<? extends Run<?, ?>> builds = getJob().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
         int nbBuildsToAnalyze = builds.size();
@@ -377,8 +380,8 @@ public class PerformanceProjectAction implements Action {
             return;
         }
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-        ReportValueSelector valueSelector = ReportValueSelector.get(getProject());
-        List<? extends Run<?, ?>> builds = getProject().getBuilds();
+        ReportValueSelector valueSelector = ReportValueSelector.get(getJob());
+        List<? extends Run<?, ?>> builds = getJob().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
         int nbBuildsToAnalyze = builds.size();
@@ -433,7 +436,7 @@ public class PerformanceProjectAction implements Action {
             return;
         }
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-        List<? extends Run<?, ?>> builds = getProject().getBuilds();
+        List<? extends Run<?, ?>> builds = getJob().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
         int nbBuildsToAnalyze = builds.size();
@@ -484,7 +487,7 @@ public class PerformanceProjectAction implements Action {
         }
 
         final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-        final List<? extends Run<?, ?>> builds = getProject().getBuilds();
+        final List<? extends Run<?, ?>> builds = getJob().getBuilds();
         final Range buildsLimits = getFirstAndLastBuild(request, builds);
 
         int nbBuildsToAnalyze = builds.size();
@@ -531,9 +534,9 @@ public class PerformanceProjectAction implements Action {
         }
         DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
         DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizerErrors = new DataSetBuilder<NumberOnlyBuildLabel, String>();
-        ReportValueSelector valueSelector = ReportValueSelector.get(getProject());
+        ReportValueSelector valueSelector = ReportValueSelector.get(getJob());
 
-        List<?> builds = getProject().getBuilds();
+        List<?> builds = getJob().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
         int nbBuildsToAnalyze = builds.size();
@@ -652,20 +655,37 @@ public class PerformanceProjectAction implements Action {
         return new Range(1, builds.size());
     }
 
-    public AbstractProject<?, ?> getProject() {
-        return project;
+    public Job<?, ?> getJob() {
+        return job;
+    }
+
+    public final Run getSomeBuildWithWorkspace() {
+        byte cnt = 0;
+        for(Run run = job.getLastBuild(); cnt < 5 && run != null; run = run.getPreviousBuild()) {
+            if (run instanceof AbstractBuild) {
+                FilePath ws = ((AbstractBuild) run).getWorkspace();
+                if(ws != null) {
+                    return run;
+                }
+            } else {
+                return run;
+            }
+            cnt++;
+        }
+        return null;
     }
 
     @Nonnull
     public List<String> getPerformanceReportList() {
-        this.performanceReportList = new ArrayList<String>(0);
-        if (null == this.project) {
+        this.performanceReportList = new ArrayList<>(0);
+        if (null == this.job) {
             return performanceReportList;
         }
-        if (null == this.project.getSomeBuildWithWorkspace()) {
+
+        if (null == getSomeBuildWithWorkspace()) {
             return performanceReportList;
         }
-        File file = new File(this.project.getSomeBuildWithWorkspace().getRootDir(),
+        File file = new File(getSomeBuildWithWorkspace().getRootDir(),
                 PerformanceReportMap.getPerformanceReportDirRelativePath());
         if (!file.isDirectory()) {
             return performanceReportList;
@@ -727,7 +747,7 @@ public class PerformanceProjectAction implements Action {
      * @return a view to configure the trend graph for the current user
      */
     private Object createUserConfiguration(final StaplerRequest request) {
-        GraphConfigurationDetail graph = new GraphConfigurationDetail(project,
+        GraphConfigurationDetail graph = new GraphConfigurationDetail(job,
                 PLUGIN_NAME, request);
         return graph;
     }
@@ -741,13 +761,13 @@ public class PerformanceProjectAction implements Action {
     private Object createTrendReport(final StaplerRequest request) {
         String filename = getTrendReportFilename(request);
         CategoryDataset dataSet = getTrendReportData(request, filename).build();
-        return new TrendReportDetail(project, PLUGIN_NAME, request, filename, dataSet);
+        return new TrendReportDetail(job, PLUGIN_NAME, request, filename, dataSet);
     }
 
     private Object createTestsuiteReport(final StaplerRequest request) {
         String filename = getTestSuiteReportFilename(request);
-        Range buildsLimits = getFirstAndLastBuild(request, getProject().getBuilds());
-        return new TestSuiteReportDetail(project, filename, buildsLimits);
+        Range buildsLimits = getFirstAndLastBuild(request, getJob().getBuilds());
+        return new TestSuiteReportDetail(job, filename, buildsLimits);
     }
 
     private String getTrendReportFilename(final StaplerRequest request) {
@@ -766,7 +786,7 @@ public class PerformanceProjectAction implements Action {
                                                                             String performanceReportNameFile) {
 
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-        List<? extends Run<?, ?>> builds = getProject().getBuilds();
+        List<? extends Run<?, ?>> builds = getJob().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
         int nbBuildsToAnalyze = builds.size();
@@ -811,19 +831,29 @@ public class PerformanceProjectAction implements Action {
 
     public boolean ifSummarizerParserUsed(String filename) {
 
-        return this.getProject().getBuilds().getLastBuild()
+        return this.getJob().getBuilds().getLastBuild()
                 .getAction(PerformanceBuildAction.class).getPerformanceReportMap()
                 .getPerformanceReport(filename).ifSummarizerParserUsed(filename);
     }
 
     public boolean ifModePerformancePerTestCaseUsed() {
-        PerformancePublisher publisher = project.getPublishersList().get(PerformancePublisher.class);
-        return publisher == null || publisher.isModePerformancePerTestCase();
+        if (this.job instanceof AbstractProject) {
+            AbstractProject project = (AbstractProject) job;
+            PerformancePublisher publisher = (PerformancePublisher) project.getPublishersList().get(PerformancePublisher.class);
+            return publisher == null || publisher.isModePerformancePerTestCase();
+        } else {
+            return true;
+        }
     }
 
     public boolean ifModeThroughputUsed() {
-        PerformancePublisher publisher = project.getPublishersList().get(PerformancePublisher.class);
-        return publisher != null && publisher.isModeThroughput();
+        if (this.job instanceof AbstractProject) {
+            AbstractProject project = (AbstractProject) job;
+            PerformancePublisher publisher = (PerformancePublisher) project.getPublishersList().get(PerformancePublisher.class);
+            return publisher == null || publisher.isModeThroughput();
+        } else {
+            return true;
+        }
     }
 
     public static class Range {

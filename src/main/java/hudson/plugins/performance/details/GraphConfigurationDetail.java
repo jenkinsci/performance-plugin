@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
+import hudson.model.Job;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.cookie.CookieHandler;
 import org.apache.commons.io.IOUtils;
@@ -24,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import hudson.model.AbstractProject;
 import hudson.model.ModelObject;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -100,7 +100,7 @@ public class GraphConfigurationDetail implements ModelObject {
 
     static DateFormat format = new SimpleDateFormat(DEFAULT_DATE);
 
-    public GraphConfigurationDetail(final AbstractProject<?, ?> project,
+    public GraphConfigurationDetail(final Job<?, ?> project,
                                     final String pluginName, final StaplerRequest request) {
 
         String value = createCookieHandler(pluginName).getValue(
@@ -236,7 +236,7 @@ public class GraphConfigurationDetail implements ModelObject {
      * @param pluginName the name of the plug-in
      * @return the created file
      */
-    protected static File createDefaultsFile(final AbstractProject<?, ?> project,
+    protected static File createDefaultsFile(final Job<?, ?> project,
                                              final String pluginName) {
         return new File(project.getRootDir(), pluginName + ".txt");
     }

@@ -24,8 +24,12 @@
     <td>${it.get90Line()}</td>
     <td>${it.getMin()}</td>
     <td>${it.getMax()}</td>
-    <td>${it.getHttpCode()}</td>
-    <td>${it.getLastBuildHttpCodeIfChanged()}</td>
+    <td>
+        ${it.getHttpCode()}
+        <sup>
+            ${it.getLastBuildHttpCodeIfChanged()}
+        </sup>
+    </td>
 
     <td>
         ${it.errorPercent()} %

@@ -1,6 +1,6 @@
 package hudson.plugins.performance.details;
 
-import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.plugins.performance.Messages;
@@ -41,13 +41,13 @@ import java.util.List;
  */
 public class TestSuiteReportDetail implements ModelObject {
 
-    private final AbstractProject<?, ?> project;
+    private final Job<?, ?> project;
     private final String filename;
     private final Range buildsLimits;
 
     private transient List<String> performanceReportTestCaseList;
 
-    public TestSuiteReportDetail(final AbstractProject<?, ?> project, String filename,
+    public TestSuiteReportDetail(final Job<?, ?> project, String filename,
                                  Range buildsLimits) {
         this.project = project;
         this.filename = filename;
@@ -183,7 +183,7 @@ public class TestSuiteReportDetail implements ModelObject {
         return this.performanceReportTestCaseList;
     }
 
-    public AbstractProject<?, ?> getProject() {
+    public Job<?, ?> getProject() {
         return project;
     }
 

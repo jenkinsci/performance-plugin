@@ -195,6 +195,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         StreamTaskListener taskListener = new StreamTaskListener(stream);
 
         PerformanceTestBuild testBuild = new PerformanceTestBuild("");
+        testBuild.setUseSystemSitePackages(false);
         testBuild.setPrintDebugOutput(true);
 
         // test absolute path
@@ -218,10 +219,10 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
 
         // test Permission denied
-        String rootPath = "/workspace/";
+        String rootPath = "/rootWorkspace/";
         testBuild.setWorkspace(rootPath);
         testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
         jobLog = new String(stream.toByteArray());
-        assertTrue(jobLog, jobLog.contains("Failed to mkdirs: /workspace :  Permission denied"));
+        assertTrue(jobLog, jobLog.contains("Cannot create directory because of error: Failed to mkdirs: /rootWorkspace"));
     }
 }
