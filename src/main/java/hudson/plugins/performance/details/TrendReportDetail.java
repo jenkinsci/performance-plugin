@@ -1,6 +1,6 @@
 package hudson.plugins.performance.details;
 
-import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.model.ModelObject;
 import hudson.plugins.performance.Messages;
 import org.jfree.data.category.CategoryDataset;
@@ -16,11 +16,11 @@ import java.util.List;
 public class TrendReportDetail implements ModelObject,
         Iterable<TrendReportDetail.Row> {
 
-    private AbstractProject<?, ?> project;
+    private Job<?, ?> project;
     private String filename;
     private CategoryDataset dataSet;
 
-    public TrendReportDetail(final AbstractProject<?, ?> project,
+    public TrendReportDetail(final Job<?, ?> project,
                              final String pluginName, final StaplerRequest request, String filename,
                              CategoryDataset dataSet) {
         this.project = project;
@@ -28,7 +28,7 @@ public class TrendReportDetail implements ModelObject,
         this.dataSet = dataSet;
     }
 
-    public AbstractProject<?, ?> getProject() {
+    public Job<?, ?> getProject() {
         return project;
     }
 
