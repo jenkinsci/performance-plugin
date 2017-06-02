@@ -75,6 +75,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean generatePerformanceTrend = true;
     private boolean useBztExitCode = true;
     private String workspace = "";
+    private String bztVersion = "";
 
     @DataBoundConstructor
     public PerformanceTestBuild(String params) {
@@ -281,7 +282,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     // return bzt install command
     private String[] getBztInstallCommand(FilePath workspace) {
-        return new String[]{getVirtualenvPath(workspace) + "pip", "install", PERFORMANCE_TEST_COMMAND};
+        return new String[]{
+                getVirtualenvPath(workspace) + "pip", "install",
+                        (bztVersion != null && !bztVersion.isEmpty()) ?
+                                PERFORMANCE_TEST_COMMAND + "==" + bztVersion :
+                                PERFORMANCE_TEST_COMMAND};
     }
 
     // return bzt check command
@@ -358,5 +363,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setWorkspace(String workspace) {
         this.workspace = workspace;
+    }
+
+    public String getBztVersion() {
+        return bztVersion;
+    }
+
+    @DataBoundSetter
+    public void setBztVersion(String bztVersion) {
+        this.bztVersion = bztVersion;
     }
 }

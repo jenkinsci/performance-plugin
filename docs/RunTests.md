@@ -20,9 +20,10 @@ Test runner step works fine with Jenkins slaves, as well as with Pipeline syntax
 
 ## Jenkins GUI Configuration
 If you are using GUI-based job configs for Jenkins, choose "Run Performance Test" step from "Add build step" menu:
+
 ![](run_step_choice.png)
 
-In the field that appears, you can simply specify path to your JMeter test plan file. This is Taurus' capability due to high popularity of JMeter:
+In the field that appears, you can simply specify path to your JMeter test plan file. This is Taurus capability due to high popularity of JMeter:
 
 ![](run_jmeter.png)
 
@@ -30,8 +31,10 @@ If you want to use extended capabilities of Taurus, you can specify its config f
 
 ![](run_extended_config.png)
 
-Clicking on "Advanced..." will open several flags that can alter build step behavior:
+Clicking on "Advanced..." will open several options that can alter build step behavior:
 
+- _Change working directory_ - set working directory in which test will be run, by default will be used build workspace
+- _Change 'bzt' version_ - set `bzt` version that will be installed inside a `virtualenv`, by default will be installed the latest version
 - _Automatically generate performance report_ - enabled by default, builds [performance trend report](Reporting.md) from Taurus execution results, you can turn it off if you don't need report
 - _Mark build unstable/failed based on exit code_ - enabled by default, will mark build step failed if Taurus exit code is 1, and will mark it unstable if it's another non-zero exit code
 - _Print debug output from all commands_ - enable this flag if you are experiencing `bzt` installation issues and want to get more debugging information into console log

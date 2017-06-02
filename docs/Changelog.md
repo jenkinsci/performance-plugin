@@ -2,7 +2,10 @@
 # Changelog 
 
 ## v3.1 (upcoming)
-- FEATURE: Snippet Generator generates nice and simple pipeline scripts for Performance Test & Performance Publisher. Contributed by Andrew Bayer
+- FEATURE: Snippet Generator generates nice and simple pipeline scripts for Performance Test & Performance Publisher. Contributed by [Andrew Bayer](https://github.com/abayer)
+- FEATURE: Add option to choose graphed metric. Contributed by [Märt Bakhoff](https://github.com/mbakhoff)
+- FEATURE: Add option to choose bzt version
+- FIX: Showing overall report link in pipeline mode
 
 ## v3.0
 
