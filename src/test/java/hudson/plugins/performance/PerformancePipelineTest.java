@@ -41,7 +41,6 @@ public class PerformancePipelineTest  {
                 story.j.assertLogContains("File aggregate-results.xml reported 0.0% of errors [SUCCESS].", r);
                 if (JenkinsRule.getLog(r).contains("Performance test: Installing bzt into 'taurus-venv'")) {
                     story.j.assertLogContains("Taurus CLI Tool v1.9.1", r);
-
                 }
             }
         });
