@@ -1,7 +1,7 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
-## v3.1 (upcoming)
+## v3.1 (2nd of June, 2017)
 - FEATURE: Snippet Generator generates nice and simple pipeline scripts for Performance Test & Performance Publisher. Contributed by [Andrew Bayer](https://github.com/abayer)
 - FEATURE: Add option to choose graphed metric. Contributed by [Märt Bakhoff](https://github.com/mbakhoff)
 - FEATURE: Add option to choose bzt version
