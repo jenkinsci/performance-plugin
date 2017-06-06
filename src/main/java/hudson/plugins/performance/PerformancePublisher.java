@@ -1124,6 +1124,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         this.relativeUnstableThresholdPositive = Math.max(0, Math.min(relativeUnstableThresholdPositive, 100));
     }
 
+    @DataBoundSetter
     public void setRelativeUnstableThresholdNegative(double relativeUnstableThresholdNegative) {
         this.relativeUnstableThresholdNegative = Math.max(0, Math.min(relativeUnstableThresholdNegative, 100));
     }
