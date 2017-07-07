@@ -71,6 +71,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     private String params;
     private boolean printDebugOutput = false;
+    private boolean alwaysUseVirtualenv = false;
     private boolean useSystemSitePackages = true;
     private boolean generatePerformanceTrend = true;
     private boolean useBztExitCode = true;
@@ -103,7 +104,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         }
 
         boolean isVirtualenvInstallation = false;
-        if (isGlobalBztInstalled(buildStepWorkspace, logger, launcher, envVars) ||
+        if ((!alwaysUseVirtualenv && isGlobalBztInstalled(buildStepWorkspace, logger, launcher, envVars)) ||
                 (isVirtualenvInstallation = installBztAndCheck(buildStepWorkspace, logger, launcher, envVars))) {
 
             int testExitCode = runPerformanceTest(buildStepWorkspace, logger, launcher, envVars, isVirtualenvInstallation);
@@ -322,6 +323,15 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     public boolean isPrintDebugOutput() {
         return printDebugOutput;
+    }
+
+    public boolean isAlwaysUseVirtualenv() {
+        return alwaysUseVirtualenv;
+    }
+
+    @DataBoundSetter
+    public void setAlwaysUseVirtualenv(boolean alwaysUseVirtualenv) {
+        this.alwaysUseVirtualenv = alwaysUseVirtualenv;
     }
 
     @DataBoundSetter
