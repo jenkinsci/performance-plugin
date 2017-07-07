@@ -985,7 +985,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setErrorFailedThreshold(int errorFailedThreshold) {
-        this.errorFailedThreshold = Math.max(0, Math.min(errorFailedThreshold, 100));
+        this.errorFailedThreshold = (errorFailedThreshold == -1) ? (-1) : Math.max(0, Math.min(errorFailedThreshold, 100));
     }
 
     public int getErrorUnstableThreshold() {
@@ -994,7 +994,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setErrorUnstableThreshold(int errorUnstableThreshold) {
-        this.errorUnstableThreshold = Math.max(0, Math.min(errorUnstableThreshold, 100));
+        this.errorUnstableThreshold = (errorUnstableThreshold == -1) ? (-1) : Math.max(0, Math.min(errorUnstableThreshold, 100));
     }
 
     public String getErrorUnstableResponseTimeThreshold() {
