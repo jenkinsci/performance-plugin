@@ -63,7 +63,7 @@ public class PerformancePipelineTest  {
                 s.setLabelString("test performance report DSL function");
                 WorkflowJob p = story.j.createProject(WorkflowJob.class, "demo");
                 p.setDefinition(new CpsFlowDefinition(
-                        "node{ writeFile file: 'test.xml', text: '''" + report + "'''; perfReport 'test.xml' }", true));
+                        "node{ writeFile file: 'test.xml', text: '''" + report + "'''; perfReport errorFailedThreshold: 0, errorUnstableThreshold: 0, sourceDataFiles: 'test.xml' }", true));
                 WorkflowRun r = p.scheduleBuild2(0).waitForStart();
                 story.j.assertBuildStatus(Result.FAILURE, story.j.waitForCompletion(r));
                 story.j.assertLogContains("File test.xml reported 1.625% of errors [FAILURE]. Build status is: FAILURE", r);
