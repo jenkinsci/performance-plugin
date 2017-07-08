@@ -3,6 +3,7 @@
 
 ## v3.2 (upcoming)
 - FIX: Comparison to baseline
+- FEATURE: Add `Always use virtualenv` option
 - FIX: Changing build status with default comparison option
 - FIX: Saving RelativeUnstableThresholdNegative. Contributed by [Märt Bakhoff](https://github.com/mbakhoff)
 

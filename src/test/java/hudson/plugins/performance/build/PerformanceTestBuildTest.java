@@ -89,6 +89,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         testBuild.setUseBztExitCode(false);
         testBuild.setUseSystemSitePackages(false);
         testBuild.setPrintDebugOutput(false);
+        testBuild.setAlwaysUseVirtualenv(false);
         testBuild.setBztVersion("1.0.0.0.0");
         assertEquals("1.0.0.0.0", testBuild.getBztVersion());
         assertEquals("test option", testBuild.getParams());
@@ -99,14 +100,17 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         assertFalse(testBuild.isPrintDebugOutput());
         assertFalse(testBuild.isGeneratePerformanceTrend());
         assertFalse(testBuild.isUseBztExitCode());
+        assertFalse(testBuild.isAlwaysUseVirtualenv());
         testBuild.setGeneratePerformanceTrend(true);
         testBuild.setPrintDebugOutput(true);
         testBuild.setUseSystemSitePackages(true);
         testBuild.setUseBztExitCode(true);
+        testBuild.setAlwaysUseVirtualenv(true);
         assertTrue(testBuild.isUseSystemSitePackages());
         assertTrue(testBuild.isPrintDebugOutput());
         assertTrue(testBuild.isGeneratePerformanceTrend());
         assertTrue(testBuild.isUseBztExitCode());
+        assertTrue(testBuild.isAlwaysUseVirtualenv());
     }
 
 
