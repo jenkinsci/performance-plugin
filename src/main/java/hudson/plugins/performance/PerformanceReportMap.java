@@ -76,6 +76,7 @@ public class PerformanceReportMap implements ModelObject {
                 }
             }
         }, null);
+        addPreviousBuildReports();
     }
 
     private void addAll(Collection<PerformanceReport> reports) {
