@@ -35,6 +35,7 @@ Clicking on "Advanced..." will open several options that can alter build step be
 
 - _Change working directory_ - set working directory in which test will be run, by default will be used build workspace
 - _Change 'bzt' version_ - set `bzt` version that will be installed inside a `virtualenv`, by default will be installed the latest version
+- _Always use virtualenv_ - enable this flag if you want to install `bzt` into `virtualenv`
 - _Automatically generate performance report_ - enabled by default, builds [performance trend report](Reporting.md) from Taurus execution results, you can turn it off if you don't need report
 - _Mark build unstable/failed based on exit code_ - enabled by default, will mark build step failed if Taurus exit code is 1, and will mark it unstable if it's another non-zero exit code
 - _Print debug output from all commands_ - enable this flag if you are experiencing `bzt` installation issues and want to get more debugging information into console log
