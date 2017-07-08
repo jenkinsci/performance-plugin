@@ -79,9 +79,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     public static final double THRESHOLD_TOLERANCE = 0.00000001;
 
-    private int errorFailedThreshold = 0;
+    private int errorFailedThreshold = -1;
 
-    private int errorUnstableThreshold = 0;
+    private int errorUnstableThreshold = -1;
 
     private String errorUnstableResponseTimeThreshold = "";
 
