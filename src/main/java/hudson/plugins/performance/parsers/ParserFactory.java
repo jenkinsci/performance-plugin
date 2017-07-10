@@ -25,24 +25,19 @@ public class ParserFactory {
     }
 
     public static PerformanceReportParser getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env) throws IOException, InterruptedException {
-        if (defaultGlobPatterns.containsKey(glob)) {
-            return getParser(defaultGlobPatterns.get(glob), glob);
+        String expandGlob = env.expand(glob);
+        if (defaultGlobPatterns.containsKey(expandGlob)) {
+            return getParser(defaultGlobPatterns.get(expandGlob), expandGlob);
         }
 
-        String expandGlob = env.expand(glob);
-        try {
-            FilePath[] pathList = workspace.list(expandGlob);
-            for (FilePath src : pathList) {
-                // copy file (it can be on remote slave) to "../build/../temp/" folder
-                final File localReport = new File(build.getRootDir(), "/temp/" + src.getName());
-                if (src.isDirectory()) {
-                    logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
-                    continue;
-                }
-                src.copyTo(new FilePath(localReport));
-                return getParser(ParserDetector.detect(localReport.getPath()), glob);
-            }
-        } catch (IOException ignored) {
+        File path = new File(expandGlob);
+        return path.isAbsolute() ? getParserWithAbsolutePath(build, logger, path) : getParserWithRelativePath(build, workspace, logger, expandGlob);
+    }
+
+    private static PerformanceReportParser getParserWithRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob) throws IOException, InterruptedException {
+        PerformanceReportParser result = getParserUsingAntPattern(build, workspace, logger, glob);
+        if (result != null) {
+            return result;
         }
 
         File report = new File(workspace.getRemote() + '/' + glob);
@@ -55,6 +50,72 @@ public class ParserFactory {
 
         return getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob);
     }
+
+    private static PerformanceReportParser getParserUsingAntPattern(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob) throws InterruptedException {
+        try {
+            FilePath[] pathList = workspace.list(glob);
+            for (FilePath src : pathList) {
+                // copy file (it can be on remote slave) to "../build/../temp/" folder
+                final File localReport = new File(build.getRootDir(), "/temp/" + src.getName());
+                if (src.isDirectory()) {
+                    logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
+                    continue;
+                }
+                src.copyTo(new FilePath(localReport));
+                return getParser(ParserDetector.detect(localReport.getPath()), glob);
+            }
+        } catch (IOException ignored) {
+        }
+        return null;
+    }
+
+
+    private static PerformanceReportParser getParserWithAbsolutePath(Run<?, ?> build, PrintStream logger, File path) throws IOException, InterruptedException {
+        PerformanceReportParser result = getParserUsingAntPattern(build, logger, path);
+        if (result != null) {
+            return result;
+        }
+
+        if (!path.exists()) {
+            // if report on remote slave
+            FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + path.getName()));
+            localReport.copyFrom(new FilePath(path));
+            return getParser(ParserDetector.detect(localReport.getRemote()), path.getName());
+        }
+
+        return getParser(ParserDetector.detect(path.getAbsolutePath()), path.getAbsolutePath());
+    }
+
+    private static PerformanceReportParser getParserUsingAntPattern(Run<?, ?> build, PrintStream logger, File path) throws InterruptedException {
+        try {
+            File parent = path.getParentFile();
+            FilePath workspace = new FilePath(path.getParentFile());
+            while (!workspace.exists()) {
+                parent = parent.getParentFile();
+                if (parent != null) {
+                    workspace = new FilePath(parent);
+                } else {
+                    return null;
+                }
+            }
+
+            String glob = path.getAbsolutePath().substring(parent.getAbsolutePath().length() + 1);
+            FilePath[] pathList = workspace.list(glob);
+            for (FilePath src : pathList) {
+                // copy file (it can be on remote slave) to "../build/../temp/" folder
+                final File localReport = new File(build.getRootDir(), "/temp/" + src.getName());
+                if (src.isDirectory()) {
+                    logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
+                    continue;
+                }
+                src.copyTo(new FilePath(localReport));
+                return getParser(ParserDetector.detect(localReport.getPath()), path.getAbsolutePath());
+            }
+        } catch (IOException ignored) {
+        }
+        return null;
+    }
+
 
     private static PerformanceReportParser getParser(String parserName, String glob) {
         if (parserName.equals(JMeterParser.class.getSimpleName())) {
