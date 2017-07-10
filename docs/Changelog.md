@@ -5,6 +5,7 @@
 - FIX: Comparison to baseline
 - FEATURE: Add `Always use virtualenv` option
 - FIX: Changing build status with default comparison option
+- FIX: Split params for build step
 - FIX: Saving RelativeUnstableThresholdNegative. Contributed by [Märt Bakhoff](https://github.com/mbakhoff)
 
 ## v3.1 (2nd of June, 2017)

@@ -31,6 +31,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * "Build step" for running performance test
@@ -235,10 +237,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     // Step 2: Run performance test.
     private int runPerformanceTest(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean isVirtualenvInstallation) throws InterruptedException, IOException {
-        String[] params = this.params.split(" ");
-        final List<String> testCommand = new ArrayList<String>(params.length + 2);
+        final List<String> testCommand = new ArrayList<>();
         testCommand.add((isVirtualenvInstallation ? getVirtualenvPath(workspace) : "") + PERFORMANCE_TEST_COMMAND);
-        for (String param : params) {
+        Matcher m = Pattern.compile("([^\']\\S*|\'.+?\')\\s*").matcher(this.params);
+        while (m.find()) {
+            String param = m.group(1);
             if (!param.isEmpty()) {
                 testCommand.add(param);
             }

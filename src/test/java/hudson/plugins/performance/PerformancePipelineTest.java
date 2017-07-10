@@ -26,7 +26,7 @@ public class PerformancePipelineTest  {
     @Test
     public void bztSmokeTests() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
-        final String bztParams =  path + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=";
+        final String bztParams =  path + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o \\'reporting.-1={module: \"junit-xml\", filename: \"report.xml\"}\\' -o \\'execution.0.scenario.requests.1={url: \"http://blazedemo.com/\": assert: [\"yo mamma\"]}\\' -o modules.jmeter.version=3.1 -o modules.jmeter.path=";
 
         story.addStep(new Statement() {
             public void evaluate() throws Throwable {
