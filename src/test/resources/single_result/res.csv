@@ -1,0 +1,2 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,Latency,IdleTime,Connect
+1497860498732,92,HTTP Request,Non HTTP response code: java.net.UnknownHostException,Non HTTP response message: blazdemo.com: Name or service not known,Thread Group 1-1,text,false,,2161,0,1,1,0,0,92
