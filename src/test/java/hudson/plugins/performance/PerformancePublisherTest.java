@@ -317,7 +317,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
     @Test
     public void testErrorThresholdUnstable() throws Exception {
 
-        PerformancePublisher publisherUnstable = new PerformancePublisher("/JMeterPublisher.csv",
+        PerformancePublisher publisherUnstable = new PerformancePublisher("JMeterPublisher.csv",
                 -1,
                 1,  // errorUnstableThreshold
                 "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
@@ -345,7 +345,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
     @Test
     public void testErrorThresholdFailed() throws Exception {
 
-        PerformancePublisher publisherFailed = new PerformancePublisher("/JMeterPublisher.csv",
+        PerformancePublisher publisherFailed = new PerformancePublisher("JMeterPublisher.csv",
                  2, //errorFailedThreshold
                 -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
                 false, // modeOfThreshold (false = Error Threshold)
@@ -372,7 +372,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
     @Test
     public void testErrorThresholdAverageResponseTime() throws Exception {
 
-        PerformancePublisher publisherART = new PerformancePublisher("/JMeterPublisher.csv", -1, -1,
+        PerformancePublisher publisherART = new PerformancePublisher("JMeterPublisher.csv", -1, -1,
                 "JMeterPublisher.csv:1000", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
                 false, // modeOfThreshold (false = Error Threshold)
                 true, true, true, null);

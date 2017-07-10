@@ -2,6 +2,7 @@
 # Changelog 
 
 ## v3.2 (upcoming)
+- FIX: Absolute path in Publisher ([JENKINS-45119](https://issues.jenkins-ci.org/browse/JENKINS-45119))
 - FIX: Comparison to baseline
 - FEATURE: Add `Always use virtualenv` option
 - FIX: Changing build status with default comparison option
