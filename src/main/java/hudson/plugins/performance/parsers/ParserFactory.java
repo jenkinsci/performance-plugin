@@ -31,11 +31,11 @@ public class ParserFactory {
         }
 
         File path = new File(expandGlob);
-        return path.isAbsolute() ? getParserWithAbsolutePath(build, logger, path) : getParserWithRelativePath(build, workspace, logger, expandGlob);
+        return path.isAbsolute() ? getParserWithAbsolutePath(build, workspace, logger, path) : getParserWithRelativePath(build, workspace, logger, expandGlob);
     }
 
     private static PerformanceReportParser getParserWithRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob) throws IOException, InterruptedException {
-        PerformanceReportParser result = getParserUsingAntPattern(build, workspace, logger, glob);
+        PerformanceReportParser result = getParserUsingAntPatternRelativePath(build, workspace, logger, glob);
         if (result != null) {
             return result;
         }
@@ -51,7 +51,7 @@ public class ParserFactory {
         return getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob);
     }
 
-    private static PerformanceReportParser getParserUsingAntPattern(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob) throws InterruptedException {
+    private static PerformanceReportParser getParserUsingAntPatternRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob) throws InterruptedException {
         try {
             FilePath[] pathList = workspace.list(glob);
             for (FilePath src : pathList) {
@@ -70,8 +70,8 @@ public class ParserFactory {
     }
 
 
-    private static PerformanceReportParser getParserWithAbsolutePath(Run<?, ?> build, PrintStream logger, File path) throws IOException, InterruptedException {
-        PerformanceReportParser result = getParserUsingAntPattern(build, logger, path);
+    private static PerformanceReportParser getParserWithAbsolutePath(Run<?, ?> build, FilePath workspace, PrintStream logger, File path) throws IOException, InterruptedException {
+        PerformanceReportParser result = getParserUsingAntPatternAbsolutePath(build, workspace, logger, path);
         if (result != null) {
             return result;
         }
@@ -79,21 +79,21 @@ public class ParserFactory {
         if (!path.exists()) {
             // if report on remote slave
             FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + path.getName()));
-            localReport.copyFrom(new FilePath(path));
+            localReport.copyFrom(new FilePath(workspace.getChannel(), path.getAbsolutePath()));
             return getParser(ParserDetector.detect(localReport.getRemote()), path.getName());
         }
 
         return getParser(ParserDetector.detect(path.getAbsolutePath()), path.getAbsolutePath());
     }
 
-    private static PerformanceReportParser getParserUsingAntPattern(Run<?, ?> build, PrintStream logger, File path) throws InterruptedException {
+    private static PerformanceReportParser getParserUsingAntPatternAbsolutePath(Run<?, ?> build, FilePath wsp, PrintStream logger, File path) throws InterruptedException {
         try {
             File parent = path.getParentFile();
-            FilePath workspace = new FilePath(path.getParentFile());
+            FilePath workspace = new FilePath(wsp.getChannel(), parent.getAbsolutePath());
             while (!workspace.exists()) {
                 parent = parent.getParentFile();
                 if (parent != null) {
-                    workspace = new FilePath(parent);
+                    workspace = new FilePath(wsp.getChannel(), parent.getAbsolutePath());
                 } else {
                     return null;
                 }
