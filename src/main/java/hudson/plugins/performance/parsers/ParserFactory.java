@@ -9,8 +9,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ParserFactory {
+    private static final Logger LOGGER = Logger.getLogger(ParserFactory.class.getName());
 
     protected static final Map<String, String> defaultGlobPatterns = new Hashtable<String, String>();
 
@@ -65,6 +68,7 @@ public class ParserFactory {
                 return getParser(ParserDetector.detect(localReport.getPath()), glob);
             }
         } catch (IOException ignored) {
+            LOGGER.log(Level.FINE, "Cannot find report file using Ant pattern", ignored);
         }
         return null;
     }
@@ -112,6 +116,7 @@ public class ParserFactory {
                 return getParser(ParserDetector.detect(localReport.getPath()), localReport.getPath());
             }
         } catch (IOException ignored) {
+            LOGGER.log(Level.FINE, "Cannot find report file using Ant pattern", ignored);
         }
         return null;
     }
