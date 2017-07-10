@@ -109,7 +109,7 @@ public class ParserFactory {
                     continue;
                 }
                 src.copyTo(new FilePath(localReport));
-                return getParser(ParserDetector.detect(localReport.getPath()), path.getAbsolutePath());
+                return getParser(ParserDetector.detect(localReport.getPath()), localReport.getPath());
             }
         } catch (IOException ignored) {
         }
