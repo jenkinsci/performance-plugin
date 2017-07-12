@@ -8,6 +8,7 @@
 - FIX: Changing build status with default comparison option
 - FIX: Split params for build step
 - FIX: Saving RelativeUnstableThresholdNegative. Contributed by [Märt Bakhoff](https://github.com/mbakhoff)
+- FIX: add PerformanceProjectAction only to runs, which contain PerformanceBuildAction 
 
 ## v3.1 (2nd of June, 2017)
 - FEATURE: Snippet Generator generates nice and simple pipeline scripts for Performance Test & Performance Publisher. Contributed by [Andrew Bayer](https://github.com/abayer)
