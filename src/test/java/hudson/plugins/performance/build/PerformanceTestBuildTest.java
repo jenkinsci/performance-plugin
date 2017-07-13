@@ -122,7 +122,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FilePath workspace = new FilePath(Files.createTempDir());
         p.createExecutable();
         Run run = p.getFirstBuild();
-        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote();
+        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]";
 
 
         PerformanceTestBuild buildTest = new PerformanceTestBuild(args);
@@ -154,7 +154,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FilePath workspace = new FilePath(Files.createTempDir());
         p.createExecutable();
         Run run = p.getFirstBuild();
-        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote();
+        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]" ;
 
         PerformanceTestBuild buildTest = new PerformanceTestBuild(args);
         buildTest.setGeneratePerformanceTrend(false);

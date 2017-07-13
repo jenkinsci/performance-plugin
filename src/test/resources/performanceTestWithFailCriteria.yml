@@ -15,4 +15,4 @@ scenarios:
 reporting:
 - module: passfail
   criteria:
-  - avg-rt of index>1ms for 1s, stop as failed    
+  - success>0
