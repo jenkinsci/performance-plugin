@@ -15,4 +15,4 @@ scenarios:
 reporting:
 - module: passfail
   criteria:
-  - success>0
+  - hits>0
