@@ -8,7 +8,6 @@ import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.BuildListener;
 import hudson.model.Items;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -943,7 +942,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     public void evaluateInExpertMode(Run<?, ?> run, TaskListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
         ConstraintFactory factory = new ConstraintFactory();
-        ConstraintSettings settings = new ConstraintSettings((BuildListener) listener, ignoreFailedBuilds, ignoreUnstableBuilds,
+        ConstraintSettings settings = new ConstraintSettings(listener, ignoreFailedBuilds, ignoreUnstableBuilds,
                 persistConstraintLog);
         ConstraintChecker checker = new ConstraintChecker(settings, run.getParent().getBuilds());
         ArrayList<ConstraintEvaluation> ceList = new ArrayList<ConstraintEvaluation>();
