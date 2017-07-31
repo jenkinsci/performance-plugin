@@ -1,7 +1,10 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
-## v3.2 (upcoming)
+## v3.3 (upcoming)
+- FIX: logging for expert criteria works with pipeline without throwing exceptions. Contributed by [https://github.com/tilln](https://github.com/tilln)
+
+## v3.2 (14th of July, 2017)
 - FIX: Absolute path in Publisher ([JENKINS-45119](https://issues.jenkins-ci.org/browse/JENKINS-45119))
 - FIX: Comparison to baseline
 - FEATURE: Add `Always use virtualenv` option
