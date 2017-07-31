@@ -1,6 +1,6 @@
 package hudson.plugins.performance.data;
 
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 
 /**
  * Holds the global settings for constraints.
@@ -13,7 +13,7 @@ public class ConstraintSettings {
      * Build listener which is used to print relevant information to the console while evaluating
      * constraints
      */
-    private transient BuildListener listener;
+    private transient TaskListener listener;
     /**
      * If true: relative constraints won't include builds in the past with the status FAILURE into
      * the evaluation
@@ -29,18 +29,18 @@ public class ConstraintSettings {
      */
     private boolean persistConstraintLog;
 
-    public ConstraintSettings(BuildListener listener, boolean ignoreFailedBuilds, boolean ignoreUnstableBuilds, boolean persistConstraintLog) {
+    public ConstraintSettings(TaskListener listener, boolean ignoreFailedBuilds, boolean ignoreUnstableBuilds, boolean persistConstraintLog) {
         this.setListener(listener);
         this.setIgnoreFailedBuilds(ignoreFailedBuilds);
         this.setIgnoreUnstableBuilds(ignoreUnstableBuilds);
         this.setPersistConstraintLog(persistConstraintLog);
     }
 
-    public BuildListener getListener() {
+    public TaskListener getListener() {
         return listener;
     }
 
-    private void setListener(BuildListener listener) {
+    private void setListener(TaskListener listener) {
         this.listener = listener;
     }
 
