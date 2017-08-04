@@ -122,6 +122,9 @@ public class RelativeConstraint extends AbstractConstraint {
 			 * you change 'ignoreFailed' or 'ignoreUnstable' you first have to save your
 			 * configuration before you change the number of previous builds
 			 */
+            if (project == null) { // Counting builds makes no sense when in Pipeline snippet generator
+                return FormValidation.ok();
+            }
             RunList<?> builds = project.getBuilds();
             int buildsToAnalyze = 0;
             int successBuilds = 0;
