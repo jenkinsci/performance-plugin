@@ -55,6 +55,15 @@ public class PreviousResultsBlock extends AbstractDescribableImpl<PreviousResult
         this.choicePreviousResults = choicePreviousResults;
     }
 
+    // Workaround for radioBlock sending 'value' instead of field name (JENKINS-45988):
+    public String getValue() {
+        return Boolean.toString(isChoicePreviousResults());
+    }
+
+    public void setValue(String value) {
+        setChoicePreviousResults(Boolean.parseBoolean(value));
+    }
+
     public String getPreviousResultsString() {
         return previousResultsString;
     }
