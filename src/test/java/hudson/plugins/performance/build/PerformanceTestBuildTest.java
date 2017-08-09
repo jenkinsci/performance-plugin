@@ -139,8 +139,8 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String jobLog = new String(stream.toByteArray());
         File root = run.getRootDir();
         File reportFile = new File(root, "/performance-reports/Taurus/aggregate-results.xml");
-
-        assertTrue(jobLog.contains("Performance: Recording Taurus reports 'aggregate-results.xml'"));
+        assertTrue(jobLog, jobLog.contains("Performance: Recording Taurus reports"));
+        assertTrue(jobLog, jobLog.contains("aggregate-results.xml'"));
         assertTrue(jobLog, jobLog.contains("Performance: Parsing JMeter report file '" + reportFile.getAbsolutePath() + "'."));
         assertTrue(jobLog, reportFile.exists());
     }

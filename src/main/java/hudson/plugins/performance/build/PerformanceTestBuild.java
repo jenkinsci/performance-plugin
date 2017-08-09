@@ -42,7 +42,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
     protected final static String VIRTUALENV_COMMAND = "virtualenv";
     protected final static String HELP_OPTION = "--help";
-    protected final static String VIRTUALENV_PATH_UNIX = "taurus-venv/bin/";
+    protected final static String VIRTUALENV_PATH_UNIX = "/taurus-venv/bin/";
     protected final static String VIRTUALENV_PATH_WINDOWS = "\\taurus-venv\\Scripts\\";
 
     protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_OPTION};
@@ -96,20 +96,21 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         PrintStream logger = listener.getLogger();
         EnvVars envVars = run.getEnvironment(listener);
 
-        FilePath buildStepWorkspace = getBuildStepWorkspace(workspace);
-        try {
-            buildStepWorkspace.mkdirs();
-        } catch (IOException ex) {
-            logger.println("Cannot create directory because of error: " + ex.getMessage());
-            run.setResult(Result.FAILURE);
-            return;
-        }
-
         boolean isVirtualenvInstallation = false;
-        if ((!alwaysUseVirtualenv && isGlobalBztInstalled(buildStepWorkspace, logger, launcher, envVars)) ||
-                (isVirtualenvInstallation = installBztAndCheck(buildStepWorkspace, logger, launcher, envVars))) {
+        if ((!alwaysUseVirtualenv && isGlobalBztInstalled(workspace, logger, launcher, envVars)) ||
+                (isVirtualenvInstallation = installBztAndCheck(workspace, logger, launcher, envVars))) {
 
-            int testExitCode = runPerformanceTest(buildStepWorkspace, logger, launcher, envVars, isVirtualenvInstallation);
+
+            FilePath bztWorkspace = getBztWorkspace(workspace);
+            try {
+                bztWorkspace.mkdirs();
+            } catch (IOException ex) {
+                logger.println("Cannot create directory because of error: " + ex.getMessage());
+                run.setResult(Result.FAILURE);
+                return;
+            }
+
+            int testExitCode = runPerformanceTest(bztWorkspace, workspace, logger, launcher, envVars, isVirtualenvInstallation);
 
             run.setResult(useBztExitCode ?
                     getBztJobResult(testExitCode) :
@@ -117,7 +118,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
             );
 
             if (generatePerformanceTrend && run.getResult().isBetterThan(Result.FAILURE)) {
-                generatePerformanceTrend(run, buildStepWorkspace, launcher, listener);
+                generatePerformanceTrend(bztWorkspace.getRemote(), run, workspace, launcher, listener);
             }
 
             return;
@@ -126,7 +127,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         run.setResult(Result.FAILURE);
     }
 
-    protected FilePath getBuildStepWorkspace(FilePath jobWorkspace) {
+    protected FilePath getBztWorkspace(FilePath jobWorkspace) {
         return (workspace != null && !workspace.isEmpty()) ?
                 (isAbsoluteFilePath() ?
                         // absolute workspace
@@ -141,8 +142,8 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         return new File(workspace).isAbsolute();
     }
 
-    protected void generatePerformanceTrend(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
-        new PerformancePublisher("aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null).
+    protected void generatePerformanceTrend(String path, Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
+        new PerformancePublisher(path + "/aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null).
                 perform(run, workspace, launcher, listener);
     }
 
@@ -236,8 +237,9 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
     // Step 2: Run performance test.
-    private int runPerformanceTest(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean isVirtualenvInstallation) throws InterruptedException, IOException {
+    private int runPerformanceTest(FilePath bztWorkspace, FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean isVirtualenvInstallation) throws InterruptedException, IOException {
         final List<String> testCommand = new ArrayList<>();
+
         testCommand.add((isVirtualenvInstallation ? getVirtualenvPath(workspace) : "") + PERFORMANCE_TEST_COMMAND);
         Matcher m = Pattern.compile("([^\']\\S*|\'.+?\')\\s*").matcher(this.params);
         while (m.find()) {
@@ -248,11 +250,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         }
 
         if (generatePerformanceTrend) {
-            testCommand.add(extractDefaultReportToWorkspace(workspace));
+            testCommand.add(extractDefaultReportToWorkspace(bztWorkspace));
         }
 
         logger.println("Performance test: run " + Arrays.toString(testCommand.toArray()));
-        return runCmd(testCommand.toArray(new String[testCommand.size()]), workspace, logger, launcher, envVars);
+        return runCmd(testCommand.toArray(new String[testCommand.size()]), bztWorkspace, logger, launcher, envVars);
     }
 
     public boolean isSuccessCode(int code) {
@@ -279,9 +281,9 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
     private String getVirtualenvPath(FilePath workspace) {
-        return Functions.isWindows() ?
-                workspace.getRemote() + VIRTUALENV_PATH_WINDOWS :
-                VIRTUALENV_PATH_UNIX;
+        return workspace.getRemote() + (Functions.isWindows() ?
+                VIRTUALENV_PATH_WINDOWS :
+                VIRTUALENV_PATH_UNIX);
     }
 
     // return bzt install command
