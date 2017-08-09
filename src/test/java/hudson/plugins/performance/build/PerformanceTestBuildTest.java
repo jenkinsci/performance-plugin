@@ -91,10 +91,15 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         testBuild.setPrintDebugOutput(false);
         testBuild.setAlwaysUseVirtualenv(false);
         testBuild.setBztVersion("1.0.0.0.0");
+        testBuild.setWorkingDirectory("workingDir");
+        assertEquals("workingDir", testBuild.getWorkingDirectory());
         assertEquals("1.0.0.0.0", testBuild.getBztVersion());
         assertEquals("test option", testBuild.getParams());
         testBuild.setParams("test1");
         assertEquals("test1", testBuild.getParams());
+        testBuild.setWorkspace("workingDirResolve");
+        assertEquals("workingDirResolve", testBuild.getWorkingDirectory());
+        assertEquals("", testBuild.getWorkspace());
 
         assertFalse(testBuild.isUseSystemSitePackages());
         assertFalse(testBuild.isPrintDebugOutput());
@@ -228,6 +233,6 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         testBuild.setWorkspace(rootPath);
         testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
         jobLog = new String(stream.toByteArray());
-        assertTrue(jobLog, jobLog.contains("Cannot create directory because of error: Failed to mkdirs: /rootWorkspace"));
+        assertTrue(jobLog, jobLog.contains("Cannot create working directory because of error: Failed to mkdirs: /rootWorkspace"));
     }
 }
