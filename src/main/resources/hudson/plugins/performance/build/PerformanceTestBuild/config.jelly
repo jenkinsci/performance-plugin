@@ -5,7 +5,7 @@
     </f:entry>
 
     <f:advanced>
-        <f:entry title="${%Change workspace}" field="workspace" >
+        <f:entry title="${%Change workingDirectory}" field="workingDirectory" >
             <f:textbox />
         </f:entry>
         <f:entry title="${%Bzt version}" field="bztVersion">
