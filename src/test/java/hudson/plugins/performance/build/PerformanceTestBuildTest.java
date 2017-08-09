@@ -91,10 +91,15 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         testBuild.setPrintDebugOutput(false);
         testBuild.setAlwaysUseVirtualenv(false);
         testBuild.setBztVersion("1.0.0.0.0");
+        testBuild.setWorkingDirectory("workingDir");
+        assertEquals("workingDir", testBuild.getWorkingDirectory());
         assertEquals("1.0.0.0.0", testBuild.getBztVersion());
         assertEquals("test option", testBuild.getParams());
         testBuild.setParams("test1");
         assertEquals("test1", testBuild.getParams());
+        testBuild.setWorkspace("workingDirResolve");
+        assertEquals("workingDirResolve", testBuild.getWorkingDirectory());
+        assertEquals("", testBuild.getWorkspace());
 
         assertFalse(testBuild.isUseSystemSitePackages());
         assertFalse(testBuild.isPrintDebugOutput());

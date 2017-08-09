@@ -14,6 +14,8 @@ import hudson.model.TaskListener;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
+import hudson.plugins.performance.parsers.JMeterParser;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import jenkins.tasks.SimpleBuildStep;
@@ -77,13 +79,30 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean useSystemSitePackages = true;
     private boolean generatePerformanceTrend = true;
     private boolean useBztExitCode = true;
-    private String workspace = "";
     private String bztVersion = "";
+    private String workingDirectory = "";
+    /**
+     * Use 'workingDirectory' for set bzt working directory
+     */
+    @Deprecated
+    private transient String workspace = "";
 
     @DataBoundConstructor
     public PerformanceTestBuild(String params) {
         this.params = params;
     }
+
+    /**
+     * This method, invoked after object is resurrected from persistence
+     */
+    public Object readResolve() {
+        if (workspace != null && !workspace.isEmpty()) {
+            workingDirectory = workspace;
+            workspace = "";
+        }
+        return this;
+    }
+
 
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
@@ -101,16 +120,16 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                 (isVirtualenvInstallation = installBztAndCheck(workspace, logger, launcher, envVars))) {
 
 
-            FilePath bztWorkspace = getBztWorkspace(workspace);
+            FilePath bztWorkingDirectory = getBztWorkingDirectory(workspace);
             try {
-                bztWorkspace.mkdirs();
+                bztWorkingDirectory.mkdirs();
             } catch (IOException ex) {
-                logger.println("Cannot create directory because of error: " + ex.getMessage());
+                logger.println("Cannot create working directory because of error: " + ex.getMessage());
                 run.setResult(Result.FAILURE);
                 return;
             }
 
-            int testExitCode = runPerformanceTest(bztWorkspace, workspace, logger, launcher, envVars, isVirtualenvInstallation);
+            int testExitCode = runPerformanceTest(bztWorkingDirectory, workspace, logger, launcher, envVars, isVirtualenvInstallation);
 
             run.setResult(useBztExitCode ?
                     getBztJobResult(testExitCode) :
@@ -118,7 +137,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
             );
 
             if (generatePerformanceTrend && run.getResult().isBetterThan(Result.FAILURE)) {
-                generatePerformanceTrend(bztWorkspace.getRemote(), run, workspace, launcher, listener);
+                generatePerformanceTrend(bztWorkingDirectory.getRemote(), run, workspace, launcher, listener);
             }
 
             return;
@@ -127,19 +146,19 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         run.setResult(Result.FAILURE);
     }
 
-    protected FilePath getBztWorkspace(FilePath jobWorkspace) {
-        return (workspace != null && !workspace.isEmpty()) ?
+    protected FilePath getBztWorkingDirectory(FilePath jobWorkspace) {
+        return (workingDirectory != null && !workingDirectory.isEmpty()) ?
                 (isAbsoluteFilePath() ?
                         // absolute workspace
-                        new FilePath(jobWorkspace.getChannel(), workspace) :
+                        new FilePath(jobWorkspace.getChannel(), workingDirectory) :
                         //relative workspace
-                        new FilePath(jobWorkspace, workspace)
+                        new FilePath(jobWorkspace, workingDirectory)
                 ) :
                 jobWorkspace;
     }
 
     private boolean isAbsoluteFilePath() {
-        return new File(workspace).isAbsolute();
+        return new File(workingDirectory).isAbsolute();
     }
 
     protected void generatePerformanceTrend(String path, Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
@@ -237,7 +256,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
     // Step 2: Run performance test.
-    private int runPerformanceTest(FilePath bztWorkspace, FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean isVirtualenvInstallation) throws InterruptedException, IOException {
+    private int runPerformanceTest(FilePath bztWorkingDirectory, FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars, boolean isVirtualenvInstallation) throws InterruptedException, IOException {
         final List<String> testCommand = new ArrayList<>();
 
         testCommand.add((isVirtualenvInstallation ? getVirtualenvPath(workspace) : "") + PERFORMANCE_TEST_COMMAND);
@@ -250,11 +269,11 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         }
 
         if (generatePerformanceTrend) {
-            testCommand.add(extractDefaultReportToWorkspace(bztWorkspace));
+            testCommand.add(extractDefaultReportToWorkingDirectory(bztWorkingDirectory));
         }
 
         logger.println("Performance test: run " + Arrays.toString(testCommand.toArray()));
-        return runCmd(testCommand.toArray(new String[testCommand.size()]), bztWorkspace, logger, launcher, envVars);
+        return runCmd(testCommand.toArray(new String[testCommand.size()]), bztWorkingDirectory, logger, launcher, envVars);
     }
 
     public boolean isSuccessCode(int code) {
@@ -312,8 +331,8 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         }
     }
 
-    protected String extractDefaultReportToWorkspace(FilePath workspace) throws IOException, InterruptedException {
-        FilePath defaultConfig = workspace.child(DEFAULT_CONFIG_FILE);
+    protected String extractDefaultReportToWorkingDirectory(FilePath workingDirectory) throws IOException, InterruptedException {
+        FilePath defaultConfig = workingDirectory.child(DEFAULT_CONFIG_FILE);
         defaultConfig.copyFrom(getClass().getResourceAsStream(DEFAULT_CONFIG_FILE));
         return defaultConfig.getRemote();
     }
@@ -378,6 +397,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setWorkspace(String workspace) {
         this.workspace = workspace;
+        readResolve();
     }
 
     public String getBztVersion() {
@@ -387,5 +407,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setBztVersion(String bztVersion) {
         this.bztVersion = bztVersion;
+    }
+
+    public String getWorkingDirectory() {
+        return workingDirectory;
+    }
+
+    @DataBoundSetter
+    public void setWorkingDirectory(String workingDirectory) {
+        this.workingDirectory = workingDirectory;
     }
 }
