@@ -40,6 +40,12 @@ public class ParserDetectorTest {
     public void testIssue44317() throws Exception {
         String filePath = getClass().getResource("/TEST-results.xml").toURI().getPath();
         assertEquals(JUnitParser.class.getSimpleName(), ParserDetector.detect(filePath));
+    }
 
+    @Issue("JENKINS-45723")
+    @Test
+    public void testIssue45723() throws Exception {
+        String filePath = getClass().getResource("/TEST-JUnitResults-success-failure-error.xml").toURI().getPath();
+        assertEquals(JUnitParser.class.getSimpleName(), ParserDetector.detect(filePath));
     }
 }
