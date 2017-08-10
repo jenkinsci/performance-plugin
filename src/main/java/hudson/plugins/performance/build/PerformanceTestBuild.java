@@ -116,7 +116,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
         FilePath virtualenvWorkspace;
         try {
-            virtualenvWorkspace = getVirtualenvWorkspace(workspace, logger);
+            virtualenvWorkspace = getVirtualenvWorkspace(run, workspace, logger);
         } catch (Exception ex) {
             logger.println("[ERROR] Performance test: " + ex.getMessage());
             run.setResult(Result.FAILURE);
@@ -154,23 +154,27 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         run.setResult(Result.FAILURE);
     }
 
-    private FilePath getVirtualenvWorkspace(FilePath workspace, PrintStream logger) throws Exception {
+    private FilePath getVirtualenvWorkspace(Run<?, ?> run, FilePath workspace, PrintStream logger) throws Exception {
         return workspace.getRemote().contains(" ") ?
-                createTemporaryWorkspace(workspace, logger) :
+                createTemporaryWorkspace(run, workspace, logger) :
                 workspace;
     }
 
-    private FilePath createTemporaryWorkspace(FilePath workspace, PrintStream logger) throws Exception {
+    private FilePath createTemporaryWorkspace(Run<?, ?> run, FilePath workspace, PrintStream logger) throws Exception {
         logger.println("[WARNING] Performance test: Job workspace contains spaces in path. Virtualenv does not support such path. Creating temporary workspace for virtualenv.");
         File baseTmpDir = new File(System.getProperty("java.io.tmpdir"));
         if (baseTmpDir.getAbsolutePath().contains(" ")) {
             logger.println("[WARNING] Performance test: Temporary folder contains spaces in path.");
             throw new InvalidPathException(baseTmpDir.getAbsolutePath(), "Virtualenv cannot be installed in workspace that contains spaces in path.");
         }
-        File tempDir = new File(baseTmpDir.getAbsolutePath(), "perf-test-virtualenv-workspace-" + System.currentTimeMillis());
+        File tempDir = new File(baseTmpDir.getAbsolutePath(), "perf-test-virtualenv-workspace-" + configJobName(run.getParent().getName()));
         FilePath tempWorkspace = new FilePath(workspace.getChannel(), tempDir.getAbsolutePath());
         tempWorkspace.mkdirs();
         return tempWorkspace;
+    }
+
+    private String configJobName(String displayName) {
+        return displayName.replaceAll(" ", "-");
     }
 
     protected FilePath getBztWorkingDirectory(FilePath jobWorkspace) {
