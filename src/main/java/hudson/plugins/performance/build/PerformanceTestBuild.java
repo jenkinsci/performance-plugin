@@ -14,8 +14,6 @@ import hudson.model.TaskListener;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
-import hudson.plugins.performance.parsers.JMeterParser;
-import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import jenkins.tasks.SimpleBuildStep;
@@ -30,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -115,21 +114,30 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         PrintStream logger = listener.getLogger();
         EnvVars envVars = run.getEnvironment(listener);
 
+        FilePath virtualenvWorkspace;
+        try {
+            virtualenvWorkspace = getVirtualenvWorkspace(workspace, logger);
+        } catch (Exception ex) {
+            logger.println("[ERROR] Performance test: " + ex.getMessage());
+            run.setResult(Result.FAILURE);
+            return;
+        }
+
         boolean isVirtualenvInstallation = false;
         if ((!alwaysUseVirtualenv && isGlobalBztInstalled(workspace, logger, launcher, envVars)) ||
-                (isVirtualenvInstallation = installBztAndCheck(workspace, logger, launcher, envVars))) {
+                (isVirtualenvInstallation = installBztAndCheck(virtualenvWorkspace, logger, launcher, envVars))) {
 
 
             FilePath bztWorkingDirectory = getBztWorkingDirectory(workspace);
             try {
                 bztWorkingDirectory.mkdirs();
             } catch (IOException ex) {
-                logger.println("Cannot create working directory because of error: " + ex.getMessage());
+                logger.println("Performance test: Cannot create working directory because of error: " + ex.getMessage());
                 run.setResult(Result.FAILURE);
                 return;
             }
 
-            int testExitCode = runPerformanceTest(bztWorkingDirectory, workspace, logger, launcher, envVars, isVirtualenvInstallation);
+            int testExitCode = runPerformanceTest(bztWorkingDirectory, virtualenvWorkspace, logger, launcher, envVars, isVirtualenvInstallation);
 
             run.setResult(useBztExitCode ?
                     getBztJobResult(testExitCode) :
@@ -144,6 +152,25 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         }
 
         run.setResult(Result.FAILURE);
+    }
+
+    private FilePath getVirtualenvWorkspace(FilePath workspace, PrintStream logger) throws Exception {
+        return workspace.getRemote().contains(" ") ?
+                createTemporaryWorkspace(workspace, logger) :
+                workspace;
+    }
+
+    private FilePath createTemporaryWorkspace(FilePath workspace, PrintStream logger) throws Exception {
+        logger.println("[WARNING] Performance test: Job workspace contains spaces in path. Virtualenv does not support such path. Creating temporary workspace for virtualenv.");
+        File baseTmpDir = new File(System.getProperty("java.io.tmpdir"));
+        if (baseTmpDir.getAbsolutePath().contains(" ")) {
+            logger.println("[WARNING] Performance test: Temporary folder contains spaces in path.");
+            throw new InvalidPathException(baseTmpDir.getAbsolutePath(), "Virtualenv cannot be installed in workspace that contains spaces in path.");
+        }
+        File tempDir = new File(baseTmpDir.getAbsolutePath(), "perf-test-virtualenv-workspace-" + System.currentTimeMillis());
+        FilePath tempWorkspace = new FilePath(workspace.getChannel(), tempDir.getAbsolutePath());
+        tempWorkspace.mkdirs();
+        return tempWorkspace;
     }
 
     protected FilePath getBztWorkingDirectory(FilePath jobWorkspace) {
