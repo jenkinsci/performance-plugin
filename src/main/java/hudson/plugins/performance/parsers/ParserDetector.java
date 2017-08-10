@@ -1,5 +1,17 @@
 package hudson.plugins.performance.parsers;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -18,27 +30,28 @@ public class ParserDetector {
      * @return report file type.
      */
     public static String detect(String reportPath) throws IOException {
-        final BufferedReader reader = new BufferedReader(new FileReader(new File(reportPath)));
-        String line = reader.readLine();
-        if (line == null) {
-            throw new IllegalArgumentException("File " + reportPath + " is empty");
-        }
+        try (final BufferedReader reader = new BufferedReader(new FileReader(new File(reportPath)))) {
+            String line = reader.readLine();
+            if (line == null) {
+                throw new IllegalArgumentException("File " + reportPath + " is empty");
+            }
 
-        if (line.startsWith("<?xml")) {
-            return detectXMLFileType(reader, null);
-        } else if (isIagoFileType(line)) {
-            return IagoParser.class.getSimpleName();
-        } else if (isWRKFileType(line)) {
-            return WrkSummarizerParser.class.getSimpleName();
-        } else if (isJMeterCSVFileType(line)) {
-            return JMeterCsvParser.class.getSimpleName();
-        } else if (isJMeterSummarizerFileType(line, reader)) {
-            return JmeterSummarizerParser.class.getSimpleName();
-        } else {
-            try {
-                return detectXMLFileType(reader, line);
-            } catch (IllegalArgumentException ex) {
-                throw new IllegalArgumentException("Can not detect file type: " + reportPath, ex);
+            if (line.startsWith("<?xml")) {
+                return detectXMLFileType(reportPath);
+            } else if (isIagoFileType(line)) {
+                return IagoParser.class.getSimpleName();
+            } else if (isWRKFileType(line)) {
+                return WrkSummarizerParser.class.getSimpleName();
+            } else if (isJMeterCSVFileType(line)) {
+                return JMeterCsvParser.class.getSimpleName();
+            } else if (isJMeterSummarizerFileType(line, reader)) {
+                return JmeterSummarizerParser.class.getSimpleName();
+            } else {
+                try {
+                    return detectXMLFileType(reportPath);
+                } catch (IllegalArgumentException ex) {
+                    throw new IllegalArgumentException("Can not detect file type: " + reportPath, ex);
+                }
             }
         }
     }
@@ -104,20 +117,30 @@ public class ParserDetector {
      *  <testsuite> - JUNIT;
      *  <FinalStatus> - TAURUS.
      */
-    private static String detectXMLFileType(final BufferedReader reader, String lineToAnalyze) throws IOException {
-        String line = (lineToAnalyze != null) ? lineToAnalyze : reader.readLine();
-        if (line == null) {
-            throw new IllegalArgumentException("File contains only xml header");
+    private static String detectXMLFileType(String reportPath) throws IOException {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(reportPath);
+            XPathFactory xPathfactory = XPathFactory.newInstance();
+            XPath xpath = xPathfactory.newXPath();
+            if (docContainsTag(doc, xpath, "testResults")) {
+                return JMeterParser.class.getSimpleName();
+            } else if (docContainsTag(doc, xpath, "testsuite")) {
+                return JUnitParser.class.getSimpleName();
+            } else if (docContainsTag(doc, xpath, "FinalStatus")) {
+                return TaurusParser.class.getSimpleName();
+            } else {
+                throw new IllegalArgumentException("Unknown xml file format");
+            }
+        } catch (ParserConfigurationException | SAXException | XPathExpressionException ex) {
+            throw new RuntimeException("XML parsing error: ", ex);
         }
+    }
 
-        if (line.contains("<testResults")) {
-            return JMeterParser.class.getSimpleName();
-        } else if (line.contains("<testsuite")) {
-            return JUnitParser.class.getSimpleName();
-        } else if (line.contains("<FinalStatus>")) {
-            return TaurusParser.class.getSimpleName();
-        } else {
-            throw new IllegalArgumentException("Unknown xml file format");
-        }
+    private static boolean docContainsTag(Document doc, XPath xpath, String tagName) throws XPathExpressionException {
+        XPathExpression expr = xpath.compile("//" + tagName);
+        NodeList list = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+        return (list.getLength() > 0);
     }
 }
