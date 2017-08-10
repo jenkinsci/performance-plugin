@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="1" failures="1" hostname="someHostname" name="tests.ATest" tests="3" time="0.069" timestamp="2009-12-19T17:58:59">
+<?xml version="1.0" encoding="UTF-8" ?><testsuite errors="1" failures="1" hostname="someHostname" name="tests.ATest" tests="3" time="0.069" timestamp="2009-12-19T17:58:59">
 
     <testcase classname="tests.ATest" name="error" time="0.0060">
         <error type="java.lang.RuntimeException">java.lang.RuntimeException at tests.ATest.error(ATest.java:11)</error>
