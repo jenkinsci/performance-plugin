@@ -70,9 +70,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Set;
 
 public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
@@ -401,7 +403,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     private Collection<PerformanceReport> locatePerformanceReports(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers) throws IOException, InterruptedException {
-        Collection<PerformanceReport> performanceReports = Collections.emptyList();
+        Collection<PerformanceReport> performanceReports = new ArrayList<PerformanceReport>();
         PrintStream logger = listener.getLogger();
         EnvVars env = run.getEnvironment(listener);
         String glob;
@@ -425,7 +427,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             }
 
             List<File> localReports = copyReportsToMaster(run, logger, files, parser.getDescriptor().getDisplayName());
-            performanceReports = parser.parse(run, localReports, listener); // TODO: WHY NOT .ADD() ?????
+            performanceReports.addAll(parser.parse(run, localReports, listener));
         }
         return performanceReports;
     }
@@ -434,31 +436,39 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                                                List<PerformanceReportParser> parsers, boolean locatePerformanceReports)
             throws IOException, InterruptedException {
 
+        List<UriReport> uriReports = new ArrayList<UriReport>();
+
         if (locatePerformanceReports) {
             Collection<PerformanceReport> performanceReports = locatePerformanceReports(build, workspace, listener, parsers);
             if (performanceReports == null) {
                 return null;
             }
+
             for (PerformanceReport r : performanceReports) {
                 // URI list is the list of labels in the current JMeter results
                 // file
-                return r.getUriListOrdered();
+                uriReports.addAll(r.getUriListOrdered());
             }
         } else {
+            Set<PerformanceReport> parsedReports = new HashSet<PerformanceReport>();
+
             for (PerformanceReportParser parser : parsers) {
                 // add the report to the build object.
                 List<File> localReports = getExistingReports(build, listener.getLogger(), parser.getDescriptor().getDisplayName());
-                Collection<PerformanceReport> parsedReports = parser.parse(build, localReports, listener);
 
-                for (PerformanceReport r : parsedReports) {
-                    // uri list is the list of labels in the previous jmeter results
-                    // file
-                    return r.getUriListOrdered();
-                }
-
+                // For more than one parser of the same type, existing reports will be found multiple times, 
+                // so we collect them in a Set to avoid duplicates (based on comparison by report filename).
+                parsedReports.addAll(parser.parse(build, localReports, listener));
             }
+
+            for (PerformanceReport r : parsedReports) {
+                // uri list is the list of labels in the previous jmeter results
+                // file
+                uriReports.addAll(r.getUriListOrdered());
+            }
+
         }
-        return Collections.emptyList();
+        return uriReports;
     }
 
     // for mode "standard evaluation"
