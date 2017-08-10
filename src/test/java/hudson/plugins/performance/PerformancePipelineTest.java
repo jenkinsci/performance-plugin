@@ -47,6 +47,31 @@ public class PerformancePipelineTest  {
     }
 
     @Test
+    public void bztJobWithSpaces() throws Exception {
+        final String path = getClass().getResource("/performanceTest.yml").getPath();
+
+        story.addStep(new Statement() {
+            public void evaluate() throws Throwable {
+                DumbSlave s = story.j.createOnlineSlave();
+                s.setLabelString("test performance test ");
+                WorkflowJob p = story.j.createProject(WorkflowJob.class, "demo job");
+                p.getRootDir().mkdirs();
+                String bztParams =  path + ' ' + "-o modules.jmeter.plugins=[] -o services=[] " +
+                        "-o \\'reporting.-1={module: \"junit-xml\", filename: \"report.xml\"}\\' " +
+                        "-o \\'execution.0.scenario.requests.1={url: \"http://blazedemo.com/\": assert: [\"yo mamma\"]}\\'";
+                p.setDefinition(new CpsFlowDefinition(
+                        "node('master'){ bzt(params: '" + bztParams + "', useSystemSitePackages: false, printDebugOutput: true, bztVersion: '1.9.1') }", true));
+                WorkflowRun r = p.scheduleBuild2(0).waitForStart();
+                story.j.assertBuildStatusSuccess(story.j.waitForCompletion(r));
+                story.j.assertLogContains("File aggregate-results.xml reported 0.0% of errors [SUCCESS].", r);
+                if (JenkinsRule.getLog(r).contains("Performance test: Installing bzt into 'taurus-venv'")) {
+                    story.j.assertLogContains("Taurus CLI Tool v1.9.1", r);
+                }
+            }
+        });
+    }
+
+    @Test
     public void perfReportSmokeTests() throws Exception {
         String fileContents = null;
 
