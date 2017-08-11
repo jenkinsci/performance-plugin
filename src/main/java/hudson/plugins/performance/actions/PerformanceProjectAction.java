@@ -9,12 +9,12 @@ import hudson.model.Run;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.PerformanceReportMap;
+import hudson.plugins.performance.data.PerformanceReportPosition;
 import hudson.plugins.performance.data.ReportValueSelector;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
 import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.data.PerformanceReportPosition;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.plugins.performance.reports.throughput.ThroughputReport;
 import hudson.util.ChartUtil;
@@ -43,8 +43,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.annotation.Nonnull;
-import java.awt.Color;
-import java.awt.BasicStroke;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -112,7 +111,7 @@ public class PerformanceProjectAction implements Action {
         final LegendTitle legend = chart.getLegend();
         legend.setPosition(RectangleEdge.BOTTOM);
 
-        chart.setBackgroundPaint(Color.white);
+        chart.setBackgroundPaint(Color.WHITE);
 
         final CategoryPlot plot = chart.getCategoryPlot();
 
@@ -120,7 +119,7 @@ public class PerformanceProjectAction implements Action {
         plot.setBackgroundPaint(Color.WHITE);
         plot.setOutlinePaint(null);
         plot.setRangeGridlinesVisible(true);
-        plot.setRangeGridlinePaint(Color.black);
+        plot.setRangeGridlinePaint(Color.BLACK);
 
         CategoryAxis domainAxis = new ShiftedCategoryAxis(null);
         plot.setDomainAxis(domainAxis);
@@ -145,7 +144,7 @@ public class PerformanceProjectAction implements Action {
         return chart;
     }
 
-    public static JFreeChart doCreateRespondingTimeChart(CategoryDataset dataset) {
+    public static JFreeChart doCreateRespondingTimeChart(CategoryDataset dataset, int legendLimit) {
 
         final JFreeChart chart = ChartFactory.createLineChart(
                 Messages.ProjectAction_RespondingTime(), // charttitle
@@ -157,21 +156,21 @@ public class PerformanceProjectAction implements Action {
                 true, // tooltips
                 false // urls
         );
-
-        // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
-
         final LegendTitle legend = chart.getLegend();
         legend.setPosition(RectangleEdge.BOTTOM);
+        if (dataset.getRowCount() > legendLimit) {
+            chart.removeLegend();
+        }
 
-        chart.setBackgroundPaint(Color.white);
+        chart.setBackgroundPaint(Color.WHITE);
 
         final CategoryPlot plot = chart.getCategoryPlot();
 
-        // plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
+//         plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
         plot.setBackgroundPaint(Color.WHITE);
         plot.setOutlinePaint(null);
         plot.setRangeGridlinesVisible(true);
-        plot.setRangeGridlinePaint(Color.black);
+        plot.setRangeGridlinePaint(Color.BLACK);
 
         CategoryAxis domainAxis = new ShiftedCategoryAxis(null);
         plot.setDomainAxis(domainAxis);
@@ -210,14 +209,14 @@ public class PerformanceProjectAction implements Action {
         final LegendTitle legend = chart.getLegend();
         legend.setPosition(RectangleEdge.BOTTOM);
 
-        chart.setBackgroundPaint(Color.white);
+        chart.setBackgroundPaint(Color.WHITE);
 
         final CategoryPlot plot = chart.getCategoryPlot();
 
         plot.setBackgroundPaint(Color.WHITE);
         plot.setOutlinePaint(null);
         plot.setRangeGridlinesVisible(true);
-        plot.setRangeGridlinePaint(Color.black);
+        plot.setRangeGridlinePaint(Color.BLACK);
 
         CategoryAxis domainAxis = new ShiftedCategoryAxis(null);
         plot.setDomainAxis(domainAxis);
@@ -253,13 +252,13 @@ public class PerformanceProjectAction implements Action {
                 true // urls
         );
 
-        chart.setBackgroundPaint(Color.white);
+        chart.setBackgroundPaint(Color.WHITE);
 
         final CategoryPlot plot = chart.getCategoryPlot();
 
         plot.setBackgroundPaint(Color.WHITE);
         plot.setRangeGridlinesVisible(true);
-        plot.setRangeGridlinePaint(Color.black);
+        plot.setRangeGridlinePaint(Color.BLACK);
 
         CategoryAxis domainAxis = plot.getDomainAxis();
         domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
@@ -278,12 +277,12 @@ public class PerformanceProjectAction implements Action {
 
         final JFreeChart chart = ChartFactory.createTimeSeriesChart(uri, "Time",
                 "Response Time", dataset.get(0), true, true, false);
-        chart.setBackgroundPaint(Color.white);
+        chart.setBackgroundPaint(Color.WHITE);
 
         final XYPlot plot = chart.getXYPlot();
-        plot.setBackgroundPaint(Color.white);
-        plot.setDomainGridlinePaint(Color.black);
-        plot.setRangeGridlinePaint(Color.black);
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setDomainGridlinePaint(Color.BLACK);
+        plot.setRangeGridlinePaint(Color.BLACK);
 
         plot.setDomainCrosshairVisible(true);
         plot.setRangeCrosshairVisible(true);
@@ -406,8 +405,10 @@ public class PerformanceProjectAction implements Action {
             }
             nbBuildsToAnalyze--;
         }
+        String legendLimit = request.getParameter("legendLimit");
+        int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
         ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilder.build()), 600, 200);
+                createRespondingTimeChart(dataSetBuilder.build(), limit), 600, 200);
     }
 
     protected PerformanceReport getPerformanceReport(Run<?, ?> build, String reportFileName) {
@@ -420,8 +421,8 @@ public class PerformanceProjectAction implements Action {
                 .getPerformanceReport(reportFileName);
     }
 
-    protected JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
-        return doCreateRespondingTimeChart(dataset);
+    protected JFreeChart createRespondingTimeChart(CategoryDataset dataset, int legendLimit) {
+        return doCreateRespondingTimeChart(dataset, legendLimit);
     }
 
     public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
@@ -470,8 +471,11 @@ public class PerformanceProjectAction implements Action {
             nbBuildsToAnalyze--;
             continue;
         }
+
+        String legendLimit = request.getParameter("legendLimit");
+        int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
         ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+                createRespondingTimeChart(dataSetBuilderAverage.build(), limit), 400, 200);
     }
 
     public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {

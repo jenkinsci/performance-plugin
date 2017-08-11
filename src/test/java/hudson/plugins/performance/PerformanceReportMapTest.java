@@ -69,9 +69,9 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
         }
 
         @Override
-        protected JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
+        protected JFreeChart createRespondingTimeChart(CategoryDataset dataset, int legendLimit) {
             this.dataset = dataset;
-            return super.createRespondingTimeChart(dataset);
+            return super.createRespondingTimeChart(dataset, legendLimit);
         }
 
         @Override

@@ -206,12 +206,14 @@ public class PerformanceReportMap implements ModelObject {
             dataSetBuilder.add(valueSelector.getValue(report),
                     keyLabel, label);
         }
+        String legendLimit = request.getParameter("legendLimit");
+        int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
         ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilder.build()), 400, 200);
+                createRespondingTimeChart(dataSetBuilder.build(), limit), 400, 200);
     }
 
-    protected JFreeChart createRespondingTimeChart(CategoryDataset dataset) {
-        return PerformanceProjectAction.doCreateRespondingTimeChart(dataset);
+    protected JFreeChart createRespondingTimeChart(CategoryDataset dataset, int legendLimit) {
+        return PerformanceProjectAction.doCreateRespondingTimeChart(dataset, legendLimit);
     }
 
     private String getKeyLabel(String configType) {
