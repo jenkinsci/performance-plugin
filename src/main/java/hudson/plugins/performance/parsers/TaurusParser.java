@@ -57,16 +57,22 @@ public class TaurusParser extends AbstractParser {
             reportURL = URLNode.getTextContent();
         }
 
+        Node testDurationNode = doc.getElementsByTagName("TestDuration").item(0);
+        Double testDuration = null;
+        if (testDurationNode != null) {
+            testDuration = Double.parseDouble(testDurationNode.getTextContent()) * 1000; // to ms
+        }
+
         NodeList nList = doc.getElementsByTagName("Group");
         for (int temp = 0; temp < nList.getLength(); temp++) {
             Node nNode = nList.item(temp);
 
+            TaurusFinalStats statusReport = getTaurusFinalStats((Element) nNode);
+            statusReport.setTestDuration(testDuration);
             if (!((Element) nNode).getAttribute("label").isEmpty()) {
-                TaurusFinalStats statusReport = getTaurusFinalStats((Element) nNode);
                 statusReport.setLabel(((Element) nNode).getAttribute("label"));
                 report.addSample(statusReport, false);
             } else {
-                TaurusFinalStats statusReport = getTaurusFinalStats((Element) nNode);
                 statusReport.setLabel(TaurusFinalStats.DEFAULT_TAURUS_LABEL);
                 report.addSample(statusReport, true);
             }
@@ -82,6 +88,9 @@ public class TaurusParser extends AbstractParser {
         report.setFail(Integer.valueOf(((Element) group.getElementsByTagName("fail").item(0)).getAttribute("value")));
         report.setSucc(Integer.valueOf(((Element) group.getElementsByTagName("succ").item(0)).getAttribute("value")));
         report.setThroughput(Long.valueOf(((Element) group.getElementsByTagName("throughput").item(0)).getAttribute("value")));
+        if (group.getElementsByTagName("throughput").getLength() > 0) {
+            report.setThroughput(Long.valueOf(((Element) group.getElementsByTagName("throughput").item(0)).getAttribute("value")));
+        }
         report.setAverageResponseTime(Double.valueOf(((Element) group.getElementsByTagName("avg_rt").item(0)).getAttribute("value")) * 1000); // to ms
 
         NodeList perc = group.getElementsByTagName("perc");

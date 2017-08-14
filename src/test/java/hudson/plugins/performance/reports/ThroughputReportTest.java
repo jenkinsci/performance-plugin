@@ -2,9 +2,16 @@ package hudson.plugins.performance.reports;
 
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
+import hudson.plugins.performance.parsers.TaurusParser;
+import hudson.util.StreamTaskListener;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -117,5 +124,17 @@ public class ThroughputReportTest {
         performanceReport.addSample(stats, true);
 
         assertEquals(777, throughputReport.get(), DELTA);
+    }
+
+    @Test
+    public void testDuration() throws IOException, URISyntaxException {
+        File report = new File(getClass().getResource("/TaurusXmlWithDuration.xml").getPath());
+        TaurusParser parser = new TaurusParser(report.getAbsolutePath());
+        PerformanceReport performanceReport = parser.parse(null, Collections.singleton(report), new StreamTaskListener(System.out)).iterator().next();
+        ThroughputReport throughputReport = new ThroughputReport(performanceReport);
+
+        Map<String, UriReport> uriReportMap = performanceReport.getUriReportMap();
+        assertEquals(3, uriReportMap.size());
+        assertEquals(((29658 + 29656) / (3141 / 1000)), throughputReport.get(), DELTA);
     }
 }

@@ -152,7 +152,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             summarizerErrors = nbError = sample.getFail();
             int sampleCount = sample.getFail() + sample.getSucc();
             samplesCount = sampleCount;
-            totalDuration = (long) sample.getAverageResponseTime() * sampleCount;
+            Double testDuration = sample.getTestDuration();
+            totalDuration = (testDuration == null) ? ((long) sample.getAverageResponseTime() * sampleCount) : (testDuration.longValue());
             totalSizeInKB = sample.getBytes();
 
             average = (long) sample.getAverageResponseTime();
@@ -160,7 +161,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             perc90 = (long) sample.getPerc90();
             perc0 = (long) sample.getPerc0();
             perc100 = (long) sample.getPerc100();
-            throughput = sample.getThroughput();
+            throughput = (testDuration == null) ?
+                    sample.getThroughput() :
+                    (sampleCount / (totalDuration / 1000));
         } else {
             String staplerUri = PerformanceReport.asStaplerURI(uri);
             synchronized (uriReportMap) {
