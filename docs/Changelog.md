@@ -2,6 +2,7 @@
 # Changelog 
 
 ## v3.3 (upcoming)
+- FIX: wrong calculation of Average Throughput ([JENKINS-44410](https://issues.jenkins-ci.org/browse/JENKINS-44410))
 - FIX: recognize JUnit file format which wrote as single line ([JENKINS-45723](https://issues.jenkins-ci.org/browse/JENKINS-45723))
 - FIX: dependency that require code v2.62+
 - FIX: show only chart legend ([JENKINS-45539](https://issues.jenkins-ci.org/browse/JENKINS-45539))

@@ -114,6 +114,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     private Long perc50;
     private Long perc90;
     private Long perc100;
+    @Deprecated
     private Long throughput;
 
     private int samplesCount;
@@ -156,8 +157,6 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         perc90 = (long) report.getPerc90();
         perc100 = (long) report.getPerc100();
 
-        throughput = report.getThroughput();
-        
         summarizerSize = report.getBytes();
         summarizerErrors = report.getFail();
         nbError = report.getFail();
@@ -431,6 +430,12 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         }
     }
 
+    @Deprecated
+    public void setThroughput(Long throughput) {
+        this.throughput = throughput;
+    }
+
+    @Deprecated
     public Long getThroughput() {
         return throughput;
     }

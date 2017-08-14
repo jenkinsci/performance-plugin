@@ -12,12 +12,15 @@ public class TaurusFinalStats implements Serializable {
     private int fail;
     private long bytes;
 
+    // ALL TIME IN MILLISECONDS!
     private double averageResponseTime;
 
     private double perc0;
     private double perc50;
     private double perc90;
     private double perc100;
+
+    private Double testDuration;
 
     private long throughput;
 
@@ -100,5 +103,13 @@ public class TaurusFinalStats implements Serializable {
 
     public void setThroughput(long throughput) {
         this.throughput = throughput;
+    }
+
+    public Double getTestDuration() {
+        return testDuration;
+    }
+
+    public void setTestDuration(Double testDuration) {
+        this.testDuration = testDuration;
     }
 }

@@ -92,11 +92,21 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private Long perc90;
     private Long perc100;
 
+    private Long throughput;
+
     public Object readResolve() {
         if (size != 0) {
             samplesCount = size;
         }
 
+        if (throughput == null) {
+            for (UriReport uriReport : getUriListOrdered()) {
+                Long uriThroughput = uriReport.getThroughput();
+                if (uriThroughput != null) {
+                    throughput = (throughput == null) ? uriThroughput : (uriThroughput + throughput);
+                }
+            }
+        }
         return this;
     }
 
@@ -150,7 +160,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             summarizerErrors = nbError = sample.getFail();
             int sampleCount = sample.getFail() + sample.getSucc();
             samplesCount = sampleCount;
-            totalDuration = (long) sample.getAverageResponseTime() * sampleCount;
+            Double testDuration = sample.getTestDuration();
+            totalDuration = (testDuration == null) ? ((long) sample.getAverageResponseTime() * sampleCount) : (testDuration.longValue());
             totalSizeInKB = sample.getBytes();
 
             average = (long) sample.getAverageResponseTime();
@@ -158,6 +169,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             perc90 = (long) sample.getPerc90();
             perc0 = (long) sample.getPerc0();
             perc100 = (long) sample.getPerc100();
+            throughput = (testDuration == null) ?
+                    sample.getThroughput() :
+                    (sampleCount / (totalDuration / 1000));
         } else {
             String staplerUri = PerformanceReport.asStaplerURI(uri);
             synchronized (uriReportMap) {
@@ -444,4 +458,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         return summarizerErrorPercent;
     }
 
+    public Long getThroughput() {
+        return throughput;
+    }
 }
