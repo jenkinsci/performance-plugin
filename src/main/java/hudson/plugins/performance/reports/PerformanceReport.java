@@ -99,6 +99,14 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             samplesCount = size;
         }
 
+        if (throughput == null) {
+            for (UriReport uriReport : getUriListOrdered()) {
+                Long uriThroughput = uriReport.getThroughput();
+                if (uriThroughput != null) {
+                    throughput = (throughput == null) ? uriThroughput : (uriThroughput + throughput);
+                }
+            }
+        }
         return this;
     }
 

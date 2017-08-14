@@ -137,4 +137,22 @@ public class ThroughputReportTest {
         assertEquals(3, uriReportMap.size());
         assertEquals(((29658 + 29656) / (3141 / 1000)), throughputReport.get(), DELTA);
     }
+
+    @Test
+    public void testDurationBackwardCompatibility() throws IOException, URISyntaxException {
+        PerformanceReport performanceReport = new PerformanceReport();
+
+        UriReport report1 = new UriReport(performanceReport, "f1", "uri1");
+        report1.setThroughput(111L);
+        UriReport report2 = new UriReport(performanceReport, "f2", "uri2");
+        report2.setThroughput(666L);
+
+        performanceReport.getUriReportMap().put("f1", report1);
+        performanceReport.getUriReportMap().put("f2", report2);
+
+        performanceReport.readResolve();
+        ThroughputReport throughputReport = new ThroughputReport(performanceReport);
+
+        assertEquals(777.0, throughputReport.get(), DELTA);
+    }
 }

@@ -114,6 +114,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     private Long perc50;
     private Long perc90;
     private Long perc100;
+    @Deprecated
+    private transient Long throughput;
 
     private int samplesCount;
 
@@ -426,5 +428,15 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
             if (this.date.after(other.date)) return 1;
             return 0;
         }
+    }
+
+    @Deprecated
+    public void setThroughput(Long throughput) {
+        this.throughput = throughput;
+    }
+
+    @Deprecated
+    public Long getThroughput() {
+        return throughput;
     }
 }
