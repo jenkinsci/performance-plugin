@@ -51,7 +51,6 @@ public class TaurusParserTest {
         assertEquals("Check max", 1.71800 * 1000, report.getMax(), DELTA);
         assertEquals("Check average", (long) (0.80638 * 1000), report.getAverage());
         assertEquals("Check samples count", 326 + 11, report.samplesCount(), DELTA);
-        assertEquals("Check throughput", new Long(337), report.getThroughput());
         assertEquals("Check errors", 3.264, report.errorPercent(), DELTA);
     }
 
@@ -63,7 +62,6 @@ public class TaurusParserTest {
         assertEquals("Check max", 0.52200 * 1000, report.getMax(), DELTA);
         assertEquals("Check average", (long) (0.11568 * 1000), report.getAverage());
         assertEquals("Check samples count", 340, report.samplesCount(), DELTA);
-        assertEquals("Check throughput", new Long(340), report.getThroughput());
         assertEquals("Check errors", 0.0, report.errorPercent(), DELTA);
     }
 

@@ -92,6 +92,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private Long perc90;
     private Long perc100;
 
+    private Long throughput;
+
     public Object readResolve() {
         if (size != 0) {
             samplesCount = size;
@@ -158,6 +160,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             perc90 = (long) sample.getPerc90();
             perc0 = (long) sample.getPerc0();
             perc100 = (long) sample.getPerc100();
+            throughput = sample.getThroughput();
         } else {
             String staplerUri = PerformanceReport.asStaplerURI(uri);
             synchronized (uriReportMap) {
@@ -444,4 +447,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         return summarizerErrorPercent;
     }
 
+    public Long getThroughput() {
+        return throughput;
+    }
 }
