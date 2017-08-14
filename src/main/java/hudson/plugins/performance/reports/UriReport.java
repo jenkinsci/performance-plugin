@@ -115,7 +115,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     private Long perc90;
     private Long perc100;
     @Deprecated
-    private transient Long throughput;
+    private Long throughput;
 
     private int samplesCount;
 
