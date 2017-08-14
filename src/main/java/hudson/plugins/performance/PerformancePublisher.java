@@ -1301,6 +1301,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusParser", TaurusParser.class);
         Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.WrkSummarizerParser", WrkSummarizerParser.class);
 
+        Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.reports.throughput.ThroughputReport", ThroughputReport.class);
         Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.reports.ThroughputReport", ThroughputReport.class);
         Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractReport", AbstractReport.class);
         Items.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintReport", ConstraintReport.class);
@@ -1338,6 +1339,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.TaurusParser", TaurusParser.class);
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.WrkSummarizerParser", WrkSummarizerParser.class);
 
+        Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.reports.throughput.ThroughputReport", ThroughputReport.class);
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.reports.ThroughputReport", ThroughputReport.class);
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.AbstractReport", AbstractReport.class);
         Run.XSTREAM2.addCompatibilityAlias("hudson.plugins.performance.constraints.ConstraintReport", ConstraintReport.class);
