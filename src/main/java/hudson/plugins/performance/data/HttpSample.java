@@ -29,6 +29,8 @@ public class HttpSample implements Serializable, Comparable<HttpSample> {
     private double sizeInKb;
 
     // Summarizer fields
+    private boolean isSummarizer;
+
     private long summarizerMin;
 
     private long summarizerMax;
@@ -135,5 +137,13 @@ public class HttpSample implements Serializable, Comparable<HttpSample> {
 
     public boolean isErrorObtained() {
         return errorObtained;
+    }
+
+    public boolean isSummarizer() {
+        return isSummarizer;
+    }
+
+    public void setSummarizer(boolean summarizer) {
+        isSummarizer = summarizer;
     }
 }

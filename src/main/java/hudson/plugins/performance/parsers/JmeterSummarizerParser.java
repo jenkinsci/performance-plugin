@@ -43,6 +43,7 @@ public class JmeterSummarizerParser extends AbstractParser {
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
         final PerformanceReport report = new PerformanceReport();
+        report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
         Scanner fileScanner = null;
@@ -80,6 +81,7 @@ public class JmeterSummarizerParser extends AbstractParser {
                     lineScanner.next();
                     reportSamples = lineScanner.nextLong();
                     sample.setSummarizerSamples(reportSamples); // set SamplesCount
+                    sample.setSummarizer(true);
                     lineScanner.findInLine("Avg:"); // set response time
                     sample.setDuration(lineScanner.nextLong());
                     reportAvg = sample.getDuration();

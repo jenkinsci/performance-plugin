@@ -132,6 +132,7 @@ public class IagoParser extends AbstractParser {
 
         //Set the sample data
         sample.setDate(dateObject);
+        sample.setSummarizer(true);
         sample.setSummarizerSamples(statsObject.getClientRequests()); // set SamplesCount
         sample.setDuration(statsObject.getClientRequestLatencyMsAverage());
         sample.setSuccessful(true);

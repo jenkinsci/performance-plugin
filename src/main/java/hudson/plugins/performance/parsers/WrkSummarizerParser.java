@@ -127,7 +127,7 @@ public class WrkSummarizerParser extends AbstractParser {
                             summaryScanner.next();
                             // long totalTime = getTime(summaryScanner.next(), logger,
                             // TimeUnit.SECOND);
-
+                            sample.setSummarizer(true);
                             sample.setSummarizerSamples(totalReq);
                             summaryScanner.close();
                             break;
