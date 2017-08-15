@@ -2,6 +2,8 @@
 # Changelog 
 
 ## v3.3 (upcoming)
+- FEATURE: add option to exclude response time of errored samples ([JENKINS-45288](https://issues.jenkins-ci.org/browse/JENKINS-45288))
+- FIX: remove unused `modeRelativeThresholds` flag ([JENKINS-39050](https://issues.jenkins-ci.org/browse/JENKINS-39050))
 - FIX: wrong calculation of Average Throughput ([JENKINS-44410](https://issues.jenkins-ci.org/browse/JENKINS-44410))
 - FIX: recognize JUnit file format which wrote as single line ([JENKINS-45723](https://issues.jenkins-ci.org/browse/JENKINS-45723))
 - FIX: dependency that require code v2.62+
