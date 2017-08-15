@@ -430,7 +430,14 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             List<File> localReports = copyReportsToMaster(run, logger, files, parser.getDescriptor().getDisplayName());
             performanceReports.addAll(parser.parse(run, localReports, listener));
         }
+        setExcludeResponseTimeToReports(performanceReports);
         return performanceReports;
+    }
+
+    private void setExcludeResponseTimeToReports(Collection<PerformanceReport> performanceReports) {
+        for (PerformanceReport report : performanceReports) {
+            report.setExcludeResponseTime(excludeResponseTime);
+        }
     }
 
     private List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
