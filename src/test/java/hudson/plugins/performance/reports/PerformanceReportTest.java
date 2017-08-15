@@ -252,4 +252,47 @@ public class PerformanceReportTest {
         assertEquals(1, report1.compareTo(report));
         assertEquals(0, report1.compareTo(report1));
     }
+
+    @Test
+    public void testExcludeResponseTimeOfErroredSamples() throws Exception {
+        PerformanceReport report = new PerformanceReport();
+        report.setExcludeResponseTime(false);
+
+        HttpSample sample1 = new HttpSample();
+        sample1.setUri("");
+        sample1.setDate(new Date());
+        sample1.setDuration(100);
+        sample1.setSuccessful(true);
+        report.addSample(sample1);
+
+        HttpSample sample2 = new HttpSample();
+        sample2.setUri("");
+        sample2.setDate(new Date());
+        sample2.setDuration(100);
+        sample2.setSuccessful(true);
+        report.addSample(sample2);
+
+        assertEquals(100, report.getAverage());
+
+        report = new PerformanceReport();
+        report.setExcludeResponseTime(false);
+        report.addSample(sample1);
+        report.addSample(sample2);
+
+        HttpSample sample3 = new HttpSample();
+        sample3.setUri("");
+        sample3.setDate(new Date());
+        sample3.setDuration(200);
+        sample3.setSuccessful(true);
+        report.addSample(sample3);
+
+        HttpSample sample4 = new HttpSample();
+        sample4.setUri("");
+        sample4.setDate(new Date());
+        sample4.setDuration(100000);
+        sample4.setSuccessful(false);
+        report.addSample(sample4);
+
+        assertEquals(100, report.getAverage());
+    }
 }

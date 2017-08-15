@@ -128,6 +128,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             UriReport uriReport = uriReportMap.get(staplerUri);
             if (uriReport == null) {
                 uriReport = new UriReport(this, staplerUri, uri);
+                uriReport.setExcludeResponseTime(excludeResponseTime);
                 uriReportMap.put(staplerUri, uriReport);
             }
             uriReport.addHttpSample(pHttpSample);
@@ -142,7 +143,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         }
         summarizerErrors += pHttpSample.getSummarizerErrors();
         samplesCount++;
-        totalDuration += pHttpSample.getDuration();
+        if (!(!excludeResponseTime && pHttpSample.isFailed())) { // TODO: if summarizer report!!!!!!!!!!!!!
+            totalDuration += pHttpSample.getDuration();
+        }
         totalSizeInKB += pHttpSample.getSizeInKb();
     }
 

@@ -123,6 +123,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private boolean modePerformancePerTestCase = true;
 
     /**
+     * Exclude response time of errored samples
+     */
+    private boolean excludeResponseTime;
+
+    /**
      * @deprecated as of 1.3. for compatibility
      */
     private transient String filename;
@@ -1249,6 +1254,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     public void setParsers(List<PerformanceReportParser> parsers) {
         this.parsers = parsers;
         migrateParsers();
+    }
+
+    public boolean isExcludeResponseTime() {
+        return excludeResponseTime;
+    }
+
+    @DataBoundSetter
+    public void setExcludeResponseTime(boolean excludeResponseTime) {
+        this.excludeResponseTime = excludeResponseTime;
     }
 
     /**

@@ -14,6 +14,11 @@ public abstract class AbstractReport {
     protected final ThreadLocal<DecimalFormat> percentFormat;
     protected final ThreadLocal<DecimalFormat> dataFormat; // three decimals
 
+    /**
+     * Exclude response time of errored samples
+     */
+    protected boolean excludeResponseTime;
+
     abstract public int countErrors();
 
     abstract public double errorPercent();
@@ -83,4 +88,12 @@ public abstract class AbstractReport {
     abstract public String getLastBuildHttpCodeIfChanged();
 
     abstract public int getSamplesCountDiff();
+
+    public boolean isExcludeResponseTime() {
+        return excludeResponseTime;
+    }
+
+    public void setExcludeResponseTime(boolean excludeResponseTime) {
+        this.excludeResponseTime = excludeResponseTime;
+    }
 }
