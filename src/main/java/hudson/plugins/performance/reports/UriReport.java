@@ -136,7 +136,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
                 samplesCount++;
             }
         }
-        if (!(!excludeResponseTime && sample.isFailed())) { // TODO: if summarizer report!!!!!!!!!!!!!
+        if (!(sample.isFailed() && excludeResponseTime)) {  // TODO: if summarizer report!!!!!!!!!!!!!
             totalDuration += sample.getDuration();
         }
         httpCodes.add(sample.getHttpCode()); // The Set implementation will ensure that no duplicates will be saved.

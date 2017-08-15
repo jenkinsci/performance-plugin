@@ -269,7 +269,7 @@ public class PerformanceReportTest {
         sample2.setUri("");
         sample2.setDate(new Date());
         sample2.setDuration(100);
-        sample2.setSuccessful(true);
+        sample2.setSuccessful(false);
         report.addSample(sample2);
 
         assertEquals(100, report.getAverage());
@@ -277,14 +277,14 @@ public class PerformanceReportTest {
 
 
         report = new PerformanceReport();
-        report.setExcludeResponseTime(false);
+        report.setExcludeResponseTime(true);
         report.addSample(sample1);
         report.addSample(sample2);
 
         HttpSample sample3 = new HttpSample();
         sample3.setUri("");
         sample3.setDate(new Date());
-        sample3.setDuration(200);
+        sample3.setDuration(300);
         sample3.setSuccessful(true);
         report.addSample(sample3);
 

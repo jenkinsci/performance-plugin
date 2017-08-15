@@ -143,7 +143,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         }
         summarizerErrors += pHttpSample.getSummarizerErrors();
         samplesCount++;
-        if (!(!excludeResponseTime && pHttpSample.isFailed())) { // TODO: if summarizer report!!!!!!!!!!!!!
+        if (!(pHttpSample.isFailed() && excludeResponseTime)) { // TODO: if summarizer report!!!!!!!!!!!!!
             totalDuration += pHttpSample.getDuration();
         }
         totalSizeInKB += pHttpSample.getSizeInKb();
