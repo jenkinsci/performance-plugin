@@ -194,8 +194,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     private long getDurationAt(double percentage) {
-        if (percentage < 0 || percentage > 1) {
-            throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 1 (inclusive)");
+        if (percentage < ZERO_PERCENT || percentage > ONE_HUNDRED_PERCENT) {
+            throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 100 (inclusive)");
         }
 
         synchronized (samples) {
