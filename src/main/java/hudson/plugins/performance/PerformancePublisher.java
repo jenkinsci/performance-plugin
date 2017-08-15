@@ -94,8 +94,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private int nthBuildNumber = 0;
 
-    private boolean modeRelativeThresholds = false;
-
     private String configType = "ART";
 
     private String graphType = "ART";
@@ -1179,15 +1177,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setCompareBuildPrevious(boolean compareBuildPrevious) {
         this.compareBuildPrevious = compareBuildPrevious;
-    }
-
-    @DataBoundSetter
-    public void setModeRelativeThresholds(boolean modeRelativeThresholds) {
-        this.modeRelativeThresholds = modeRelativeThresholds;
-    }
-
-    public boolean getModeRelativeThresholds() {
-        return modeRelativeThresholds;
     }
 
     public boolean isModeThroughput() {
