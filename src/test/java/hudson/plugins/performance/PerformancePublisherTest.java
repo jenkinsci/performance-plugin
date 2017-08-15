@@ -290,8 +290,6 @@ public class PerformancePublisherTest extends HudsonTestCase {
         assertTrue(publisher.isIgnoreUnstableBuilds());
         publisher.setIgnoreFailedBuilds(true);
         assertTrue(publisher.isIgnoreFailedBuilds());
-        publisher.setModeRelativeThresholds(true);
-        assertTrue(publisher.getModeRelativeThresholds());
         List<AbstractConstraint> allConstraints = AbstractConstraint.all();
         publisher.setConstraints(allConstraints);
         assertEquals(allConstraints, publisher.getConstraints());
