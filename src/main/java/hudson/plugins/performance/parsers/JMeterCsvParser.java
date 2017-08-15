@@ -53,6 +53,7 @@ public class JMeterCsvParser extends AbstractParser {
         this.isNumberDateFormat = false;
 
         final PerformanceReport report = new PerformanceReport();
+        report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
         String[] header = null;

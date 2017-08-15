@@ -49,6 +49,7 @@ public class JUnitParser extends AbstractParser {
 
         final SAXParser parser = factory.newSAXParser();
         final PerformanceReport report = new PerformanceReport();
+        report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
         parser.parse(reportFile, new DefaultHandler() {
             private HttpSample currentSample;

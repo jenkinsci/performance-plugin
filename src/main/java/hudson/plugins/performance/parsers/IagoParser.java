@@ -68,6 +68,7 @@ public class IagoParser extends AbstractParser {
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
         final PerformanceReport report = new PerformanceReport();
+        report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
         final BufferedReader reader = new BufferedReader(new FileReader(reportFile));

@@ -357,6 +357,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         run.setResult(Result.SUCCESS);
 
         final List<PerformanceReportParser> parsers = getParsers(run, workspace, listener.getLogger(), run.getEnvironment(listener));
+        prepareParsers(parsers);
 
         Collection<PerformanceReport> parsedReports = prepareEvaluation(run, workspace, listener, parsers);
         if (parsedReports == null) {
@@ -430,13 +431,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             List<File> localReports = copyReportsToMaster(run, logger, files, parser.getDescriptor().getDisplayName());
             performanceReports.addAll(parser.parse(run, localReports, listener));
         }
-        setExcludeResponseTimeToReports(performanceReports);
         return performanceReports;
     }
 
-    private void setExcludeResponseTimeToReports(Collection<PerformanceReport> performanceReports) {
-        for (PerformanceReport report : performanceReports) {
-            report.setExcludeResponseTime(excludeResponseTime);
+    /**
+     *
+     */
+    private void prepareParsers(Collection<PerformanceReportParser> performanceReportParsers) {
+        for (PerformanceReportParser parser : performanceReportParsers) {
+            parser.setExcludeResponseTime(excludeResponseTime);
         }
     }
 

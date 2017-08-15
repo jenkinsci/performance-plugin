@@ -297,5 +297,11 @@ public class PerformanceReportTest {
 
         assertEquals(100, report.getAverage());
         assertEquals(100, report.getUriReportMap().get("").getAverage());
+
+        report = new PerformanceReport();
+        report.setExcludeResponseTime(true);
+        report.addSample(sample2);
+        report.addSample(sample4);
+        assertEquals(0, report.getAverage());
     }
 }
