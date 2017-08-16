@@ -72,8 +72,8 @@ public class UriReportTest {
     public void testCompareSameDateDifferentDuration() {
         // setup fixture
         final List<Sample> samples = new ArrayList<Sample>();
-        samples.add(new Sample(HTTP_200, new Date(1), 2));
-        samples.add(new Sample(HTTP_200, new Date(1), 1));
+        samples.add(new Sample(new Date(1), 2, HTTP_200, true, false));
+        samples.add(new Sample(new Date(1), 1, HTTP_200, true, false));
 
         // execute system under test
         Collections.sort(samples);
@@ -91,8 +91,8 @@ public class UriReportTest {
     public void testCompareDifferentDateSameDuration() {
         // setup fixture
         final List<Sample> samples = new ArrayList<Sample>();
-        samples.add(new Sample(HTTP_200, new Date(2), 1));
-        samples.add(new Sample(HTTP_200, new Date(1), 1));
+        samples.add(new Sample(new Date(2), 1, HTTP_200, true, false));
+        samples.add(new Sample(new Date(1), 1, HTTP_200, true, false));
 
         // execute system under test
         Collections.sort(samples);
@@ -110,8 +110,8 @@ public class UriReportTest {
     public void testCompareDifferentDateDifferentDuration() {
         // setup fixture
         final List<Sample> samples = new ArrayList<Sample>();
-        samples.add(new Sample(HTTP_200, new Date(1), 2));
-        samples.add(new Sample(HTTP_200, new Date(2), 1));
+        samples.add(new Sample(new Date(1), 2, HTTP_200, true, false));
+        samples.add(new Sample(new Date(2), 1, HTTP_200, true, false));
 
         // execute system under test
         Collections.sort(samples);
@@ -129,8 +129,8 @@ public class UriReportTest {
     public void testCompareNullDateSameDuration() {
         // setup fixture
         final List<Sample> samples = new ArrayList<Sample>();
-        samples.add(new Sample(HTTP_200, null, 1));
-        samples.add(new Sample(HTTP_200, null, 1));
+        samples.add(new Sample(null, 1, HTTP_200, true, false));
+        samples.add(new Sample(null, 1, HTTP_200, true, false));
 
         try {
             // execute system under test
