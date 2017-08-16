@@ -120,7 +120,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private static final String archive_directory = "archive";
 
-    private boolean modePerformancePerTestCase = true;
+    private boolean modePerformancePerTestCase = false;
 
     /**
      * Exclude response time of errored samples
