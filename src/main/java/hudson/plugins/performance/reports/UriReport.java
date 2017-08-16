@@ -384,7 +384,9 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         TimeSeries responseTimes = new TimeSeries("Response Time", FixedMillisecond.class);
         synchronized (samples) {
             for (Sample sample : samples) {
-                responseTimes.addOrUpdate(new FixedMillisecond(sample.date), sample.duration);
+                if (isIncludeResponseTime(sample)) {
+                    responseTimes.addOrUpdate(new FixedMillisecond(sample.date), sample.duration);
+                }
             }
         }
 
