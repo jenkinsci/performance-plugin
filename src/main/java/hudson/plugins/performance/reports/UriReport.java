@@ -417,11 +417,11 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
         private static final long serialVersionUID = 4458431861223813407L;
 
-        final Date date;
-        final long duration;
-        final String httpCode;
-        final boolean isSuccessful;
-        final boolean isSummarizer;
+        protected final Date date;
+        protected final long duration;
+        protected final String httpCode;
+        protected final boolean isSuccessful;
+        protected final boolean isSummarizer;
 
         public Sample(Date date, long duration, String httpCode, boolean isSuccessful, boolean isSummarizer) {
             this.date = date;
