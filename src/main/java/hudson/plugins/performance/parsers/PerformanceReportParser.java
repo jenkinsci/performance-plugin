@@ -31,6 +31,10 @@ public abstract class PerformanceReportParser implements
      */
     public final String glob;
     public String reportURL;
+    /**
+     * Exclude response time of errored samples
+     */
+    protected boolean excludeResponseTime;
 
     protected PerformanceReportParser(String glob) {
         this.glob = (glob == null || glob.length() == 0) ? getDefaultGlobPattern()
@@ -62,4 +66,11 @@ public abstract class PerformanceReportParser implements
         return this.getClass().getName().replaceAll("^.*\\.(\\w+)Parser.*$", "$1");
     }
 
+    public boolean isExcludeResponseTime() {
+        return excludeResponseTime;
+    }
+
+    public void setExcludeResponseTime(boolean excludeResponseTime) {
+        this.excludeResponseTime = excludeResponseTime;
+    }
 }

@@ -86,6 +86,7 @@ public class JMeterParser extends AbstractParser {
         factory.setNamespaceAware(false);
 
         final PerformanceReport report = new PerformanceReport();
+        report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
         factory.newSAXParser().parse(reportFile, new DefaultHandler() {

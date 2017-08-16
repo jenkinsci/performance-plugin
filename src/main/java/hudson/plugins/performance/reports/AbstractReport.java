@@ -1,5 +1,6 @@
 package hudson.plugins.performance.reports;
 
+import hudson.plugins.performance.data.HttpSample;
 import org.kohsuke.stapler.Stapler;
 
 import java.text.DecimalFormat;
@@ -10,9 +11,18 @@ import java.util.Locale;
  * Abstract class for classes with samplesCount, error, mean, average, 90 line, min and max attributes
  */
 public abstract class AbstractReport {
+    public static final double ZERO_PERCENT = 0;
+    public static final double ONE_HUNDRED_PERCENT = 100;
+    public static final double NINETY_PERCENT = 90;
+    public static final double FIFTY_PERCENT = 50;
 
     protected final ThreadLocal<DecimalFormat> percentFormat;
     protected final ThreadLocal<DecimalFormat> dataFormat; // three decimals
+
+    /**
+     * Exclude response time of errored samples
+     */
+    protected boolean excludeResponseTime;
 
     abstract public int countErrors();
 
@@ -83,4 +93,16 @@ public abstract class AbstractReport {
     abstract public String getLastBuildHttpCodeIfChanged();
 
     abstract public int getSamplesCountDiff();
+
+    public boolean isExcludeResponseTime() {
+        return excludeResponseTime;
+    }
+
+    public void setExcludeResponseTime(boolean excludeResponseTime) {
+        this.excludeResponseTime = excludeResponseTime;
+    }
+
+    protected boolean isIncludeResponseTime(HttpSample sample) {
+        return !(sample.isFailed() && excludeResponseTime && !sample.isSummarizer());
+    }
 }

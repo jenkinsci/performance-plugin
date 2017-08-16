@@ -123,6 +123,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private boolean modePerformancePerTestCase = true;
 
     /**
+     * Exclude response time of errored samples
+     */
+    private boolean excludeResponseTime;
+
+    /**
      * @deprecated as of 1.3. for compatibility
      */
     private transient String filename;
@@ -352,6 +357,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         run.setResult(Result.SUCCESS);
 
         final List<PerformanceReportParser> parsers = getParsers(run, workspace, listener.getLogger(), run.getEnvironment(listener));
+        prepareParsers(parsers);
 
         Collection<PerformanceReport> parsedReports = prepareEvaluation(run, workspace, listener, parsers);
         if (parsedReports == null) {
@@ -426,6 +432,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             performanceReports.addAll(parser.parse(run, localReports, listener));
         }
         return performanceReports;
+    }
+
+    /**
+     *
+     */
+    private void prepareParsers(Collection<PerformanceReportParser> performanceReportParsers) {
+        for (PerformanceReportParser parser : performanceReportParsers) {
+            parser.setExcludeResponseTime(excludeResponseTime);
+        }
     }
 
     private List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
@@ -1249,6 +1264,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     public void setParsers(List<PerformanceReportParser> parsers) {
         this.parsers = parsers;
         migrateParsers();
+    }
+
+    public boolean isExcludeResponseTime() {
+        return excludeResponseTime;
+    }
+
+    @DataBoundSetter
+    public void setExcludeResponseTime(boolean excludeResponseTime) {
+        this.excludeResponseTime = excludeResponseTime;
     }
 
     /**

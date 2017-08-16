@@ -74,6 +74,7 @@ public class WrkSummarizerParser extends AbstractParser {
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
         final PerformanceReport r = new PerformanceReport();
+        r.setExcludeResponseTime(excludeResponseTime);
         r.setReportFileName(reportFile.getName());
 
         Scanner s = null;
@@ -126,7 +127,7 @@ public class WrkSummarizerParser extends AbstractParser {
                             summaryScanner.next();
                             // long totalTime = getTime(summaryScanner.next(), logger,
                             // TimeUnit.SECOND);
-
+                            sample.setSummarizer(true);
                             sample.setSummarizerSamples(totalReq);
                             summaryScanner.close();
                             break;

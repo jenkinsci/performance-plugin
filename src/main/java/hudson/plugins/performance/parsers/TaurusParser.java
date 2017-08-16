@@ -44,6 +44,7 @@ public class TaurusParser extends AbstractParser {
 
     private PerformanceReport readFromXML(File reportFile) throws Exception {
         final PerformanceReport report = new PerformanceReport();
+        report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
         DocumentBuilderFactory dbFactory

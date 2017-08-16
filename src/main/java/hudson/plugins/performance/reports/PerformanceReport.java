@@ -28,10 +28,7 @@ import java.util.Map;
 public class PerformanceReport extends AbstractReport implements Serializable,
         Comparable<PerformanceReport> {
     private static final long serialVersionUID = 675698410989941826L;
-    private static final double ZERO_PERCENT = 0;
-    private static final double ONE_HUNDRED_PERCENT = 100;
-    private static final double NINETY_PERCENT = 90;
-    private static final double FIFTY_PERCENT = 50;
+
 
     private transient PerformanceBuildAction buildAction;
 
@@ -128,6 +125,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             UriReport uriReport = uriReportMap.get(staplerUri);
             if (uriReport == null) {
                 uriReport = new UriReport(this, staplerUri, uri);
+                uriReport.setExcludeResponseTime(excludeResponseTime);
                 uriReportMap.put(staplerUri, uriReport);
             }
             uriReport.addHttpSample(pHttpSample);
@@ -142,7 +140,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         }
         summarizerErrors += pHttpSample.getSummarizerErrors();
         samplesCount++;
-        totalDuration += pHttpSample.getDuration();
+        if (isIncludeResponseTime(pHttpSample)) {
+            totalDuration += pHttpSample.getDuration();
+        }
         totalSizeInKB += pHttpSample.getSizeInKb();
     }
 
@@ -241,11 +241,15 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
         synchronized (uriReportMap) {
             if (durationsSortedBySize == null) {
-                durationsSortedBySize = new ArrayList<Long>();
+                durationsSortedBySize = new ArrayList<>();
                 for (UriReport currentReport : uriReportMap.values()) {
                     durationsSortedBySize.addAll(currentReport.getDurations());
                 }
                 Collections.sort(durationsSortedBySize);
+            }
+
+            if (durationsSortedBySize.isEmpty()) {
+                return 0;
             }
 
             final double percentInDecimals = percentage / 100;

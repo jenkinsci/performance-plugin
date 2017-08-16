@@ -131,12 +131,14 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
             nbError++;
         }
         synchronized (samples) {
-            if (samples.add(new Sample(sample.getHttpCode(), sample.getDate(), sample.getDuration()))) {
+            if (samples.add(Sample.convertFromHttpSample(sample))) {
                 isSorted = false;
                 samplesCount++;
             }
         }
-        totalDuration += sample.getDuration();
+        if (isIncludeResponseTime(sample)) {
+            totalDuration += sample.getDuration();
+        }
         httpCodes.add(sample.getHttpCode()); // The Set implementation will ensure that no duplicates will be saved.
         summarizerSize += sample.getSummarizerSamples();
         summarizerErrors += sample.getSummarizerErrors();
@@ -149,6 +151,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
             end = finish;
         }
     }
+
+
 
     public void setFromTaurusFinalStats(TaurusFinalStats report) {
         average = (long) report.getAverageResponseTime();
@@ -190,8 +194,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     private long getDurationAt(double percentage) {
-        if (percentage < 0 || percentage > 1) {
-            throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 1 (inclusive)");
+        if (percentage < ZERO_PERCENT || percentage > ONE_HUNDRED_PERCENT) {
+            throw new IllegalArgumentException("Argument 'percentage' must be a value between 0 and 100 (inclusive)");
         }
 
         synchronized (samples) {
@@ -201,13 +205,23 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
                 return 0;
             }
 
-            return durations.get((int) (samples.size() * percentage));
+            final double percentInDecimals = percentage / 100;
+            int indexToReturn = ((int) (durationsSortedBySize.size() * percentInDecimals)) - 1;
+
+            // Make sure a valid index is used.
+            if (indexToReturn < 0) {
+                indexToReturn = 0;
+            } else if (indexToReturn >= durationsSortedBySize.size()) {
+                indexToReturn = durationsSortedBySize.size() - 1;
+            }
+
+            return durations.get(indexToReturn);
         }
     }
 
     public long get90Line() {
         if (perc90 == null) {
-            perc90 = getDurationAt(0.9);
+            perc90 = getDurationAt(NINETY_PERCENT);
         }
         return perc90;
     }
@@ -218,7 +232,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
     public long getMedian() {
         if (perc50 == null) {
-            perc50 = getDurationAt(0.5);
+            perc50 = getDurationAt(FIFTY_PERCENT);
         }
         return perc50;
     }
@@ -243,9 +257,11 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         synchronized (samples) {
             if (!isSorted || durationsSortedBySize == null || durationsSortedBySize.size() != samples.size()) {
 
-                durationsSortedBySize = new ArrayList<Long>(samplesCount());
+                durationsSortedBySize = new ArrayList<>(samplesCount());
                 for (Sample sample : samples) {
-                    durationsSortedBySize.add(sample.duration);
+                    if (isIncludeResponseTime(sample)) {
+                        durationsSortedBySize.add(sample.duration);
+                    }
                 }
                 Collections.sort(durationsSortedBySize);
                 isSorted = true;
@@ -258,9 +274,11 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     public List<Long> getDurations() {
         synchronized (samples) {
             if (durationsIO == null || durationsIO.size() != samples.size()) {
-                durationsIO = new ArrayList<Long>(samples.size());
+                durationsIO = new ArrayList<>(samples.size());
                 for (Sample sample : samples) {
-                    durationsIO.add(sample.duration);
+                    if (isIncludeResponseTime(sample)) {
+                        durationsIO.add(sample.duration);
+                    }
                 }
             }
             return durationsIO;
@@ -269,16 +287,14 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
     public long getMax() {
         if (perc100 == null) {
-            final List<Long> durations = getSortedDuration();
-            perc100 = durations.isEmpty() ? 0 : durations.get(durations.size() - 1);
+            perc100 = getDurationAt(ONE_HUNDRED_PERCENT);
         }
         return perc100;
     }
 
     public long getMin() {
         if (perc0 == null) {
-            final List<Long> durations = getSortedDuration();
-            perc0 = durations.isEmpty() ? 0 : durations.get(0);
+            perc0 = getDurationAt(ZERO_PERCENT);
         }
         return perc0;
     }
@@ -368,7 +384,9 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         TimeSeries responseTimes = new TimeSeries("Response Time", FixedMillisecond.class);
         synchronized (samples) {
             for (Sample sample : samples) {
-                responseTimes.addOrUpdate(new FixedMillisecond(sample.date), sample.duration);
+                if (isIncludeResponseTime(sample)) {
+                    responseTimes.addOrUpdate(new FixedMillisecond(sample.date), sample.duration);
+                }
             }
         }
 
@@ -390,18 +408,32 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         return end;
     }
 
+
+    protected boolean isIncludeResponseTime(Sample sample) {
+        return !(sample.isFailed() && excludeResponseTime && !sample.isSummarizer());
+    }
+
     public static class Sample implements Serializable, Comparable<Sample> {
 
         private static final long serialVersionUID = 4458431861223813407L;
 
-        final Date date;
-        final long duration;
-        final String httpCode;
+        protected final Date date;
+        protected final long duration;
+        protected final String httpCode;
+        protected final boolean isSuccessful;
+        protected final boolean isSummarizer;
 
-        public Sample(String httpCode, Date date, long duration) {
-            this.httpCode = httpCode;
+        public Sample(Date date, long duration, String httpCode, boolean isSuccessful, boolean isSummarizer) {
             this.date = date;
             this.duration = duration;
+            this.httpCode = httpCode;
+            this.isSuccessful = isSuccessful;
+            this.isSummarizer = isSummarizer;
+        }
+
+        public static Sample convertFromHttpSample(HttpSample httpSample) {
+            return new Sample(httpSample.getDate(), httpSample.getDuration(), httpSample.getHttpCode(),
+                    httpSample.isSuccessful(), httpSample.isSummarizer());
         }
 
         public String getHttpCode() {
@@ -414,6 +446,18 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
         public long getDuration() {
             return duration;
+        }
+
+        public boolean isSuccessful() {
+            return isSuccessful;
+        }
+
+        public boolean isFailed() {
+            return !isSuccessful();
+        }
+
+        public boolean isSummarizer() {
+            return isSummarizer;
         }
 
         /**
