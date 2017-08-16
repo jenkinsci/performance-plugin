@@ -44,7 +44,7 @@ public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTe
     public void testRespondingTimeGraphPerTestCaseModeMedianValues() throws Exception {
         setGraphType(PerformancePublisher.MRT);
         target.doRespondingTimeGraphPerTestCaseMode(request, response);
-        assertArrayEquals(new Number[]{14720L, 278L}, toArray(target.dataset));
+        assertArrayEquals(new Number[]{598L, 63L}, toArray(target.dataset));
     }
 
     @Test
@@ -58,7 +58,7 @@ public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTe
     public void testSummarizerGraphMedianValues() throws Exception {
         setGraphType(PerformancePublisher.MRT);
         target.doSummarizerGraph(request, response);
-        assertArrayEquals(new Number[]{14720L, 278L}, toArray(target.dataset));
+        assertArrayEquals(new Number[]{598L, 63L}, toArray(target.dataset));
     }
 
     private class TestablePerformanceProjectAction extends PerformanceProjectAction {

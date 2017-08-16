@@ -97,7 +97,7 @@ public class TestSuiteReportDetailTest {
     @Test
     public void chartDatasetHasMedianOfSamples() throws Exception {
         when(publisher.getGraphType()).thenReturn(PerformancePublisher.MRT);
-        assertEquals(1000L, getDatasetValue());
+        assertEquals(100L, getDatasetValue());
     }
 
     private Number getDatasetValue() {
