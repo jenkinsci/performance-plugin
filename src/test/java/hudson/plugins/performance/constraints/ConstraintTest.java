@@ -58,6 +58,7 @@ public class ConstraintTest {
         performancePublisher.setIgnoreFailedBuilds(false);
         performancePublisher.setIgnoreUnstableBuilds(false);
         performancePublisher.setPersistConstraintLog(false);
+        performancePublisher.setFailBuildIfNoResultFile(false);
 
         FreeStyleProject p = j.createFreeStyleProject("informationModeDoesntAffectBuildStatus");
         p.getPublishersList().add(performancePublisher);
@@ -185,6 +186,7 @@ public class ConstraintTest {
         performancePublisher.setIgnoreFailedBuilds(false);
         performancePublisher.setIgnoreUnstableBuilds(false);
         performancePublisher.setPersistConstraintLog(false);
+        performancePublisher.setFailBuildIfNoResultFile(false);
 
         FreeStyleProject p = j.createFreeStyleProject("equalValuesWithNotGreaterOperator");
         p.getPublishersList().add(performancePublisher);
@@ -311,6 +313,7 @@ public class ConstraintTest {
         performancePublisher.setIgnoreFailedBuilds(false);
         performancePublisher.setIgnoreUnstableBuilds(false);
         performancePublisher.setPersistConstraintLog(false);
+        performancePublisher.setFailBuildIfNoResultFile(false);
 
         FreeStyleProject p = j.createFreeStyleProject("notEqualValueWithNotEqualOperator");
         p.getPublishersList().add(performancePublisher);
@@ -353,6 +356,7 @@ public class ConstraintTest {
         performancePublisher.setIgnoreFailedBuilds(false);
         performancePublisher.setIgnoreUnstableBuilds(false);
         performancePublisher.setPersistConstraintLog(false);
+        performancePublisher.setFailBuildIfNoResultFile(false);
 
         FreeStyleProject p = j.createFreeStyleProject("equalValuesWithNotLessOperator");
         p.getPublishersList().add(performancePublisher);
