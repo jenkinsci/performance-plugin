@@ -100,7 +100,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private boolean modeOfThreshold = false;
 
-    private boolean failBuildIfNoResultFile = false;
+    private boolean failBuildIfNoResultFile = true;
 
     private boolean compareBuildPrevious = false;
 
@@ -304,11 +304,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     protected List<PerformanceReportParser> getParsers(Run<?, ?> build, FilePath workspace, PrintStream logger, EnvVars env) throws IOException, InterruptedException {
-        final List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
+        final List<PerformanceReportParser> parsers = new ArrayList<>();
         if (sourceDataFiles != null) {
             for (String filePath : sourceDataFiles.split(";")) {
                 if (!filePath.isEmpty()) {
-                    parsers.add(ParserFactory.getParser(build, workspace, logger, filePath, env));
+                    try {
+                        parsers.add(ParserFactory.getParser(build, workspace, logger, filePath, env));
+                    } catch (IOException ex) {
+                        logger.println("Cannot detect file type because of error: " + ex.getMessage());
+                    }
                 }
             }
         }
@@ -357,17 +361,21 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         run.setResult(Result.SUCCESS);
 
         final List<PerformanceReportParser> parsers = getParsers(run, workspace, listener.getLogger(), run.getEnvironment(listener));
-        prepareParsers(parsers);
+        if (!parsers.isEmpty()) {
+            prepareParsers(parsers);
 
-        Collection<PerformanceReport> parsedReports = prepareEvaluation(run, workspace, listener, parsers);
-        if (parsedReports == null) {
-            return;
-        }
+            Collection<PerformanceReport> parsedReports = prepareEvaluation(run, workspace, listener, parsers);
+            if (parsedReports == null) {
+                return;
+            }
 
-        if (!modeEvaluation) {
-            evaluateInStandardMode(run, workspace, parsedReports, listener, parsers);
+            if (!modeEvaluation) {
+                evaluateInStandardMode(run, workspace, parsedReports, listener, parsers);
+            } else {
+                evaluateInExpertMode(run, listener);
+            }
         } else {
-            evaluateInExpertMode(run, listener);
+            run.setResult(failBuildIfNoResultFile ?  Result.FAILURE : Result.UNSTABLE);
         }
     }
 
@@ -422,7 +430,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     return null;
                 }
 
-                run.setResult(Result.FAILURE);
+                if (failBuildIfNoResultFile) {
+                    run.setResult(Result.FAILURE);
+                }
                 logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob
                         + "' have been found. Has the report generated?. Setting Build to " + run.getResult());
                 return null;
