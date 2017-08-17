@@ -338,12 +338,32 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     // return bzt install command
     private String[] getBztInstallCommand(FilePath workspace) {
+
+
         return new String[]{
-                getVirtualenvPath(workspace) + "pip", "install",
-                        (bztVersion != null && !bztVersion.isEmpty()) ?
-                                PERFORMANCE_TEST_COMMAND + "==" + bztVersion :
-                                PERFORMANCE_TEST_COMMAND};
+                getVirtualenvPath(workspace) + "pip", "install", getInstallCommand()};
     }
+
+    private String getInstallCommand() {
+        if (bztVersion != null && !bztVersion.isEmpty()) {
+            return isVersionOrURL() ? (PERFORMANCE_TEST_COMMAND + "==" + bztVersion) : getInstallFromURLCommand();
+        } else {
+            return PERFORMANCE_TEST_COMMAND;
+        }
+    }
+
+
+    /**
+     * @return true if 'bztVersion' contains version, false - if URL or path
+     */
+    private boolean isVersionOrURL() {
+        return !bztVersion.matches(".*[a-zA-Z].*");
+    }
+
+    private String getInstallFromURLCommand() {
+        return bztVersion.toLowerCase().contains("git") ? ("git+" + bztVersion) : bztVersion;
+    }
+
 
     // return bzt check command
     private String[] getBztCheckCommand(FilePath workspace) {
