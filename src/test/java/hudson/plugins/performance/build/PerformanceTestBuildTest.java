@@ -1,7 +1,9 @@
 package hudson.plugins.performance.build;
 
 import com.google.common.io.Files;
+import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -19,7 +21,11 @@ import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class PerformanceTestBuildTest extends HudsonTestCase {
@@ -75,15 +81,13 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         buildExt.getRootDir().mkdirs();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote());
-        buildTest.setGeneratePerformanceTrend(true);
+        PerformanceTestBuildExt buildTest = new PerformanceTestBuildExt(new File(path).getAbsolutePath());
+        buildTest.setGeneratePerformanceTrend(false);
         buildTest.setPrintDebugOutput(true);
         buildTest.setUseSystemSitePackages(false);
         buildTest.setUseBztExitCode(false);
+        buildTest.setAlwaysUseVirtualenv(true);
         buildTest.setBztVersion(gitRepo);
-
-        assertEquals(PerformanceProjectAction.class, buildTest.getProjectAction((AbstractProject) project).getClass());
-
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamTaskListener taskListener = new StreamTaskListener(stream);
@@ -98,13 +102,14 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
         assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
-        assertTrue(jobLog, jobLog.contains("Collecting git+" + gitRepo));
+        assertEquals(jobLog, 5, buildTest.commands.size());
+        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, git+" + gitRepo));
     }
 
     @Test
     public void testInstallFromPath() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
-        String pathToBzt = "http://gettaurus.org/snapshots/bzt-1.9.5.1622.tar.gz";
+        String pathToBzt = "/home/user/snapshot/bzt-1.9.5.1622.tar.gz";
 
         FreeStyleProject project = createFreeStyleProject();
 
@@ -115,15 +120,13 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         buildExt.getRootDir().mkdirs();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote());
-        buildTest.setGeneratePerformanceTrend(true);
+        PerformanceTestBuildExt buildTest = new PerformanceTestBuildExt(new File(path).getAbsolutePath());
+        buildTest.setGeneratePerformanceTrend(false);
         buildTest.setPrintDebugOutput(true);
         buildTest.setUseSystemSitePackages(false);
         buildTest.setUseBztExitCode(false);
+        buildTest.setAlwaysUseVirtualenv(true);
         buildTest.setBztVersion(pathToBzt);
-
-        assertEquals(PerformanceProjectAction.class, buildTest.getProjectAction((AbstractProject) project).getClass());
-
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamTaskListener taskListener = new StreamTaskListener(stream);
@@ -138,7 +141,22 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
         assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
-        assertTrue(jobLog, jobLog.contains("Collecting " + pathToBzt));
+        assertEquals(jobLog, 5, buildTest.commands.size());
+        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + pathToBzt));
+    }
+
+    public static class PerformanceTestBuildExt extends PerformanceTestBuild {
+        public PerformanceTestBuildExt(String params) {
+            super(params);
+        }
+
+        public List<String[]> commands = new LinkedList<>();
+
+        @Override
+        public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+            this.commands.add(commands);
+            return 0;
+        }
     }
 
 
@@ -275,6 +293,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         assertFalse(testBuild.isSuccessCode(1));
     }
 
+    @Test
     public void testPWD() throws Exception {
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
         File buildWorkspace = Files.createTempDir();
