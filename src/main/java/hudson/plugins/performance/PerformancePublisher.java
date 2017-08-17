@@ -375,7 +375,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 evaluateInExpertMode(run, listener);
             }
         } else {
-            run.setResult(failBuildIfNoResultFile ?  Result.FAILURE : Result.UNSTABLE);
+            if (failBuildIfNoResultFile) {
+                run.setResult(Result.FAILURE);
+            }
         }
     }
 
