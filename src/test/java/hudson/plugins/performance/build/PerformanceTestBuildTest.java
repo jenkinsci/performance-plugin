@@ -70,7 +70,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     @Test
     public void testInstallFromGit() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
-        String gitRepo = "https://github.com/Blazemeter/taurus.git";
+        String gitRepo = "git+https://github.com/Blazemeter/taurus.git";
 
         FreeStyleProject project = createFreeStyleProject();
 
@@ -103,13 +103,13 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
         assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, git+" + gitRepo));
+        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + gitRepo));
     }
 
     @Test
-    public void testInstallFromPath() throws Exception {
+    public void testInstallFromURL() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
-        String pathToBzt = "/home/user/snapshot/bzt-1.9.5.1622.tar.gz";
+        String url = "http://gettaurus.org/snapshots/bzt-1.9.5.1622.tar.gz";
 
         FreeStyleProject project = createFreeStyleProject();
 
@@ -126,7 +126,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildTest.setUseSystemSitePackages(false);
         buildTest.setUseBztExitCode(false);
         buildTest.setAlwaysUseVirtualenv(true);
-        buildTest.setBztVersion(pathToBzt);
+        buildTest.setBztVersion(url);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamTaskListener taskListener = new StreamTaskListener(stream);
@@ -142,7 +142,45 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
         assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + pathToBzt));
+        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + url));
+    }
+
+    @Test
+    public void testInstallFromPath() throws Exception {
+        String path = getClass().getResource("/performanceTest.yml").getPath();
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
+        FilePath workspace = new FilePath(Files.createTempDir());
+        buildExt.setWorkspace(workspace);
+        buildExt.onStartBuilding();
+
+        buildExt.getRootDir().mkdirs();
+
+        PerformanceTestBuildExt buildTest = new PerformanceTestBuildExt(new File(path).getAbsolutePath());
+        buildTest.setGeneratePerformanceTrend(false);
+        buildTest.setPrintDebugOutput(true);
+        buildTest.setUseSystemSitePackages(false);
+        buildTest.setUseBztExitCode(false);
+        buildTest.setAlwaysUseVirtualenv(true);
+        buildTest.setBztVersion(path);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+
+        Iterator<Publisher> iterator = project.getPublishersList().iterator();
+        StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
+        while (iterator.hasNext()) {
+            builder.append(iterator.next().getClass().getName()).append("\n");
+        }
+
+        String jobLog = new String(stream.toByteArray()) + builder.toString();
+
+        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
+        assertEquals(jobLog, 5, buildTest.commands.size());
+        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + path));
     }
 
     public static class PerformanceTestBuildExt extends PerformanceTestBuild {
