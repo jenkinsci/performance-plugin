@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -337,12 +339,36 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
     // return bzt install command
-    private String[] getBztInstallCommand(FilePath workspace) {
+    private String[] getBztInstallCommand(FilePath workspace) throws IOException, InterruptedException {
         return new String[]{
-                getVirtualenvPath(workspace) + "pip", "install",
-                        (bztVersion != null && !bztVersion.isEmpty()) ?
-                                PERFORMANCE_TEST_COMMAND + "==" + bztVersion :
-                                PERFORMANCE_TEST_COMMAND};
+                getVirtualenvPath(workspace) + "pip", "install", getInstallCommand(workspace)};
+    }
+
+    private String getInstallCommand(FilePath workspace) throws IOException, InterruptedException {
+        if (bztVersion != null && !bztVersion.isEmpty()) {
+            return (isPathToFile(workspace) || isURLToFile()) ?
+                    bztVersion :
+                    (PERFORMANCE_TEST_COMMAND + "==" + bztVersion);
+        } else {
+            return PERFORMANCE_TEST_COMMAND;
+        }
+    }
+
+    private boolean isURLToFile() {
+        try {
+            if (bztVersion.startsWith("git+")) {
+                new URL(bztVersion.substring(4));
+            } else {
+                new URL(bztVersion);
+            }
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+
+    private boolean isPathToFile(FilePath workspace) throws IOException, InterruptedException {
+        return new FilePath(workspace.getChannel(), bztVersion).exists();
     }
 
     // return bzt check command

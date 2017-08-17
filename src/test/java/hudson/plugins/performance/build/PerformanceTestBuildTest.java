@@ -1,7 +1,9 @@
 package hudson.plugins.performance.build;
 
 import com.google.common.io.Files;
+import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -19,7 +21,11 @@ import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class PerformanceTestBuildTest extends HudsonTestCase {
@@ -59,6 +65,136 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
         assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
+    }
+
+    @Test
+    public void testInstallFromGit() throws Exception {
+        String path = getClass().getResource("/performanceTest.yml").getPath();
+        String gitRepo = "git+https://github.com/Blazemeter/taurus.git";
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
+        FilePath workspace = new FilePath(Files.createTempDir());
+        buildExt.setWorkspace(workspace);
+        buildExt.onStartBuilding();
+
+        buildExt.getRootDir().mkdirs();
+
+        PerformanceTestBuildExt buildTest = new PerformanceTestBuildExt(new File(path).getAbsolutePath());
+        buildTest.setGeneratePerformanceTrend(false);
+        buildTest.setPrintDebugOutput(true);
+        buildTest.setUseSystemSitePackages(false);
+        buildTest.setUseBztExitCode(false);
+        buildTest.setAlwaysUseVirtualenv(true);
+        buildTest.setBztVersion(gitRepo);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+
+        Iterator<Publisher> iterator = project.getPublishersList().iterator();
+        StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
+        while (iterator.hasNext()) {
+            builder.append(iterator.next().getClass().getName()).append("\n");
+        }
+
+        String jobLog = new String(stream.toByteArray()) + builder.toString();
+
+        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
+        assertEquals(jobLog, 5, buildTest.commands.size());
+        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + gitRepo));
+    }
+
+    @Test
+    public void testInstallFromURL() throws Exception {
+        String path = getClass().getResource("/performanceTest.yml").getPath();
+        String url = "http://gettaurus.org/snapshots/bzt-1.9.5.1622.tar.gz";
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
+        FilePath workspace = new FilePath(Files.createTempDir());
+        buildExt.setWorkspace(workspace);
+        buildExt.onStartBuilding();
+
+        buildExt.getRootDir().mkdirs();
+
+        PerformanceTestBuildExt buildTest = new PerformanceTestBuildExt(new File(path).getAbsolutePath());
+        buildTest.setGeneratePerformanceTrend(false);
+        buildTest.setPrintDebugOutput(true);
+        buildTest.setUseSystemSitePackages(false);
+        buildTest.setUseBztExitCode(false);
+        buildTest.setAlwaysUseVirtualenv(true);
+        buildTest.setBztVersion(url);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+
+        Iterator<Publisher> iterator = project.getPublishersList().iterator();
+        StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
+        while (iterator.hasNext()) {
+            builder.append(iterator.next().getClass().getName()).append("\n");
+        }
+
+        String jobLog = new String(stream.toByteArray()) + builder.toString();
+
+        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
+        assertEquals(jobLog, 5, buildTest.commands.size());
+        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + url));
+    }
+
+    @Test
+    public void testInstallFromPath() throws Exception {
+        String path = getClass().getResource("/performanceTest.yml").getPath();
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
+        FilePath workspace = new FilePath(Files.createTempDir());
+        buildExt.setWorkspace(workspace);
+        buildExt.onStartBuilding();
+
+        buildExt.getRootDir().mkdirs();
+
+        PerformanceTestBuildExt buildTest = new PerformanceTestBuildExt(new File(path).getAbsolutePath());
+        buildTest.setGeneratePerformanceTrend(false);
+        buildTest.setPrintDebugOutput(true);
+        buildTest.setUseSystemSitePackages(false);
+        buildTest.setUseBztExitCode(false);
+        buildTest.setAlwaysUseVirtualenv(true);
+        buildTest.setBztVersion(path);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+
+        Iterator<Publisher> iterator = project.getPublishersList().iterator();
+        StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
+        while (iterator.hasNext()) {
+            builder.append(iterator.next().getClass().getName()).append("\n");
+        }
+
+        String jobLog = new String(stream.toByteArray()) + builder.toString();
+
+        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
+        assertEquals(jobLog, 5, buildTest.commands.size());
+        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + path));
+    }
+
+    public static class PerformanceTestBuildExt extends PerformanceTestBuild {
+        public PerformanceTestBuildExt(String params) {
+            super(params);
+        }
+
+        public List<String[]> commands = new LinkedList<>();
+
+        @Override
+        public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+            this.commands.add(commands);
+            return 0;
+        }
     }
 
 
@@ -195,6 +331,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         assertFalse(testBuild.isSuccessCode(1));
     }
 
+    @Test
     public void testPWD() throws Exception {
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
         File buildWorkspace = Files.createTempDir();
