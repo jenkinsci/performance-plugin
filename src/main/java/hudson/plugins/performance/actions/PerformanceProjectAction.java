@@ -666,13 +666,15 @@ public class PerformanceProjectAction implements Action {
     public final Run getSomeBuildWithWorkspace() {
         byte cnt = 0;
         for(Run run = job.getLastBuild(); cnt < 5 && run != null; run = run.getPreviousBuild()) {
-            if (run instanceof AbstractBuild) {
-                FilePath ws = ((AbstractBuild) run).getWorkspace();
-                if(ws != null) {
+            if (!run.isBuilding()) {
+                if (run instanceof AbstractBuild) {
+                    FilePath ws = ((AbstractBuild) run).getWorkspace();
+                    if (ws != null) {
+                        return run;
+                    }
+                } else {
                     return run;
                 }
-            } else {
-                return run;
             }
             cnt++;
         }
