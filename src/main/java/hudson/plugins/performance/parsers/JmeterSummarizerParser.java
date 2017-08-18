@@ -55,7 +55,7 @@ public class JmeterSummarizerParser extends AbstractParser {
             String lastEqualsLine = null;
             while (fileScanner.hasNextLine()) {
                 line = fileScanner.nextLine();
-                if (line.contains("=") && line.contains("jmeter.reporters.Summariser:")) {
+                if (line.contains("=") && line.contains("Summariser:")) {
                     lastEqualsLine = line;
                 }
             }
@@ -74,7 +74,7 @@ public class JmeterSummarizerParser extends AbstractParser {
                     final HttpSample sample = new HttpSample();
                     final String dateString = lineScanner.next();
                     sample.setDate(dateFormat.parse(dateString));
-                    lineScanner.findInLine("jmeter.reporters.Summariser:");
+                    lineScanner.findInLine("Summariser:");
                     lineScanner.useDelimiter("\\=");
                     key = lineScanner.next().trim();
                     lineScanner.useDelimiter(delimiter);

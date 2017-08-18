@@ -21,4 +21,22 @@ public class JmeterSummarizerParserTest {
         assertEquals(5630, performanceReport.getSummarizerMax());
         assertEquals("4.56", performanceReport.getSummarizerErrors());
     }
+
+
+    @Test
+    public void testParseNewLog() throws Exception {
+
+        String path = getClass().getResource("/jmeter.log").getPath();
+        String parser = ParserDetector.detect(path);
+        assertEquals(JmeterSummarizerParser.class.getSimpleName(), parser);
+
+        JmeterSummarizerParser jmeterSummarizerParser = new JmeterSummarizerParser(path);
+        PerformanceReport performanceReport = jmeterSummarizerParser.parse(new File(path));
+
+        assertEquals(1257, performanceReport.getSummarizerSize());
+        assertEquals(333, performanceReport.getSummarizerAvg());
+        assertEquals(3, performanceReport.getSummarizerMin());
+        assertEquals(5630, performanceReport.getSummarizerMax());
+        assertEquals("4.56", performanceReport.getSummarizerErrors());
+    }
 }
