@@ -153,7 +153,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <!-- Travis build workaround -->
-                    <argLine>-XX:MaxPermSize=256m -Xmx1024m</argLine>
+                    <argLine>-XX:MaxMetaspaceSize=256m -Xmx1024m -XX:-HeapDumpOnOutOfMemoryErro</argLine>
                 </configuration>
             </plugin>
         </plugins>
