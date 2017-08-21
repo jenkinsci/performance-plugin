@@ -4,6 +4,7 @@
 ## v3.3 (upcoming)
 - FEATURE: install 'bzt' from URL or path
 - FEATURE: add option to exclude response time of errored samples ([JENKINS-45288](https://issues.jenkins-ci.org/browse/JENKINS-45288))
+- FIX: summarizer parser for JMeter 3.2 
 - FIX: does not present graphs while job running 
 - FIX: wrong time values for uri reports 
 - FIX: unused `failBuildIfNoResultFile` flag 
