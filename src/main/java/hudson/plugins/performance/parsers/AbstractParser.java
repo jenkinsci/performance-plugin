@@ -49,6 +49,13 @@ public abstract class AbstractParser extends PerformanceReportParser {
      */
     private static final Cache<String, PerformanceReport> CACHE = CacheBuilder.newBuilder().maximumSize(1000).softValues().build();
 
+    protected boolean isNumberDateFormat = false;
+    protected SimpleDateFormat dateFormat;
+
+    protected final static String[] DATE_FORMATS = new String[]{
+            "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss,SSS", "yyyy/mm/dd HH:mm:ss"
+    };
+
     public AbstractParser(String glob) {
         super(glob);
     }
@@ -194,12 +201,6 @@ public abstract class AbstractParser extends PerformanceReportParser {
         }
     }
 
-    protected boolean isNumberDateFormat = false;
-    protected SimpleDateFormat dateFormat;
-
-    protected final static String[] DATE_FORMATS = new String[]{
-            "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss,SSS", "yyyy/mm/dd HH:mm:ss"
-    };
 
     public void clearDateFormat() {
         this.dateFormat = null;
