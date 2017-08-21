@@ -1,7 +1,7 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
-## v3.3 (upcoming)
+## v3.3 (21th of August, 2017)
 - FEATURE: install 'bzt' from URL or path
 - FEATURE: add option to exclude response time of errored samples ([JENKINS-45288](https://issues.jenkins-ci.org/browse/JENKINS-45288))
 - FIX: summarizer parser for JMeter 3.2 
