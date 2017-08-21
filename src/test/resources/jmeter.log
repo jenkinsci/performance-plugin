@@ -1,0 +1,79 @@
+2017-08-18 17:23:41,964 INFO o.a.j.u.JMeterUtils: Setting Locale to en_US
+2017-08-18 17:23:41,974 INFO o.a.j.JMeter: Loading user properties from: /home/artem/apache-jmeter-3.2/bin/user.properties
+2017-08-18 17:23:41,974 INFO o.a.j.JMeter: Loading system properties from: /home/artem/apache-jmeter-3.2/bin/system.properties
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: Copyright (c) 1998-2017 The Apache Software Foundation
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: Version 3.2 r1790748
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: java.version=1.8.0_131
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: os.name=Linux
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: os.arch=amd64
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: os.version=4.4.0-92-generic
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: file.encoding=UTF-8
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: Max memory     =536870912
+2017-08-18 17:23:41,977 INFO o.a.j.JMeter: Available Processors =8
+2017-08-18 17:23:41,981 INFO o.a.j.JMeter: Default Locale=English (United States)
+2017-08-18 17:23:41,982 INFO o.a.j.JMeter: JMeter  Locale=English (United States)
+2017-08-18 17:23:41,982 INFO o.a.j.JMeter: JMeterHome=/home/artem/apache-jmeter-3.2
+2017-08-18 17:23:41,982 INFO o.a.j.JMeter: user.dir  =/var/lib/jenkins/workspace/throughput_summary_jmeter
+2017-08-18 17:23:41,982 INFO o.a.j.JMeter: PWD       =/var/lib/jenkins/workspace/throughput_summary_jmeter
+2017-08-18 17:23:41,982 INFO o.a.j.JMeter: IP: 127.0.1.1 Name: artem-fedorov-pc FullName: artem-fedorov-pc
+2017-08-18 17:23:41,984 INFO o.a.j.s.FileServer: Default base='/var/lib/jenkins/workspace/throughput_summary_jmeter'
+2017-08-18 17:23:41,984 INFO o.a.j.s.FileServer: Set new base='/home/artem/jmx'
+2017-08-18 17:23:42,053 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2017-08-18 17:23:42,061 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2017-08-18 17:23:42,064 INFO o.a.j.s.SaveService: Using SaveService properties version 3.2
+2017-08-18 17:23:42,069 INFO o.a.j.s.SaveService: Loading file: /home/artem/jmx/summary.jmx
+2017-08-18 17:23:42,102 INFO o.a.j.JMeter: Creating summariser <summary>
+2017-08-18 17:23:42,105 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2017-08-18 17:23:42,106 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2017-08-18 17:23:42,106 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2017-08-18 17:23:42,109 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2017-08-18 17:23:42,109 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2017-08-18 17:23:42,334 INFO o.a.j.JMeter: Running test (1503066222334)
+2017-08-18 17:23:42,360 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 1 : Thread Group
+2017-08-18 17:23:42,361 INFO o.a.j.e.StandardJMeterEngine: Starting 10 threads for group Thread Group.
+2017-08-18 17:23:42,361 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2017-08-18 17:23:42,361 INFO o.a.j.t.ThreadGroup: Starting thread group... number=1 threads=10 ramp-up=1 perThread=100.0 delayedStart=false
+2017-08-18 17:23:42,366 INFO o.a.j.t.ThreadGroup: Started thread group number 1
+2017-08-18 17:23:42,366 INFO o.a.j.e.StandardJMeterEngine: All thread groups have been started
+2017-08-18 17:23:42,366 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-1
+2017-08-18 17:23:42,368 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
+2017-08-18 17:23:42,368 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to ISO-8859-1
+2017-08-18 17:23:42,368 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
+2017-08-18 17:23:42,368 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2017-08-18 17:23:42,466 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-2
+2017-08-18 17:23:42,566 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-3
+2017-08-18 17:23:42,672 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-4
+2017-08-18 17:23:42,766 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-5
+2017-08-18 17:23:42,866 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-6
+2017-08-18 17:23:42,966 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-7
+2017-08-18 17:23:43,066 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-8
+2017-08-18 17:23:43,166 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-9
+2017-08-18 17:23:43,266 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-10
+2017-08-18 17:24:00,006 INFO o.a.j.r.Summariser: Generate Summary Results +    626 in 00:00:18 =   35.4/s Avg:   270 Min:    50 Max:   500 Err:     0 (0.00%) Active: 10 Started: 10 Finished: 0
+2017-08-18 17:24:00,007 INFO o.a.j.r.Summariser: summary +    626 in 00:00:18 =   35.4/s Avg:   270 Min:    50 Max:   500 Err:     0 (0.00%) Active: 10 Started: 10 Finished: 0
+2017-08-18 17:24:08,047 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-5
+2017-08-18 17:24:08,047 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-5
+2017-08-18 17:24:08,577 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-6
+2017-08-18 17:24:08,577 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-6
+2017-08-18 17:24:09,948 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-8
+2017-08-18 17:24:09,948 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-8
+2017-08-18 17:24:09,965 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-7
+2017-08-18 17:24:09,965 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-7
+2017-08-18 17:24:10,013 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-10
+2017-08-18 17:24:10,014 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-10
+2017-08-18 17:24:10,668 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-4
+2017-08-18 17:24:10,668 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-4
+2017-08-18 17:24:10,804 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-1
+2017-08-18 17:24:10,805 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-1
+2017-08-18 17:24:11,635 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-2
+2017-08-18 17:24:11,635 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-2
+2017-08-18 17:24:11,998 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-3
+2017-08-18 17:24:11,998 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-3
+2017-08-18 17:24:12,902 INFO o.a.j.t.JMeterThread: Thread is done: Thread Group 1-9
+2017-08-18 17:24:12,902 INFO o.a.j.t.JMeterThread: Thread finished: Thread Group 1-9
+2017-08-18 17:24:12,903 INFO o.a.j.e.StandardJMeterEngine: Notifying test listeners of end of test
+2017-08-18 17:24:12,904 INFO o.a.j.r.Summariser: summary +    374 in 00:00:13 =   29.0/s Avg:   284 Min:    51 Max:   499 Err:     0 (0.00%) Active: 0 Started: 10 Finished: 10
+2017-08-18 17:24:12,905 INFO o.a.j.r.Summariser: summary =   1000 in 00:00:31 =   32.7/s Avg:   276 Min:    50 Max:   500 Err:     0 (0.00%)
+2017-08-18 17:24:12,905 INFO o.a.j.r.Summariser: Generate Summary Results +    374 in 00:00:13 =   29.0/s Avg:   284 Min:    51 Max:   499 Err:     0 (0.00%) Active: 0 Started: 10 Finished: 10
+2017-08-18 17:24:12,906 INFO o.a.j.r.Summariser: Generate Summary Results =   1000 in 00:00:31 =   32.7/s Avg:   276 Min:    50 Max:   500 Err:     0 (0.00%)

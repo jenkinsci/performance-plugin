@@ -7,7 +7,6 @@ import hudson.plugins.performance.reports.PerformanceReport;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -36,12 +35,10 @@ public class JmeterSummarizerParser extends AbstractParser {
         return "**/*.log";
     }
 
-    public String getDefaultDatePattern() {
-        return "yyyy/mm/dd HH:mm:ss";
-    }
-
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
+        clearDateFormat();
+
         final PerformanceReport report = new PerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
@@ -51,11 +48,10 @@ public class JmeterSummarizerParser extends AbstractParser {
             fileScanner = new Scanner(reportFile);
             String key;
             String line;
-            SimpleDateFormat dateFormat = new SimpleDateFormat(getDefaultDatePattern());
             String lastEqualsLine = null;
             while (fileScanner.hasNextLine()) {
                 line = fileScanner.nextLine();
-                if (line.contains("=") && line.contains("jmeter.reporters.Summariser:")) {
+                if (line.contains("=") && line.contains("Summariser:")) {
                     lastEqualsLine = line;
                 }
             }
@@ -73,8 +69,8 @@ public class JmeterSummarizerParser extends AbstractParser {
                     lineScanner.useDelimiter("INFO"); // as jmeter logs INFO mode
                     final HttpSample sample = new HttpSample();
                     final String dateString = lineScanner.next();
-                    sample.setDate(dateFormat.parse(dateString));
-                    lineScanner.findInLine("jmeter.reporters.Summariser:");
+                    sample.setDate(parseTimestamp(dateString));
+                    lineScanner.findInLine("Summariser:");
                     lineScanner.useDelimiter("\\=");
                     key = lineScanner.next().trim();
                     lineScanner.useDelimiter(delimiter);

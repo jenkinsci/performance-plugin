@@ -95,7 +95,7 @@ public class ParserDetector {
      * Read file, until It find a string "jmeter.reporters.Summariser: Generate Summary Results"
      */
     private static boolean isJMeterSummarizerFileType(String firstLine, final BufferedReader reader) throws IOException {
-        String pattern = "jmeter.reporters.Summariser: Generate Summary Results";
+        String pattern = "Summariser: Generate Summary Results";
         String line = firstLine;
         if (line.contains(pattern)) {
             return true;
