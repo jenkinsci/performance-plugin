@@ -33,10 +33,10 @@ public class JmeterSummarizerParserTest {
         JmeterSummarizerParser jmeterSummarizerParser = new JmeterSummarizerParser(path);
         PerformanceReport performanceReport = jmeterSummarizerParser.parse(new File(path));
 
-        assertEquals(1257, performanceReport.getSummarizerSize());
-        assertEquals(333, performanceReport.getSummarizerAvg());
-        assertEquals(3, performanceReport.getSummarizerMin());
-        assertEquals(5630, performanceReport.getSummarizerMax());
-        assertEquals("4.56", performanceReport.getSummarizerErrors());
+        assertEquals(1000, performanceReport.getSummarizerSize());
+        assertEquals(276, performanceReport.getSummarizerAvg());
+        assertEquals(50, performanceReport.getSummarizerMin());
+        assertEquals(500, performanceReport.getSummarizerMax());
+        assertEquals("0.00", performanceReport.getSummarizerErrors());
     }
 }
