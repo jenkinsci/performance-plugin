@@ -14,6 +14,7 @@ import hudson.plugins.performance.reports.UriReport;
 import hudson.util.FormValidation;
 
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -24,6 +25,7 @@ import org.kohsuke.stapler.QueryParameter;
  */
 public class AbsoluteConstraint extends AbstractConstraint {
 
+    @Symbol("absolute")
     @Extension
     public static class DescriptorImpl extends ConstraintDescriptor {
 

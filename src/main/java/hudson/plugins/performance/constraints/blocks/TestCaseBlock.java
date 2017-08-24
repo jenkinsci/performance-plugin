@@ -1,5 +1,6 @@
 package hudson.plugins.performance.constraints.blocks;
 
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -13,6 +14,7 @@ import hudson.model.Descriptor;
  */
 public class TestCaseBlock extends AbstractDescribableImpl<TestCaseBlock> {
 
+    @Symbol("testCase")
     @Extension
     public static class DescriptorImpl extends Descriptor<TestCaseBlock> {
         @Override

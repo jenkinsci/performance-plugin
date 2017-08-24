@@ -16,6 +16,7 @@ import hudson.plugins.performance.reports.UriReport;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -37,6 +38,7 @@ import java.util.ListIterator;
  */
 public class RelativeConstraint extends AbstractConstraint {
 
+    @Symbol("relative")
     @Extension
     public static class DescriptorImpl extends ConstraintDescriptor {
 

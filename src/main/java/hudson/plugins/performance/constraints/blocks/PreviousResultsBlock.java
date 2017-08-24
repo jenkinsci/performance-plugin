@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -13,6 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 public class PreviousResultsBlock extends AbstractDescribableImpl<PreviousResultsBlock> {
 
+    @Symbol("previous")
     @Extension
     public static class DescriptorImpl extends Descriptor<PreviousResultsBlock> {
         @Override
