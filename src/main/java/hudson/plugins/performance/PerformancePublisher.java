@@ -681,7 +681,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
             if (buildForComparison != null) {
                 logger.print("\nComparison build no. - " + buildForComparison.number + " and " + run.number + " using ");
-                printInfoAboutCompareBasedOn(logger);
+
+                int maxUriColumnWidth = 0;
+                for (UriReport report : currentUriReports) {
+                    maxUriColumnWidth = Math.max(report.getStaplerUri().length(), maxUriColumnWidth);
+                }
+
+                printInfoAboutCompareBasedOn(logger, "%-"+maxUriColumnWidth+"s%20s%20s%20s%20s");
 
                 compareUriReports(run,
                         currentUriReports,
@@ -691,7 +697,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                         // open xml tags
                         (averageBuffer = new StringBuilder("<average>\n")),
                         (medianBuffer = new StringBuilder("<median>\n")),
-                        (percentileBuffer = new StringBuilder("<percentile>\n"))
+                        (percentileBuffer = new StringBuilder("<percentile>\n")),
+                        "%1$-"+maxUriColumnWidth+"s%2$20d%3$20d%4$20.0f%5$19.2f%%"
                 );
 
                 // close xml tags
@@ -714,7 +721,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     // Comparing both builds based on either average, median or 90
     // percentile response time...
     private void compareUriReports(Run<?, ?> run, List<UriReport> currentUriReports, List<UriReport> reportsForComparison, PrintStream logger,
-                                   StringBuilder averageBuffer, StringBuilder medianBuffer, StringBuilder percentileBuffer) {
+                                   StringBuilder averageBuffer, StringBuilder medianBuffer, StringBuilder percentileBuffer, String logFormat) {
 
         // comparing the labels and calculating the differences...
         for (UriReport reportForComparison : reportsForComparison) {
@@ -726,7 +733,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     appendRelativeInfoAbout90Line(currentUriReport, reportForComparison, percentileBuffer);
 
                     calculateBuildStatus(run, logger, reportForComparison.getStaplerUri(),
-                            calculateRelativeDiffInPercent(currentUriReport, reportForComparison, logger));
+                            calculateRelativeDiffInPercent(currentUriReport, reportForComparison, logger, logFormat));
                 }
             }
         }
@@ -762,7 +769,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     private double calculateDiffInPercents(double value1, double value2) {
-        return Math.round(((value1 * 100) / value2) * 100)  / 100;
+        return Math.round(((value1 * 100) / value2) * 100)  / 100d;
     }
 
     private boolean calculateRelativeFailedThresholdNegative(double relativeDiffPercent) {
@@ -785,7 +792,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 && Math.abs(relativeDiffPercent) - relativeUnstableThresholdPositive > THRESHOLD_TOLERANCE);
     }
 
-    private double calculateRelativeDiffInPercent(UriReport currentReport, UriReport reportForComparison, PrintStream logger) {
+    private double calculateRelativeDiffInPercent(UriReport currentReport, UriReport reportForComparison, PrintStream logger, String logFormat) {
         double relativeDiff;
         double relativeDiffPercent = 0;
 
@@ -793,25 +800,25 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             relativeDiff = currentReport.getAverage() - reportForComparison.getAverage();
             relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getAverage());
 
-            logger.println(reportForComparison.getStaplerUri() + "\t" + currentReport.getStaplerUri()
-                    + "\t\t" + reportForComparison.getAverage() + "\t\t\t" + currentReport.getAverage()
-                    + "\t\t\t" + relativeDiff + "\t\t" + relativeDiffPercent);
+            logger.println(String.format(logFormat, reportForComparison.getStaplerUri(),
+                reportForComparison.getAverage(), currentReport.getAverage(),
+                relativeDiff, relativeDiffPercent));
 
         } else if (configType.equalsIgnoreCase("MRT")) {
             relativeDiff = currentReport.getMedian() - reportForComparison.getMedian();
             relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getMedian());
 
-            logger.println(reportForComparison.getStaplerUri() + "\t" + currentReport.getStaplerUri()
-                    + "\t\t" + reportForComparison.getMedian() + "\t\t\t" + currentReport.getMedian() + "\t\t\t"
-                    + relativeDiff + "\t\t" + relativeDiffPercent);
+            logger.println(String.format(logFormat, reportForComparison.getStaplerUri(),
+                reportForComparison.getMedian(), currentReport.getMedian(),
+                relativeDiff, relativeDiffPercent));
 
         } else if (configType.equalsIgnoreCase("PRT")) {
             relativeDiff = currentReport.get90Line() - reportForComparison.get90Line();
             relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.get90Line());
 
-            logger.println(reportForComparison.getStaplerUri() + "\t" + currentReport.getStaplerUri()
-                    + "\t\t" + reportForComparison.get90Line() + "\t\t\t" + currentReport.get90Line() + "\t\t\t"
-                    + relativeDiff + "\t\t" + relativeDiffPercent);
+            logger.println(String.format(logFormat, reportForComparison.getStaplerUri(),
+                reportForComparison.get90Line(), currentReport.get90Line(),
+                relativeDiff, relativeDiffPercent));
         }
         return relativeDiffPercent;
     }
@@ -952,19 +959,19 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
 
-    private void printInfoAboutCompareBasedOn(PrintStream logger) {
+    private void printInfoAboutCompareBasedOn(PrintStream logger, String logFormat) {
         if (configType.equalsIgnoreCase("ART")) {
             logger.println("Average response time\n\n");
-            logger.println(
-                    "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURIAvg\t\tCurrentBuildURIAvg\tRelativeDiff\tRelativeDiffPercentage ");
+            logger.println(String.format(logFormat,
+                "URI", "PrevBuildURIAvg", "CurrentBuildURIAvg", "RelativeDiff", "RelativeDiff(%)"));
         } else if (configType.equalsIgnoreCase("MRT")) {
             logger.println("Median response time\n\n");
-            logger.println(
-                    "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURIMed\t\tCurrentBuildURIMed\tRelativeDiff\tRelativeDiffPercentage ");
+            logger.println(String.format(logFormat,
+                "URI", "PrevBuildURIMed", "CurrentBuildURIMed", "RelativeDiff", "RelativeDiff(%)"));
         } else if (configType.equalsIgnoreCase("PRT")) {
             logger.println("90 Percentile response time\n\n");
-            logger.println(
-                    "PrevBuildURI\tCurrentBuildURI\t\tPrevBuildURI90%\t\tCurrentBuildURI90%\tRelativeDiff\tRelativeDiffPercentage ");
+            logger.println(String.format(logFormat,
+                "URI", "PrevBuildURI90%", "CurrentBuildURI90%", "RelativeDiff", "RelativeDiff(%)"));
         }
     }
 
