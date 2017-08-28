@@ -265,8 +265,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         Run run = p.getFirstBuild();
         String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]";
 
+        FilePath report = new FilePath(new File(workspace.getRemote(), "aggregate-results.xml"));
+        report.copyFrom(getClass().getResource("/aggregate-results.xml"));
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(args);
+
+        PerformanceTestBuildExt buildTest = new PerformanceTestBuildExt(args);
         buildTest.setGeneratePerformanceTrend(true);
         buildTest.setPrintDebugOutput(true);
         buildTest.setUseSystemSitePackages(false);
@@ -278,8 +281,8 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
 
         String jobLog = new String(stream.toByteArray());
-        File root = run.getRootDir();
-        File reportFile = new File(root, "/performance-reports/Taurus/aggregate-results.xml");
+
+        File reportFile = new File(run.getRootDir(), "performance-reports/Taurus/aggregate-results.xml");
         assertTrue(jobLog, jobLog.contains("Performance: Recording Taurus reports"));
         assertTrue(jobLog, jobLog.contains("aggregate-results.xml'"));
         assertTrue(jobLog, jobLog.contains("Performance: Parsing JMeter report file '" + reportFile.getAbsolutePath() + "'."));
@@ -297,7 +300,18 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         Run run = p.getFirstBuild();
         String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]" ;
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(args);
+        PerformanceTestBuild buildTest = new PerformanceTestBuildExt(args) {
+            @Override
+            public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+                for (String cmd : commands) {
+                    if (cmd.contains("performanceTestWithFailCriteria.yml")) {
+                        logger.write("Done performing with code: 3".getBytes());
+                        return 3;
+                    }
+                }
+                return super.runCmd(commands, workspace, logger, launcher, envVars);
+            }
+        };
         buildTest.setGeneratePerformanceTrend(false);
         buildTest.setPrintDebugOutput(true);
         buildTest.setUseSystemSitePackages(false);
@@ -341,7 +355,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamTaskListener taskListener = new StreamTaskListener(stream);
 
-        PerformanceTestBuild testBuild = new PerformanceTestBuild("");
+        PerformanceTestBuildExt testBuild = new PerformanceTestBuildExt("");
         testBuild.setUseSystemSitePackages(false);
         testBuild.setPrintDebugOutput(true);
 
