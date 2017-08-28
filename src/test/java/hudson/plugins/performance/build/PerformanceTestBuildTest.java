@@ -300,7 +300,18 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         Run run = p.getFirstBuild();
         String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]" ;
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(args);
+        PerformanceTestBuild buildTest = new PerformanceTestBuildExt(args) {
+            @Override
+            public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+                for (String cmd : commands) {
+                    if (cmd.contains("performanceTestWithFailCriteria.yml")) {
+                        logger.write("Done performing with code: 3".getBytes());
+                        return 3;
+                    }
+                }
+                return super.runCmd(commands, workspace, logger, launcher, envVars);
+            }
+        };
         buildTest.setGeneratePerformanceTrend(false);
         buildTest.setPrintDebugOutput(true);
         buildTest.setUseSystemSitePackages(false);
