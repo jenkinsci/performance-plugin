@@ -355,7 +355,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamTaskListener taskListener = new StreamTaskListener(stream);
 
-        PerformanceTestBuild testBuild = new PerformanceTestBuild("");
+        PerformanceTestBuildExt testBuild = new PerformanceTestBuildExt("");
         testBuild.setUseSystemSitePackages(false);
         testBuild.setPrintDebugOutput(true);
 
