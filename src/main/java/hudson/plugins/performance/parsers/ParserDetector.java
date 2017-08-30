@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,6 +47,8 @@ public class ParserDetector {
                 return JMeterCsvParser.class.getSimpleName();
             } else if (isJMeterSummarizerFileType(line, reader)) {
                 return JmeterSummarizerParser.class.getSimpleName();
+            } else if (isLoadRunnerFileType(line)) {
+                return LoadRunnerParser.class.getSimpleName();
             } else {
                 try {
                     return detectXMLFileType(reportPath);
@@ -109,6 +112,17 @@ public class ParserDetector {
             line = reader.readLine();
         }
         return false;
+    }
+
+    /**
+     * Detect LoadRunner MDB file using MS Access magic pattern "....Standard Jet DB"
+     * http://www.garykessler.net/library/file_sigs.html
+     */
+    private static boolean isLoadRunnerFileType(String line) throws IOException {
+        final char[] magic = new char[]{ 0x00, 0x01, 0x00, 0x00, 0x53, 0x74, 0x61, 0x6E, 0x64, 0x61, 0x72, 0x64, 0x20, 0x4A, 0x65, 0x74, 0x20, 0x44, 0x42 };
+
+        return line.length() > magic.length && 
+            Arrays.equals(magic, line.substring(0, magic.length).toCharArray());
     }
 
     /**

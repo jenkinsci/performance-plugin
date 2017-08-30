@@ -25,6 +25,7 @@ public class ParserFactory {
         defaultGlobPatterns.put("**/TEST-*.xml", JUnitParser.class.getSimpleName());
         defaultGlobPatterns.put("**/*.xml", TaurusParser.class.getSimpleName());
         defaultGlobPatterns.put("**/*.wrk", WrkSummarizerParser.class.getSimpleName());
+        defaultGlobPatterns.put("**/*.mdb", LoadRunnerParser.class.getSimpleName());
     }
 
     public static PerformanceReportParser getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env) throws IOException, InterruptedException {
@@ -137,6 +138,8 @@ public class ParserFactory {
             return new JmeterSummarizerParser(glob);
         } else if (parserName.equals(IagoParser.class.getSimpleName())) {
             return new IagoParser(glob);
+        } else if (parserName.equals(LoadRunnerParser.class.getSimpleName())) {
+            return new LoadRunnerParser(glob);
         } else {
             throw new IllegalArgumentException("Unknown parser type: " + parserName);
         }
