@@ -115,14 +115,14 @@ public class ParserDetector {
     }
 
     /**
-     * Detect LoadRunner MDB file using MS Access magic pattern "....Standard Jet DB"
+     * Detect LoadRunner MDB file using MS Access magic pattern.
      * http://www.garykessler.net/library/file_sigs.html
      */
-    private static boolean isLoadRunnerFileType(String line) throws IOException {
-        final char[] magic = new char[]{ 0x00, 0x01, 0x00, 0x00, 0x53, 0x74, 0x61, 0x6E, 0x64, 0x61, 0x72, 0x64, 0x20, 0x4A, 0x65, 0x74, 0x20, 0x44, 0x42 };
+    private static boolean isLoadRunnerFileType(String line) {
+        String pattern = new String(new char[]{0x00, 0x01, 0x00, 0x00})+"Standard Jet DB";
 
-        return line.length() > magic.length && 
-            Arrays.equals(magic, line.substring(0, magic.length).toCharArray());
+        return line.length() > pattern.length() &&
+            pattern.equals(line.substring(0, pattern.length()));
     }
 
     /**
