@@ -33,6 +33,9 @@ public class ParserDetectorTest {
 
         filePath = getClass().getResource("/summary.log").toURI().getPath();
         assertEquals(JmeterSummarizerParser.class.getSimpleName(), ParserDetector.detect(filePath));
+
+        filePath = getClass().getResource("/lr-session.mdb").toURI().getPath();
+        assertEquals(LoadRunnerParser.class.getSimpleName(), ParserDetector.detect(filePath));
     }
 
     @Issue("JENKINS-44317")

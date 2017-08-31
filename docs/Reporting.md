@@ -12,6 +12,7 @@ Report formats supported:
 - [JUnit](http://www.junit.org/) format (used by SoapUI for example)
 - Twitter's [Iago](https://github.com/twitter/iago)
 - [wrk](https://github.com/wg/wrk)
+- [HPE LoadRunner](https://saas.hpe.com/en-us/software/loadrunner)
 
 ## Browsing Reports
 

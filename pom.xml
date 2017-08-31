@@ -144,6 +144,11 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.sf.ucanaccess</groupId>
+            <artifactId>ucanaccess</artifactId>
+            <version>4.0.2</version>
+        </dependency>
     </dependencies>
 
     <build>

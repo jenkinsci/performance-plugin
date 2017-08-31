@@ -46,6 +46,8 @@ public class ParserDetector {
                 return JMeterCsvParser.class.getSimpleName();
             } else if (isJMeterSummarizerFileType(line, reader)) {
                 return JmeterSummarizerParser.class.getSimpleName();
+            } else if (isLoadRunnerFileType(line)) {
+                return LoadRunnerParser.class.getSimpleName();
             } else {
                 try {
                     return detectXMLFileType(reportPath);
@@ -109,6 +111,17 @@ public class ParserDetector {
             line = reader.readLine();
         }
         return false;
+    }
+
+    /**
+     * Detect LoadRunner MDB file using MS Access magic pattern.
+     * http://www.garykessler.net/library/file_sigs.html
+     */
+    private static boolean isLoadRunnerFileType(String line) {
+        String pattern = new String(new char[]{0x00, 0x01, 0x00, 0x00})+"Standard Jet DB";
+
+        return line.length() > pattern.length() &&
+            pattern.equals(line.substring(0, pattern.length()));
     }
 
     /**
