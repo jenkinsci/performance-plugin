@@ -21,7 +21,13 @@
         </sup>
     </td>
 
-    <td>${it.get90Line()}</td>
+    <td>
+        ${it.get90Line()}
+        <sup class="${h.ifThenElse(it.get90LineDiff()>0,'red','green')}">
+            ${h.ifThenElse(it.get90LineDiff()>0,'+','')}${it.get90LineDiff()}
+        </sup>
+    </td>
+
     <td>${it.getMin()}</td>
     <td>${it.getMax()}</td>
     <td>
