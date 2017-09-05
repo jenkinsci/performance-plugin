@@ -88,6 +88,8 @@ public abstract class AbstractReport {
 
     abstract public long getMedianDiff();
 
+    abstract public long get90LineDiff();
+
     abstract public double getErrorPercentDiff();
 
     abstract public String getLastBuildHttpCodeIfChanged();

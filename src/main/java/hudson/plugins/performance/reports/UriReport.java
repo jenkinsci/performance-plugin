@@ -350,6 +350,13 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         return getMedian() - lastBuildUriReport.getMedian();
     }
 
+    public long get90LineDiff() {
+        if (lastBuildUriReport == null) {
+            return 0;
+        }
+        return get90Line() - lastBuildUriReport.get90Line();
+    }
+
     public double getErrorPercentDiff() {
         if (lastBuildUriReport == null) {
             return 0;

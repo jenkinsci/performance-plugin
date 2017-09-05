@@ -373,6 +373,13 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         return getMedian() - lastBuildReport.getMedian();
     }
 
+    public long get90LineDiff() {
+        if (lastBuildReport == null) {
+            return 0;
+        }
+        return get90Line() - lastBuildReport.get90Line();
+    }
+
     public double getErrorPercentDiff() {
         if (lastBuildReport == null) {
             return 0;
