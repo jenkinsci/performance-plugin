@@ -17,6 +17,8 @@ import hudson.plugins.performance.constraints.RelativeConstraint;
 import hudson.plugins.performance.reports.ConstraintReport;
 import jenkins.model.Jenkins;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
+import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
+import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -139,6 +141,27 @@ public class ConstraintReportTest {
         when(ac3.getResultMessage()).thenReturn(resultMsgAc3);
         when(ac4.getResultMessage()).thenReturn(resultMsgAc4);
         when(ac5.getResultMessage()).thenReturn(resultMsgAc5);
+
+        when(rc0.getRelatedPerfReport()).thenReturn("Result.xml");
+        when(rc1.getRelatedPerfReport()).thenReturn("Result.xml");
+        when(rc2.getRelatedPerfReport()).thenReturn("Result.xml");
+        when(ac3.getRelatedPerfReport()).thenReturn("Result.xml");
+        when(ac4.getRelatedPerfReport()).thenReturn("Result.xml");
+        when(ac5.getRelatedPerfReport()).thenReturn("Result.xml");
+
+        when(rc0.getOperator()).thenReturn(Operator.NOT_GREATER);
+        when(rc1.getOperator()).thenReturn(Operator.NOT_LESS);
+        when(rc2.getOperator()).thenReturn(Operator.NOT_GREATER);
+        when(ac3.getOperator()).thenReturn(Operator.NOT_GREATER);
+        when(ac4.getOperator()).thenReturn(Operator.NOT_LESS);
+        when(ac5.getOperator()).thenReturn(Operator.NOT_EQUAL);
+
+        when(rc0.getMeteredValue()).thenReturn(Metric.AVERAGE);
+        when(rc1.getMeteredValue()).thenReturn(Metric.AVERAGE);
+        when(rc2.getMeteredValue()).thenReturn(Metric.MAXIMUM);
+        when(ac3.getMeteredValue()).thenReturn(Metric.AVERAGE);
+        when(ac4.getMeteredValue()).thenReturn(Metric.AVERAGE);
+        when(ac5.getMeteredValue()).thenReturn(Metric.AVERAGE);
 
         when(globBuild.getNumber()).thenReturn(42);
         when(globBuild.getTimestamp()).thenReturn(calendar);

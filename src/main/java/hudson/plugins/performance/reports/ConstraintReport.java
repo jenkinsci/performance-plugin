@@ -6,6 +6,7 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.StringParameterValue;
 import hudson.plugins.performance.constraints.AbsoluteConstraint;
+import hudson.plugins.performance.constraints.AbstractConstraint;
 import hudson.plugins.performance.constraints.ConstraintEvaluation;
 import hudson.plugins.performance.constraints.RelativeConstraint;
 import jenkins.model.Jenkins;
@@ -232,6 +233,35 @@ public class ConstraintReport {
             loggerMsg += "The highest escalation: Error! The build will be marked as FAILURE";
         }
 
+        loggerMsg += "\n";
+
+        if (violatedConstraints == 0)
+            return;
+
+        int maxUriColumnWidth = 8, maxReportColumnWidth = 6; // header column widths
+        for (ConstraintEvaluation ce : ceList) {
+            AbstractConstraint c = ce.getAbstractConstraint();
+            maxUriColumnWidth = Math.max(c.isSpecifiedTestCase() ? c.getTestCaseBlock().getTestCase().length() : 0, maxUriColumnWidth);
+            maxReportColumnWidth = Math.max(c.getRelatedPerfReport().length(), maxReportColumnWidth);
+        }
+        String logFormat = "%1$-"+maxReportColumnWidth+"s %2$-"+maxUriColumnWidth+"s %3$-10s %4$-20s %5$10s %6$-20s\n";
+
+        loggerMsg += "\nSummary of failed constraints:\n"+
+            String.format(logFormat, "Report", "Testcase", "Metric", "Operator", "Value", "Level");
+
+        for (ConstraintEvaluation ce : ceList) {
+            AbstractConstraint c = ce.getAbstractConstraint();
+            if (!c.getSuccess()) {
+                loggerMsg += String.format(logFormat,
+                    c.getRelatedPerfReport(),
+                    c.isSpecifiedTestCase() ? c.getTestCaseBlock().getTestCase() : "*",
+                    c.getMeteredValue().toString(),
+                    c.getOperator().toString(),
+                    c instanceof RelativeConstraint ? String.format("%9.3f%%", ((RelativeConstraint)c).getTolerance()) 
+                        : String.format("%10d", ((AbsoluteConstraint)c).getValue()),
+                    c.getEscalationLevel().toString());
+            }
+        }
         loggerMsg += "\n";
     }
 
