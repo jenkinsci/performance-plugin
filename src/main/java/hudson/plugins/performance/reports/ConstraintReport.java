@@ -238,7 +238,9 @@ public class ConstraintReport {
         if (violatedConstraints == 0)
             return;
 
-        int maxUriColumnWidth = 8, maxReportColumnWidth = 6; // header column widths
+        int maxUriColumnWidth = 8; // header column widths
+        int maxReportColumnWidth = 6;
+
         for (ConstraintEvaluation ce : ceList) {
             AbstractConstraint c = ce.getAbstractConstraint();
             maxUriColumnWidth = Math.max(c.isSpecifiedTestCase() ? c.getTestCaseBlock().getTestCase().length() : 0, maxUriColumnWidth);
