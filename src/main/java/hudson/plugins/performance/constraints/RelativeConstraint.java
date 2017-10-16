@@ -348,6 +348,15 @@ public class RelativeConstraint extends AbstractConstraint {
                     + getOperator().text + " " + result + "\n" + "Measured value for " + getMeteredValue() + ": " + newValue + "\n" + "Included builds: Last " + getPreviousResults() + " builds \n"
                     + "Escalation Level: " + getEscalationLevel());
         }
+
+        String unit = getMeteredValue()==Metric.ERRORPRC ? "percent" : "milliseconds";
+        setJunitResult(String.format("<testcase classname=\"%s\" name=\"%s of %s must %s %.3f percent above/below previous\">\n",
+            getRelatedPerfReport(), getMeteredValue(), measuredLevel, getOperator().text, getTolerance())
+            + (getSuccess() ? "" :
+                String.format("    <failure type=\"%s\">Measured value for %s: %.0f %s. Previous value: %.0f</failure>\n",
+                getEscalationLevel(), getMeteredValue(), newValue, unit, result))
+            + "</testcase>\n");
+
         return evaluation;
     }
 

@@ -136,6 +136,15 @@ public class AbsoluteConstraint extends AbstractConstraint {
             setResultMessage("Absolute constraint failed! - Report: " + getRelatedPerfReport() + " \n" + "The constraint says: " + getMeteredValue() + " of " + measuredLevel + " must "
                     + getOperator().text + " " + getValue() + "\n" + "Measured value for " + getMeteredValue() + ": " + newValue + "\n" + "Escalation Level: " + getEscalationLevel());
         }
+
+        String unit = getMeteredValue()==Metric.ERRORPRC ? "percent" : "milliseconds";
+        setJunitResult(String.format("<testcase classname=\"%s\" name=\"%s of %s must %s %d %s\">\n", 
+            getRelatedPerfReport(), getMeteredValue(), measuredLevel, getOperator().text, getValue(), unit)
+            + (getSuccess() ? "" :
+                String.format("    <failure type=\"%s\">Measured value for %s: %.0f %s</failure>\n",
+                getEscalationLevel(), getMeteredValue(), newValue, unit))
+            + "</testcase>\n");
+
         return evaluation;
     }
 

@@ -192,7 +192,11 @@
       </tbody>
     </table>
   </f:entry>
-   
+
+  <f:entry title="${%JUnit output file}">
+    <f:textbox name="junitOutput" field="junitOutput" default=""/>
+  </f:entry>
+  
   <f:entry title="Constraints" field="constraints">
     <f:hetero-list name="constraints" hasHeader="true"
                    descriptors="${descriptor.getConstraintDescriptors()}"

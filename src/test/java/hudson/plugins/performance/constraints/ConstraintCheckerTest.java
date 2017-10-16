@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -670,5 +671,33 @@ public class ConstraintCheckerTest {
         checker.setBuilds(list);
 
         assertEquals(list, checker.getBuilds());
+    }
+
+    @Test
+    public void generateJunitOutput() throws Exception {
+        List<AbstractConstraint> constraints = new ArrayList<AbstractConstraint>();
+        constraints.add(rc0);
+        constraints.add(rc1);
+        constraints.add(rc2);
+        constraints.add(ac3);
+        constraints.add(ac4);
+        constraints.add(ac5);
+
+        ArrayList<ConstraintEvaluation> result = new ArrayList<ConstraintEvaluation>();
+        result = constraintChecker.checkAllConstraints(constraints);
+        
+        List<String> expectedList = Arrays.asList(
+            "<testcase classname=\"testResult0.xml\" name=\"Average of testUri0 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n",
+            "<testcase classname=\"testResult0.xml\" name=\"Error % of testUri1 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n",
+            "<testcase classname=\"testResult0.xml\" name=\"90% Line of testUri0 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n",
+            "<testcase classname=\"testResult1.xml\" name=\"Maximum of testUri1 must not be greater than 100 milliseconds\">\n</testcase>\n",
+            "<testcase classname=\"testResult1.xml\" name=\"Median of all test cases must not be equal to 100 milliseconds\">\n</testcase>\n",
+            "<testcase classname=\"testResult1.xml\" name=\"Minimum of all test cases must not be less than 100 milliseconds\">\n    <failure type=\"Error\">Measured value for Minimum: 10 milliseconds</failure>\n</testcase>\n"
+        );
+
+        Iterator<String> expected = expectedList.iterator();
+        for (ConstraintEvaluation ce : result) {
+            assertEquals(expected.next(), ce.getAbstractConstraint().getJunitResult());
+        }
     }
 }

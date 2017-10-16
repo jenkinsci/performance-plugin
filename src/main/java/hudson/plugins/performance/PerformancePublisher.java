@@ -162,6 +162,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private String sourceDataFiles;
 
     /**
+     * Optional filename indicating whether and where a JUnit compatible XML report should be written
+     */
+    private String junitOutput = "";
+
+    /**
      * Legacy constructor used for internal references.
      */
     @Restricted(NoExternalUse.class)
@@ -372,7 +377,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             if (!modeEvaluation) {
                 evaluateInStandardMode(run, workspace, parsedReports, listener, parsers);
             } else {
-                evaluateInExpertMode(run, listener);
+                evaluateInExpertMode(run, workspace, listener);
             }
         } else {
             if (failBuildIfNoResultFile) {
@@ -978,7 +983,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     /*
      * For mode "expert evaluation"
      */
-    public void evaluateInExpertMode(Run<?, ?> run, TaskListener listener) throws IOException, InterruptedException {
+    public void evaluateInExpertMode(Run<?, ?> run, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
         ConstraintFactory factory = new ConstraintFactory();
         ConstraintSettings settings = new ConstraintSettings(listener, ignoreFailedBuilds, ignoreUnstableBuilds,
@@ -999,6 +1004,21 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
        * Determine build result
        */
         run.setResult(cr.getBuildResult());
+
+      /*
+       * Write JUnit report back to workspace, for other post-build actions to pick up
+       */
+        if (junitOutput != null && !junitOutput.isEmpty()) {
+            listener.getLogger().println("Performance: Generating JUnit output: "+junitOutput);
+            File output = new File(workspace.getRemote(), junitOutput);
+            output.getParentFile().mkdirs();
+            try (FileWriter writer = new FileWriter(output)) {
+                writer.write(cr.getJunitReport()); 
+            }
+            catch (IOException ex) {
+                listener.getLogger().println("Failed to write JUnit file: "+ex.getMessage());
+            }
+        }
     }
 
     private List<File> copyReportsToMaster(Run<?, ?> build, PrintStream logger, List<FilePath> files,
@@ -1291,6 +1311,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setExcludeResponseTime(boolean excludeResponseTime) {
         this.excludeResponseTime = excludeResponseTime;
+    }
+
+    public String getJunitOutput() {
+        return junitOutput;
+    }
+
+    @DataBoundSetter
+    public void setJunitOutput(String junitOutput) {
+        this.junitOutput = junitOutput;
     }
 
     /**
