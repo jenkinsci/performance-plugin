@@ -50,6 +50,10 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
      */
     private String resultMessage = "";
     /**
+     * Holds relevant information about the evaluation in Junit format
+     */
+    private String junitResult = "";
+    /**
      * The report file the constraint refers to
      */
     private String relatedPerfReport;
@@ -298,6 +302,14 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
 
     public void setResultMessage(String resultMessage) {
         this.resultMessage = resultMessage;
+    }
+
+    public String getJunitResult() {
+        return junitResult;
+    }
+
+    public void setJunitResult(String junitResult) {
+        this.junitResult = junitResult;
     }
 
     public String getRelatedPerfReport() {

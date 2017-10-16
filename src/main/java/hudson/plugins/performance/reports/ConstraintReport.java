@@ -91,6 +91,10 @@ public class ConstraintReport {
      * Logger message for log file and environment variable
      */
     private String loggerMsgAdv;
+    /**
+     * Buld result in JUnit report format
+     */
+    private String junitReport;
 
     public ConstraintReport(ArrayList<ConstraintEvaluation> ceList, Run<?, ?> globBuild, boolean persistConstraintLog) throws IOException, InterruptedException {
         this.newBuild = globBuild;
@@ -101,6 +105,7 @@ public class ConstraintReport {
         if (persistConstraintLog) {
             this.writeResultsToFile();
         }
+        this.junitReport = this.createJunitReport(ceList);
     }
 
     /**
@@ -279,6 +284,21 @@ public class ConstraintReport {
     }
 
     /**
+     * Generate JUnit XML output format for all evaluated constraints. 
+     * Depends on results from previous createMetaData call.
+     */
+    private String createJunitReport(ArrayList<ConstraintEvaluation> ceList) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("<testsuite tests=\""+getAllConstraints()+"\" failures=\""+getViolatedConstraints()+"\" >\n");
+        for (ConstraintEvaluation ce : ceList) {
+            AbstractConstraint c = ce.getAbstractConstraint();
+            sb.append(c.getJunitResult());
+        }
+        sb.append("</testsuite>"); 
+        return sb.toString();
+    }
+
+    /**
      * Creates the log file if not present and writes the report to the log file. Only executed if
      * persistConstraintLog == true
      *
@@ -364,6 +384,10 @@ public class ConstraintReport {
 
     public String getLoggerMsgAdv() {
         return loggerMsgAdv;
+    }
+
+    public String getJunitReport() {
+        return junitReport;
     }
 
     public File getPerformanceLog() {

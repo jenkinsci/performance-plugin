@@ -228,6 +228,8 @@ public class ConstraintReportTest {
         f.delete();
         f.getParentFile().delete();
         f.getParentFile().getParentFile().delete();
+
+        assertTrue(result.getJunitReport().contains("<testsuite tests=\"6\" failures=\"3\" >"));
     }
 
 }
