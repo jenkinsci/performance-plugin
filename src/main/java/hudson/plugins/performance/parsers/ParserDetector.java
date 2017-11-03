@@ -14,10 +14,14 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Auto-detect parser for file
@@ -131,10 +135,19 @@ public class ParserDetector {
      *  <FinalStatus> - TAURUS.
      */
     private static String detectXMLFileType(String reportPath) throws IOException {
+        try (InputStream in = new FileInputStream(reportPath)) {
+            return detectXMLFileType(in);
+        } catch (Exception ex) {
+            throw new RuntimeException("XML parsing error: ", ex);
+        }
+    }
+
+    @VisibleForTesting
+    protected static String detectXMLFileType(final InputStream in) throws IOException {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(reportPath);
+            Document doc = builder.parse(in);
             XPathFactory xPathfactory = XPathFactory.newInstance();
             XPath xpath = xPathfactory.newXPath();
             if (docContainsTag(doc, xpath, "testResults")) {
