@@ -1,23 +1,20 @@
 package hudson.plugins.performance.parsers;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Auto-detect parser for file
@@ -131,29 +128,37 @@ public class ParserDetector {
      *  <FinalStatus> - TAURUS.
      */
     private static String detectXMLFileType(String reportPath) throws IOException {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(reportPath);
-            XPathFactory xPathfactory = XPathFactory.newInstance();
-            XPath xpath = xPathfactory.newXPath();
-            if (docContainsTag(doc, xpath, "testResults")) {
-                return JMeterParser.class.getSimpleName();
-            } else if (docContainsTag(doc, xpath, "testsuite")) {
-                return JUnitParser.class.getSimpleName();
-            } else if (docContainsTag(doc, xpath, "FinalStatus")) {
-                return TaurusParser.class.getSimpleName();
-            } else {
-                throw new IllegalArgumentException("Unknown xml file format");
-            }
-        } catch (ParserConfigurationException | SAXException | XPathExpressionException ex) {
+        try (InputStream in = new FileInputStream(reportPath)) {
+            return detectXMLFileType(in);
+        } catch (Exception ex) {
             throw new RuntimeException("XML parsing error: ", ex);
         }
     }
 
-    private static boolean docContainsTag(Document doc, XPath xpath, String tagName) throws XPathExpressionException {
-        XPathExpression expr = xpath.compile("//" + tagName);
-        NodeList list = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-        return (list.getLength() > 0);
+    @VisibleForTesting
+    protected static String detectXMLFileType(final InputStream in) throws XMLStreamException {
+        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        XMLEventReader eventReader = inputFactory.createXMLEventReader(in);
+
+        while (eventReader.hasNext()) {
+            XMLEvent event = eventReader.nextEvent();
+            if (event.isStartElement()) {
+                StartElement startElement = event.asStartElement();
+                String name = startElement.getName().getLocalPart();
+
+                switch (name) {
+                case "testResults":
+                    return JMeterParser.class.getSimpleName();
+                case "testsuite":
+                case "testsuites":
+                    return JUnitParser.class.getSimpleName();
+                case "FinalStatus":
+                    return TaurusParser.class.getSimpleName();
+                default:
+                    throw new IllegalArgumentException("Unknown xml file format");
+                }
+            }
+        }
+        throw new RuntimeException("XML parsing error: no start element");
     }
 }
