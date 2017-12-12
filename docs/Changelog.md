@@ -1,7 +1,7 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
-## v3.4 (upcoming)
+## v3.4 (12th of December, 2017)
 - FEATURE: add LoadRunner parser. Contributed by [Till Neunast](https://github.com/tilln)
 - FEATURE: add option to write a JUnit report file to the job's workspace
 - FEATURE: add summary table of failed constraints for Publisher log in expert mode
@@ -9,6 +9,7 @@
 - FEATURE: add 90th percentile difference in publisher summary table
 - FIX: OutOfMemoryException when parsing huge XML report ([JENKINS-47808](https://issues.jenkins-ci.org/browse/JENKINS-47808)). Contributed by [Julien Coste](https://github.com/jcoste-orange)
 - FIX: size column width logging of relative comparision results
+- FIX: publisher JUnit output to Slave workspace
 
 ## v3.3 (21th of August, 2017)
 - FEATURE: install 'bzt' from URL or path
