@@ -11,3 +11,4 @@ after_success:
 - bash <(curl -s https://codecov.io/bash)
 sudo: required
 dist: trusty
+group: deprecated-2017Q4
