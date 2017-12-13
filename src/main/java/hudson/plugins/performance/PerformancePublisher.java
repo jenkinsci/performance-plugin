@@ -67,6 +67,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -142,7 +143,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     /**
      * Configured constraints
      */
-    private List<? extends AbstractConstraint> constraints;
+    private List<? extends AbstractConstraint> constraints = Collections.emptyList();
 
     /**
      * Constraint settings

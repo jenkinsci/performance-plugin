@@ -1,5 +1,8 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
+ 
+## v3.5 (upcoming)
+- FIX: NullPointerException in ConstraintFactory
 
 ## v3.4 (12th of December, 2017)
 - FEATURE: add LoadRunner parser. Contributed by [Till Neunast](https://github.com/tilln)
