@@ -91,15 +91,6 @@ public class RelativeConstraint extends AbstractConstraint {
             return FormValidation.error("Not a valid date!");
         }
 
-        public FormValidation doCheckTolerance(@QueryParameter double tolerance) {
-            if (tolerance < 0) {
-                return FormValidation.error("This value can't be negative");
-            } else {
-                return FormValidation.ok();
-            }
-
-        }
-
         public FormValidation doCheckPreviousResultsString(@QueryParameter String previousResultsString, @AncestorInPath AbstractProject<?, ?> project) {
             if (previousResultsString.equals("*")) {
                 return FormValidation.ok();

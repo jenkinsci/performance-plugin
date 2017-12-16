@@ -40,7 +40,7 @@
           	</td>
         </tr>
         <tr>
-        	<td>
+        	<td style="vertical-align: middle">
         		<table>
           			<tr>
           				<f:entry field="meteredValue" name="meteredValue">
@@ -49,7 +49,7 @@
           			</tr>
           		</table>
         	</td>
-        	<td>
+        	<td style="vertical-align: middle">
         		<table>
         			<tr>
         				<f:entry field="operator" name="operator">
@@ -62,16 +62,10 @@
         			</tr>
         		</table>
         	</td>
-        	<td>
-        		<table>
-        			<tr>
-        				<f:entry field="tolerance" name="tolerance">
-        					<f:textbox default="0"/>
-        				</f:entry>
-        			</tr>
-        		</table>
+        	<td style="vertical-align: middle">
+        	    <f:number field="tolerance" name="tolerance" default="0" min="0"/>
         	</td>
-        	<td>
+        	<td style="vertical-align: middle">
         		<table>
         			<tr>
         				<f:entry field="escalationLevel" name="escalationLevel">

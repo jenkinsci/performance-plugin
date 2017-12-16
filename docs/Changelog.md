@@ -3,6 +3,7 @@
  
 ## v3.5 (upcoming)
 - FIX: NullPointerException in ConstraintFactory
+- FIX: RelativeConstraint.tolerance and AbsoluteConstraint.value fields in UI
 
 ## v3.4 (12th of December, 2017)
 - FEATURE: add LoadRunner parser. Contributed by [Till Neunast](https://github.com/tilln)
