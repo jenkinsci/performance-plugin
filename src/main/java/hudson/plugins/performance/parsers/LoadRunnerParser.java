@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.TimeZone;
 
 /** Parser for LoadRunner Analysis results stored in an MS Access database (*.mdb file).
  * 
@@ -22,7 +23,7 @@ public class LoadRunnerParser extends AbstractParser {
 
     private String resultQuery = 
         "select "+
-        "    cast(([Start Time] - [Time Zone] + e.[End Time] - e.Value)*1000 as decimal) as timeStamp, "+
+        "    cast(([Start Time] + e.[End Time] - e.Value)*1000 as decimal) as timeStamp, "+
         "    cast(e.Value*1000 as decimal) as elapsed, "+
         "    [Event Name] as label, "+
         "    case [Transaction End Status] when 'Pass' then 'true' end as success "+
@@ -57,7 +58,12 @@ public class LoadRunnerParser extends AbstractParser {
 
     protected HttpSample getSample(ResultSet res) throws SQLException {
         HttpSample sample = new HttpSample();
-        sample.setDate(new Date(res.getLong(1)));
+        Date sampleTime = new Date(res.getLong(1));
+        // Fix LoadRunner times that are off by 1 hour when in DST:
+        if (TimeZone.getTimeZone(System.getProperty("user.timezone")).inDaylightTime(sampleTime)) {
+            sampleTime = new Date(res.getLong(1)-3600000L);
+        }
+        sample.setDate(sampleTime);
         sample.setDuration(res.getLong(2));
         sample.setUri(res.getString(3));
         sample.setSuccessful(Boolean.parseBoolean(res.getString(4)));

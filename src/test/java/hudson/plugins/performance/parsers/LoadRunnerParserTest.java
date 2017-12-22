@@ -38,8 +38,8 @@ public class LoadRunnerParserTest {
         assertEquals(20, report.samplesCount());
         assertEquals(1000, report.getAverage());
         assertEquals(0, report.countErrors());
-        assertEquals(new Date(1504124850990L), report.getStart());
-        assertEquals(new Date(1504124860033L+1000), report.getEnd());
+        assertEquals(new Date(1504081650990L), report.getStart());
+        assertEquals(new Date(1504081660033L+1000), report.getEnd());
 
         report = uriReportMap.get("transaction2");
         assertNotNull(report);
@@ -47,7 +47,7 @@ public class LoadRunnerParserTest {
         assertEquals(20, report.samplesCount());
         assertEquals(1500, report.getAverage());
         assertEquals(4, report.countErrors());
-        assertEquals(new Date(1504124851990L), report.getStart());
-        assertEquals(new Date(1504124860033L+2000), report.getEnd());
+        assertEquals(new Date(1504081651990L), report.getStart());
+        assertEquals(new Date(1504081660033L+2000), report.getEnd());
     }
 }
