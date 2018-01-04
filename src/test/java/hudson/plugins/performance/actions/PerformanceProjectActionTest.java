@@ -50,7 +50,7 @@ public class PerformanceProjectActionTest {
         Object testSuiteReportDetail = performanceProjectAction.getDynamic("testsuiteReport", staplerRequest, null);
         assertTrue(testSuiteReportDetail instanceof TestSuiteReportDetail);
 
-        assertTrue(performanceProjectAction.ifModePerformancePerTestCaseUsed());
+        assertFalse(performanceProjectAction.ifModePerformancePerTestCaseUsed());
         assertTrue(performanceProjectAction.ifModeThroughputUsed());
 
         freeStyleProject.getPublishersList().add(new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, false, "", true, false, false, true, null));
