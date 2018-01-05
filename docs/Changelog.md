@@ -2,8 +2,10 @@
 # Changelog 
  
 ## v3.5 (upcoming)
+- FIX: Display Performance Report Per Test Case
 - FIX: NullPointerException in ConstraintFactory
 - FIX: RelativeConstraint.tolerance and AbsoluteConstraint.value fields in UI
+- ADD: move some options to Advanced
 
 ## v3.4 (12th of December, 2017)
 - FEATURE: add LoadRunner parser. Contributed by [Till Neunast](https://github.com/tilln)

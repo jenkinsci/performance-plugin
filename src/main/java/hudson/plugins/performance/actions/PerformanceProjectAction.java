@@ -846,7 +846,7 @@ public class PerformanceProjectAction implements Action {
         if (this.job instanceof AbstractProject) {
             AbstractProject project = (AbstractProject) job;
             PerformancePublisher publisher = (PerformancePublisher) project.getPublishersList().get(PerformancePublisher.class);
-            return publisher == null || publisher.isModePerformancePerTestCase();
+            return publisher != null && publisher.isModePerformancePerTestCase();
         } else {
             return true;
         }
