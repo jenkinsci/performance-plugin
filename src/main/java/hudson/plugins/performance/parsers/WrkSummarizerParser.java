@@ -62,8 +62,8 @@ public class WrkSummarizerParser extends AbstractParser {
     }
 
     @DataBoundConstructor
-    public WrkSummarizerParser(String glob) {
-        super(glob);
+    public WrkSummarizerParser(String glob, String percentiles) {
+        super(glob, percentiles);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class WrkSummarizerParser extends AbstractParser {
 
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
-        final PerformanceReport r = new PerformanceReport();
+        final PerformanceReport r = new PerformanceReport(percentiles);
         r.setExcludeResponseTime(excludeResponseTime);
         r.setReportFileName(reportFile.getName());
 

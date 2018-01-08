@@ -1,6 +1,7 @@
 package hudson.plugins.performance.parsers;
 
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.plugins.performance.reports.UriReport;
 import org.junit.Test;
 
@@ -90,7 +91,7 @@ public class JMeterParserTest {
     @Test
     public void testParseXmlJtlFile() throws Exception {
         // Setup fixture.
-        final JMeterParser parser = new JMeterParser(null);
+        final JMeterParser parser = new JMeterParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         final File reportFile = new File(getClass().getResource("/JMeterResults.jtl").toURI());
 
         // Execute system under test.
@@ -113,7 +114,7 @@ public class JMeterParserTest {
     @Test
     public void testParseCsvJtlFile() throws Exception {
         // Setup fixture.
-        final JMeterParser parser = new JMeterParser(null);
+        final JMeterParser parser = new JMeterParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         final File reportFile = new File(getClass().getResource("/JENKINS-16627_CSV_instead_of_XML.jtl").toURI());
 
         // Execute system under test.

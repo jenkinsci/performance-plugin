@@ -1,6 +1,7 @@
 package hudson.plugins.performance.parsers;
 
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,7 +25,7 @@ public class JUnitParserTest {
 
     @Test
     public void testCanParseFileWithoutTimeAtrribute() throws Exception {
-        final JUnitParser parser = new JUnitParser(null);
+        final JUnitParser parser = new JUnitParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         final File reportFile = new File(getClass().getResource("/TEST-JUnitResults-noTimeAttribute.xml").toURI());
 
         // Execute system under test.
@@ -37,7 +38,7 @@ public class JUnitParserTest {
 
     @Test
     public void testCanParseJunitResultFileWithSuccessErrorAndFailure() throws Exception {
-        final JUnitParser parser = new JUnitParser(null);
+        final JUnitParser parser = new JUnitParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         final File reportFile = new File(getClass().getResource("/TEST-JUnitResults-success-failure-error.xml").toURI());
 
         // Execute system under test.

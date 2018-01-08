@@ -1,6 +1,7 @@
 package hudson.plugins.performance.parsers;
 
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,7 +12,7 @@ public class JmeterSummarizerParserTest {
 
     @Test
     public void testParse() throws Exception {
-        JmeterSummarizerParser jmeterSummarizerParser = new JmeterSummarizerParser(null);
+        JmeterSummarizerParser jmeterSummarizerParser = new JmeterSummarizerParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         File summaryLogFile = new File(getClass().getResource("/summary.log").toURI());
         PerformanceReport performanceReport = jmeterSummarizerParser.parse(summaryLogFile);
 
@@ -30,7 +31,7 @@ public class JmeterSummarizerParserTest {
         String parser = ParserDetector.detect(path);
         assertEquals(JmeterSummarizerParser.class.getSimpleName(), parser);
 
-        JmeterSummarizerParser jmeterSummarizerParser = new JmeterSummarizerParser(path);
+        JmeterSummarizerParser jmeterSummarizerParser = new JmeterSummarizerParser(path, PerformanceReportTest.DEFAULT_PERCENTILES);
         PerformanceReport performanceReport = jmeterSummarizerParser.parse(new File(path));
 
         assertEquals(1000, performanceReport.getSummarizerSize());

@@ -15,9 +15,12 @@ public abstract class AbstractReport {
     public static final double ONE_HUNDRED_PERCENT = 100;
     public static final double NINETY_PERCENT = 90;
     public static final double FIFTY_PERCENT = 50;
+    public static final String DEFAULT_PERCENTILES = "0,50,90,100";
 
     protected final ThreadLocal<DecimalFormat> percentFormat;
     protected final ThreadLocal<DecimalFormat> dataFormat; // three decimals
+
+    protected String percentiles;
 
     /**
      * Exclude response time of errored samples
@@ -28,7 +31,10 @@ public abstract class AbstractReport {
 
     abstract public double errorPercent();
 
-    public AbstractReport() {
+
+
+    public AbstractReport(String percentiles) {
+        this.percentiles = percentiles;
         final Locale useThisLocale = (Stapler.getCurrentRequest() != null) ? Stapler.getCurrentRequest().getLocale() : Locale.getDefault();
 
         percentFormat = new ThreadLocal<DecimalFormat>() {
@@ -46,7 +52,10 @@ public abstract class AbstractReport {
                 return new DecimalFormat("#,###", DecimalFormatSymbols.getInstance(useThisLocale));
             }
         };
+    }
 
+    public AbstractReport() {
+        this(DEFAULT_PERCENTILES);
     }
 
     public String errorPercentFormated() {
@@ -106,5 +115,13 @@ public abstract class AbstractReport {
 
     protected boolean isIncludeResponseTime(HttpSample sample) {
         return !(sample.isFailed() && excludeResponseTime && !sample.isSummarizer());
+    }
+
+    public String getPercentiles() {
+        return percentiles;
+    }
+
+    public void setPercentiles(String percentiles) {
+        this.percentiles = percentiles;
     }
 }

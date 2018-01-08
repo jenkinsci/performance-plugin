@@ -91,6 +91,14 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     private Long throughput;
 
+    public PerformanceReport() {
+        super(DEFAULT_PERCENTILES);
+    }
+
+    public PerformanceReport(String percentiles) {
+        super(percentiles);
+    }
+
     public Object readResolve() {
         if (size != 0) {
             samplesCount = size;

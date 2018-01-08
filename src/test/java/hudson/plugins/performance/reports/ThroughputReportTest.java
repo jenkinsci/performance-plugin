@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
+import static hudson.plugins.performance.reports.PerformanceReportTest.DEFAULT_PERCENTILES;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -21,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 public class ThroughputReportTest {
 
     private final static double DELTA = 0.000001;
-    private PerformanceReport performanceReport = new PerformanceReport();
+    private PerformanceReport performanceReport = new PerformanceReport(DEFAULT_PERCENTILES);
 
     private ThroughputReport throughputReport = new ThroughputReport(performanceReport);
 
@@ -59,14 +60,16 @@ public class ThroughputReportTest {
         httpSample1.setDate(date);
         httpSample1.setDuration(1100);
 
-        UriReport uriReport1 = new UriReport(null, "f", "url1");
+        PerformanceReport report = new PerformanceReport(PerformanceReportTest.DEFAULT_PERCENTILES);
+
+        UriReport uriReport1 = new UriReport(report, "f", "url1");
         uriReport1.addHttpSample(httpSample1);
 
         HttpSample httpSample2 = new HttpSample();
         httpSample2.setDate(date);
         httpSample2.setDuration(1100);
 
-        UriReport uriReport2 = new UriReport(null, "f", "url2");
+        UriReport uriReport2 = new UriReport(report, "f", "url2");
         uriReport2.addHttpSample(httpSample2);
 
         performanceReport.getUriReportMap().clear();
@@ -97,13 +100,14 @@ public class ThroughputReportTest {
         lastSample.setDuration(1000);
 
 
+        PerformanceReport report = new PerformanceReport(PerformanceReportTest.DEFAULT_PERCENTILES);
 
-        UriReport uriReport1 = new UriReport(null, "f", "url1");
+        UriReport uriReport1 = new UriReport(report, "f", "url1");
         uriReport1.addHttpSample(firstSample);
         uriReport1.addHttpSample(thirdSample);
 
 
-        UriReport uriReport2 = new UriReport(null, "f", "url2");
+        UriReport uriReport2 = new UriReport(report, "f", "url2");
         uriReport2.addHttpSample(secondSample);
         uriReport2.addHttpSample(lastSample);
 
@@ -129,7 +133,7 @@ public class ThroughputReportTest {
     @Test
     public void testDuration() throws IOException, URISyntaxException {
         File report = new File(getClass().getResource("/TaurusXmlWithDuration.xml").getPath());
-        TaurusParser parser = new TaurusParser(report.getAbsolutePath());
+        TaurusParser parser = new TaurusParser(report.getAbsolutePath(), PerformanceReportTest.DEFAULT_PERCENTILES);
         PerformanceReport performanceReport = parser.parse(null, Collections.singleton(report), new StreamTaskListener(System.out)).iterator().next();
         ThroughputReport throughputReport = new ThroughputReport(performanceReport);
 
@@ -140,7 +144,7 @@ public class ThroughputReportTest {
 
     @Test
     public void testDurationBackwardCompatibility() throws IOException, URISyntaxException {
-        PerformanceReport performanceReport = new PerformanceReport();
+        PerformanceReport performanceReport = new PerformanceReport(DEFAULT_PERCENTILES);
 
         UriReport report1 = new UriReport(performanceReport, "f1", "uri1");
         report1.setThroughput(111L);

@@ -121,6 +121,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
 
     public UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
+        super(performanceReport.percentiles);
         this.performanceReport = performanceReport;
         this.staplerUri = staplerUri;
         this.uri = uri;

@@ -47,8 +47,8 @@ public class IagoParser extends AbstractParser {
     }
 
     @DataBoundConstructor
-    public IagoParser(String glob) {
-        super(glob);
+    public IagoParser(String glob, String percentiles) {
+        super(glob, percentiles);
         this.statsDateFormat = getStatsDateFormat();
     }
 
@@ -67,7 +67,7 @@ public class IagoParser extends AbstractParser {
 
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
-        final PerformanceReport report = new PerformanceReport();
+        final PerformanceReport report = new PerformanceReport(percentiles);
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 

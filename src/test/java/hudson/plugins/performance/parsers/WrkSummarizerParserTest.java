@@ -2,6 +2,7 @@ package hudson.plugins.performance.parsers;
 
 import hudson.model.TaskListener;
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.util.StreamTaskListener;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +21,7 @@ public class WrkSummarizerParserTest {
 
     @Before
     public void before() {
-        parser = new WrkSummarizerParser(null);
+        parser = new WrkSummarizerParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         listener = new StreamTaskListener((java.io.OutputStream) System.out);
     }
 

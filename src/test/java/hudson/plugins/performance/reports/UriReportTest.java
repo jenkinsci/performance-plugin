@@ -21,7 +21,8 @@ public class UriReportTest {
 
     @Before
     public void setUp() {
-        uriReport = new UriReport(null, null, null);
+        PerformanceReport performanceReport = new PerformanceReport(PerformanceReportTest.DEFAULT_PERCENTILES);
+        uriReport = new UriReport(performanceReport, null, null);
         HttpSample httpSample1 = new HttpSample();
         httpSample1.setDuration(MAX);
         Date date = new Date();

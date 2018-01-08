@@ -1,6 +1,7 @@
 package hudson.plugins.performance.parsers;
 
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.plugins.performance.reports.UriReport;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,19 +29,19 @@ public class JMeterCsvParserTest {
 
     @Test
     public void canParseCsvFile() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB);
+        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, PerformanceReportTest.DEFAULT_PERCENTILES);
         parseAndVerifyResult(parser, reportFile);
     }
 
     @Test
     public void canParseCsvFileWhenSkipFirstLineIsNotSpecifiedAndFirstLineHasHeader() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB);
+        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, PerformanceReportTest.DEFAULT_PERCENTILES);
         parseAndVerifyResult(parser, reportFile);
     }
 
     @Test
     public void testDateDateFormats() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB);
+        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, PerformanceReportTest.DEFAULT_PERCENTILES);
         parseAndVerifyResult(parser, reportFile);
         parseAndVerifyResult(parser, reportFile2);
         parseAndVerifyResult(parser, reportFile3);
@@ -72,7 +73,7 @@ public class JMeterCsvParserTest {
     public void testMultiLineCSV() throws Exception {
 
         // Setup fixture.
-        final JMeterCsvParser parser = new JMeterCsvParser(null);
+        final JMeterCsvParser parser = new JMeterCsvParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         final File reportFile = new File(getClass().getResource("/multiLineCSV.jtl").toURI());
 
         // Execute system under test.

@@ -28,8 +28,8 @@ public class TaurusParser extends AbstractParser {
     }
 
     @DataBoundConstructor
-    public TaurusParser(String glob) {
-        super(glob);
+    public TaurusParser(String glob, String percentiles) {
+        super(glob, percentiles);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class TaurusParser extends AbstractParser {
     }
 
     private PerformanceReport readFromXML(File reportFile) throws Exception {
-        final PerformanceReport report = new PerformanceReport();
+        final PerformanceReport report = new PerformanceReport(percentiles);
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
