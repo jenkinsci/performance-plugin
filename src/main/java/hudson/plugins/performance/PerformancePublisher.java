@@ -168,6 +168,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private String junitOutput = "";
 
     /**
+     * Percentiles that will be display in url tables
+     * comma-separated
+     */
+    private String percentiles;
+
+    /**
      * Legacy constructor used for internal references.
      */
     @Restricted(NoExternalUse.class)
@@ -1321,6 +1327,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setJunitOutput(String junitOutput) {
         this.junitOutput = junitOutput;
+    }
+
+    public String getPercentiles() {
+        return percentiles;
+    }
+
+    @DataBoundSetter
+    public void setPercentiles(String percentiles) {
+        this.percentiles = percentiles;
     }
 
     /**

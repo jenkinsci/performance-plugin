@@ -172,6 +172,10 @@
             </f:select>
         </f:entry>
 
+        <f:entry title="Select display percentiles">
+            <f:textbox name="percentiles" field="percentiles" default="0,50,90,100"/>
+        </f:entry>
+
         <f:entry title="${%Performance display}">
             <table>
                 <tbody>
