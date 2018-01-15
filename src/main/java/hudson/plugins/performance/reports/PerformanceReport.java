@@ -273,6 +273,15 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         }
     }
 
+    @Override
+    public void calculatePercentiles() {
+        List<Double> percs = super.parsePercentiles();
+        for (Double perc : percs) {
+            super.percentilesValues.put(perc, getDurationAt(perc));
+        }
+        super.isCalculatedPercentilesValues = true;
+    }
+
     public long get90Line() {
         if (perc90 == null) {
             perc90 = getDurationAt(NINETY_PERCENT);

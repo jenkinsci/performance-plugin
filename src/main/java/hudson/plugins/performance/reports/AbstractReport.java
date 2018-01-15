@@ -1,16 +1,24 @@
 package hudson.plugins.performance.reports;
 
 import hudson.plugins.performance.data.HttpSample;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Stapler;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract class for classes with samplesCount, error, mean, average, 90 line, min and max attributes
  */
 public abstract class AbstractReport {
+    public static final Logger LOGGER = Logger.getLogger(AbstractReport.class.getName());
     public static final double ZERO_PERCENT = 0;
     public static final double ONE_HUNDRED_PERCENT = 100;
     public static final double NINETY_PERCENT = 90;
@@ -21,6 +29,9 @@ public abstract class AbstractReport {
     protected final ThreadLocal<DecimalFormat> dataFormat; // three decimals
 
     protected String percentiles;
+    protected Map<Double, Long> percentilesValues = new TreeMap<>();
+    protected transient boolean isCalculatedPercentilesValues = false;
+
 
     /**
      * Exclude response time of errored samples
@@ -31,7 +42,7 @@ public abstract class AbstractReport {
 
     abstract public double errorPercent();
 
-
+    abstract public void calculatePercentiles();
 
     public AbstractReport(String percentiles) {
         this.percentiles = percentiles;
@@ -61,6 +72,21 @@ public abstract class AbstractReport {
     public String errorPercentFormated() {
         Stapler.getCurrentRequest().getLocale();
         return percentFormat.get().format(errorPercent());
+    }
+
+    protected List<Double> parsePercentiles() {
+        final List<Double> res = new ArrayList<>();
+        if (!StringUtils.isBlank(percentiles)) {
+            String[] percs = this.percentiles.split(",");
+            for (String perc : percs) {
+                try {
+                    res.add(Double.parseDouble(perc));
+                } catch (NumberFormatException ex) {
+                    LOGGER.log(Level.WARNING, "Cannot parse percentile value " + perc);
+                }
+            }
+        }
+        return res;
     }
 
     abstract public long getAverage();
@@ -123,5 +149,12 @@ public abstract class AbstractReport {
 
     public void setPercentiles(String percentiles) {
         this.percentiles = percentiles;
+    }
+
+    public Map<Double, Long> getPercentilesValues() {
+        if (!isCalculatedPercentilesValues) {
+            calculatePercentiles();
+        }
+        return percentilesValues;
     }
 }
