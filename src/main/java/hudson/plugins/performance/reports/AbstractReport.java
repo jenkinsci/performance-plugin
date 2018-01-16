@@ -30,6 +30,7 @@ public abstract class AbstractReport {
 
     protected String percentiles;
     protected Map<Double, Long> percentilesValues = new TreeMap<>();
+    protected Map<Double, Long> percentilesDiffValues = new TreeMap<>();
     protected transient boolean isCalculatedPercentilesValues = false;
 
 
@@ -43,6 +44,8 @@ public abstract class AbstractReport {
     abstract public double errorPercent();
 
     abstract public void calculatePercentiles();
+
+    abstract void calculateDiffPercentiles();
 
     public AbstractReport(String percentiles) {
         this.percentiles = percentiles;
@@ -154,7 +157,28 @@ public abstract class AbstractReport {
     public Map<Double, Long> getPercentilesValues() {
         if (!isCalculatedPercentilesValues) {
             calculatePercentiles();
+            calculateDiffPercentiles();
         }
         return percentilesValues;
+    }
+
+    public Map<Double, Long> getPercentilesDiffValues() {
+        if (!isCalculatedPercentilesValues) {
+            calculatePercentiles();
+            calculateDiffPercentiles();
+        }
+        return percentilesDiffValues;
+    }
+
+    public String getPercentileLabel(Double perc) {
+        if (perc == 0.0) {
+            return "Min(ms)";
+        } else if (perc == 50.0) {
+            return "Median(ms)";
+        } else if (perc == 100.0) {
+            return "Max(ms)";
+        } else {
+            return "Line " + perc + "(ms)";
+        }
     }
 }

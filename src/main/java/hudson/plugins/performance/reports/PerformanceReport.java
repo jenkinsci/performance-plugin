@@ -282,6 +282,22 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         super.isCalculatedPercentilesValues = true;
     }
 
+    @Override
+    void calculateDiffPercentiles() {
+        List<Double> percs = super.parsePercentiles();
+        for (Double perc : percs) {
+            Long diff = 0L;
+            if (lastBuildReport != null) {
+                Long previousValue = lastBuildReport.getPercentilesValues().get(perc);
+                Long currentValue = getPercentilesValues().get(perc);
+                if (previousValue != null && currentValue != null) {
+                    diff = currentValue - previousValue;
+                }
+            }
+            super.percentilesDiffValues.put(perc, diff);
+        }
+    }
+
     public long get90Line() {
         if (perc90 == null) {
             perc90 = getDurationAt(NINETY_PERCENT);
