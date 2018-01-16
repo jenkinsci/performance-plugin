@@ -16,10 +16,14 @@
     <th>${%URI}</th>
     <th>${%Samples}</th>
     <th>${%Average} (ms)</th>
-    <th>${%Median} (ms)</th>
-    <th>${%Line90} (ms)</th>
-    <th>${%Minimum} (ms)</th>
-    <th>${%Maximum} (ms)</th>
+
+    <j:set var="percentiles" value="${it.getPercentilesValues()}"/>
+    <j:forEach var="entry" items="${percentiles}">
+        <th>
+            ${it.getPercentileLabel(entry.getKey())}
+        </th>
+    </j:forEach>
+
     <th>${%Http Code}</th>
     <th>${%Errors} (%)</th>
     <th>${%Average} (KB)</th>
