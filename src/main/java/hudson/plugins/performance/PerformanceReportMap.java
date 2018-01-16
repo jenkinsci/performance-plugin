@@ -9,6 +9,7 @@ import hudson.plugins.performance.data.ReportValueSelector;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.plugins.performance.reports.AbstractReport;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.data.PerformanceReportPosition;
 import hudson.plugins.performance.reports.UriReport;
@@ -292,7 +293,7 @@ public class PerformanceReportMap implements ModelObject {
         });
         // this may fail, if the build itself failed, we need to recover gracefully
         if (files != null) {
-            addAll(new JMeterParser("").parse(build, Arrays.asList(files), listener));
+            addAll(new JMeterParser("", AbstractReport.DEFAULT_PERCENTILES).parse(build, Arrays.asList(files), listener));
         }
 
         // otherwise subdirectory name designates the parser ID.
