@@ -7,6 +7,7 @@ import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
+import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -92,7 +93,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private Long throughput;
 
     public PerformanceReport() {
-        super(DEFAULT_PERCENTILES);
+        if (!StringUtils.isBlank(percentiles)) {
+            this.percentiles = DEFAULT_PERCENTILES;
+        }
     }
 
     public PerformanceReport(String percentiles) {
