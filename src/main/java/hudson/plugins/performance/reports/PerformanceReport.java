@@ -115,6 +115,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
                 }
             }
         }
+        checkPercentileAndSet(0.0, perc0);
+        checkPercentileAndSet(50.0, perc50);
+        checkPercentileAndSet(90.0, perc90);
+        checkPercentileAndSet(100.0, perc100);
         return this;
     }
 
@@ -180,6 +184,12 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             perc90 = (long) sample.getPerc90();
             perc0 = (long) sample.getPerc0();
             perc100 = (long) sample.getPerc100();
+            this.percentilesValues.put(0.0, (long) sample.getPerc0());
+            this.percentilesValues.put(50.0, (long) sample.getPerc50());
+            this.percentilesValues.put(90.0, (long) sample.getPerc90());
+            this.percentilesValues.put(100.0, (long) sample.getPerc100());
+            calculateDiffPercentiles();
+            isCalculatedPercentilesValues = true;
             throughput = (testDuration == null) ?
                     sample.getThroughput() :
                     (sampleCount / (totalDuration / 1000));
@@ -393,6 +403,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             }
         }
         this.lastBuildReport = lastBuildReport;
+        calculateDiffPercentiles();
     }
 
     public long getAverageDiff() {

@@ -77,6 +77,13 @@ public abstract class AbstractReport {
         return percentFormat.get().format(errorPercent());
     }
 
+    protected void checkPercentileAndSet(Double key, Long value) {
+        if (value != null) {
+            percentilesValues.put(key, value);
+            isCalculatedPercentilesValues = true;
+        }
+    }
+
     protected List<Double> parsePercentiles() {
         final List<Double> res = new ArrayList<>();
         if (!StringUtils.isBlank(percentiles)) {

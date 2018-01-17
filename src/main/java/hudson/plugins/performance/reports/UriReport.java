@@ -120,6 +120,14 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     private int samplesCount;
 
 
+    public Object readResolve() {
+        checkPercentileAndSet(0.0, perc0);
+        checkPercentileAndSet(50.0, perc50);
+        checkPercentileAndSet(90.0, perc90);
+        checkPercentileAndSet(100.0, perc100);
+        return this;
+    }
+
     public UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
         super(performanceReport.percentiles);
         this.performanceReport = performanceReport;
@@ -161,6 +169,13 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         perc50 = (long) report.getPerc50();
         perc90 = (long) report.getPerc90();
         perc100 = (long) report.getPerc100();
+
+        this.percentilesValues.put(0.0, (long) report.getPerc0());
+        this.percentilesValues.put(50.0, (long) report.getPerc50());
+        this.percentilesValues.put(90.0, (long) report.getPerc90());
+        this.percentilesValues.put(100.0, (long) report.getPerc100());
+        calculateDiffPercentiles();
+        isCalculatedPercentilesValues = true;
 
         summarizerSize = report.getBytes();
         summarizerErrors = report.getFail();
@@ -360,6 +375,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
     public void addLastBuildUriReport(UriReport lastBuildUriReport) {
         this.lastBuildUriReport = lastBuildUriReport;
+        calculateDiffPercentiles();
     }
 
     public long getAverageDiff() {
