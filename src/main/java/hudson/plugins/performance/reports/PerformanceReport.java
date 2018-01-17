@@ -93,7 +93,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private Long throughput;
 
     public PerformanceReport() {
-        if (!StringUtils.isBlank(percentiles)) {
+        if (StringUtils.isBlank(percentiles)) {
             this.percentiles = DEFAULT_PERCENTILES;
         }
     }
