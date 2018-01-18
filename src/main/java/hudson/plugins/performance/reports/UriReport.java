@@ -248,7 +248,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     @Override
-    void calculateDiffPercentiles() {
+    public void calculateDiffPercentiles() {
         List<Double> percs = super.parsePercentiles(percentiles);
         for (Double perc : percs) {
             Long diff = 0L;

@@ -300,7 +300,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     @Override
-    void calculateDiffPercentiles() {
+    public void calculateDiffPercentiles() {
         List<Double> percs = super.parsePercentiles(percentiles);
         for (Double perc : percs) {
             Long diff = 0L;
