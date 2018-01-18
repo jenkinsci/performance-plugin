@@ -118,21 +118,24 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     private Long throughput;
 
     private int samplesCount;
-
+    protected String percentiles;
 
     public Object readResolve() {
         checkPercentileAndSet(0.0, perc0);
         checkPercentileAndSet(50.0, perc50);
         checkPercentileAndSet(90.0, perc90);
         checkPercentileAndSet(100.0, perc100);
+        if (StringUtils.isBlank(percentiles)) {
+            this.percentiles = DEFAULT_PERCENTILES;
+        }
         return this;
     }
 
     public UriReport(PerformanceReport performanceReport, String staplerUri, String uri) {
-        super(performanceReport.percentiles);
         this.performanceReport = performanceReport;
         this.staplerUri = staplerUri;
         this.uri = uri;
+        this.percentiles = performanceReport.percentiles;
     }
 
     public void addHttpSample(HttpSample sample) {
@@ -237,7 +240,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
     @Override
     public void calculatePercentiles() {
-        List<Double> percs = super.parsePercentiles();
+        List<Double> percs = super.parsePercentiles(percentiles);
         for (Double perc : percs) {
             super.percentilesValues.put(perc, getDurationAt(perc));
         }
@@ -246,7 +249,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
     @Override
     void calculateDiffPercentiles() {
-        List<Double> percs = super.parsePercentiles();
+        List<Double> percs = super.parsePercentiles(percentiles);
         for (Double perc : percs) {
             Long diff = 0L;
             if (lastBuildUriReport != null) {

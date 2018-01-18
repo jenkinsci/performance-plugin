@@ -28,7 +28,6 @@ public abstract class AbstractReport {
     protected final ThreadLocal<DecimalFormat> percentFormat;
     protected final ThreadLocal<DecimalFormat> dataFormat; // three decimals
 
-    protected String percentiles;
     protected Map<Double, Long> percentilesValues = new TreeMap<>();
     protected Map<Double, Long> percentilesDiffValues = new TreeMap<>();
     protected transient boolean isCalculatedPercentilesValues = false;
@@ -47,8 +46,7 @@ public abstract class AbstractReport {
 
     abstract void calculateDiffPercentiles();
 
-    public AbstractReport(String percentiles) {
-        this.percentiles = percentiles;
+    public AbstractReport() {
         final Locale useThisLocale = (Stapler.getCurrentRequest() != null) ? Stapler.getCurrentRequest().getLocale() : Locale.getDefault();
 
         percentFormat = new ThreadLocal<DecimalFormat>() {
@@ -68,10 +66,6 @@ public abstract class AbstractReport {
         };
     }
 
-    public AbstractReport() {
-        this(DEFAULT_PERCENTILES);
-    }
-
     public String errorPercentFormated() {
         Stapler.getCurrentRequest().getLocale();
         return percentFormat.get().format(errorPercent());
@@ -84,10 +78,10 @@ public abstract class AbstractReport {
         }
     }
 
-    protected List<Double> parsePercentiles() {
+    protected List<Double> parsePercentiles(String percentiles) {
         final List<Double> res = new ArrayList<>();
         if (!StringUtils.isBlank(percentiles)) {
-            String[] percs = this.percentiles.split(",");
+            String[] percs = percentiles.split(",");
             for (String perc : percs) {
                 try {
                     res.add(Double.parseDouble(perc));
@@ -151,14 +145,6 @@ public abstract class AbstractReport {
 
     protected boolean isIncludeResponseTime(HttpSample sample) {
         return !(sample.isFailed() && excludeResponseTime && !sample.isSummarizer());
-    }
-
-    public String getPercentiles() {
-        return percentiles;
-    }
-
-    public void setPercentiles(String percentiles) {
-        this.percentiles = percentiles;
     }
 
     public Map<Double, Long> getPercentilesValues() {

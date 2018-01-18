@@ -91,6 +91,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private Long perc100;
 
     private Long throughput;
+    protected String percentiles;
 
     public PerformanceReport() {
         if (StringUtils.isBlank(percentiles)) {
@@ -99,7 +100,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     public PerformanceReport(String percentiles) {
-        super(percentiles);
+        this.percentiles = percentiles;
     }
 
     public Object readResolve() {
@@ -119,6 +120,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         checkPercentileAndSet(50.0, perc50);
         checkPercentileAndSet(90.0, perc90);
         checkPercentileAndSet(100.0, perc100);
+        if (StringUtils.isBlank(percentiles)) {
+            this.percentiles = DEFAULT_PERCENTILES;
+        }
         return this;
     }
 
@@ -288,7 +292,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     @Override
     public void calculatePercentiles() {
-        List<Double> percs = super.parsePercentiles();
+        List<Double> percs = super.parsePercentiles(percentiles);
         for (Double perc : percs) {
             super.percentilesValues.put(perc, getDurationAt(perc));
         }
@@ -297,7 +301,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     @Override
     void calculateDiffPercentiles() {
-        List<Double> percs = super.parsePercentiles();
+        List<Double> percs = super.parsePercentiles(percentiles);
         for (Double perc : percs) {
             Long diff = 0L;
             if (lastBuildReport != null) {
