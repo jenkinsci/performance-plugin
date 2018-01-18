@@ -60,7 +60,7 @@ public class ThroughputReportTest {
         httpSample1.setDate(date);
         httpSample1.setDuration(1100);
 
-        PerformanceReport report = new PerformanceReport(PerformanceReportTest.DEFAULT_PERCENTILES);
+        PerformanceReport report = new PerformanceReport(DEFAULT_PERCENTILES);
 
         UriReport uriReport1 = new UriReport(report, "f", "url1");
         uriReport1.addHttpSample(httpSample1);
@@ -100,7 +100,7 @@ public class ThroughputReportTest {
         lastSample.setDuration(1000);
 
 
-        PerformanceReport report = new PerformanceReport(PerformanceReportTest.DEFAULT_PERCENTILES);
+        PerformanceReport report = new PerformanceReport(DEFAULT_PERCENTILES);
 
         UriReport uriReport1 = new UriReport(report, "f", "url1");
         uriReport1.addHttpSample(firstSample);
@@ -133,7 +133,7 @@ public class ThroughputReportTest {
     @Test
     public void testDuration() throws IOException, URISyntaxException {
         File report = new File(getClass().getResource("/TaurusXmlWithDuration.xml").getPath());
-        TaurusParser parser = new TaurusParser(report.getAbsolutePath(), PerformanceReportTest.DEFAULT_PERCENTILES);
+        TaurusParser parser = new TaurusParser(report.getAbsolutePath(), DEFAULT_PERCENTILES);
         PerformanceReport performanceReport = parser.parse(null, Collections.singleton(report), new StreamTaskListener(System.out)).iterator().next();
         ThroughputReport throughputReport = new ThroughputReport(performanceReport);
 

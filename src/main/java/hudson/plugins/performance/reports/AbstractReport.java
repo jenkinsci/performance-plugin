@@ -44,7 +44,7 @@ public abstract class AbstractReport {
 
     abstract public void calculatePercentiles();
 
-    abstract void calculateDiffPercentiles();
+    abstract public void calculateDiffPercentiles();
 
     public AbstractReport() {
         final Locale useThisLocale = (Stapler.getCurrentRequest() != null) ? Stapler.getCurrentRequest().getLocale() : Locale.getDefault();
