@@ -221,7 +221,11 @@ public class RelativeConstraint extends AbstractConstraint {
             if (this.previousResultsBlock.getPreviousResultsString().equals("*")) {
                 this.previousResults = -1;
             } else {
-                this.previousResults = Integer.parseInt(this.previousResultsBlock.getPreviousResultsString());
+                try {
+                    this.previousResults = Integer.parseInt(this.previousResultsBlock.getPreviousResultsString());
+                } catch (NumberFormatException ex) {
+                    this.previousResults = -1;
+                }
             }
             this.previousResultsString = this.previousResultsBlock.getPreviousResultsString();
         } else {
