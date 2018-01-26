@@ -3,6 +3,7 @@ package hudson.plugins.performance;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,7 +24,7 @@ public class TrendReportGraphsTest {
     public void test() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject();
         FreeStyleBuild build = project.createExecutable();
-        PerformanceReport report = new PerformanceReport();
+        PerformanceReport report = new PerformanceReport(PerformanceReportTest.DEFAULT_PERCENTILES);
 
         TrendReportGraphs graphs = new TrendReportGraphs(project, build, null, "simpleFilename", report);
 

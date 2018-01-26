@@ -16,6 +16,7 @@ import hudson.plugins.performance.constraints.AbstractConstraint;
 import hudson.plugins.performance.parsers.JMeterCsvParser;
 import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
 import org.junit.Ignore;
@@ -406,8 +407,8 @@ public class PerformancePublisherTest extends HudsonTestCase {
     @Test
     public void testMigration() throws Exception {
         List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
-        parsers.add(new JMeterCsvParser("test1"));
-        parsers.add(new JMeterParser("test2"));
+        parsers.add(new JMeterCsvParser("test1", PerformanceReportTest.DEFAULT_PERCENTILES));
+        parsers.add(new JMeterParser("test2", PerformanceReportTest.DEFAULT_PERCENTILES));
 
         PerformancePublisher publisher = new PerformancePublisher("", -1, -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT", false, true, true, true, parsers);
 

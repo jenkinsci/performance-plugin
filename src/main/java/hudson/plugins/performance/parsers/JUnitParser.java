@@ -31,8 +31,8 @@ public class JUnitParser extends AbstractParser {
     }
 
     @DataBoundConstructor
-    public JUnitParser(String glob) {
-        super(glob);
+    public JUnitParser(String glob, String percentiles) {
+        super(glob, percentiles);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class JUnitParser extends AbstractParser {
         factory.setNamespaceAware(false);
 
         final SAXParser parser = factory.newSAXParser();
-        final PerformanceReport report = new PerformanceReport();
+        final PerformanceReport report = new PerformanceReport(percentiles);
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
         parser.parse(reportFile, new DefaultHandler() {

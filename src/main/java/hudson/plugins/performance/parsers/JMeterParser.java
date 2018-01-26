@@ -32,8 +32,8 @@ public class JMeterParser extends AbstractParser {
     }
 
     @DataBoundConstructor
-    public JMeterParser(String glob) {
-        super(glob);
+    public JMeterParser(String glob, String percentiles) {
+        super(glob, percentiles);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class JMeterParser extends AbstractParser {
         factory.setValidating(false);
         factory.setNamespaceAware(false);
 
-        final PerformanceReport report = new PerformanceReport();
+        final PerformanceReport report = new PerformanceReport(percentiles);
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
@@ -188,7 +188,7 @@ public class JMeterParser extends AbstractParser {
      * A delegate for {@link #parse(File)} that can process CSV data.
      */
     PerformanceReport parseCsv(File reportFile) throws Exception {
-        final JMeterCsvParser delegate = new JMeterCsvParser(this.glob);
+        final JMeterCsvParser delegate = new JMeterCsvParser(this.glob, this.percentiles);
         return delegate.parse(reportFile);
     }
 

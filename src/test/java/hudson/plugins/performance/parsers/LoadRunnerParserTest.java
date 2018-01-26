@@ -1,6 +1,7 @@
 package hudson.plugins.performance.parsers;
 
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.plugins.performance.reports.UriReport;
 import org.junit.Test;
 import java.io.File;
@@ -27,7 +28,7 @@ public class LoadRunnerParserTest {
     */
     @Test
     public void test() throws Exception {
-        final LoadRunnerParser parser = new LoadRunnerParser(NO_GLOB);
+        final LoadRunnerParser parser = new LoadRunnerParser(NO_GLOB, PerformanceReportTest.DEFAULT_PERCENTILES);
         final PerformanceReport result = parser.parse(new File(getClass().getResource("/lr-session.mdb").toURI()));
         assertNotNull(result);
 

@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class PerformanceReportTest {
+    public static final String DEFAULT_PERCENTILES = "0,50,90,100";
 
     private PerformanceReport performanceReport;
 
@@ -32,7 +33,7 @@ public class PerformanceReportTest {
     public void setUp() throws Exception {
         PerformanceBuildAction buildAction = EasyMock
                 .createMock(PerformanceBuildAction.class);
-        performanceReport = new PerformanceReport();
+        performanceReport = new PerformanceReport(DEFAULT_PERCENTILES);
         performanceReport.setBuildAction(buildAction);
     }
 
@@ -106,12 +107,12 @@ public class PerformanceReportTest {
     }
 
     private PerformanceReport parseOneJMeter(File f) throws IOException {
-        return new JMeterParser("").parse(null, Collections.singleton(f),
+        return new JMeterParser("", DEFAULT_PERCENTILES).parse(null, Collections.singleton(f),
                 new StreamTaskListener(System.out)).iterator().next();
     }
 
     private PerformanceReport parseOneJUnit(File f) throws IOException {
-        return new JUnitParser("").parse(null, Collections.singleton(f),
+        return new JUnitParser("", PerformanceReportTest.DEFAULT_PERCENTILES).parse(null, Collections.singleton(f),
                 new StreamTaskListener(System.out)).iterator().next();
     }
 
@@ -244,9 +245,9 @@ public class PerformanceReportTest {
 
     @Test
     public void testCompare() {
-        PerformanceReport report = new PerformanceReport();
+        PerformanceReport report = new PerformanceReport(DEFAULT_PERCENTILES);
         report.setReportFileName("aaaaaa");
-        PerformanceReport report1 = new PerformanceReport();
+        PerformanceReport report1 = new PerformanceReport(DEFAULT_PERCENTILES);
         report1.setReportFileName("bbbbb");
         assertEquals(-1, report.compareTo(report1));
         assertEquals(1, report1.compareTo(report));
@@ -255,7 +256,7 @@ public class PerformanceReportTest {
 
     @Test
     public void testExcludeResponseTimeOfErroredSamples() throws Exception {
-        PerformanceReport report = new PerformanceReport();
+        PerformanceReport report = new PerformanceReport(DEFAULT_PERCENTILES);
         report.setExcludeResponseTime(false);
 
         HttpSample sample1 = new HttpSample();
@@ -276,7 +277,7 @@ public class PerformanceReportTest {
         assertEquals(100, report.getUriReportMap().get("").getAverage());
 
 
-        report = new PerformanceReport();
+        report = new PerformanceReport(DEFAULT_PERCENTILES);
         report.setExcludeResponseTime(true);
         report.addSample(sample1);
         report.addSample(sample2);
@@ -298,7 +299,7 @@ public class PerformanceReportTest {
         assertEquals(100, report.getAverage());
         assertEquals(100, report.getUriReportMap().get("").getAverage());
 
-        report = new PerformanceReport();
+        report = new PerformanceReport(DEFAULT_PERCENTILES);
         report.setExcludeResponseTime(true);
         report.addSample(sample2);
         report.addSample(sample4);

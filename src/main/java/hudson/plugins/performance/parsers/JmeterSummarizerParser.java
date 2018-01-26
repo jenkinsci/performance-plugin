@@ -26,8 +26,8 @@ public class JmeterSummarizerParser extends AbstractParser {
     }
 
     @DataBoundConstructor
-    public JmeterSummarizerParser(String glob) {
-        super(glob);
+    public JmeterSummarizerParser(String glob, String percentiles) {
+        super(glob, percentiles);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class JmeterSummarizerParser extends AbstractParser {
     PerformanceReport parse(File reportFile) throws Exception {
         clearDateFormat();
 
-        final PerformanceReport report = new PerformanceReport();
+        final PerformanceReport report = new PerformanceReport(percentiles);
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 

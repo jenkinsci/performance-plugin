@@ -72,10 +72,11 @@ public class ConstraintFactoryTest {
          * Creating UriReports
          */
         List<UriReport> list = new ArrayList<UriReport>();
-        UriReport ur1 = new UriReport(null, "tc1", "tc1");
-        UriReport ur2 = new UriReport(null, "tc2", "tc2");
-        UriReport ur3 = new UriReport(null, "tc3", "tc3");
-        UriReport ur4 = new UriReport(null, "tc4", "tc4");
+        PerformanceReport report = new PerformanceReport(PerformanceReport.DEFAULT_PERCENTILES);
+        UriReport ur1 = new UriReport(report, "tc1", "tc1");
+        UriReport ur2 = new UriReport(report, "tc2", "tc2");
+        UriReport ur3 = new UriReport(report, "tc3", "tc3");
+        UriReport ur4 = new UriReport(report, "tc4", "tc4");
         list.add(ur1);
         list.add(ur2);
         list.add(ur3);

@@ -168,6 +168,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private String junitOutput = "";
 
     /**
+     * Percentiles that will be display in url tables
+     * comma-separated
+     */
+    private String percentiles;
+
+    /**
      * Legacy constructor used for internal references.
      */
     @Restricted(NoExternalUse.class)
@@ -315,7 +321,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             for (String filePath : sourceDataFiles.split(";")) {
                 if (!filePath.isEmpty()) {
                     try {
-                        parsers.add(ParserFactory.getParser(build, workspace, logger, filePath, env));
+                        parsers.add(ParserFactory.getParser(build, workspace, logger, filePath, env, percentiles));
                     } catch (IOException ex) {
                         logger.println("Cannot detect file type because of error: " + ex.getMessage());
                     }
@@ -352,7 +358,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         if (parsers == null)
             parsers = new ArrayList<PerformanceReportParser>();
         if (filename != null) {
-            parsers.add(new JMeterParser(filename));
+            parsers.add(new JMeterParser(filename, percentiles));
             filename = null;
         }
         // Migrate parsers to simple field sourceDataFiles.
@@ -1321,6 +1327,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setJunitOutput(String junitOutput) {
         this.junitOutput = junitOutput;
+    }
+
+    public String getPercentiles() {
+        return percentiles;
+    }
+
+    @DataBoundSetter
+    public void setPercentiles(String percentiles) {
+        this.percentiles = percentiles;
     }
 
     /**

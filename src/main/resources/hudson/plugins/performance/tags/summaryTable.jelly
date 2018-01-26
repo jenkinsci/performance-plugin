@@ -14,22 +14,19 @@
         </sup>
     </td>
 
-    <td>
-        ${it.getMedian()}
-        <sup class="${h.ifThenElse(it.getMedianDiff()>0,'red','green')}">
-            ${h.ifThenElse(it.getMedianDiff()>0,'+','')}${it.getMedianDiff()}
-        </sup>
-    </td>
 
-    <td>
-        ${it.get90Line()}
-        <sup class="${h.ifThenElse(it.get90LineDiff()>0,'red','green')}">
-            ${h.ifThenElse(it.get90LineDiff()>0,'+','')}${it.get90LineDiff()}
-        </sup>
-    </td>
+    <j:set var="percentiles" value="${it.getPercentilesValues()}"/>
+    <j:set var="percentilesDiff" value="${it.getPercentilesDiffValues()}"/>
+    <j:forEach var="entry" items="${percentiles}">
+        <td>
+            ${entry.getValue()}
+            <j:set var="diff" value="${percentilesDiff.get(entry.getKey())}"/>
+            <sup class="${h.ifThenElse(diff > 0,'red','green')}">
+                ${h.ifThenElse(diff > 0,'+','')}${diff}
+            </sup>
+        </td>
+    </j:forEach>
 
-    <td>${it.getMin()}</td>
-    <td>${it.getMax()}</td>
     <td>
         ${it.getHttpCode()}
         <sup>

@@ -1,6 +1,7 @@
 package hudson.plugins.performance.parsers;
 
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.plugins.performance.reports.UriReport;
 import org.junit.Test;
 
@@ -17,7 +18,7 @@ public class TaurusParserTest {
 
     @Test
     public void testReadXML() throws Exception {
-        TaurusParser parser = new TaurusParser("xml report");
+        TaurusParser parser = new TaurusParser("xml report", PerformanceReportTest.DEFAULT_PERCENTILES);
 
         PerformanceReport report = parser.parse(new File(getClass().getResource("/TaurusXMLReport.xml").toURI()));
         PerformanceReport prevReport = parser.parse(new File(getClass().getResource("/TaurusPreviousBuildReport.xml").toURI()));
@@ -86,6 +87,6 @@ public class TaurusParserTest {
 
     @Test
     public void testGlobPattern() throws Exception {
-        assertEquals("**/*.xml", new TaurusParser("").getDefaultGlobPattern());
+        assertEquals("**/*.xml", new TaurusParser("", PerformanceReportTest.DEFAULT_PERCENTILES).getDefaultGlobPattern());
     }
 }

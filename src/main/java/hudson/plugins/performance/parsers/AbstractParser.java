@@ -56,8 +56,11 @@ public abstract class AbstractParser extends PerformanceReportParser {
             "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss,SSS", "yyyy/mm/dd HH:mm:ss"
     };
 
-    public AbstractParser(String glob) {
+    protected String percentiles;
+
+    public AbstractParser(String glob, String percentiles) {
         super(glob);
+        this.percentiles = percentiles;
     }
 
     @Override
@@ -199,6 +202,8 @@ public abstract class AbstractParser extends PerformanceReportParser {
                     classMapping.get(desc.getName()) :
                     super.resolveClass(desc);
         }
+
+
     }
 
 

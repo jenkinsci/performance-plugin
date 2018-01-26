@@ -7,6 +7,7 @@ import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
+import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -90,6 +91,17 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private Long perc100;
 
     private Long throughput;
+    protected String percentiles;
+
+    public PerformanceReport() {
+        if (StringUtils.isBlank(percentiles)) {
+            this.percentiles = DEFAULT_PERCENTILES;
+        }
+    }
+
+    public PerformanceReport(String percentiles) {
+        this.percentiles = percentiles;
+    }
 
     public Object readResolve() {
         if (size != 0) {
@@ -103,6 +115,13 @@ public class PerformanceReport extends AbstractReport implements Serializable,
                     throughput = (throughput == null) ? uriThroughput : (uriThroughput + throughput);
                 }
             }
+        }
+        checkPercentileAndSet(0.0, perc0);
+        checkPercentileAndSet(50.0, perc50);
+        checkPercentileAndSet(90.0, perc90);
+        checkPercentileAndSet(100.0, perc100);
+        if (StringUtils.isBlank(percentiles)) {
+            this.percentiles = DEFAULT_PERCENTILES;
         }
         return this;
     }
@@ -169,6 +188,12 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             perc90 = (long) sample.getPerc90();
             perc0 = (long) sample.getPerc0();
             perc100 = (long) sample.getPerc100();
+            this.percentilesValues.put(0.0, (long) sample.getPerc0());
+            this.percentilesValues.put(50.0, (long) sample.getPerc50());
+            this.percentilesValues.put(90.0, (long) sample.getPerc90());
+            this.percentilesValues.put(100.0, (long) sample.getPerc100());
+            calculateDiffPercentiles();
+            isCalculatedPercentilesValues = true;
             throughput = (testDuration == null) ?
                     sample.getThroughput() :
                     (sampleCount / (totalDuration / 1000));
@@ -265,6 +290,31 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         }
     }
 
+    @Override
+    public void calculatePercentiles() {
+        List<Double> percs = super.parsePercentiles(percentiles);
+        for (Double perc : percs) {
+            super.percentilesValues.put(perc, getDurationAt(perc));
+        }
+        super.isCalculatedPercentilesValues = true;
+    }
+
+    @Override
+    public void calculateDiffPercentiles() {
+        List<Double> percs = super.parsePercentiles(percentiles);
+        for (Double perc : percs) {
+            Long diff = 0L;
+            if (lastBuildReport != null) {
+                Long previousValue = lastBuildReport.getPercentilesValues().get(perc);
+                Long currentValue = getPercentilesValues().get(perc);
+                if (previousValue != null && currentValue != null) {
+                    diff = currentValue - previousValue;
+                }
+            }
+            super.percentilesDiffValues.put(perc, diff);
+        }
+    }
+
     public long get90Line() {
         if (perc90 == null) {
             perc90 = getDurationAt(NINETY_PERCENT);
@@ -357,6 +407,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             }
         }
         this.lastBuildReport = lastBuildReport;
+        calculateDiffPercentiles();
     }
 
     public long getAverageDiff() {
