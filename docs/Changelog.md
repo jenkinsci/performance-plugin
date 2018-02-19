@@ -1,7 +1,7 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
  
-## v3.5 (upcoming)
+## v3.5 (29th of January, 2018)
 - FIX: Display Performance Report Per Test Case
 - FIX: NullPointerException in ConstraintFactory
 - FIX: NumberFormatException in RelativeConstraint
