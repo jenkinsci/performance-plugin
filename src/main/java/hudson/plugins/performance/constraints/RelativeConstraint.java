@@ -47,8 +47,6 @@ public class RelativeConstraint extends AbstractConstraint {
             return "Relative Constraint";
         }
 
-        final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        final SimpleDateFormat dfShort = new SimpleDateFormat("yyyy-MM-dd");
 
         public FormValidation doCheckRelatedPerfReport(@QueryParameter String relatedPerfReport) {
             if (relatedPerfReport.equals("")) {
@@ -76,6 +74,9 @@ public class RelativeConstraint extends AbstractConstraint {
         }
 
         private FormValidation dateCheck(String dateString) {
+            final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            final SimpleDateFormat dfShort = new SimpleDateFormat("yyyy-MM-dd");
+
             dfLong.setLenient(false);
             dfShort.setLenient(false);
             try {
@@ -176,10 +177,7 @@ public class RelativeConstraint extends AbstractConstraint {
      * relative constraint includes all builds that have taken place in an user defined time frame
      */
     private boolean choicePreviousResults = true;
-    /**
-     * Processable date format
-     */
-    private final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
     /**
      * Start of the time frame (for internal use)
      */
@@ -238,6 +236,7 @@ public class RelativeConstraint extends AbstractConstraint {
                 this.timeframeEndString = this.timeframeEndString + " 23:59";
             }
             try {
+                final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 this.timeframeStart = dfLong.parse(this.timeframeStartString);
                 if (!this.timeframeEndString.equals("now")) {
                     this.timeframeEnd = dfLong.parse(this.timeframeEndString);
