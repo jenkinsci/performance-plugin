@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>performance</artifactId>
-    <version>3.7-SNAPSHOT</version>
+    <version>3.6-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>Performance Plugin</name>
