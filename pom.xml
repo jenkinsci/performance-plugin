@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>performance</artifactId>
-    <version>3.7-SNAPSHOT</version>
+    <version>3.7</version>
     <packaging>hpi</packaging>
 
     <name>Performance Plugin</name>
@@ -28,7 +28,7 @@
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/performance-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/performance-plugin.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>performance-3.7</tag>
     </scm>
 
     <properties>
