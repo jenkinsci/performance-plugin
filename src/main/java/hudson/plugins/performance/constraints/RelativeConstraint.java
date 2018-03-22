@@ -160,7 +160,7 @@ public class RelativeConstraint extends AbstractConstraint {
                 buildsToAnalyze += failedBuilds;
                 buildSizeMessage = buildSizeMessage + ", FAILED";
             }
-            if (previousResults > buildsToAnalyze) {
+            if (previousResults > buildsToAnalyze+1) { // at the time of evaluation there will be one more build (the next build that is run, which could be the very first or only build)
                 return FormValidation.error(buildSizeMessage);
             } else {
                 return FormValidation.ok();
@@ -292,11 +292,12 @@ public class RelativeConstraint extends AbstractConstraint {
         double calculatedValue = calcAveOfReports(builds);
 		/*
 		 * If calculatedValue == Long.MIN_VALUE there was no build found to evaluate this constraint
-		 * The process should not get aborted, but this constraint should be marked as failed.
+		 * The process should not get aborted, but this constraint should be marked as failed, unless it is the very first or only build.
 		 */
         if (calculatedValue == Long.MIN_VALUE) {
-            setSuccess(false);
-            setResultMessage("Relative constraint failed! - Report: " + getRelatedPerfReport() + "\n" + "There were no builds found to evaluate! Please check your constraint configuration!");
+            boolean isVeryFirstBuild = (builds.size() == 1);
+            setSuccess(isVeryFirstBuild);
+            setResultMessage("Relative constraint " + (isVeryFirstBuild ? "skipped." : "failed!") + " - Report: " + getRelatedPerfReport() + "\n" + "There were no builds found to evaluate!");
             return new ConstraintEvaluation(this, 0, 0);
         }
         double result = 0;
@@ -397,10 +398,10 @@ public class RelativeConstraint extends AbstractConstraint {
         } else {
 			/*
 			 * If no build was found to analyze return Long.MIN_VALUE. This will cause the
-			 * constraint to be marked as failed.
+			 * constraint to be marked as failed (except for the first/only build).
 			 */
             PrintStream logger = getSettings().getListener().getLogger();
-            logger.println("Performance: There were no builds found to evaluate for a relative constraint! The constraint will be marked as failed!");
+            logger.println("Performance: There were no builds found to evaluate for a relative constraint!");
             return Long.MIN_VALUE;
         }
         return result;
