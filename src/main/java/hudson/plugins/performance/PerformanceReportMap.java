@@ -1,6 +1,7 @@
 package hudson.plugins.performance;
 
 import hudson.model.AbstractProject;
+import hudson.model.Describable;
 import hudson.model.FreeStyleProject;
 import hudson.model.Job;
 import hudson.model.ModelObject;
@@ -110,21 +111,30 @@ public class PerformanceReportMap implements ModelObject {
         return listPerformance;
     }
 
-    public boolean ifModeThroughputUsed() {
+    protected PerformancePublisher getPublisher() {
         if (buildAction != null) {
             Run<?, ?> build = buildAction.getBuild();
             if (build != null) {
                 Job<?, ?> job = build.getParent();
                 if (job instanceof AbstractProject) {
                     AbstractProject project = (AbstractProject) job;
-                    PerformancePublisher publisher = (PerformancePublisher) project.getPublishersList().get(PerformancePublisher.class);
-                    return publisher == null || publisher.isModeThroughput();
+                    Describable describable = project.getPublishersList().get(PerformancePublisher.class);
+                    return (describable != null) ? (PerformancePublisher) describable : null;
                 }
             }
         }
-        return true;
+        return null;
     }
 
+    public boolean ifModeThroughputUsed() {
+        PerformancePublisher publisher = getPublisher();
+        return publisher == null || publisher.isModeThroughput();
+    }
+
+    public boolean ifModePerformancePerTestCaseUsed() {
+        PerformancePublisher publisher = getPublisher();
+        return publisher == null || publisher.isModePerformancePerTestCase();
+    }
 
     public Map<String, PerformanceReport> getPerformanceReportMap() {
         return performanceReportMap;
@@ -247,7 +257,6 @@ public class PerformanceReportMap implements ModelObject {
 
         final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<>();
         List<? extends Run<?, ?>> builds = buildAction.getBuild().getParent().getBuilds();
-//        final Map<Run<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
 
         for (final Run<?, ?> build : builds) {
                 final PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
@@ -268,6 +277,45 @@ public class PerformanceReportMap implements ModelObject {
 
         ChartUtil.generateGraph(request, response,
                 PerformanceProjectAction.createThroughputChart((dataSetBuilder.build())), 400, 200);
+    }
+
+    public void doRespondingTimeGraphPerTestCaseMode(
+            StaplerRequest request, StaplerResponse response) throws IOException {
+        final String performanceReportNameFile = request.getParameter("performanceReportPosition");
+        if (performanceReportNameFile == null) {
+            return;
+        }
+
+        if (ChartUtil.awtProblemCause != null) {
+            // not available. send out error message
+            response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+            return;
+        }
+
+        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<>();
+        List<? extends Run<?, ?>> builds = buildAction.getBuild().getParent().getBuilds();
+
+        ReportValueSelector valueSelector = ReportValueSelector.get(getPublisher());
+
+
+        for (Run<?, ?> build : builds) {
+                NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+
+                PerformanceReport performanceReport = getPerformanceReport(performanceReportNameFile);
+                if (performanceReport == null) {
+                    continue;
+                }
+
+                List<UriReport> uriListOrdered = performanceReport.getUriListOrdered();
+                for (UriReport uriReport : uriListOrdered) {
+                    dataSetBuilder.add(valueSelector.getValue(uriReport), uriReport.getUri(), label);
+                }
+        }
+
+        String legendLimit = request.getParameter("legendLimit");
+        int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
+        ChartUtil.generateGraph(request, response,
+                createRespondingTimeChart(dataSetBuilder.build(), limit), 600, 200);
     }
 
     protected JFreeChart createRespondingTimeChart(CategoryDataset dataset, int legendLimit) {

@@ -15,9 +15,17 @@
             <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="325" />
           </j:when>
           <j:otherwise>
-            <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+            <j:choose>
+                <j:when test="${it.ifModePerformancePerTestCaseUsed()}">
+                    <img class="trend" src="./respondingTimeGraphPerTestCaseMode?width=500&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                </j:when>
+                <j:otherwise>
+                    <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                </j:otherwise>
+            </j:choose>
           </j:otherwise>
          </j:choose>
+
 
         <a href="./trendReport?performanceReportPosition=${performanceReport.getReportFileName()}">${% Response time trends for build: }"${it.build}" </a>
 
