@@ -1,5 +1,8 @@
 package hudson.plugins.performance;
 
+import hudson.model.AbstractProject;
+import hudson.model.FreeStyleProject;
+import hudson.model.Job;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -12,6 +15,7 @@ import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.reports.AbstractReport;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.data.PerformanceReportPosition;
+import hudson.plugins.performance.reports.ThroughputReport;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
@@ -105,6 +109,22 @@ public class PerformanceReportMap implements ModelObject {
         Collections.sort(listPerformance);
         return listPerformance;
     }
+
+    public boolean ifModeThroughputUsed() {
+        if (buildAction != null) {
+            Run<?, ?> build = buildAction.getBuild();
+            if (build != null) {
+                Job<?, ?> job = build.getParent();
+                if (job instanceof AbstractProject) {
+                    AbstractProject project = (AbstractProject) job;
+                    PerformancePublisher publisher = (PerformancePublisher) project.getPublishersList().get(PerformancePublisher.class);
+                    return publisher == null || publisher.isModeThroughput();
+                }
+            }
+        }
+        return true;
+    }
+
 
     public Map<String, PerformanceReport> getPerformanceReportMap() {
         return performanceReportMap;
@@ -211,6 +231,43 @@ public class PerformanceReportMap implements ModelObject {
         int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
         ChartUtil.generateGraph(request, response,
                 createRespondingTimeChart(dataSetBuilder.build(), limit), 400, 200);
+    }
+
+    public void doThroughputGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+        String parameter = request.getParameter("performanceReportPosition");
+        if (parameter == null) {
+            return;
+        }
+
+        if (ChartUtil.awtProblemCause != null) {
+            // not available. send out error message
+            response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+            return;
+        }
+
+        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<>();
+        List<? extends Run<?, ?>> builds = buildAction.getBuild().getParent().getBuilds();
+//        final Map<Run<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
+
+        for (final Run<?, ?> build : builds) {
+                final PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+                if (performanceBuildAction == null) {
+                    continue;
+                }
+
+                final PerformanceReport performanceReport = performanceBuildAction
+                        .getPerformanceReportMap().getPerformanceReport(parameter);
+                if (performanceReport == null) {
+                    continue;
+                }
+
+                final ThroughputReport throughputReport = new ThroughputReport(performanceReport);
+                final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+                dataSetBuilder.add(throughputReport.get(), Messages.ProjectAction_RequestsPerSeconds(), label);
+        }
+
+        ChartUtil.generateGraph(request, response,
+                PerformanceProjectAction.createThroughputChart((dataSetBuilder.build())), 400, 200);
     }
 
     protected JFreeChart createRespondingTimeChart(CategoryDataset dataset, int legendLimit) {

@@ -193,7 +193,7 @@ public class PerformanceProjectAction implements Action {
         return chart;
     }
 
-    protected static JFreeChart createThroughputChart(final CategoryDataset dataset) {
+    public static JFreeChart createThroughputChart(final CategoryDataset dataset) {
 
         final JFreeChart chart = ChartFactory.createLineChart(
                 Messages.ProjectAction_Throughput(), // chart title
