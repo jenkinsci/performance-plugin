@@ -318,6 +318,41 @@ public class PerformanceReportMap implements ModelObject {
                 createRespondingTimeChart(dataSetBuilder.build(), limit), 600, 200);
     }
 
+    public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
+            throws IOException {
+        final String performanceReportNameFile = request.getParameter("performanceReportPosition");
+        if (performanceReportNameFile == null) {
+            return;
+        }
+
+        if (ChartUtil.awtProblemCause != null) {
+            // not available. send out error message
+            response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+            return;
+        }
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderErrors = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        List<? extends Run<?, ?>> builds = buildAction.getBuild().getParent().getBuilds();
+
+        for (Run<?, ?> currentBuild : builds) {
+                NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+                PerformanceBuildAction performanceBuildAction = currentBuild
+                        .getAction(PerformanceBuildAction.class);
+                if (performanceBuildAction == null) {
+                    continue;
+                }
+                PerformanceReport performanceReport = performanceBuildAction
+                        .getPerformanceReportMap().getPerformanceReport(
+                                performanceReportNameFile);
+                if (performanceReport == null) {
+                    continue;
+                }
+                dataSetBuilderErrors.add(performanceReport.errorPercent(),
+                        Messages.ProjectAction_Errors(), label);
+        }
+        ChartUtil.generateGraph(request, response,
+                PerformanceProjectAction.createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
+    }
+
     protected JFreeChart createRespondingTimeChart(CategoryDataset dataset, int legendLimit) {
         return PerformanceProjectAction.doCreateRespondingTimeChart(dataset, legendLimit);
     }

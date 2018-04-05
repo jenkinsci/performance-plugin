@@ -93,7 +93,7 @@ public class PerformanceProjectAction implements Action {
         this.job = job;
     }
 
-    private JFreeChart createErrorsChart(CategoryDataset dataset) {
+    public static JFreeChart createErrorsChart(CategoryDataset dataset) {
 
         final JFreeChart chart = ChartFactory.createLineChart(
                 Messages.ProjectAction_PercentageOfErrors(), // chart title
