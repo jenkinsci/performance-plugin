@@ -301,15 +301,21 @@ public class PerformanceReportMap implements ModelObject {
         for (Run<?, ?> build : builds) {
                 NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
 
-                PerformanceReport performanceReport = getPerformanceReport(performanceReportNameFile);
-                if (performanceReport == null) {
-                    continue;
-                }
+            final PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+            if (performanceBuildAction == null) {
+                continue;
+            }
 
-                List<UriReport> uriListOrdered = performanceReport.getUriListOrdered();
-                for (UriReport uriReport : uriListOrdered) {
-                    dataSetBuilder.add(valueSelector.getValue(uriReport), uriReport.getUri(), label);
-                }
+            final PerformanceReport performanceReport = performanceBuildAction
+                    .getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
+            if (performanceReport == null) {
+                continue;
+            }
+
+            List<UriReport> uriListOrdered = performanceReport.getUriListOrdered();
+            for (UriReport uriReport : uriListOrdered) {
+                dataSetBuilder.add(valueSelector.getValue(uriReport), uriReport.getUri(), label);
+            }
         }
 
         String legendLimit = request.getParameter("legendLimit");
@@ -337,6 +343,7 @@ public class PerformanceReportMap implements ModelObject {
                 NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
                 PerformanceBuildAction performanceBuildAction = currentBuild
                         .getAction(PerformanceBuildAction.class);
+
                 if (performanceBuildAction == null) {
                     continue;
                 }
@@ -346,6 +353,7 @@ public class PerformanceReportMap implements ModelObject {
                 if (performanceReport == null) {
                     continue;
                 }
+
                 dataSetBuilderErrors.add(performanceReport.errorPercent(),
                         Messages.ProjectAction_Errors(), label);
         }

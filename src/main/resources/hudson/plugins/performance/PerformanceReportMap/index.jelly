@@ -17,10 +17,14 @@
           <j:otherwise>
             <j:choose>
                 <j:when test="${it.ifModePerformancePerTestCaseUsed()}">
-                    <img class="trend" src="./respondingTimeGraphPerTestCaseMode?width=600&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                    <a href="./respondingTimeGraphPerTestCaseMode?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport.getReportFileName()}" title="${%Click for larger image}">
+                        <img class="trend" src="./respondingTimeGraphPerTestCaseMode?width=600&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                    </a>
                 </j:when>
                 <j:otherwise>
-                    <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                    <a href="./respondingTimeGraph?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport.getReportFileName()}" title="${%Click for larger image}">
+                        <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                    </a>
                 </j:otherwise>
             </j:choose>
           </j:otherwise>
