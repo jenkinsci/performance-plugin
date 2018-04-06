@@ -2,7 +2,6 @@ package hudson.plugins.performance;
 
 import hudson.model.AbstractProject;
 import hudson.model.Describable;
-import hudson.model.FreeStyleProject;
 import hudson.model.Job;
 import hudson.model.ModelObject;
 import hudson.model.Run;
