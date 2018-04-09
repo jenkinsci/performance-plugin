@@ -526,7 +526,11 @@ public class PerformanceProjectAction implements Action {
         }
 
         ChartUtil.generateGraph(request, response,
-                createThroughputChart(dataSetBuilder.build()), 400, 200);
+                createThroughputGraph(dataSetBuilder.build()), 400, 200);
+    }
+
+    protected JFreeChart createThroughputGraph(CategoryDataset dataset) {
+        return createThroughputChart(dataset);
     }
 
     public void doSummarizerGraph(StaplerRequest request, StaplerResponse response) throws IOException {
