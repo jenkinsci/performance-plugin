@@ -1,13 +1,16 @@
 package hudson.plugins.performance;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collections;
 
-import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.util.DescribableList;
 import hudson.util.RunList;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
@@ -29,18 +32,34 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
     protected PerformanceBuildAction performanceBuildAction;
     @Mock
     protected PerformanceReportMap reportMap;
+    @Mock
+    protected PerformancePublisher performancePublisher;
 
     @Before
     public void reportMapSetup() throws Exception {
-        PerformanceBuildAction buildAction = mock(PerformanceBuildAction.class);
-        when(buildAction.getBuild()).thenReturn(build);
         when(build.getParent()).thenReturn(project);
         when(request.getParameter("performanceReportPosition")).thenReturn("JMeterResults.jtl");
         when(project.getBuilds()).thenReturn(RunList.fromRuns(Collections.singletonList(build)));
         when(build.getAction(PerformanceBuildAction.class)).thenReturn(performanceBuildAction);
         when(performanceBuildAction.getPerformanceReportMap()).thenReturn(reportMap);
+        when(performanceBuildAction.getBuild()).thenReturn(build);
+        DescribableList publisherList = mock(DescribableList.class);
+        when(publisherList.get(PerformancePublisher.class)).thenReturn(performancePublisher);
+        when(performancePublisher.isModeThroughput()).thenReturn(true);
+        when(performancePublisher.isModePerformancePerTestCase()).thenReturn(false);
+        when(project.getPublishersList()).thenReturn(publisherList);
         when(reportMap.getPerformanceReport("JMeterResults.jtl")).thenReturn(report);
-        target = new TestablePerformanceReportMap(buildAction, mock(TaskListener.class));
+        target = new TestablePerformanceReportMap(performanceBuildAction, mock(TaskListener.class));
+    }
+
+    @Test
+    public void testGetters() throws Exception {
+        PerformanceReportMap reportMap = new PerformanceReportMap(performanceBuildAction, mock(TaskListener.class));
+        assertTrue(reportMap.ifModeThroughputUsed());
+        assertFalse(reportMap.ifModePerformancePerTestCaseUsed());
+        assertEquals(performanceBuildAction, reportMap.getBuildAction());
+        assertEquals("Performance", reportMap.getDisplayName());
+        assertEquals("performance", reportMap.getUrlName());
     }
 
     @Test
@@ -77,6 +96,20 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
         assertArrayEquals(new Number[]{0.04515946937623483}, toArray(target.dataset));
     }
 
+    @Test
+    public void testRespondingTimeGraphPerTestCaseMode() throws Exception {
+        setGraphType(PerformancePublisher.MRT);
+        target.doRespondingTimeGraphPerTestCaseMode(request, response);
+        assertArrayEquals(new Number[]{598L, 63L}, toArray(target.dataset));
+    }
+
+    @Test
+    public void testErrorsGraph() throws Exception {
+        setGraphType(PerformancePublisher.MRT);
+        target.doErrorsGraph(request, response);
+        assertArrayEquals(new Number[]{0.0}, toArray(target.dataset));
+    }
+
     public class TestablePerformanceReportMap extends PerformanceReportMap {
 
         public CategoryDataset dataset;
@@ -106,6 +139,12 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
         protected JFreeChart createThroughputChart(CategoryDataset dataset) {
             this.dataset = dataset;
             return super.createThroughputChart(dataset);
+        }
+
+        @Override
+        protected JFreeChart createErrorsChart(CategoryDataset dataset) {
+            this.dataset = dataset;
+            return super.createErrorsChart(dataset);
         }
     }
 }

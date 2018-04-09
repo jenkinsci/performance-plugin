@@ -362,8 +362,13 @@ public class PerformanceReportMap implements ModelObject {
                         Messages.ProjectAction_Errors(), label);
         }
         ChartUtil.generateGraph(request, response,
-                PerformanceProjectAction.createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
+                createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
     }
+
+    protected JFreeChart createErrorsChart(CategoryDataset dataset) {
+        return PerformanceProjectAction.createErrorsChart(dataset);
+    }
+
 
     protected JFreeChart createRespondingTimeChart(CategoryDataset dataset, int legendLimit) {
         return PerformanceProjectAction.doCreateRespondingTimeChart(dataset, legendLimit);
