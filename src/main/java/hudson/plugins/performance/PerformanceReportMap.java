@@ -275,8 +275,13 @@ public class PerformanceReportMap implements ModelObject {
         }
 
         ChartUtil.generateGraph(request, response,
-                PerformanceProjectAction.createThroughputChart((dataSetBuilder.build())), 400, 200);
+                createThroughputChart((dataSetBuilder.build())), 400, 200);
     }
+
+    protected JFreeChart createThroughputChart(CategoryDataset dataset) {
+        return PerformanceProjectAction.createThroughputChart(dataset);
+    }
+
 
     public void doRespondingTimeGraphPerTestCaseMode(
             StaplerRequest request, StaplerResponse response) throws IOException {
@@ -412,7 +417,7 @@ public class PerformanceReportMap implements ModelObject {
                 long methodValue = valueSelector.getValue(report.getUriReportMap().get(key));
                 dataSetBuilderSummarizer.add(methodValue, label, key);
             }
-            ;
+
         }
         ChartUtil.generateGraph(
                 request,

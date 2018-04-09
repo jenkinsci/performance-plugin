@@ -7,11 +7,14 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Collections;
 
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.util.RunList;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import hudson.model.Run;
@@ -22,6 +25,10 @@ import hudson.plugins.performance.actions.PerformanceBuildAction;
 public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
 
     private TestablePerformanceReportMap target;
+    @Mock
+    protected PerformanceBuildAction performanceBuildAction;
+    @Mock
+    protected PerformanceReportMap reportMap;
 
     @Before
     public void reportMapSetup() throws Exception {
@@ -29,6 +36,10 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
         when(buildAction.getBuild()).thenReturn(build);
         when(build.getParent()).thenReturn(project);
         when(request.getParameter("performanceReportPosition")).thenReturn("JMeterResults.jtl");
+        when(project.getBuilds()).thenReturn(RunList.fromRuns(Collections.singletonList(build)));
+        when(build.getAction(PerformanceBuildAction.class)).thenReturn(performanceBuildAction);
+        when(performanceBuildAction.getPerformanceReportMap()).thenReturn(reportMap);
+        when(reportMap.getPerformanceReport("JMeterResults.jtl")).thenReturn(report);
         target = new TestablePerformanceReportMap(buildAction, mock(TaskListener.class));
     }
 
@@ -60,6 +71,12 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
         assertArrayEquals(new Number[]{598L, 63L}, toArray(target.dataset));
     }
 
+    @Test
+    public void testThroughputGraph() throws Exception {
+        target.doThroughputGraph(request, response);
+        assertArrayEquals(new Number[]{0.04515946937623483}, toArray(target.dataset));
+    }
+
     public class TestablePerformanceReportMap extends PerformanceReportMap {
 
         public CategoryDataset dataset;
@@ -83,6 +100,12 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
         @Override
         protected void parseReports(Run<?, ?> build, TaskListener listener, PerformanceReportCollector collector, String filename) {
             collector.addAll(Collections.singletonList(report));
+        }
+
+        @Override
+        protected JFreeChart createThroughputChart(CategoryDataset dataset) {
+            this.dataset = dataset;
+            return super.createThroughputChart(dataset);
         }
     }
 }
