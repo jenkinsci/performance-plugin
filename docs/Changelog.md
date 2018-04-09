@@ -1,6 +1,10 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
+## v3.7 (6th of April, 2018)
+- ADD: charts to `Performace report` page
+- FIX: relative constraint failure on first build. Contributed by [Till Neunast](https://github.com/tilln)
+
 ## v3.6 (14th of March, 2018)
 - Support [JEP-200](https://jenkins.io/blog/2018/01/13/jep-200/)
  

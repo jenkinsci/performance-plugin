@@ -5,15 +5,35 @@
     <l:main-panel>
       <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
         <h2>${%Performance Breakdown by URI}: ${performanceReport.getReportFileName()}</h2>
+
+         <j:if test="${it.ifModeThroughputUsed()}">
+             <img class="trend" src="./throughputGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+         </j:if>
+
          <j:choose>
           <j:when test="${performanceReport.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
             <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="325" />
           </j:when>
           <j:otherwise>
-            <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+            <j:choose>
+                <j:when test="${it.ifModePerformancePerTestCaseUsed()}">
+                    <a href="./respondingTimeGraphPerTestCaseMode?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport.getReportFileName()}" title="${%Click for larger image}">
+                        <img class="trend" src="./respondingTimeGraphPerTestCaseMode?width=600&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                    </a>
+                </j:when>
+                <j:otherwise>
+                    <a href="./respondingTimeGraph?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport.getReportFileName()}" title="${%Click for larger image}">
+                        <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                    </a>
+                </j:otherwise>
+            </j:choose>
           </j:otherwise>
          </j:choose>
-        <a href="./trendReport?performanceReportPosition=${performanceReport.getReportFileName()}">${% Response time trends for build: }"${it.build}" </a>
+
+        <img class="trend" src="./errorsGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+
+        <p><a href="./trendReport?performanceReportPosition=${performanceReport.getReportFileName()}">${% Response time trends for build: }"${it.build}" </a></p>
+
         <table class="sortable source" border="1">
          <jm:captionLine it="${performanceReport}"/>
          <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">
