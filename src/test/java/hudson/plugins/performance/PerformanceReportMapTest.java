@@ -28,10 +28,7 @@ import hudson.plugins.performance.actions.PerformanceBuildAction;
 public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
 
     private TestablePerformanceReportMap target;
-    @Mock
-    protected PerformanceBuildAction performanceBuildAction;
-    @Mock
-    protected PerformanceReportMap reportMap;
+
     @Mock
     protected PerformancePublisher performancePublisher;
 
@@ -40,15 +37,12 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
         when(build.getParent()).thenReturn(project);
         when(request.getParameter("performanceReportPosition")).thenReturn("JMeterResults.jtl");
         when(project.getBuilds()).thenReturn(RunList.fromRuns(Collections.singletonList(build)));
-        when(build.getAction(PerformanceBuildAction.class)).thenReturn(performanceBuildAction);
-        when(performanceBuildAction.getPerformanceReportMap()).thenReturn(reportMap);
-        when(performanceBuildAction.getBuild()).thenReturn(build);
+
         DescribableList publisherList = mock(DescribableList.class);
         when(publisherList.get(PerformancePublisher.class)).thenReturn(performancePublisher);
         when(performancePublisher.isModeThroughput()).thenReturn(true);
         when(performancePublisher.isModePerformancePerTestCase()).thenReturn(false);
         when(project.getPublishersList()).thenReturn(publisherList);
-        when(reportMap.getPerformanceReport("JMeterResults.jtl")).thenReturn(report);
         target = new TestablePerformanceReportMap(performanceBuildAction, mock(TaskListener.class));
     }
 

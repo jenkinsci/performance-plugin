@@ -363,7 +363,11 @@ public class PerformanceProjectAction implements Action {
             nbBuildsToAnalyze--;
         }
         ChartUtil.generateGraph(request, response,
-                createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
+                createErrorsGraph(dataSetBuilderErrors.build()), 400, 200);
+    }
+
+    protected  JFreeChart createErrorsGraph(CategoryDataset dataset) {
+        return createErrorsChart(dataset);
     }
 
     public void doRespondingTimeGraphPerTestCaseMode(

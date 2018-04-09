@@ -61,6 +61,13 @@ public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTe
         assertArrayEquals(new Number[]{598L, 63L}, toArray(target.dataset));
     }
 
+    @Test
+    public void testErrorsGraph() throws Exception {
+        setGraphType(PerformancePublisher.MRT);
+        target.doErrorsGraph(request, response);
+        assertArrayEquals(new Number[]{0.0}, toArray(target.dataset));
+    }
+
     private class TestablePerformanceProjectAction extends PerformanceProjectAction {
 
         public CategoryDataset dataset;
@@ -90,6 +97,12 @@ public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTe
         protected JFreeChart createSummarizerChart(CategoryDataset dataset, String yAxis, String chartTitle) {
             this.dataset = dataset;
             return super.createSummarizerChart(dataset, yAxis, chartTitle);
+        }
+
+        @Override
+        protected JFreeChart createErrorsGraph(CategoryDataset dataset) {
+            this.dataset = dataset;
+            return super.createErrorsGraph(dataset);
         }
     }
 }
