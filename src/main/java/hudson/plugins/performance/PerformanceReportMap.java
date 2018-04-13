@@ -1,5 +1,8 @@
 package hudson.plugins.performance;
 
+import hudson.model.AbstractProject;
+import hudson.model.Describable;
+import hudson.model.Job;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -12,6 +15,7 @@ import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.reports.AbstractReport;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.data.PerformanceReportPosition;
+import hudson.plugins.performance.reports.ThroughputReport;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
@@ -104,6 +108,31 @@ public class PerformanceReportMap implements ModelObject {
                 getPerformanceReportMap().values());
         Collections.sort(listPerformance);
         return listPerformance;
+    }
+
+    protected PerformancePublisher getPublisher() {
+        if (buildAction != null) {
+            Run<?, ?> build = buildAction.getBuild();
+            if (build != null) {
+                Job<?, ?> job = build.getParent();
+                if (job instanceof AbstractProject) {
+                    AbstractProject project = (AbstractProject) job;
+                    Describable describable = project.getPublishersList().get(PerformancePublisher.class);
+                    return (describable != null) ? (PerformancePublisher) describable : null;
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean ifModeThroughputUsed() {
+        PerformancePublisher publisher = getPublisher();
+        return publisher == null || publisher.isModeThroughput();
+    }
+
+    public boolean ifModePerformancePerTestCaseUsed() {
+        PerformancePublisher publisher = getPublisher();
+        return publisher == null || publisher.isModePerformancePerTestCase();
     }
 
     public Map<String, PerformanceReport> getPerformanceReportMap() {
@@ -213,6 +242,134 @@ public class PerformanceReportMap implements ModelObject {
                 createRespondingTimeChart(dataSetBuilder.build(), limit), 400, 200);
     }
 
+    public void doThroughputGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+        String parameter = request.getParameter("performanceReportPosition");
+        if (parameter == null) {
+            return;
+        }
+
+        if (ChartUtil.awtProblemCause != null) {
+            // not available. send out error message
+            response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+            return;
+        }
+
+        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<>();
+        List<? extends Run<?, ?>> builds = buildAction.getBuild().getParent().getBuilds();
+
+        for (final Run<?, ?> build : builds) {
+                final PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+                if (performanceBuildAction == null) {
+                    continue;
+                }
+
+                final PerformanceReport performanceReport = performanceBuildAction
+                        .getPerformanceReportMap().getPerformanceReport(parameter);
+                if (performanceReport == null) {
+                    continue;
+                }
+
+                final ThroughputReport throughputReport = new ThroughputReport(performanceReport);
+                final NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+                dataSetBuilder.add(throughputReport.get(), Messages.ProjectAction_RequestsPerSeconds(), label);
+        }
+
+        ChartUtil.generateGraph(request, response,
+                createThroughputChart((dataSetBuilder.build())), 400, 200);
+    }
+
+    protected JFreeChart createThroughputChart(CategoryDataset dataset) {
+        return PerformanceProjectAction.createThroughputChart(dataset);
+    }
+
+
+    public void doRespondingTimeGraphPerTestCaseMode(
+            StaplerRequest request, StaplerResponse response) throws IOException {
+        final String performanceReportNameFile = request.getParameter("performanceReportPosition");
+        if (performanceReportNameFile == null) {
+            return;
+        }
+
+        if (ChartUtil.awtProblemCause != null) {
+            // not available. send out error message
+            response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+            return;
+        }
+
+        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<>();
+        List<? extends Run<?, ?>> builds = buildAction.getBuild().getParent().getBuilds();
+
+        ReportValueSelector valueSelector = ReportValueSelector.get(getPublisher());
+
+
+        for (Run<?, ?> build : builds) {
+                NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+
+            final PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+            if (performanceBuildAction == null) {
+                continue;
+            }
+
+            final PerformanceReport performanceReport = performanceBuildAction
+                    .getPerformanceReportMap().getPerformanceReport(performanceReportNameFile);
+            if (performanceReport == null) {
+                continue;
+            }
+
+            List<UriReport> uriListOrdered = performanceReport.getUriListOrdered();
+            for (UriReport uriReport : uriListOrdered) {
+                dataSetBuilder.add(valueSelector.getValue(uriReport), uriReport.getUri(), label);
+            }
+        }
+
+        String legendLimit = request.getParameter("legendLimit");
+        int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
+        ChartUtil.generateGraph(request, response,
+                createRespondingTimeChart(dataSetBuilder.build(), limit), 600, 200);
+    }
+
+    public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
+            throws IOException {
+        final String performanceReportNameFile = request.getParameter("performanceReportPosition");
+        if (performanceReportNameFile == null) {
+            return;
+        }
+
+        if (ChartUtil.awtProblemCause != null) {
+            // not available. send out error message
+            response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+            return;
+        }
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderErrors = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        List<? extends Run<?, ?>> builds = buildAction.getBuild().getParent().getBuilds();
+
+        for (Run<?, ?> currentBuild : builds) {
+                NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
+                PerformanceBuildAction performanceBuildAction = currentBuild
+                        .getAction(PerformanceBuildAction.class);
+
+                if (performanceBuildAction == null) {
+                    continue;
+                }
+                PerformanceReport performanceReport = performanceBuildAction
+                        .getPerformanceReportMap().getPerformanceReport(
+                                performanceReportNameFile);
+                if (performanceReport == null) {
+                    continue;
+                }
+
+                dataSetBuilderErrors.add(performanceReport.errorPercent(),
+                        Messages.ProjectAction_Errors(), label);
+        }
+        ChartUtil.generateGraph(request, response,
+                createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
+    }
+
+    protected JFreeChart createErrorsChart(CategoryDataset dataset) {
+        return PerformanceProjectAction.createErrorsChart(dataset);
+    }
+
+
     protected JFreeChart createRespondingTimeChart(CategoryDataset dataset, int legendLimit) {
         return PerformanceProjectAction.doCreateRespondingTimeChart(dataset, legendLimit);
     }
@@ -265,7 +422,7 @@ public class PerformanceReportMap implements ModelObject {
                 long methodValue = valueSelector.getValue(report.getUriReportMap().get(key));
                 dataSetBuilderSummarizer.add(methodValue, label, key);
             }
-            ;
+
         }
         ChartUtil.generateGraph(
                 request,

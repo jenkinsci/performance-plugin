@@ -61,6 +61,26 @@ public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTe
         assertArrayEquals(new Number[]{598L, 63L}, toArray(target.dataset));
     }
 
+    @Test
+    public void testErrorsGraph() throws Exception {
+        setGraphType(PerformancePublisher.MRT);
+        target.doErrorsGraph(request, response);
+        assertArrayEquals(new Number[]{0.0}, toArray(target.dataset));
+    }
+
+    @Test
+    public void testRespondingTimeGraph() throws Exception {
+        setGraphType(PerformancePublisher.MRT);
+        target.doRespondingTimeGraph(request, response);
+        assertArrayEquals(new Number[]{14720L, 4142L, 501L}, toArray(target.dataset));
+    }
+
+    @Test
+    public void testThroughputGraph() throws Exception {
+        target.doThroughputGraph(request, response);
+        assertArrayEquals(new Number[]{0.04515946937623483}, toArray(target.dataset));
+    }
+
     private class TestablePerformanceProjectAction extends PerformanceProjectAction {
 
         public CategoryDataset dataset;
@@ -90,6 +110,18 @@ public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTe
         protected JFreeChart createSummarizerChart(CategoryDataset dataset, String yAxis, String chartTitle) {
             this.dataset = dataset;
             return super.createSummarizerChart(dataset, yAxis, chartTitle);
+        }
+
+        @Override
+        protected JFreeChart createErrorsGraph(CategoryDataset dataset) {
+            this.dataset = dataset;
+            return super.createErrorsGraph(dataset);
+        }
+
+        @Override
+        protected JFreeChart createThroughputGraph(CategoryDataset dataset) {
+            this.dataset = dataset;
+            return super.createThroughputGraph(dataset);
         }
     }
 }

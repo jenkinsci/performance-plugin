@@ -93,7 +93,7 @@ public class PerformanceProjectAction implements Action {
         this.job = job;
     }
 
-    private JFreeChart createErrorsChart(CategoryDataset dataset) {
+    public static JFreeChart createErrorsChart(CategoryDataset dataset) {
 
         final JFreeChart chart = ChartFactory.createLineChart(
                 Messages.ProjectAction_PercentageOfErrors(), // chart title
@@ -193,7 +193,7 @@ public class PerformanceProjectAction implements Action {
         return chart;
     }
 
-    protected static JFreeChart createThroughputChart(final CategoryDataset dataset) {
+    public static JFreeChart createThroughputChart(final CategoryDataset dataset) {
 
         final JFreeChart chart = ChartFactory.createLineChart(
                 Messages.ProjectAction_Throughput(), // chart title
@@ -363,7 +363,11 @@ public class PerformanceProjectAction implements Action {
             nbBuildsToAnalyze--;
         }
         ChartUtil.generateGraph(request, response,
-                createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
+                createErrorsGraph(dataSetBuilderErrors.build()), 400, 200);
+    }
+
+    protected  JFreeChart createErrorsGraph(CategoryDataset dataset) {
+        return createErrorsChart(dataset);
     }
 
     public void doRespondingTimeGraphPerTestCaseMode(
@@ -522,7 +526,11 @@ public class PerformanceProjectAction implements Action {
         }
 
         ChartUtil.generateGraph(request, response,
-                createThroughputChart(dataSetBuilder.build()), 400, 200);
+                createThroughputGraph(dataSetBuilder.build()), 400, 200);
+    }
+
+    protected JFreeChart createThroughputGraph(CategoryDataset dataset) {
+        return createThroughputChart(dataset);
     }
 
     public void doSummarizerGraph(StaplerRequest request, StaplerResponse response) throws IOException {
