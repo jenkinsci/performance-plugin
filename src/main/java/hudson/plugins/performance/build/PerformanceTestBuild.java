@@ -297,6 +297,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         while (m.find()) {
             String param = m.group(1);
             if (!param.isEmpty()) {
+                param = param.replaceAll("^'+", "").replaceAll("'+$", "");
                 testCommand.add(param);
             }
         }
