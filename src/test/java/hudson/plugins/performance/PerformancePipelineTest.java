@@ -40,6 +40,7 @@ public class PerformancePipelineTest  {
                         "node('master'){ bzt(params: '" + bztParams + "', useSystemSitePackages: false, printDebugOutput: true, bztVersion: '1.9.1') }", true));
                 WorkflowRun r = p.scheduleBuild2(0).waitForStart();
                 story.j.assertBuildStatusSuccess(story.j.waitForCompletion(r));
+                story.j.assertLogContains("Writing JUnit XML report into: report.xml", r);
                 story.j.assertLogContains("File aggregate-results.xml reported", r);
                 story.j.assertLogContains("of errors [SUCCESS].", r);
                 if (JenkinsRule.getLog(r).contains("Performance test: Installing bzt into 'taurus-venv'")) {
