@@ -18,6 +18,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.output.NullOutputStream;
+import org.codehaus.plexus.util.cli.Commandline;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -34,8 +35,6 @@ import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * "Build step" for running performance test
@@ -293,9 +292,16 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         final List<String> testCommand = new ArrayList<>();
 
         testCommand.add((isVirtualenvInstallation ? getVirtualenvPath(workspace) : "") + PERFORMANCE_TEST_COMMAND);
-        Matcher m = Pattern.compile("([^\']\\S*|\'.+?\')\\s*").matcher(this.params);
-        while (m.find()) {
-            String param = m.group(1);
+        String[] parsedParams;
+        try {
+            parsedParams = Commandline.translateCommandline(envVars.expand(this.params));
+        } catch (Exception e) {
+            logger.println("Failed parse Taurus parameters");
+            e.printStackTrace(logger);
+            return 1;
+        }
+
+        for (String param : parsedParams) {
             if (!param.isEmpty()) {
                 testCommand.add(param);
             }

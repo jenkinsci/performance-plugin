@@ -54,6 +54,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-command-line</artifactId>
+            <version>1.0-alpha-2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymockclassextension</artifactId>
             <version>2.4</version>
