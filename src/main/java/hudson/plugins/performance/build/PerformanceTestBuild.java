@@ -303,6 +303,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
         for (String param : parsedParams) {
             if (!param.isEmpty()) {
+                param = param.replaceAll("^'+", "").replaceAll("'+$", "");
                 testCommand.add(param);
             }
         }
