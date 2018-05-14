@@ -1,6 +1,9 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
+## v3.8 (upcoming)
+- FIX: parse Taurus tool parameters;
+
 ## v3.7 (6th of April, 2018)
 - ADD: charts to `Performace report` page
 - FIX: relative constraint failure on first build. Contributed by [Till Neunast](https://github.com/tilln)
