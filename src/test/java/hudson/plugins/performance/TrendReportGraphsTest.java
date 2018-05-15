@@ -29,6 +29,7 @@ public class TrendReportGraphsTest {
         TrendReportGraphs graphs = new TrendReportGraphs(project, build, null, "simpleFilename", report);
 
         assertEquals(0, graphs.getUris().size());
+        assertFalse(graphs.hasSamples(""));
         assertEquals("simpleFilename", graphs.getFilename());
         assertEquals("Trend report", graphs.getDisplayName());
         assertEquals(project, graphs.getProject());

@@ -42,6 +42,11 @@ public class UriReportTest {
     }
 
     @Test
+    public void testHasSamples() throws Exception {
+        assertTrue(uriReport.hasSamples());
+    }
+
+    @Test
     public void testCountErrors() {
         assertEquals(2, uriReport.countErrors());
     }
