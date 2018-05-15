@@ -84,6 +84,11 @@ public class TrendReportGraphs implements ModelObject {
         return build;
     }
 
+    public boolean hasSamples(String uri) {
+        UriReport report = getUriReport(uri);
+        return report != null && report.hasSamples();
+    }
+
     public PerformanceReport getPerformanceReport() {
         return performanceReport;
     }
