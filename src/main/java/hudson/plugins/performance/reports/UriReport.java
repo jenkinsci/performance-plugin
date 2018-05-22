@@ -535,4 +535,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     public Long getThroughput() {
         return throughput;
     }
+
+    public boolean hasSamples() {
+        return !samples.isEmpty();
+    }
 }

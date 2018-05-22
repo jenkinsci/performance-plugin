@@ -5,9 +5,11 @@
       <h1>${%Trend report}: ${it.filename}</h1>
       <j:forEach var="URI" items="${it.getUris()}">
         <h1>${%URI}: ${URI}</h1>
-          <a href="./respondingTimeGraph?width=1500&amp;height=650&amp;performanceReportPosition=${it.filename}&amp;summarizerTrendUri=${URI}" title="${%Click for larger image}">
-          <img class="trend" src="./respondingTimeGraph?width=600&amp;height=325&amp;performanceReportPosition=${it.filename}&amp;summarizerTrendUri=${URI}" width="600" height="325" />
-          </a>
+          <j:if test="${it.hasSamples(URI)}">
+            <a href="./respondingTimeGraph?width=1500&amp;height=650&amp;performanceReportPosition=${it.filename}&amp;summarizerTrendUri=${URI}" title="${%Click for larger image}">
+                <img class="trend" src="./respondingTimeGraph?width=600&amp;height=325&amp;performanceReportPosition=${it.filename}&amp;summarizerTrendUri=${URI}" width="600" height="325" />
+            </a>
+          </j:if>
         <br></br>
         <table border="1" class="source">
           <jm:captionLine it="${it.getPerformanceReport()}"/>

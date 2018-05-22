@@ -4,9 +4,11 @@
     <st:include it="${it.build}" page="sidepanel.jelly" />
     <l:main-panel>
       <h1>${it.performanceReport.getReportFileName()}</h1>
-        <a href="./summarizerTrendGraph?width=1500&amp;height=650&amp;performanceReportPosition=${performanceReport}"  title="${%Click for larger image}">
-        <img class="trend" src="./summarizerTrendGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport}" width="600" height="325" />
-        </a>
+        <j:if test="${it.hasSamples()}">
+            <a href="./summarizerTrendGraph?width=1500&amp;height=650&amp;performanceReportPosition=${performanceReport}"  title="${%Click for larger image}">
+                <img class="trend" src="./summarizerTrendGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport}" width="600" height="325" />
+            </a>
+        </j:if>
         <br></br>
       <strong class="uri">URI: ${it.uri}</strong>
       <table border="1" class="source">
@@ -23,6 +25,7 @@
             </j:choose>
         </tr>
       </table>
+      <j:if test="${it.hasSamples()}">
       <h3>${%Performance samples}</h3>
       <table class="sortable source" border="1">
         <j:choose>
@@ -52,6 +55,7 @@
           </j:otherwise>
         </j:choose>
       </table>
+      </j:if>
     </l:main-panel>
   </l:layout>
 </j:jelly>
