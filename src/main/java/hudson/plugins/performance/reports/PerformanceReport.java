@@ -195,10 +195,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             calculateDiffPercentiles();
             isCalculatedPercentilesValues = true;
 
-            long durationSec = totalDuration / 1000;
-            if (durationSec == 0) {
-                durationSec = 1;
-            }
+            long durationSec = (long) Math.ceil((float)totalDuration / 1000);
             throughput = (testDuration == null) ?
                     sample.getThroughput() :
                     (sampleCount / durationSec);
