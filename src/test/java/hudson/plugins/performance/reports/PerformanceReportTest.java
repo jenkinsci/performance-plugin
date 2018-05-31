@@ -305,4 +305,19 @@ public class PerformanceReportTest {
         report.addSample(sample4);
         assertEquals(0, report.getAverage());
     }
+
+    @Test
+    public void testDivisionByZero() throws Exception {
+        PerformanceReport report = new PerformanceReport(DEFAULT_PERCENTILES);
+        report.setExcludeResponseTime(false);
+
+        TaurusFinalStats stats = new TaurusFinalStats();
+        stats.setLabel("aaaa");
+        stats.setFail(5);
+        stats.setSucc(5);
+        stats.setTestDuration(10d);
+
+        report.addSample(stats, true);
+        assertEquals(10, report.getThroughput().longValue());
+    }
 }

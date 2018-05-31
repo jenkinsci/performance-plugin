@@ -139,7 +139,10 @@ public class ThroughputReportTest {
 
         Map<String, UriReport> uriReportMap = performanceReport.getUriReportMap();
         assertEquals(3, uriReportMap.size());
-        assertEquals(((29658 + 29656) / (3141 / 1000)), throughputReport.get(), DELTA);
+
+        int samplesCount = 29658 + 29656;
+        long duration = (long) Math.ceil((float)3141 / 1000);
+        assertEquals(samplesCount/ duration, throughputReport.get(), DELTA);
     }
 
     @Test
