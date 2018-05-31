@@ -4,6 +4,7 @@
 ## v3.8 (upcoming)
 - FIX: parse Taurus tool parameters;
 - FIX: hide Trend/URI graphs if report contains only summary info
+- FIX: division by zero error
 
 ## v3.7 (6th of April, 2018)
 - ADD: charts to `Performace report` page

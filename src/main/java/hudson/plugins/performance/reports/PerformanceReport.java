@@ -194,9 +194,14 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             this.percentilesValues.put(100.0, (long) sample.getPerc100());
             calculateDiffPercentiles();
             isCalculatedPercentilesValues = true;
+
+            long durationSec = totalDuration / 1000;
+            if (durationSec == 0) {
+                durationSec = 1;
+            }
             throughput = (testDuration == null) ?
                     sample.getThroughput() :
-                    (sampleCount / (totalDuration / 1000));
+                    (sampleCount / durationSec);
         } else {
             String staplerUri = PerformanceReport.asStaplerURI(uri);
             synchronized (uriReportMap) {
