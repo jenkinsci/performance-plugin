@@ -964,10 +964,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                     relativeFailedThresholdPositive, Result.FAILURE.toString());
         }
 
-        if (relativeFailedThresholdPositive < 0 && relativeFailedThresholdNegative < 0) {
-            logger.printf("Performance: No threshold configured for making the test [%s]%n", Result.FAILURE.toString());
-        }
-
         if (relativeUnstableThresholdNegative >= 0) {
             logger.printf("Performance: Percentage of relative difference less than -%s %% sets the build as [%s]%n",
                     relativeUnstableThresholdNegative, Result.UNSTABLE.toString());
@@ -976,10 +972,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         if (relativeUnstableThresholdPositive >= 0) {
             logger.printf("Performance: Percentage of relative difference more than %s %% sets the build as [%s]%n",
                     relativeUnstableThresholdPositive, Result.UNSTABLE.toString());
-        }
-
-        if (relativeUnstableThresholdPositive < 0 && relativeUnstableThresholdNegative < 0) {
-            logger.printf("Performance: No threshold configured for making the test [%s]%n", Result.UNSTABLE.toString());
         }
     }
 
