@@ -1,14 +1,17 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
-## v3.8 (upcoming)
+## v3.9 (1st of June, 2018)
 - FIX: parse Taurus tool parameters;
 - FIX: hide Trend/URI graphs if report contains only summary info
 - FIX: division by zero error
+- FIX: relative thresholds
 
-## v3.7 (6th of April, 2018)
+## v3.8 (13th of April, 2018)
 - ADD: charts to `Performace report` page
 - FIX: relative constraint failure on first build. Contributed by [Till Neunast](https://github.com/tilln)
+
+## v3.7 (skipped)
 
 ## v3.6 (14th of March, 2018)
 - Support [JEP-200](https://jenkins.io/blog/2018/01/13/jep-200/)
