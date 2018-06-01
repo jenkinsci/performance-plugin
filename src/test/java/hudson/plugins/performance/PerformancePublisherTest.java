@@ -1,6 +1,7 @@
 package hudson.plugins.performance;
 
 import com.google.common.io.Files;
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -10,13 +11,17 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.build.PerformanceTestBuildTest;
 import hudson.plugins.performance.constraints.AbstractConstraint;
+import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.parsers.JMeterCsvParser;
 import hudson.plugins.performance.parsers.JMeterParser;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.PerformanceReportTest;
+import hudson.plugins.performance.reports.UriReport;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
 import org.junit.Ignore;
@@ -29,7 +34,9 @@ import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -557,5 +564,73 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
         publisher.setSourceDataFiles("JMeterCsvResults.csv");
         assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+    }
+
+    public void testRelativeThresholds() throws Exception {
+        FreeStyleProject freeStyleProject = createFreeStyleProject();
+
+        final RunExt prevBuild = new RunExt(freeStyleProject);
+        prevBuild.onStartBuilding();
+
+        PerformancePublisher publisher = new PerformancePublisher("") {
+            @Override
+            protected List<PerformanceReportParser> getParsers(Run<?, ?> build, FilePath workspace, PrintStream logger, EnvVars env) throws IOException, InterruptedException {
+                List<PerformanceReportParser> parsers = new ArrayList<>();
+                parsers.add(new JMeterCsvParser("", ""));
+                return parsers;
+            }
+
+            @Override
+            public Collection<PerformanceReport> prepareEvaluation(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers) throws IOException, InterruptedException {
+                List<PerformanceReport> reports = new ArrayList<>();
+                reports.add(new PerformanceReport());
+                reports.add(new PerformanceReport());
+                return reports;
+            }
+
+            @Override
+            protected List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers, boolean locatePerformanceReports) throws IOException, InterruptedException {
+                List<UriReport> uriReports = new ArrayList<>();
+                if (locatePerformanceReports) {
+                    UriReport report = new UriReport(new PerformanceReport(), "aaaaa", "bbbbb");
+                    TaurusFinalStats taurusFinalStats = new TaurusFinalStats();
+                    taurusFinalStats.setAverageResponseTime(100d);
+                    report.setFromTaurusFinalStats(taurusFinalStats);
+                    uriReports.add(report);
+                } else {
+                    UriReport report = new UriReport(new PerformanceReport(), "aaaaa", "bbbbb");
+                    TaurusFinalStats taurusFinalStats = new TaurusFinalStats();
+                    taurusFinalStats.setAverageResponseTime(200d);
+                    report.setFromTaurusFinalStats(taurusFinalStats);
+                    uriReports.add(report);
+                }
+                return uriReports;
+            }
+
+            @Override
+            public Run<?, ?> getnthBuild(Run<?, ?> build) throws IOException {
+                return prevBuild;
+            }
+        };
+        publisher.setModeOfThreshold(true);
+        publisher.setRelativeFailedThresholdPositive(10);
+        publisher.setRelativeUnstableThresholdPositive(5);
+
+        RunExt run1 = new RunExt(freeStyleProject);
+        run1.onStartBuilding();
+        publisher.perform(run1, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
+        assertEquals(Result.SUCCESS, run1.getResult());
+
+        publisher.setRelativeUnstableThresholdNegative(10);
+        RunExt run2 = new RunExt(freeStyleProject);
+        run2.onStartBuilding();
+        publisher.perform(run2, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
+        assertEquals(Result.UNSTABLE, run2.getResult());
+
+        publisher.setRelativeFailedThresholdNegative(10);
+        RunExt run3 = new RunExt(freeStyleProject);
+        run3.onStartBuilding();
+        publisher.perform(run3, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
+        assertEquals(Result.FAILURE, run3.getResult());
     }
 }
