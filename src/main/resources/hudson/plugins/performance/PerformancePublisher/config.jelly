@@ -70,10 +70,10 @@
             <label>Unstable % Range</label>
           </td>
           <td>
-            <f:number field="relativeUnstableThresholdNegative"/>
+            <f:number field="relativeUnstableThresholdNegative" default="-1.0"/>
           </td>
           <td>
-            <f:number field="relativeUnstableThresholdPositive"/>
+            <f:number field="relativeUnstableThresholdPositive" default="-1.0"/>
           </td>
         </tr>
         <tr>
@@ -81,10 +81,10 @@
             <label>Failed % Range</label>
           </td>
           <td>
-            <f:number field="relativeFailedThresholdNegative"/>
+            <f:number field="relativeFailedThresholdNegative" default="-1.0"/>
           </td>
           <td>
-            <f:number field="relativeFailedThresholdPositive"/>
+            <f:number field="relativeFailedThresholdPositive" default="-1.0"/>
           </td>
         </tr>
         <tr>

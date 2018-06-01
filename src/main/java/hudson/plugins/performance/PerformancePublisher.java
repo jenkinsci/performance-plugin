@@ -78,6 +78,7 @@ import java.util.Set;
 public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     public static final double THRESHOLD_TOLERANCE = 0.00000001;
+    private static final double DEFAULT_THRESHOLD = -1;
 
     private int errorFailedThreshold = -1;
 
@@ -85,13 +86,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private String errorUnstableResponseTimeThreshold = "";
 
-    private double relativeFailedThresholdPositive = 0;
+    private double relativeFailedThresholdPositive = DEFAULT_THRESHOLD;
 
-    private double relativeFailedThresholdNegative = 0;
+    private double relativeFailedThresholdNegative = DEFAULT_THRESHOLD;
 
-    private double relativeUnstableThresholdPositive = 0;
+    private double relativeUnstableThresholdPositive = DEFAULT_THRESHOLD;
 
-    private double relativeUnstableThresholdNegative = 0;
+    private double relativeUnstableThresholdNegative = DEFAULT_THRESHOLD;
 
     private int nthBuildNumber = 0;
 
@@ -466,11 +467,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         }
     }
 
-    private List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
+    protected List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
                                                List<PerformanceReportParser> parsers, boolean locatePerformanceReports)
             throws IOException, InterruptedException {
 
-        List<UriReport> uriReports = new ArrayList<UriReport>();
+        List<UriReport> uriReports = new ArrayList<>();
 
         if (locatePerformanceReports) {
             Collection<PerformanceReport> performanceReports = locatePerformanceReports(build, workspace, listener, parsers);
@@ -953,21 +954,25 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     // Print information about Relative Threshold
     private void printInfoAboutRelativeThreshold(PrintStream logger) {
-        logger.println(
-                (relativeFailedThresholdNegative <= 100 && relativeFailedThresholdPositive <= 100) ?
-                        "Performance: Percentage of relative difference outside -" + relativeFailedThresholdNegative
-                                + " to +" + relativeFailedThresholdPositive + " % sets the build as "
-                                + Result.FAILURE.toString().toLowerCase() :
-                        "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase()
-        );
+        if (relativeFailedThresholdNegative >= 0) {
+            logger.printf("Performance: Percentage of relative difference less than -%s %% sets the build as [%s]%n",
+                    relativeFailedThresholdNegative, Result.FAILURE.toString());
+        }
 
-        logger.println(
-                (relativeUnstableThresholdNegative <= 100 && relativeUnstableThresholdPositive <= 100) ?
-                        "Performance: Percentage of relative difference outside -"
-                                + relativeUnstableThresholdNegative + " to +" + relativeUnstableThresholdPositive
-                                + " % sets the build as " + Result.UNSTABLE.toString().toLowerCase() :
-                        "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase()
-        );
+        if (relativeFailedThresholdPositive >= 0) {
+            logger.printf("Performance: Percentage of relative difference more than %s %% sets the build as [%s]%n",
+                    relativeFailedThresholdPositive, Result.FAILURE.toString());
+        }
+
+        if (relativeUnstableThresholdNegative >= 0) {
+            logger.printf("Performance: Percentage of relative difference less than -%s %% sets the build as [%s]%n",
+                    relativeUnstableThresholdNegative, Result.UNSTABLE.toString());
+        }
+
+        if (relativeUnstableThresholdPositive >= 0) {
+            logger.printf("Performance: Percentage of relative difference more than %s %% sets the build as [%s]%n",
+                    relativeUnstableThresholdPositive, Result.UNSTABLE.toString());
+        }
     }
 
 
@@ -1168,12 +1173,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setRelativeFailedThresholdPositive(double relativeFailedThresholdPositive) {
-        this.relativeFailedThresholdPositive = Math.max(0, Math.min(relativeFailedThresholdPositive, 100));
+        this.relativeFailedThresholdPositive = relativeFailedThresholdPositive;
     }
 
     @DataBoundSetter
     public void setRelativeFailedThresholdNegative(double relativeFailedThresholdNegative) {
-        this.relativeFailedThresholdNegative = Math.max(0, Math.min(relativeFailedThresholdNegative, 100));
+        this.relativeFailedThresholdNegative = relativeFailedThresholdNegative;
     }
 
     public double getRelativeUnstableThresholdPositive() {
@@ -1186,12 +1191,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setRelativeUnstableThresholdPositive(double relativeUnstableThresholdPositive) {
-        this.relativeUnstableThresholdPositive = Math.max(0, Math.min(relativeUnstableThresholdPositive, 100));
+        this.relativeUnstableThresholdPositive = relativeUnstableThresholdPositive;
     }
 
     @DataBoundSetter
     public void setRelativeUnstableThresholdNegative(double relativeUnstableThresholdNegative) {
-        this.relativeUnstableThresholdNegative = Math.max(0, Math.min(relativeUnstableThresholdNegative, 100));
+        this.relativeUnstableThresholdNegative = relativeUnstableThresholdNegative;
     }
 
     public int getNthBuildNumber() {
