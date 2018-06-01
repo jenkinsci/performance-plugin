@@ -78,6 +78,7 @@ import java.util.Set;
 public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     public static final double THRESHOLD_TOLERANCE = 0.00000001;
+    private static final double DEFAULT_THRESHOLD = -1;
 
     private int errorFailedThreshold = -1;
 
@@ -85,13 +86,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private String errorUnstableResponseTimeThreshold = "";
 
-    private double relativeFailedThresholdPositive = 0;
+    private double relativeFailedThresholdPositive = DEFAULT_THRESHOLD;
 
-    private double relativeFailedThresholdNegative = 0;
+    private double relativeFailedThresholdNegative = DEFAULT_THRESHOLD;
 
-    private double relativeUnstableThresholdPositive = 0;
+    private double relativeUnstableThresholdPositive = DEFAULT_THRESHOLD;
 
-    private double relativeUnstableThresholdNegative = 0;
+    private double relativeUnstableThresholdNegative = DEFAULT_THRESHOLD;
 
     private int nthBuildNumber = 0;
 
