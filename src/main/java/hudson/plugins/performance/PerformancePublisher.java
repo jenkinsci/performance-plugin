@@ -467,11 +467,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         }
     }
 
-    private List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
+    protected List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
                                                List<PerformanceReportParser> parsers, boolean locatePerformanceReports)
             throws IOException, InterruptedException {
 
-        List<UriReport> uriReports = new ArrayList<UriReport>();
+        List<UriReport> uriReports = new ArrayList<>();
 
         if (locatePerformanceReports) {
             Collection<PerformanceReport> performanceReports = locatePerformanceReports(build, workspace, listener, parsers);
@@ -954,21 +954,33 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     // Print information about Relative Threshold
     private void printInfoAboutRelativeThreshold(PrintStream logger) {
-        logger.println(
-                (relativeFailedThresholdNegative <= 100 && relativeFailedThresholdPositive <= 100) ?
-                        "Performance: Percentage of relative difference outside -" + relativeFailedThresholdNegative
-                                + " to +" + relativeFailedThresholdPositive + " % sets the build as "
-                                + Result.FAILURE.toString().toLowerCase() :
-                        "Performance: No threshold configured for making the test " + Result.FAILURE.toString().toLowerCase()
-        );
+        if (relativeFailedThresholdNegative >= 0) {
+            logger.printf("Performance: Percentage of relative difference less than -%s %% sets the build as [%s]%n",
+                    relativeFailedThresholdNegative, Result.FAILURE.toString());
+        }
 
-        logger.println(
-                (relativeUnstableThresholdNegative <= 100 && relativeUnstableThresholdPositive <= 100) ?
-                        "Performance: Percentage of relative difference outside -"
-                                + relativeUnstableThresholdNegative + " to +" + relativeUnstableThresholdPositive
-                                + " % sets the build as " + Result.UNSTABLE.toString().toLowerCase() :
-                        "Performance: No threshold configured for making the test " + Result.UNSTABLE.toString().toLowerCase()
-        );
+        if (relativeFailedThresholdPositive >= 0) {
+            logger.printf("Performance: Percentage of relative difference more than %s %% sets the build as [%s]%n",
+                    relativeFailedThresholdPositive, Result.FAILURE.toString());
+        }
+
+        if (relativeFailedThresholdPositive < 0 && relativeFailedThresholdNegative < 0) {
+            logger.printf("Performance: No threshold configured for making the test [%s]%n", Result.FAILURE.toString());
+        }
+
+        if (relativeUnstableThresholdNegative >= 0) {
+            logger.printf("Performance: Percentage of relative difference less than -%s %% sets the build as [%s]%n",
+                    relativeUnstableThresholdNegative, Result.UNSTABLE.toString());
+        }
+
+        if (relativeUnstableThresholdPositive >= 0) {
+            logger.printf("Performance: Percentage of relative difference more than %s %% sets the build as [%s]%n",
+                    relativeUnstableThresholdPositive, Result.UNSTABLE.toString());
+        }
+
+        if (relativeUnstableThresholdPositive < 0 && relativeUnstableThresholdNegative < 0) {
+            logger.printf("Performance: No threshold configured for making the test [%s]%n", Result.UNSTABLE.toString());
+        }
     }
 
 
