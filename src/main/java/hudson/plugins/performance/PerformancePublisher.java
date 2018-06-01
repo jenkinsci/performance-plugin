@@ -1169,12 +1169,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setRelativeFailedThresholdPositive(double relativeFailedThresholdPositive) {
-        this.relativeFailedThresholdPositive = Math.max(0, Math.min(relativeFailedThresholdPositive, 100));
+        this.relativeFailedThresholdPositive = relativeFailedThresholdPositive;
     }
 
     @DataBoundSetter
     public void setRelativeFailedThresholdNegative(double relativeFailedThresholdNegative) {
-        this.relativeFailedThresholdNegative = Math.max(0, Math.min(relativeFailedThresholdNegative, 100));
+        this.relativeFailedThresholdNegative = relativeFailedThresholdNegative;
     }
 
     public double getRelativeUnstableThresholdPositive() {
@@ -1187,12 +1187,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setRelativeUnstableThresholdPositive(double relativeUnstableThresholdPositive) {
-        this.relativeUnstableThresholdPositive = Math.max(0, Math.min(relativeUnstableThresholdPositive, 100));
+        this.relativeUnstableThresholdPositive = relativeUnstableThresholdPositive;
     }
 
     @DataBoundSetter
     public void setRelativeUnstableThresholdNegative(double relativeUnstableThresholdNegative) {
-        this.relativeUnstableThresholdNegative = Math.max(0, Math.min(relativeUnstableThresholdNegative, 100));
+        this.relativeUnstableThresholdNegative = relativeUnstableThresholdNegative;
     }
 
     public int getNthBuildNumber() {
