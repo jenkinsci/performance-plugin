@@ -53,7 +53,7 @@ If you are using GUI to configure Jenkins jobs, start with adding "Publisth Pefr
 
 Specify the report files into "Source data files" field, separate multiple entries with semicolon. Plugin will autodetect file format for each file. You can use Jenkins globs like `**/*.jtl`.
 
-You can configure the error percentage thresholds which would make the project unstable or failed or set them to `-1` to disable the feature:
+You can configure the error percentage thresholds and the relative percentage thresholds which would make the project unstable or failed or set them to `-1` to disable the feature:
 
 ![](report_constraints.png)
 
