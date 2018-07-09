@@ -50,7 +50,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
     private static final Cache<String, PerformanceReport> CACHE = CacheBuilder.newBuilder().maximumSize(1000).softValues().build();
 
     protected boolean isNumberDateFormat = false;
-    protected transient SimpleDateFormat dateFormat;
+    protected transient SimpleDateFormat format;
 
     protected final static String[] DATE_FORMATS = new String[]{
             "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss,SSS", "yyyy/mm/dd HH:mm:ss"
@@ -208,19 +208,19 @@ public abstract class AbstractParser extends PerformanceReportParser {
 
 
     public void clearDateFormat() {
-        this.dateFormat = null;
+        this.format = null;
         this.isNumberDateFormat = false;
     }
 
     public Date parseTimestamp(String timestamp) {
-        if (this.dateFormat == null) {
+        if (this.format == null) {
             initDateFormat(timestamp);
         }
 
         try {
             return isNumberDateFormat ?
                     new Date(Long.valueOf(timestamp)) :
-                    dateFormat.parse(timestamp);
+                    format.parse(timestamp);
         } catch (ParseException e) {
             throw new RuntimeException("Cannot parse timestamp: " + timestamp +
                     ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), e);
@@ -231,11 +231,11 @@ public abstract class AbstractParser extends PerformanceReportParser {
         Date result = null;
         for (String format : DATE_FORMATS) {
             try {
-                dateFormat = new SimpleDateFormat(format);
-                result = dateFormat.parse(timestamp);
+                this.format = new SimpleDateFormat(format);
+                result = this.format.parse(timestamp);
             } catch (ParseException ex) {
                 // ok
-                dateFormat = null;
+                this.format = null;
             }
 
             if (result != null) {
