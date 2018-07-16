@@ -100,10 +100,12 @@ public class PerformancePublisherTest extends HudsonTestCase {
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         b.getAction(PerformanceBuildAction.class);
 
-        String standardExportFilename = b.getRootDir().getAbsolutePath() + "/archive/standardResults.xml";
+        String standardExportFilename = b.getRootDir().getAbsolutePath() + File.separator + "archive" + File.separator + "standardResults.xml";
         String content = new String (java.nio.file.Files.readAllBytes(Paths.get(standardExportFilename)));
-        Assert.assertEquals("<api>\n" +
-                "\t<name>Home</name>\n" +
+        Assert.assertEquals("<?xml version=\"1.0\"?>\n" +
+                "<results>\n" +
+                "<api>\n" +
+                "\t<uri>Home</uri>\n" +
                 "\t<samples>4</samples>\n" +
                 "\t<average>7930</average>\n" +
                 "\t<min>501</min>\n" +
@@ -112,9 +114,9 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 "\t<max>15902</max>\n" +
                 "\t<httpCode>200</httpCode>\n" +
                 "\t<errors>0.0</errors>\n" +
-                "\t</api>\n" +
+                "</api>\n" +
                 "<api>\n" +
-                "\t<name>Workgroup</name>\n" +
+                "\t<uri>Workgroup</uri>\n" +
                 "\t<samples>4</samples>\n" +
                 "\t<average>354</average>\n" +
                 "\t<min>58</min>\n" +
@@ -123,8 +125,8 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 "\t<max>1017</max>\n" +
                 "\t<httpCode>200</httpCode>\n" +
                 "\t<errors>0.0</errors>\n" +
-                "\t</api>\n" +
-                "</results>", content);
+                "</api>\n" +
+                "</results>\n", content);
     }
 
     @Test

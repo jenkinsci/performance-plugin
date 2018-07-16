@@ -52,6 +52,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -589,22 +590,18 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         BufferedWriter bw = null;
         try {
             xmlDir = run.getRootDir().getAbsolutePath();
-            xmlDir += "/" + archive_directory;
+            xmlDir += File.separator + archive_directory;
 
-            if (!new File(xmlDir).exists()) {
-                new File(xmlDir).mkdirs();
-            }
+            xmlfile = new File(xmlDir + File.separator + "standardResults.xml");
+            FileUtils.touch(xmlfile);
 
-            xmlfile = new File(xmlDir + "/standardResults.xml");
-            xmlfile.createNewFile();
-
-            fw = new FileWriter(xmlfile.getAbsoluteFile());
+            fw = new FileWriter(xmlfile);
             bw = new BufferedWriter(fw);
 
-            xml = "<?xml version=\"1.0\"?>\n";
-            xml += "<results>\n";
-            appendStandardResultsStatsToXml(parsedReports);
-            xml += "</results>";
+            xml = new StringBuilder("<?xml version=\"1.0\"?>\n")
+                    .append("<results>\n")
+                    .append(appendStandardResultsStatsToXml(parsedReports))
+                    .append("</results>\n").toString();
 
             bw.write(xml);
         } finally {
@@ -617,12 +614,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         }
     }
 
-    private void appendStandardResultsStatsToXml(Collection<PerformanceReport> reports) {
+    private String appendStandardResultsStatsToXml(Collection<PerformanceReport> reports) {
         StringBuilder xmlSB = new StringBuilder();
         for (PerformanceReport perfReport : reports) {
             for (UriReport report : perfReport.getUriListOrdered()) {
                 xmlSB.append("<api>\n\t");
-                xmlSB.append("<name>").append(report.getUri()).append("</name>\n\t");
+                xmlSB.append("<uri>").append(report.getUri()).append("</uri>\n\t");
                 xmlSB.append("<samples>").append(report.samplesCount()).append("</samples>\n\t");
                 xmlSB.append("<average>").append(report.getAverage()).append("</average>\n\t");
                 xmlSB.append("<min>").append(report.getMin()).append("</min>\n\t");
@@ -630,11 +627,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 xmlSB.append("<ninetieth>").append(report.get90Line()).append("</ninetieth>\n\t");
                 xmlSB.append("<max>").append(report.getMax()).append("</max>\n\t");
                 xmlSB.append("<httpCode>").append(report.getHttpCode()).append("</httpCode>\n\t");
-                xmlSB.append("<errors>").append(report.errorPercent()).append("</errors>\n\t");
+                xmlSB.append("<errors>").append(report.errorPercent()).append("</errors>\n");
                 xmlSB.append("</api>\n");
             }
         }
-        xml = xmlSB.toString();
+        return xmlSB.toString();
     }
 
     // write report in xml, when checked Error Threshold comparison
