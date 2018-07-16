@@ -384,6 +384,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
             if (!modeEvaluation) {
                 evaluateInStandardMode(run, workspace, parsedReports, listener, parsers);
+                writeStandardResultsToXML(run, parsedReports);
             } else {
                 evaluateInExpertMode(run, workspace, listener);
             }
@@ -579,6 +580,61 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             return Result.FAILURE;
         }
         return null;
+    }
+
+    // write 'standard mode' report in xml containing each of the populated columns otherwise found in the jelly output.
+    // producing an on disk, machine parseable format allows for archiving and automation.
+    private void writeStandardResultsToXML(Run<?, ?> run, Collection<PerformanceReport> parsedReports) throws IOException {
+        FileWriter fw = null;
+        BufferedWriter bw = null;
+        try {
+            xmlDir = run.getRootDir().getAbsolutePath();
+            xmlDir += "/" + archive_directory;
+
+            if (!new File(xmlDir).exists()) {
+                new File(xmlDir).mkdirs();
+            }
+
+            xmlfile = new File(xmlDir + "/standardResults.xml");
+            xmlfile.createNewFile();
+
+            fw = new FileWriter(xmlfile.getAbsoluteFile());
+            bw = new BufferedWriter(fw);
+
+            xml = "<?xml version=\"1.0\"?>\n";
+            xml += "<results>\n";
+            appendStandardResultsStatsToXml(parsedReports);
+            xml += "</results>";
+
+            bw.write(xml);
+        } finally {
+            if (bw != null) {
+                bw.close();
+            }
+            if (fw != null) {
+                fw.close();
+            }
+        }
+    }
+
+    private void appendStandardResultsStatsToXml(Collection<PerformanceReport> reports) {
+        StringBuilder xmlSB = new StringBuilder();
+        for (PerformanceReport perfReport : reports) {
+            for (UriReport report : perfReport.getUriListOrdered()) {
+                xmlSB.append("<api>\n\t");
+                xmlSB.append("<name>").append(report.getUri()).append("</name>\n\t");
+                xmlSB.append("<samples>").append(report.samplesCount()).append("</samples>\n\t");
+                xmlSB.append("<average>").append(report.getAverage()).append("</average>\n\t");
+                xmlSB.append("<min>").append(report.getMin()).append("</min>\n\t");
+                xmlSB.append("<median>").append(report.getMedian()).append("</median>\n\t");
+                xmlSB.append("<ninetieth>").append(report.get90Line()).append("</ninetieth>\n\t");
+                xmlSB.append("<max>").append(report.getMax()).append("</max>\n\t");
+                xmlSB.append("<httpCode>").append(report.getHttpCode()).append("</httpCode>\n\t");
+                xmlSB.append("<errors>").append(report.errorPercent()).append("</errors>\n\t");
+                xmlSB.append("</api>\n");
+            }
+        }
+        xml = xmlSB.toString();
     }
 
     // write report in xml, when checked Error Threshold comparison

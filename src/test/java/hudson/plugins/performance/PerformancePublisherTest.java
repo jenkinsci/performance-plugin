@@ -24,6 +24,7 @@ import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
@@ -35,6 +36,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -73,6 +75,56 @@ public class PerformancePublisherTest extends HudsonTestCase {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testStandardResultsXML() throws Exception {
+        FreeStyleProject p = createFreeStyleProject();
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                                   Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("test.jtl").copyFrom(getClass().getResource("/JMeterResults.jtl"));
+                return true;
+            }
+        });
+
+        List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
+        parsers.add(new JMeterParser("test.jtl", PerformanceReportTest.DEFAULT_PERCENTILES));
+
+        PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, parsers);
+        publisher.setModeEvaluation(false);
+        p.getPublishersList().add(publisher);
+
+        FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        b.getAction(PerformanceBuildAction.class);
+
+        String standardExportFilename = b.getRootDir().getAbsolutePath() + "/archive/standardResults.xml";
+        String content = new String (java.nio.file.Files.readAllBytes(Paths.get(standardExportFilename)));
+        Assert.assertEquals("<api>\n" +
+                "\t<name>Home</name>\n" +
+                "\t<samples>4</samples>\n" +
+                "\t<average>7930</average>\n" +
+                "\t<min>501</min>\n" +
+                "\t<median>598</median>\n" +
+                "\t<ninetieth>14720</ninetieth>\n" +
+                "\t<max>15902</max>\n" +
+                "\t<httpCode>200</httpCode>\n" +
+                "\t<errors>0.0</errors>\n" +
+                "\t</api>\n" +
+                "<api>\n" +
+                "\t<name>Workgroup</name>\n" +
+                "\t<samples>4</samples>\n" +
+                "\t<average>354</average>\n" +
+                "\t<min>58</min>\n" +
+                "\t<median>63</median>\n" +
+                "\t<ninetieth>278</ninetieth>\n" +
+                "\t<max>1017</max>\n" +
+                "\t<httpCode>200</httpCode>\n" +
+                "\t<errors>0.0</errors>\n" +
+                "\t</api>\n" +
+                "</results>", content);
     }
 
     @Test
