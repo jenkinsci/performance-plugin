@@ -52,6 +52,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -384,6 +385,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
             if (!modeEvaluation) {
                 evaluateInStandardMode(run, workspace, parsedReports, listener, parsers);
+                writeStandardResultsToXML(run, parsedReports);
             } else {
                 evaluateInExpertMode(run, workspace, listener);
             }
@@ -579,6 +581,57 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             return Result.FAILURE;
         }
         return null;
+    }
+
+    // write 'standard mode' report in xml containing each of the populated columns otherwise found in the jelly output.
+    // producing an on disk, machine parseable format allows for archiving and automation.
+    private void writeStandardResultsToXML(Run<?, ?> run, Collection<PerformanceReport> parsedReports) throws IOException {
+        FileWriter fw = null;
+        BufferedWriter bw = null;
+        try {
+            xmlDir = run.getRootDir().getAbsolutePath();
+            xmlDir += File.separator + archive_directory;
+
+            xmlfile = new File(xmlDir + File.separator + "standardResults.xml");
+            FileUtils.touch(xmlfile);
+
+            fw = new FileWriter(xmlfile);
+            bw = new BufferedWriter(fw);
+
+            xml = new StringBuilder("<?xml version=\"1.0\"?>\n")
+                    .append("<results>\n")
+                    .append(appendStandardResultsStatsToXml(parsedReports))
+                    .append("</results>\n").toString();
+
+            bw.write(xml);
+        } finally {
+            if (bw != null) {
+                bw.close();
+            }
+            if (fw != null) {
+                fw.close();
+            }
+        }
+    }
+
+    private String appendStandardResultsStatsToXml(Collection<PerformanceReport> reports) {
+        StringBuilder xmlSB = new StringBuilder();
+        for (PerformanceReport perfReport : reports) {
+            for (UriReport report : perfReport.getUriListOrdered()) {
+                xmlSB.append("<api>\n\t");
+                xmlSB.append("<uri>").append(report.getUri()).append("</uri>\n\t");
+                xmlSB.append("<samples>").append(report.samplesCount()).append("</samples>\n\t");
+                xmlSB.append("<average>").append(report.getAverage()).append("</average>\n\t");
+                xmlSB.append("<min>").append(report.getMin()).append("</min>\n\t");
+                xmlSB.append("<median>").append(report.getMedian()).append("</median>\n\t");
+                xmlSB.append("<ninetieth>").append(report.get90Line()).append("</ninetieth>\n\t");
+                xmlSB.append("<max>").append(report.getMax()).append("</max>\n\t");
+                xmlSB.append("<httpCode>").append(report.getHttpCode()).append("</httpCode>\n\t");
+                xmlSB.append("<errors>").append(report.errorPercent()).append("</errors>\n");
+                xmlSB.append("</api>\n");
+            }
+        }
+        return xmlSB.toString();
     }
 
     // write report in xml, when checked Error Threshold comparison
