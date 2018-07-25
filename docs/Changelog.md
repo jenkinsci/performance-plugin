@@ -1,7 +1,8 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
-## v3.11 (upcoming)
+## v3.11 (25th of July, 2018)
+- ADD: write results xml file to disk for standard mode output
 - FIX: Support [JEP-200](https://jenkins.io/blog/2018/01/13/jep-200/)
 
 ## v3.10 (1st of June, 2018)
