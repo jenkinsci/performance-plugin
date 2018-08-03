@@ -544,17 +544,17 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         Result result = Result.SUCCESS;
         double errorPercent = performanceReport.errorPercent();
 
+        // check average response time values
+        Result res = checkAverageResponseTime(performanceReport, responseTimeThresholdMap, logger);
+        if (res != null) {
+            result = res;
+        }
+
         // check failed and unstable values
         if (errorFailedThreshold >= 0 && errorPercent - errorFailedThreshold > THRESHOLD_TOLERANCE) {
             result = Result.FAILURE;
         } else if (errorUnstableThreshold >= 0 && errorPercent - errorUnstableThreshold > THRESHOLD_TOLERANCE) {
             result = Result.UNSTABLE;
-        }
-
-        // check average response time values
-        Result res = checkAverageResponseTime(performanceReport, responseTimeThresholdMap, logger);
-        if (res != null) {
-            result = res;
         }
 
         // set result. It'll be set only when result is worse
