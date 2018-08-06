@@ -23,6 +23,11 @@
             <name>Andrey Pokhilko (CA BlazeMeter)</name>
             <email>andrey@blazemeter.com</email>
         </developer>
+        <developer>
+            <id>artem_fedorov</id>
+            <name>Artem Fedorov (CA BlazeMeter)</name>
+            <email>artem.fedorov@blazemeter.com</email>
+        </developer>
     </developers>
 
     <scm>
