@@ -14,7 +14,7 @@
 - FIX: division by zero error
 
 ## v3.8 (13th of April, 2018)
-- ADD: charts to `Performace report` page
+- ADD: charts to `Performance report` page
 - FIX: relative constraint failure on first build. Contributed by [Till Neunast](https://github.com/tilln)
 
 ## v3.7 (skipped)
