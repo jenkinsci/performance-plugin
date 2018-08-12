@@ -83,7 +83,7 @@ public class JUnitParser extends AbstractParser {
                           String timestamp = attributes.getValue("timestamp");
 			              currentSample.setDate(new SimpleDateFormat(ISO8601_DATETIME_PATTERN).parse(timestamp));
 		            } catch (Exception e) {
-						  currentSample.setDate(new date(0));
+						  currentSample.setDate(new Date(0));
 		            }
                     String time = attributes.getValue("time");
                     currentSample.setDuration(parseDuration(time));
