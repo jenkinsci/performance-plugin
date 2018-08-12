@@ -80,11 +80,11 @@ public class JUnitParser extends AbstractParser {
                     status = 1;
                     currentSample = new HttpSample();
                     try {
-                          String timestamp = attributes.getValue("timestamp");
-			              currentSample.setDate(new SimpleDateFormat(ISO8601_DATETIME_PATTERN).parse(timestamp));
-		            } catch (Exception e) {
-						  currentSample.setDate(new Date(0));
-		            }
+                    	String timestamp = attributes.getValue("timestamp");
+			currentSample.setDate(new SimpleDateFormat(ISO8601_DATETIME_PATTERN).parse(timestamp));
+		    } catch (Exception e) {
+			currentSample.setDate(new Date(0));
+		    }
                     String time = attributes.getValue("time");
                     currentSample.setDuration(parseDuration(time));
                     currentSample.setSuccessful(true);
