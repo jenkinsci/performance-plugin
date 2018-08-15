@@ -14,6 +14,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 
 /**
  * Parser for JUnit.
@@ -22,6 +23,8 @@ import java.util.Date;
  */
 public class JUnitParser extends AbstractParser {
 
+    public static final String ISO8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+    
     @Extension
     public static class DescriptorImpl extends PerformanceReportParserDescriptor {
         @Override
@@ -76,7 +79,12 @@ public class JUnitParser extends AbstractParser {
                     }
                     status = 1;
                     currentSample = new HttpSample();
-                    currentSample.setDate(new Date(0));
+                    try {
+                    	String timestamp = attributes.getValue("timestamp");
+			currentSample.setDate(new SimpleDateFormat(ISO8601_DATETIME_PATTERN).parse(timestamp));
+		    } catch (Exception e) {
+			currentSample.setDate(new Date(0));
+		    }
                     String time = attributes.getValue("time");
                     currentSample.setDuration(parseDuration(time));
                     currentSample.setSuccessful(true);
