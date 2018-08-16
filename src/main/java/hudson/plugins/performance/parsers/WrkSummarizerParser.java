@@ -4,6 +4,8 @@ import hudson.Extension;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.tools.SafeMaths;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
@@ -202,7 +204,7 @@ public class WrkSummarizerParser extends AbstractParser {
 
         double timeValue = Double.parseDouble(timeValueString);
         double timeInMilliSeconds = timeValue * factor;
-        double timeInReturnFormat = timeInMilliSeconds / tu.getFactor();
+        double timeInReturnFormat = SafeMaths.safeDivide(timeInMilliSeconds, tu.getFactor());
 
         return (int) Math.floor(timeInReturnFormat);
     }

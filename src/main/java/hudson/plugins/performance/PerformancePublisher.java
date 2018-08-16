@@ -46,6 +46,7 @@ import hudson.plugins.performance.reports.ConstraintReport;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.ThroughputReport;
 import hudson.plugins.performance.reports.UriReport;
+import hudson.plugins.performance.tools.SafeMaths;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -835,7 +836,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     private double calculateDiffInPercents(double value1, double value2) {
-        return Math.round(((value1 * 100) / value2) * 100)  / 100d;
+        return Math.round(SafeMaths.safeDivide(value1 * 100, value2) * 100)  / 100d;
     }
 
     private boolean calculateRelativeFailedThresholdNegative(double relativeDiffPercent) {

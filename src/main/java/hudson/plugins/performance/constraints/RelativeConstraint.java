@@ -13,6 +13,7 @@ import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
 import hudson.plugins.performance.descriptors.ConstraintDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
+import hudson.plugins.performance.tools.SafeMaths;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
@@ -394,7 +395,7 @@ public class RelativeConstraint extends AbstractConstraint {
                     setPreviousResults(getPreviousResults() - 1);
                 }
             }
-            result = tmpResult / counter;
+            result = (long)SafeMaths.safeDivide(tmpResult, counter);
         } else {
 			/*
 			 * If no build was found to analyze return Long.MIN_VALUE. This will cause the
