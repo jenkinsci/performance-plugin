@@ -6,6 +6,7 @@ import hudson.plugins.performance.actions.PerformanceProjectAction;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
+import hudson.plugins.performance.tools.SafeMaths;
 import hudson.util.ChartUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jfree.data.time.FixedMillisecond;
@@ -201,13 +202,13 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public double errorPercent() {
-        return Math.round((((double) countErrors()) / samplesCount() * 100) * 1000.0) / 1000.0;
+        return Math.round((SafeMaths.safeDivide((double) countErrors(), samplesCount()) * 100) * 1000.0) / 1000.0;
     }
 
     public long getAverage() {
         if (average == null) {
             int samplesCount = samplesCount();
-            average = (samplesCount == 0) ? 0 : totalDuration / samplesCount;
+            average = (samplesCount == 0) ? 0 : (long)SafeMaths.safeDivide(totalDuration, samplesCount);
         }
         return average;
     }

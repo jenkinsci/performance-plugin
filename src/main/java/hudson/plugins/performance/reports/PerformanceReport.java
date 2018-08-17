@@ -7,6 +7,8 @@ import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.plugins.performance.tools.SafeMaths;
+
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
@@ -19,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Represents a single performance report, which consists of multiple
@@ -196,9 +199,12 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             isCalculatedPercentilesValues = true;
 
             long durationSec = (long) Math.ceil((float)totalDuration / 1000);
+            if (durationSec < 1) {
+                LOGGER.log(Level.INFO, String.format("Performance test had a duration of only %d second(s), please check your configuration.", durationSec));
+            }
             throughput = (testDuration == null) ?
                     sample.getThroughput() :
-                    (sampleCount / durationSec);
+                    (long)SafeMaths.safeDivide(sampleCount, durationSec);
         } else {
             String staplerUri = PerformanceReport.asStaplerURI(uri);
             synchronized (uriReportMap) {
@@ -232,13 +238,13 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             if (uriReportMap.size() == 0) return 0;
             return Math.round((summarizerErrors / uriReportMap.size()) * 1000.0) / 1000.0;
         } else {
-            return Math.round((samplesCount() == 0 ? 0 : ((double) countErrors()) / samplesCount() * 100) * 1000.0) / 1000.0;
+            return Math.round((samplesCount() == 0 ? 0 : SafeMaths.safeDivide((double) countErrors(), samplesCount()) * 100) * 1000.0) / 1000.0;
         }
     }
 
     public long getAverage() {
         if (average == null) {
-            average = (samplesCount == 0) ? 0 : (totalDuration / samplesCount);
+            average = (samplesCount == 0) ? 0 : (long)SafeMaths.safeDivide(totalDuration, samplesCount);
         }
         return average;
     }
@@ -247,7 +253,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         if (samplesCount == 0) {
             return 0;
         }
-        return roundTwoDecimals(totalSizeInKB / samplesCount);
+        return roundTwoDecimals(SafeMaths.safeDivide(totalSizeInKB, samplesCount));
     }
 
     /**
