@@ -35,37 +35,37 @@ public class ParserFactoryTest {
         String filePath;
 
         filePath = getClass().getResource("/TaurusXMLReport.xml").toURI().getPath();
-        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof TaurusParser);
+        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof TaurusParser);
 
         filePath = getClass().getResource("/JMeterResults.jtl").toURI().getPath();
-        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterParser);
+        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterParser);
 
         filePath = getClass().getResource("/TEST-JUnitResults.xml").toURI().getPath();
-        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JUnitParser);
+        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JUnitParser);
 
         filePath = getClass().getResource("/IagoResults.log").toURI().getPath();
-        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof IagoParser);
+        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof IagoParser);
 
         filePath = getClass().getResource("/WrkResultsQuick.wrk").toURI().getPath();
-        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof WrkSummarizerParser);
+        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof WrkSummarizerParser);
 
         filePath = getClass().getResource("/JMeterCsvResults.csv").toURI().getPath();
-        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterCsvParser);
+        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterCsvParser);
 
         filePath = getClass().getResource("/summary.log").toURI().getPath();
-        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JmeterSummarizerParser);
+        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JmeterSummarizerParser);
     }
 
     @Test
     public void testFlowWithGlob() throws Exception {
         EnvVars envVars = new EnvVars(new HashMap<String, String>());
-        assertTrue(ParserFactory.getParser(null, null, null, "**/*.xml", envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof TaurusParser);
-        assertTrue(ParserFactory.getParser(null, null, null, "**/*.jtl", envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterParser);
-        assertTrue(ParserFactory.getParser(null, null, null, "**/TEST-*.xml", envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JUnitParser);
-        assertTrue(ParserFactory.getParser(null, null, null, "parrot-server-stats.log", envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof IagoParser);
-        assertTrue(ParserFactory.getParser(null, null, null, "**/*.wrk", envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof WrkSummarizerParser);
-        assertTrue(ParserFactory.getParser(null, null, null, "**/*.csv", envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterCsvParser);
-        assertTrue(ParserFactory.getParser(null, null, null, "**/*.log", envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JmeterSummarizerParser);
+        assertTrue(ParserFactory.getParser(null, null, null, "**/*.xml", envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof TaurusParser);
+        assertTrue(ParserFactory.getParser(null, null, null, "**/*.jtl", envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterParser);
+        assertTrue(ParserFactory.getParser(null, null, null, "**/TEST-*.xml", envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JUnitParser);
+        assertTrue(ParserFactory.getParser(null, null, null, "parrot-server-stats.log", envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof IagoParser);
+        assertTrue(ParserFactory.getParser(null, null, null, "**/*.wrk", envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof WrkSummarizerParser);
+        assertTrue(ParserFactory.getParser(null, null, null, "**/*.csv", envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterCsvParser);
+        assertTrue(ParserFactory.getParser(null, null, null, "**/*.log", envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JmeterSummarizerParser);
     }
 
     @Test
@@ -84,12 +84,12 @@ public class ParserFactoryTest {
         FilePath child = results.child("result.wrk");
         child.copyFrom(getClass().getResourceAsStream("/WrkResultsQuick.wrk"));
         String glob = "**/results/*.wrk";
-        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, glob, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof WrkSummarizerParser);
+        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, glob, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof WrkSummarizerParser);
 
         FilePath child2 = results.child("result.jtl");
         child2.copyFrom(getClass().getResourceAsStream("/JMeterResults.jtl"));
         String glob2 = "**/results/*.jtl";
-        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, glob2, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterParser);
+        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, glob2, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterParser);
     }
 
 
@@ -105,21 +105,21 @@ public class ParserFactoryTest {
 
         String absPath1 = getClass().getResource("/WrkResultsQuick.wrk").getPath();
 
-        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, absPath1, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof WrkSummarizerParser);
+        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, absPath1, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof WrkSummarizerParser);
 
         String absPath2 = getClass().getResource("/JMeterResults.jtl").getPath();
-        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, absPath2, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterParser);
+        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, absPath2, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterParser);
 
         FilePath results = workspace.child("results");
         results.mkdirs();
 
         FilePath child = results.child("result.wrk");
         child.copyFrom(getClass().getResourceAsStream("/WrkResultsQuick.wrk"));
-        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, "results/result.wrk", envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof WrkSummarizerParser);
+        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, "results/result.wrk", envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof WrkSummarizerParser);
 
         FilePath child2 = results.child("result.jtl");
         child2.copyFrom(getClass().getResourceAsStream("/JMeterResults.jtl"));
-        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, "results/result.jtl", envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterParser);
+        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, "results/result.jtl", envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterParser);
     }
 
     @Test
@@ -134,16 +134,16 @@ public class ParserFactoryTest {
 
         String path = getClass().getResource("/single_result/res.csv").getPath();
         path = path.replace("res.", "*.");
-        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, path, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterCsvParser);
+        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, path, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterCsvParser);
 
         String path2 = getClass().getResource("/single_result/nested/res.jtl").getPath();
         path2 = path2.replace("nested/res", "**/*");
-        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, path2, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterParser);
+        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, path2, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterParser);
 
         String path3 = getClass().getResource("/single_result/nested/res.jtl").getPath();
         path3 = path3.replace("single_result", "**");
         path3 = path3.replace("res.", "*.");
-        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, path3, envVars, PerformanceReportTest.DEFAULT_PERCENTILES) instanceof JMeterParser);
+        assertTrue(ParserFactory.getParser(build, build.getWorkspace(), null, path3, envVars, PerformanceReportTest.DEFAULT_PERCENTILES).get(0) instanceof JMeterParser);
     }
 
 

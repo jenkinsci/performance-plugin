@@ -324,7 +324,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             for (String filePath : sourceDataFiles.split(";")) {
                 if (!filePath.isEmpty()) {
                     try {
-                        parsers.add(ParserFactory.getParser(build, workspace, logger, filePath, env, percentiles));
+                        parsers.addAll(ParserFactory.getParser(build, workspace, logger, filePath, env, percentiles));
                     } catch (IOException ex) {
                         logger.println("Cannot detect file type because of error: " + ex.getMessage());
                     }

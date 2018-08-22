@@ -1,6 +1,11 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
+## v3.12 (upcoming)
+- FIX: search report files using Ant pattern
+- ADD: JUnit timestamp parsing
+- ADD: a safe division where division by 0 can occur
+
 ## v3.11 (25th of July, 2018)
 - ADD: write results xml file to disk for standard mode output
 - FIX: Support [JEP-200](https://jenkins.io/blog/2018/01/13/jep-200/)
