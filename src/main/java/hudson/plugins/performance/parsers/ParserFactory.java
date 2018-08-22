@@ -7,7 +7,10 @@ import hudson.model.Run;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,19 +31,19 @@ public class ParserFactory {
         defaultGlobPatterns.put("**/*.mdb", LoadRunnerParser.class.getSimpleName());
     }
 
-    public static PerformanceReportParser getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env, String percentiles) throws IOException, InterruptedException {
+    public static List<PerformanceReportParser> getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env, String percentiles) throws IOException, InterruptedException {
         String expandGlob = env.expand(glob);
         if (defaultGlobPatterns.containsKey(expandGlob)) {
-            return getParser(defaultGlobPatterns.get(expandGlob), expandGlob, percentiles);
+            return Collections.singletonList(getParser(defaultGlobPatterns.get(expandGlob), expandGlob, percentiles));
         }
 
         File path = new File(expandGlob);
         return path.isAbsolute() ? getParserWithAbsolutePath(build, workspace, logger, path, percentiles) : getParserWithRelativePath(build, workspace, logger, expandGlob, percentiles);
     }
 
-    private static PerformanceReportParser getParserWithRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, String percentiles) throws IOException, InterruptedException {
-        PerformanceReportParser result = getParserUsingAntPatternRelativePath(build, workspace, logger, glob, percentiles);
-        if (result != null) {
+    private static List<PerformanceReportParser> getParserWithRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, String percentiles) throws IOException, InterruptedException {
+        List<PerformanceReportParser> result = getParserUsingAntPatternRelativePath(build, workspace, logger, glob, percentiles);
+        if (result != null && !result.isEmpty()) {
             return result;
         }
 
@@ -49,15 +52,16 @@ public class ParserFactory {
             // if report on remote slave
             FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + glob));
             localReport.copyFrom(new FilePath(workspace, glob));
-            return getParser(ParserDetector.detect(localReport.getRemote()), glob, percentiles);
+            return Collections.singletonList(getParser(ParserDetector.detect(localReport.getRemote()), glob, percentiles));
         }
 
-        return getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob, percentiles);
+        return Collections.singletonList(getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob, percentiles));
     }
 
-    private static PerformanceReportParser getParserUsingAntPatternRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, String percentiles) throws InterruptedException {
+    private static List<PerformanceReportParser> getParserUsingAntPatternRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, String percentiles) throws InterruptedException {
         try {
             FilePath[] pathList = workspace.list(glob);
+            List<PerformanceReportParser> result = new ArrayList<>();
             for (FilePath src : pathList) {
                 // copy file (it can be on remote slave) to "../build/../temp/" folder
                 final File localReport = new File(build.getRootDir(), "/temp/" + src.getName());
@@ -66,8 +70,9 @@ public class ParserFactory {
                     continue;
                 }
                 src.copyTo(new FilePath(localReport));
-                return getParser(ParserDetector.detect(localReport.getPath()), glob, percentiles);
+                result.add(getParser(ParserDetector.detect(localReport.getPath()), glob, percentiles));
             }
+            return result;
         } catch (IOException ignored) {
             LOGGER.log(Level.FINE, "Cannot find report file using Ant pattern", ignored);
         }
@@ -75,9 +80,9 @@ public class ParserFactory {
     }
 
 
-    private static PerformanceReportParser getParserWithAbsolutePath(Run<?, ?> build, FilePath workspace, PrintStream logger, File path, String percentiles) throws IOException, InterruptedException {
-        PerformanceReportParser result = getParserUsingAntPatternAbsolutePath(build, workspace, logger, path, percentiles);
-        if (result != null) {
+    private static List<PerformanceReportParser> getParserWithAbsolutePath(Run<?, ?> build, FilePath workspace, PrintStream logger, File path, String percentiles) throws IOException, InterruptedException {
+        List<PerformanceReportParser> result = getParserUsingAntPatternAbsolutePath(build, workspace, logger, path, percentiles);
+        if (result != null && !result.isEmpty()) {
             return result;
         }
 
@@ -85,13 +90,14 @@ public class ParserFactory {
             // if report on remote slave
             FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + path.getName()));
             localReport.copyFrom(new FilePath(workspace.getChannel(), path.getAbsolutePath()));
-            return getParser(ParserDetector.detect(localReport.getRemote()), path.getName(), percentiles);
+            return Collections.singletonList(getParser(ParserDetector.detect(localReport.getRemote()), path.getName(), percentiles));
         }
 
-        return getParser(ParserDetector.detect(path.getAbsolutePath()), path.getAbsolutePath(), percentiles);
+
+        return Collections.singletonList(getParser(ParserDetector.detect(path.getAbsolutePath()), path.getAbsolutePath(), percentiles));
     }
 
-    private static PerformanceReportParser getParserUsingAntPatternAbsolutePath(Run<?, ?> build, FilePath wsp, PrintStream logger, File path, String percentiles) throws InterruptedException {
+    private static List<PerformanceReportParser> getParserUsingAntPatternAbsolutePath(Run<?, ?> build, FilePath wsp, PrintStream logger, File path, String percentiles) throws InterruptedException {
         try {
             File parent = path.getParentFile();
             FilePath workspace = new FilePath(wsp.getChannel(), parent.getAbsolutePath());
@@ -106,6 +112,7 @@ public class ParserFactory {
 
             String glob = path.getAbsolutePath().substring(parent.getAbsolutePath().length() + 1);
             FilePath[] pathList = workspace.list(glob);
+            List<PerformanceReportParser> parsers = new ArrayList<>();
             for (FilePath src : pathList) {
                 // copy file (it can be on remote slave) to "../build/../temp/" folder
                 final File localReport = new File(build.getRootDir(), "/temp/" + src.getName());
@@ -114,8 +121,10 @@ public class ParserFactory {
                     continue;
                 }
                 src.copyTo(new FilePath(localReport));
-                return getParser(ParserDetector.detect(localReport.getPath()), localReport.getPath(), percentiles);
+
+                parsers.add(getParser(ParserDetector.detect(localReport.getPath()), localReport.getPath(), percentiles));
             }
+            return parsers;
         } catch (IOException ignored) {
             LOGGER.log(Level.FINE, "Cannot find report file using Ant pattern", ignored);
         }
