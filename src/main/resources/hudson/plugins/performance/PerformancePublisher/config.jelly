@@ -91,10 +91,10 @@
           <td colspan="3">
             <table>
               <tr>
-                <td width="80%">
+                <td width="85%">
                   <f:booleanRadio name="compareBuildPrevious" field="compareBuildPrevious" true="Compare with previous Build" false="Compare with Build number" />
                 </td>
-                <td width="20%">
+                <td width="15%">
                   <f:number field="nthBuildNumber"/>
                 </td>
               </tr>
