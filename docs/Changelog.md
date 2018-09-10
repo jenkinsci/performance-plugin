@@ -2,6 +2,7 @@
 # Changelog 
 
 ## v3.12 (upcoming)
+- FIX: pass envVars from pipeline script to Taurus
 - FIX: search report files using Ant pattern
 - ADD: JUnit timestamp parsing
 - ADD: a safe division where division by 0 can occur
