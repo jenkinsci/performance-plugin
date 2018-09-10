@@ -29,17 +29,21 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * "Build step" for running performance test
  */
 public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
+    public static final Logger LOGGER = Logger.getLogger(PerformanceTestBuild.class.getName());
 
     protected final static String PERFORMANCE_TEST_COMMAND = "bzt";
     protected final static String VIRTUALENV_COMMAND = "virtualenv";
@@ -114,6 +118,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
         EnvVars envVars = run.getEnvironment(listener);
+        addPipelineEnvVars(run, envVars);
 
         FilePath virtualenvWorkspace;
         try {
@@ -153,6 +158,30 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         }
 
         run.setResult(Result.FAILURE);
+    }
+
+    private void addPipelineEnvVars(Run<?, ?> run, EnvVars envVars) {
+        if (run.getClass().getCanonicalName().startsWith("org.jenkinsci.plugins.workflow")) {
+            List<? extends Action> allActions = run.getActions();
+            if (!allActions.isEmpty()) {
+                for (Action action : allActions) {
+                    if ("org.jenkinsci.plugins.workflow.cps.EnvActionImpl".equals(action.getClass().getCanonicalName())) {
+                        addEnvVars(action, envVars);
+                    }
+                }
+            }
+        }
+    }
+
+    private void addEnvVars(Action action, EnvVars envVars) {
+        try {
+            Class<? extends Action> actionClass = action.getClass();
+            Method method = actionClass.getMethod("getOverriddenEnvironment");
+            Map<String, String> map = (Map<String, String>) method.invoke(action);
+            envVars.overrideAll(map);
+        } catch (Throwable ex) {
+            LOGGER.warning("Failed to add envVars from action: " + action.getClass());
+        }
     }
 
     private FilePath getVirtualenvWorkspace(Run<?, ?> run, FilePath workspace, PrintStream logger) throws Exception {
