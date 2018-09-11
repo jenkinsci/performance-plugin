@@ -36,6 +36,13 @@
         <tag>HEAD</tag>
     </scm>
 
+    <distributionManagement>
+        <repository>
+            <id>maven.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/releases</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <jenkins.version>1.642.3</jenkins.version>
         <java.level>7</java.level>
@@ -46,13 +53,13 @@
 
     <repositories>
         <repository>
-            <id>repo.jenkins-ci.org</id>
+            <id>maven.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
+            <id>maven.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
