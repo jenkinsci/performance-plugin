@@ -1,7 +1,7 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
-## v3.12 (upcoming)
+## v3.12 (11th of September, 2018)
 - FIX: pass envVars from pipeline script to Taurus
 - FIX: search report files using Ant pattern
 - ADD: JUnit timestamp parsing
