@@ -390,7 +390,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             if (parsedReports == null) {
                 return;
             }
-            setBaseLineBuildToReports(parsedReports);
+            passBaseLineBuildToReports(parsedReports);
 
             if (!modeEvaluation) {
                 evaluateInStandardMode(run, workspace, parsedReports, listener, parsers);
@@ -405,7 +405,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         }
     }
 
-    private void setBaseLineBuildToReports(Collection<PerformanceReport> parsedReports) {
+    private void passBaseLineBuildToReports(Collection<PerformanceReport> parsedReports) {
         for (PerformanceReport report : parsedReports) {
             report.setBaselineBuild(baselineBuild);
             for (UriReport uriReport : report.getUriListOrdered()) {
