@@ -210,6 +210,8 @@
                 </tbody>
             </table>
         </f:entry>
-
+        <f:entry title="Baseline build number">
+            <f:number name="baselineBuild" field="baselineBuild" />
+        </f:entry>
     </f:advanced>
 </j:jelly>

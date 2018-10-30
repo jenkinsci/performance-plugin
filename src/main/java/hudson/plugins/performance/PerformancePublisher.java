@@ -176,6 +176,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      */
     private String percentiles = AbstractReport.DEFAULT_PERCENTILES;
 
+
+    /**
+     * Base line build for create performance Trends
+     * default '0' - is previous build
+     */
+    private int baselineBuild;
+
     /**
      * Legacy constructor used for internal references.
      */
@@ -1395,6 +1402,16 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setPercentiles(String percentiles) {
         this.percentiles = percentiles;
+    }
+
+
+    public int getBaselineBuild() {
+        return baselineBuild;
+    }
+
+    @DataBoundSetter
+    public void setBaselineBuild(int baselineBuild) {
+        this.baselineBuild = baselineBuild;
     }
 
     /**
