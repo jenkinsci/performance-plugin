@@ -390,6 +390,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             if (parsedReports == null) {
                 return;
             }
+            setBaseLineBuildToReports(parsedReports);
 
             if (!modeEvaluation) {
                 evaluateInStandardMode(run, workspace, parsedReports, listener, parsers);
@@ -400,6 +401,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         } else {
             if (failBuildIfNoResultFile) {
                 run.setResult(Result.FAILURE);
+            }
+        }
+    }
+
+    private void setBaseLineBuildToReports(Collection<PerformanceReport> parsedReports) {
+        for (PerformanceReport report : parsedReports) {
+            report.setBaselineBuild(baselineBuild);
+            for (UriReport uriReport : report.getUriListOrdered()) {
+                uriReport.setBaselineBuild(baselineBuild);
             }
         }
     }
