@@ -174,7 +174,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      * Percentiles that will be display in url tables
      * comma-separated
      */
-    private String percentiles;
+    private String percentiles = AbstractReport.DEFAULT_PERCENTILES;
 
     /**
      * Legacy constructor used for internal references.
