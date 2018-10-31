@@ -57,7 +57,7 @@ public class PerformanceReportMap implements ModelObject {
      * Test names are arbitrary human-readable and URL-safe string that identifies
      * an individual report.
      */
-    private Map<String, PerformanceReport> performanceReportMap = new LinkedHashMap<String, PerformanceReport>();
+    private Map<String, PerformanceReport> performanceReportMap = new LinkedHashMap<>();
     private static final String PERFORMANCE_REPORTS_DIRECTORY = "performance-reports";
     private static final String PLUGIN_NAME = "performance";
     private static final String TRENDREPORT_LINK = "trendReport";
@@ -503,41 +503,38 @@ public class PerformanceReportMap implements ModelObject {
             }
         }
 
-        Run<?, ?> previousBuild = getBuild().getPreviousCompletedBuild();
-        if (previousBuild == null) {
-            return;
-        }
-
-        PerformanceBuildAction previousPerformanceAction = previousBuild
-                .getAction(PerformanceBuildAction.class);
-        if (previousPerformanceAction == null) {
-            return;
-        }
-
-        PerformanceReportMap previousPerformanceReportMap = previousPerformanceAction
-                .getPerformanceReportMap();
-        if (previousPerformanceReportMap == null) {
-            return;
-        }
-
         for (Map.Entry<String, PerformanceReport> item : getPerformanceReportMap()
                 .entrySet()) {
             PerformanceReport curReport = item.getValue();
             int baselineBuild = curReport.getBaselineBuild();
             PerformanceReport reportForCompare = (baselineBuild == 0) ?
-                    previousPerformanceReportMap.getPerformanceReportMap().get(item.getKey()) :
-                    getReportForBuildNumber(baselineBuild, item.getKey());
+                    getPerformanceReportForBuild(getBuild().getPreviousCompletedBuild(), item.getKey()) :
+                    getPerformanceReportForBuild(getBuild(baselineBuild), item.getKey());
             if (reportForCompare != null) {
                 curReport.setLastBuildReport(reportForCompare);
             }
         }
     }
 
-    private PerformanceReport getReportForBuildNumber(int buildNumber, String key) {
-        return getBuild(buildNumber).getAction(PerformanceBuildAction.class).getPerformanceReportMap().getPerformanceReportMap().get(key);
+    protected PerformanceReport getPerformanceReportForBuild(Run<?, ?> build, String key) {
+        if (build == null) {
+            return null;
+        }
+
+        PerformanceBuildAction action = build.getAction(PerformanceBuildAction.class);
+        if (action == null) {
+            return null;
+        }
+
+        PerformanceReportMap reportMap = action.getPerformanceReportMap();
+        if (reportMap == null) {
+            return null;
+        }
+
+        return reportMap.getPerformanceReportMap().get(key);
     }
 
-    private Run<?, ?> getBuild(int buildNumber) {
+    protected Run<?, ?> getBuild(int buildNumber) {
         Run<?, ?> r = getBuild();
         while (r != null && buildNumber != r.getNumber()) {
             r = r.getPreviousBuild();
