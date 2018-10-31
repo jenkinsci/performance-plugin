@@ -522,12 +522,27 @@ public class PerformanceReportMap implements ModelObject {
 
         for (Map.Entry<String, PerformanceReport> item : getPerformanceReportMap()
                 .entrySet()) {
-            PerformanceReport lastReport = previousPerformanceReportMap
-                    .getPerformanceReportMap().get(item.getKey());
-            if (lastReport != null) {
-                item.getValue().setLastBuildReport(lastReport);
+            PerformanceReport curReport = item.getValue();
+            int baselineBuild = curReport.getBaselineBuild();
+            PerformanceReport reportForCompare = (baselineBuild == 0) ?
+                    previousPerformanceReportMap.getPerformanceReportMap().get(item.getKey()) :
+                    getReportForBuildNumber(baselineBuild, item.getKey());
+            if (reportForCompare != null) {
+                curReport.setLastBuildReport(reportForCompare);
             }
         }
+    }
+
+    private PerformanceReport getReportForBuildNumber(int buildNumber, String key) {
+        return getBuild(buildNumber).getAction(PerformanceBuildAction.class).getPerformanceReportMap().getPerformanceReportMap().get(key);
+    }
+
+    private Run<?, ?> getBuild(int buildNumber) {
+        Run<?, ?> r = getBuild();
+        while (r != null && buildNumber != r.getNumber()) {
+            r = r.getPreviousBuild();
+        }
+        return r;
     }
 
     protected interface PerformanceReportCollector {
