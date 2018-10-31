@@ -32,7 +32,6 @@ public abstract class AbstractReport {
     protected Map<Double, Long> percentilesDiffValues = new TreeMap<>();
     protected transient boolean isCalculatedPercentilesValues = false;
 
-    protected int baselineBuild = 0;
 
     /**
      * Exclude response time of errored samples
@@ -176,11 +175,4 @@ public abstract class AbstractReport {
         }
     }
 
-    public int getBaselineBuild() {
-        return baselineBuild;
-    }
-
-    public void setBaselineBuild(int baselineBuild) {
-        this.baselineBuild = baselineBuild;
-    }
 }

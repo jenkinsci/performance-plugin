@@ -390,7 +390,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             if (parsedReports == null) {
                 return;
             }
-            passBaseLineBuildToReports(parsedReports);
 
             if (!modeEvaluation) {
                 evaluateInStandardMode(run, workspace, parsedReports, listener, parsers);
@@ -401,15 +400,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         } else {
             if (failBuildIfNoResultFile) {
                 run.setResult(Result.FAILURE);
-            }
-        }
-    }
-
-    private void passBaseLineBuildToReports(Collection<PerformanceReport> parsedReports) {
-        for (PerformanceReport report : parsedReports) {
-            report.setBaselineBuild(baselineBuild);
-            for (UriReport uriReport : report.getUriListOrdered()) {
-                uriReport.setBaselineBuild(baselineBuild);
             }
         }
     }
@@ -448,7 +438,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     private Collection<PerformanceReport> locatePerformanceReports(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers) throws IOException, InterruptedException {
-        Collection<PerformanceReport> performanceReports = new ArrayList<PerformanceReport>();
+        Collection<PerformanceReport> performanceReports = new ArrayList<>();
         PrintStream logger = listener.getLogger();
         EnvVars env = run.getEnvironment(listener);
         String glob;
@@ -484,6 +474,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private void prepareParsers(Collection<PerformanceReportParser> performanceReportParsers) {
         for (PerformanceReportParser parser : performanceReportParsers) {
             parser.setExcludeResponseTime(excludeResponseTime);
+            parser.setBaselineBuild(baselineBuild);
         }
     }
 
