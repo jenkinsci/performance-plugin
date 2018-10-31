@@ -6,14 +6,7 @@
     <l:main-panel>
       <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
         <h2>${%Performance Breakdown by URI}: ${performanceReport.getReportFileName()}</h2>
-        <j:choose>
-          <j:when test="${performanceReport.getBaselineBuild() != 0}">
-            <h4>Comparison with build #${performanceReport.getBaselineBuild()}</h4>
-          </j:when>
-          <j:otherwise>
-            <h4>Comparison with previous build</h4>
-          </j:otherwise>
-        </j:choose>
+
          <j:if test="${it.ifModeThroughputUsed()}">
              <img class="trend" src="./throughputGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
          </j:if>
@@ -42,6 +35,14 @@
 
         <p><a href="./trendReport?performanceReportPosition=${performanceReport.getReportFileName()}">${% Response time trends for build: }"${it.build}" </a></p>
 
+        <j:choose>
+          <j:when test="${performanceReport.getBaselineBuild() != 0}">
+            <h4>Comparison with build #${performanceReport.getBaselineBuild()}</h4>
+          </j:when>
+          <j:otherwise>
+            <h4>Comparison with previous build</h4>
+          </j:otherwise>
+        </j:choose>
         <table class="sortable source" border="1">
          <jm:captionLine it="${performanceReport}"/>
          <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">
