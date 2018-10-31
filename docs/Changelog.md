@@ -1,6 +1,10 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
+## v3.13 (31th of October, 2018)
+- FIX: set default values for percentiles
+- ADD: baseline build for Performance Trend
+
 ## v3.12 (11th of September, 2018)
 - FIX: pass envVars from pipeline script to Taurus
 - FIX: search report files using Ant pattern
