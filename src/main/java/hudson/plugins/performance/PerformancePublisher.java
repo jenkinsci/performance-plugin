@@ -174,7 +174,14 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      * Percentiles that will be display in url tables
      * comma-separated
      */
-    private String percentiles;
+    private String percentiles = AbstractReport.DEFAULT_PERCENTILES;
+
+
+    /**
+     * Base line build for create performance Trends
+     * default '0' - is previous build
+     */
+    private int baselineBuild;
 
     /**
      * Legacy constructor used for internal references.
@@ -431,7 +438,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     private Collection<PerformanceReport> locatePerformanceReports(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers) throws IOException, InterruptedException {
-        Collection<PerformanceReport> performanceReports = new ArrayList<PerformanceReport>();
+        Collection<PerformanceReport> performanceReports = new ArrayList<>();
         PrintStream logger = listener.getLogger();
         EnvVars env = run.getEnvironment(listener);
         String glob;
@@ -467,6 +474,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private void prepareParsers(Collection<PerformanceReportParser> performanceReportParsers) {
         for (PerformanceReportParser parser : performanceReportParsers) {
             parser.setExcludeResponseTime(excludeResponseTime);
+            parser.setBaselineBuild(baselineBuild);
         }
     }
 
@@ -1395,6 +1403,16 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setPercentiles(String percentiles) {
         this.percentiles = percentiles;
+    }
+
+
+    public int getBaselineBuild() {
+        return baselineBuild;
+    }
+
+    @DataBoundSetter
+    public void setBaselineBuild(int baselineBuild) {
+        this.baselineBuild = baselineBuild;
     }
 
     /**

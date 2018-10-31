@@ -95,6 +95,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     private Long throughput;
     protected String percentiles;
+    protected int baselineBuild = 0;
 
     public PerformanceReport() {
         if (StringUtils.isBlank(percentiles)) {
@@ -382,7 +383,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     public List<UriReport> getUriListOrdered() {
         synchronized (uriReportMap) {
             if (uriReportsOrdered == null) {
-                uriReportsOrdered = new ArrayList<UriReport>(uriReportMap.values());
+                uriReportsOrdered = new ArrayList<>(uriReportMap.values());
                 Collections.sort(uriReportsOrdered, Collections.reverseOrder());
             }
             return uriReportsOrdered;
@@ -530,5 +531,13 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     public Long getThroughput() {
         return throughput;
+    }
+
+    public int getBaselineBuild() {
+        return baselineBuild;
+    }
+
+    public void setBaselineBuild(int baselineBuild) {
+        this.baselineBuild = baselineBuild;
     }
 }

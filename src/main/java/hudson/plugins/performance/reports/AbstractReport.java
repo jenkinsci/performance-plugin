@@ -174,4 +174,5 @@ public abstract class AbstractReport {
             return "Line " + perc + "(ms)";
         }
     }
+
 }

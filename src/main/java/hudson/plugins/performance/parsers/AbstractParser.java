@@ -80,6 +80,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
                 listener.getLogger().println("Performance: Parsing JMeter report file '" + reportFile + "'.");
                 final PerformanceReport report = parse(reportFile);
                 result.add(report);
+                passBaselineBuild(report);
                 saveSerializedReport(reportFile, report);
             } catch (Throwable e) {
                 listener.getLogger().println("Performance: Failed to parse file '" + reportFile + "': " + e.getMessage());
@@ -87,6 +88,10 @@ public abstract class AbstractParser extends PerformanceReportParser {
             }
         }
         return result;
+    }
+
+    private void passBaselineBuild(PerformanceReport report) {
+        report.setBaselineBuild(baselineBuild);
     }
 
     /**
@@ -185,7 +190,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
         }
     }
 
-    public static class  ObjectInputStreamWithClassMapping extends ObjectInputStream {
+    public static class ObjectInputStreamWithClassMapping extends ObjectInputStream {
         protected Hashtable<String, Class> classMapping = new Hashtable<String, Class>();
 
         public ObjectInputStreamWithClassMapping(InputStream in) throws IOException {
