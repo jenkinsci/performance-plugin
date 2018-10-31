@@ -544,7 +544,7 @@ public class PerformanceReportMap implements ModelObject {
 
     protected interface PerformanceReportCollector {
 
-        public void addAll(Collection<PerformanceReport> parse);
+        void addAll(Collection<PerformanceReport> parse);
     }
 
     public Object getDynamic(final String link, final StaplerRequest request,
@@ -571,5 +571,10 @@ public class PerformanceReportMap implements ModelObject {
         PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
         return performanceReportPosition.getPerformanceReportPosition();
+    }
+
+    // only for tests
+    static void cleanCurrentReport() {
+        PerformanceReportMap.currentBuild = null;
     }
 }
