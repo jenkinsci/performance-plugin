@@ -1,7 +1,7 @@
 <small>[<< Back to main page](./)</small>
 # Changelog 
 
-## v3.13 (31th of October, 2018)
+## v3.13 (1st of November, 2018)
 - FIX: set default values for percentiles
 - ADD: baseline build for Performance Trend
 
