@@ -5,7 +5,6 @@ import hudson.model.TaskListener;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.reports.PerformanceReport;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,18 +59,13 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
 
         when(prevBuild.getAction(PerformanceBuildAction.class)).thenReturn(prevAction);
         when(prevAction.getBuild()).thenReturn(prevBuild);
-        when(prevAction.getPerformanceReportMap()).thenReturn(prevReportMap);
+        when(prevAction.getPerformanceReportMap(false)).thenReturn(prevReportMap);
         when(prevReportMap.getPerformanceReportMap()).thenReturn(reportMapForPreviousBuild);
 
         when(buildWithNumber3.getAction(PerformanceBuildAction.class)).thenReturn(actionWithNumber3);
         when(actionWithNumber3.getBuild()).thenReturn(buildWithNumber3);
-        when(actionWithNumber3.getPerformanceReportMap()).thenReturn(reportMapWithNumber3);
+        when(actionWithNumber3.getPerformanceReportMap(false)).thenReturn(reportMapWithNumber3);
         when(reportMapWithNumber3.getPerformanceReportMap()).thenReturn(reportMapForBuildNumber3);
-    }
-
-    @After
-    public void cleanCurrentBuild() {
-        PerformanceReportMap.cleanCurrentReport();
     }
 
     private void prepareReportForBuild(int num, int baseline, Map<String, PerformanceReport> map) {
