@@ -1,7 +1,7 @@
 <small>[<< Back to main page](./)</small>
 # Changelog
 
-## v3.14 (upcoming)
+## v3.14 (14th of December, 2018)
 - FIX: StackOverflowError for jobs with 2k+ builds
 
 ## v3.13 (1st of November, 2018)
