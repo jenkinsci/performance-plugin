@@ -1,5 +1,8 @@
 <small>[<< Back to main page](./)</small>
-# Changelog 
+# Changelog
+
+## v3.14 (upcoming)
+- FIX: StackOverflowError for jobs with 2k+ builds
 
 ## v3.13 (1st of November, 2018)
 - FIX: set default values for percentiles

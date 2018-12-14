@@ -59,7 +59,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
     }
 
     public PerformanceReportMap getTarget() {
-        return getPerformanceReportMap();
+        return getPerformanceReportMap(true);
     }
 
     public Run<?, ?> getBuild() {
@@ -71,23 +71,27 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
     }
 
     public PerformanceReportMap getPerformanceReportMap() {
+        return getPerformanceReportMap(true);
+    }
+
+    public synchronized PerformanceReportMap getPerformanceReportMap(boolean isInitNextLevel) {
         PerformanceReportMap reportMap = null;
         WeakReference<PerformanceReportMap> wr = this.performanceReportMap;
         if (wr != null) {
             reportMap = wr.get();
-            if (reportMap != null)
+            if (reportMap != null) {
                 return reportMap;
+            }
         }
-
         try {
-            reportMap = new PerformanceReportMap(this, StreamTaskListener.fromStderr());
+            reportMap = new PerformanceReportMap(this, StreamTaskListener.fromStderr(), isInitNextLevel);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error creating new PerformanceReportMap()", e);
         }
-        this.performanceReportMap = new WeakReference<PerformanceReportMap>(
-                reportMap);
+        this.performanceReportMap = new WeakReference<>(reportMap);
         return reportMap;
     }
+
 
     public void setPerformanceReportMap(WeakReference<PerformanceReportMap> performanceReportMap) {
         this.performanceReportMap = performanceReportMap;

@@ -62,7 +62,10 @@ public class PerformanceReportMap implements ModelObject {
     private static final String PLUGIN_NAME = "performance";
     private static final String TRENDREPORT_LINK = "trendReport";
 
-    private static Run<?, ?> currentBuild = null;
+    public PerformanceReportMap(final PerformanceBuildAction buildAction,
+                                TaskListener listener) throws IOException {
+        this(buildAction, listener, true);
+    }
 
     /**
      * Parses the reports and build a {@link PerformanceReportMap}.
@@ -70,7 +73,7 @@ public class PerformanceReportMap implements ModelObject {
      * @throws IOException If a report fails to parse.
      */
     public PerformanceReportMap(final PerformanceBuildAction buildAction,
-                         TaskListener listener) throws IOException {
+                         TaskListener listener, boolean isTopLevel) throws IOException {
         this.buildAction = buildAction;
         parseReports(getBuild(), listener, new PerformanceReportCollector() {
 
@@ -81,8 +84,14 @@ public class PerformanceReportMap implements ModelObject {
                 }
             }
         }, null);
-        addPreviousBuildReports();
+
+        if (isTopLevel) {
+            loadPreviousBuilds();
+            addPreviousBuildReports();
+        }
     }
+
+
 
     private void addAll(Collection<PerformanceReport> reports) {
         for (PerformanceReport r : reports) {
@@ -488,23 +497,19 @@ public class PerformanceReportMap implements ModelObject {
             }
         }
 
-        addPreviousBuildReports();
+        //addPreviousBuildReports();
+    }
+
+    private void loadPreviousBuilds() {
+        Run<?, ?> prev = getBuild().getPreviousCompletedBuild();
+        while (prev != null) {
+            getReportMap(prev);
+            prev = prev.getPreviousCompletedBuild();
+        }
     }
 
     private void addPreviousBuildReports() {
-
-        // Avoid parsing all builds.
-        if (PerformanceReportMap.currentBuild == null) {
-            PerformanceReportMap.currentBuild = getBuild();
-        } else {
-            if (PerformanceReportMap.currentBuild != getBuild()) {
-                PerformanceReportMap.currentBuild = null;
-                return;
-            }
-        }
-
-        for (Map.Entry<String, PerformanceReport> item : getPerformanceReportMap()
-                .entrySet()) {
+        for (Map.Entry<String, PerformanceReport> item : getPerformanceReportMap().entrySet()) {
             PerformanceReport curReport = item.getValue();
             int baselineBuild = curReport.getBaselineBuild();
             PerformanceReport reportForCompare = (baselineBuild == 0) ?
@@ -516,7 +521,7 @@ public class PerformanceReportMap implements ModelObject {
         }
     }
 
-    protected PerformanceReport getPerformanceReportForBuild(Run<?, ?> build, String key) {
+    protected PerformanceReportMap getReportMap(Run<?, ?> build) {
         if (build == null) {
             return null;
         }
@@ -526,7 +531,11 @@ public class PerformanceReportMap implements ModelObject {
             return null;
         }
 
-        PerformanceReportMap reportMap = action.getPerformanceReportMap();
+        return action.getPerformanceReportMap(false);
+    }
+
+    protected PerformanceReport getPerformanceReportForBuild(Run<?, ?> build, String key) {
+        PerformanceReportMap reportMap = getReportMap(build);
         if (reportMap == null) {
             return null;
         }
@@ -571,10 +580,5 @@ public class PerformanceReportMap implements ModelObject {
         PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
         return performanceReportPosition.getPerformanceReportPosition();
-    }
-
-    // only for tests
-    static void cleanCurrentReport() {
-        PerformanceReportMap.currentBuild = null;
     }
 }
