@@ -1,13 +1,17 @@
 package hudson.plugins.performance.reports;
 
-import hudson.model.ModelObject;
-import hudson.model.Run;
-import hudson.plugins.performance.actions.PerformanceProjectAction;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.data.TaurusFinalStats;
-import hudson.plugins.performance.details.GraphConfigurationDetail;
-import hudson.plugins.performance.tools.SafeMaths;
-import hudson.util.ChartUtil;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.jfree.data.time.FixedMillisecond;
 import org.jfree.data.time.TimeSeries;
@@ -16,16 +20,14 @@ import org.jfree.data.xy.XYDataset;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import hudson.model.ModelObject;
+import hudson.model.Run;
+import hudson.plugins.performance.actions.PerformanceProjectAction;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.data.TaurusFinalStats;
+import hudson.plugins.performance.details.GraphConfigurationDetail;
+import hudson.plugins.performance.tools.SafeMaths;
+import hudson.util.ChartUtil;
 
 /**
  * A report about a particular tested URI.
@@ -62,17 +64,17 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     /**
      * A list that contains the date and duration (in milliseconds) of all individual samples.
      */
-    private final List<Sample> samples = new ArrayList<Sample>(); // retain insertion order.
+    private final List<Sample> samples = new ArrayList<>(); // retain insertion order.
 
     /**
      * A lazy cache of all duration values in {@link #samples}, insertion order (same as {@link #samples}
      */
-    private transient List<Long> durationsIO = new ArrayList<Long>();
+    private transient List<Long> durationsIO = new ArrayList<>();
 
     /**
      * A lazy cache of all duration values in {@link #samples}, ordered by duration.
      */
-    private transient List<Long> durationsSortedBySize = new ArrayList<Long>();
+    private transient List<Long> durationsSortedBySize = new ArrayList<>();
 
     /**
      * Indicates if the collection {@link #durationsSortedBySize} is in a sorted state.
@@ -87,7 +89,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     /**
      * The set of (unique) HTTP status codes from all samples.
      */
-    private Set<String> httpCodes = new HashSet<String>();
+    private Set<String> httpCodes = new HashSet<>();
 
     /**
      * The sum of summarizerSample values from all samples;
@@ -120,6 +122,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
     private int samplesCount;
     protected String percentiles;
+
+    private double sizeInKb;
 
     public Object readResolve() {
         checkPercentileAndSet(0.0, perc0);
@@ -155,7 +159,8 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         httpCodes.add(sample.getHttpCode()); // The Set implementation will ensure that no duplicates will be saved.
         summarizerSize += sample.getSummarizerSamples();
         summarizerErrors += sample.getSummarizerErrors();
-
+        sizeInKb += sample.getSizeInKb();
+        
         if (start == null || sample.getDate().before(start)) {
             start = sample.getDate();
         }
@@ -374,7 +379,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         sb.append(performanceReport.getReportFileName()).append(
                 GraphConfigurationDetail.SEPARATOR).append(getStaplerUri()).append(
                 END_PERFORMANCE_PARAMETER);
-        return URLEncoder.encode(sb.toString(), "UTF-8");
+        return URLEncoder.encode(sb.toString(), StandardCharsets.UTF_8.name());
     }
 
     public void addLastBuildUriReport(UriReport lastBuildUriReport) {
@@ -446,7 +451,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         TimeSeriesCollection resp = new TimeSeriesCollection();
         resp.addSeries(responseTimes);
 
-        ArrayList<XYDataset> dataset = new ArrayList<XYDataset>();
+        ArrayList<XYDataset> dataset = new ArrayList<>();
         dataset.add(resp);
 
         ChartUtil.generateGraph(request, response,
@@ -539,5 +544,27 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
     public boolean hasSamples() {
         return !samples.isEmpty();
+    }
+
+    public double getAverageSizeInKb() {
+        return SafeMaths.roundTwoDecimals(SafeMaths.safeDivide(sizeInKb, samplesCount()));
+    }
+    
+    public double getTotalTrafficInKb() {
+        return SafeMaths.roundTwoDecimals(sizeInKb);
+    }
+    
+    public double getAverageSizeInKbDiff() {
+        if (lastBuildUriReport == null) {
+            return 0;
+        }
+        return SafeMaths.roundTwoDecimals(getAverageSizeInKb() - lastBuildUriReport.getAverageSizeInKb());
+    }
+    
+    public double getTotalTrafficInKbDiff() {
+        if (lastBuildUriReport == null) {
+            return 0;
+        }
+        return SafeMaths.roundTwoDecimals(getTotalTrafficInKb() - lastBuildUriReport.getTotalTrafficInKb());
     }
 }

@@ -42,16 +42,20 @@ public class JMeterCsvParserTest {
     @Test
     public void testDateDateFormats() throws Exception {
         final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, PerformanceReportTest.DEFAULT_PERCENTILES);
-        parseAndVerifyResult(parser, reportFile);
-        parseAndVerifyResult(parser, reportFile2);
-        parseAndVerifyResult(parser, reportFile3);
+        PerformanceReport performanceReport = parseAndVerifyResult(parser, reportFile);
+        assertEquals(41.9, performanceReport.getTotalTrafficInKb(), 0.01);
+        performanceReport = parseAndVerifyResult(parser, reportFile2);
+        assertEquals(41.9, performanceReport.getTotalTrafficInKb(), 0.01);
+        performanceReport = parseAndVerifyResult(parser, reportFile3);
+        assertEquals(41.9, performanceReport.getTotalTrafficInKb(), 0.01);
     }
 
-    private void parseAndVerifyResult(JMeterCsvParser parser, File file) throws Exception {
+    private PerformanceReport parseAndVerifyResult(JMeterCsvParser parser, File file) throws Exception {
         final PerformanceReport result = parser.parse(file);
         // Verify results.
         assertNotNull(result);
         assertEquals("The source file contains three samples. These should all have been added to the performance report.", 3, result.samplesCount());
+        return result;
     }
 
     @Test

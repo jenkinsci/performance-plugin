@@ -23,6 +23,8 @@ public class JMeterCsvParser extends AbstractParser {
     public int responseCodeIdx = -1;
     public int successIdx = -1;
     public int urlIdx = -1;
+    public int bytesIdx = -1;
+    public int sentBytesIdx = -1;
 
 
     @DataBoundConstructor
@@ -52,25 +54,16 @@ public class JMeterCsvParser extends AbstractParser {
         report.setReportFileName(reportFile.getName());
 
         String[] header = null;
-        final BufferedReader reader = new BufferedReader(new FileReader(reportFile));
-        try {
+        try (FileReader fr = new FileReader(reportFile);
+                BufferedReader reader = new BufferedReader(fr)){
             String line = reader.readLine();
             if (line != null) {
                 header = readCSVHeader(line);
             }
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
-        }
+        } 
 
-        Reader fileReader = new FileReader(reportFile);
-        try {
+        try (Reader fileReader = new FileReader(reportFile)){
             parseCSV(fileReader, header, report);
-        } finally {
-            if (fileReader != null) {
-                fileReader.close();
-            }
         }
 
         return report;
@@ -84,13 +77,13 @@ public class JMeterCsvParser extends AbstractParser {
             try {
                 report.addSample(sample);
             } catch (SAXException e) {
-                throw new RuntimeException("Error parsing file '" + report.getReportFileName() + "': Unable to add sample for CSVRecord " + record, e);
+                throw new IllegalStateException("Error parsing file '" + report.getReportFileName() + "': Unable to add sample for CSVRecord " + record, e);
 
             }
         }
     }
 
-    protected String[] readCSVHeader(String line) throws Exception {
+    protected String[] readCSVHeader(String line) {
         this.delimiter = lookingForDelimiter(line);
         final String[] header = line.split(String.valueOf(delimiter));
         for (int i = 0; i < header.length; i++) {
@@ -103,6 +96,10 @@ public class JMeterCsvParser extends AbstractParser {
                 responseCodeIdx = i;
             } else if ("success".equalsIgnoreCase(field)) {
                 successIdx = i;
+            } else if ("bytes".equalsIgnoreCase(field)) {
+                bytesIdx = i;
+            } else if ("sentBytes".equalsIgnoreCase(field)) {
+                sentBytesIdx = i;
             } else if ("URL".equalsIgnoreCase(field) && urlIdx < 0) {
                 urlIdx = i;
             } else if ("label".equalsIgnoreCase(field) && urlIdx < 0) {
@@ -111,22 +108,23 @@ public class JMeterCsvParser extends AbstractParser {
         }
 
         if (timestampIdx < 0 || elapsedIdx < 0 || responseCodeIdx < 0
-                || successIdx < 0 || urlIdx < 0) {
-            throw new Exception("Missing required column");
+                || successIdx < 0 || urlIdx < 0 || bytesIdx < 0
+                // || sentBytesIdx < 0 // sentBytes was introduced in 3.1
+                ) {
+            throw new IllegalStateException("Missing required column");
         }
 
         return header;
     }
 
-    protected static char lookingForDelimiter(String line) throws Exception {
+    protected static char lookingForDelimiter(String line) {
         for (char ch : line.toCharArray()) {
             if (!Character.isLetter(ch)) {
                 return ch;
             }
         }
-        throw new Exception("Cannot find delimiter in header " + line);
+        throw new IllegalStateException("Cannot find delimiter in header " + line);
     }
-
 
     /**
      * Parses a single HttpSample instance from a single CSV Record.
@@ -140,10 +138,12 @@ public class JMeterCsvParser extends AbstractParser {
         sample.setDuration(Long.valueOf(record.get(elapsedIdx)));
         sample.setHttpCode(record.get(responseCodeIdx));
         sample.setSuccessful(Boolean.valueOf(record.get(successIdx)));
+        long bytes = Long.parseLong(record.get(bytesIdx));
+        if(sentBytesIdx != -1) {
+            bytes += Long.parseLong(record.get(sentBytesIdx));
+        }
+        sample.setSizeInKb(Double.valueOf(bytes) / 1024d);
         sample.setUri(record.get(urlIdx));
         return sample;
     }
-
-
-
 }
