@@ -1,5 +1,17 @@
 package hudson.plugins.performance.reports;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+
+import org.apache.commons.lang.StringUtils;
+import org.xml.sax.SAXException;
+
 import hudson.model.Run;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.PerformanceReportMap;
@@ -8,20 +20,6 @@ import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.tools.SafeMaths;
-
-import org.apache.commons.lang.StringUtils;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * Represents a single performance report, which consists of multiple
@@ -254,7 +252,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         if (samplesCount == 0) {
             return 0;
         }
-        return roundTwoDecimals(SafeMaths.safeDivide(totalSizeInKB, samplesCount));
+        return SafeMaths.roundTwoDecimals(SafeMaths.safeDivide(totalSizeInKB, samplesCount));
     }
 
     /**
@@ -366,7 +364,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     public double getTotalTrafficInKb() {
-        return roundTwoDecimals(totalSizeInKB);
+        return SafeMaths.roundTwoDecimals(totalSizeInKB);
     }
 
     public long getMin() {
@@ -481,12 +479,6 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             return true;
         }
         return false;
-    }
-
-    private double roundTwoDecimals(double d) {
-        BigDecimal bd = new BigDecimal(d);
-        bd = bd.setScale(2, RoundingMode.HALF_UP);
-        return bd.doubleValue();
     }
 
     public void setSummarizerSize(long summarizerSize) {

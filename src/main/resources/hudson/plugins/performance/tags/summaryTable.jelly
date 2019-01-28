@@ -41,6 +41,16 @@
         </sup>
     </td>
 
-    <td>${it.getAverageSizeInKb()}</td>
-    <td>${it.getTotalTrafficInKb()}</td>
+    <td>
+    	${it.getAverageSizeInKb()}
+    	<sup class="${h.ifThenElse(it.getAverageSizeInKbDiff()>0,'red','green')}">
+            ${h.ifThenElse(it.getAverageSizeInKbDiff()>0,'+','')}${it.getAverageSizeInKbDiff()}
+        </sup>
+    </td>
+    <td>
+    	${it.getTotalTrafficInKb()}
+    	<sup class="${h.ifThenElse(it.getTotalTrafficInKbDiff()>0,'red','green')}">
+            ${h.ifThenElse(it.getTotalTrafficInKbDiff()>0,'+','')}${it.getTotalTrafficInKbDiff()}
+        </sup>
+    </td>
 </j:jelly>

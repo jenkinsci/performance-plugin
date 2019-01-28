@@ -1,5 +1,8 @@
 package hudson.plugins.performance.tools;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class SafeMaths {
 	public static double safeDivide(double dividend, double divisor) {
 		if (Double.compare(divisor, Double.NaN) == 0) {
@@ -22,4 +25,10 @@ public class SafeMaths {
 		}
 		return dividend / divisor;
 	}
+	
+	public static double roundTwoDecimals(double d) {
+        BigDecimal bd = BigDecimal.valueOf(d);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
 }
