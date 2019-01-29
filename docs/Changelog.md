@@ -1,6 +1,9 @@
 <small>[<< Back to main page](./)</small>
 # Changelog
 
+## v3.15 (29th of January, 2019)
+- ADD: network traffic when parsing JMeter CSV
+
 ## v3.14 (14th of December, 2018)
 - FIX: StackOverflowError for jobs with 2k+ builds
 
