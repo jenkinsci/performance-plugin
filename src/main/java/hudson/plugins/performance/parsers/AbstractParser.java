@@ -81,7 +81,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
 
             // When serialized data cannot be used, the original JMeter files are to be processed.
             try {
-                listener.getLogger().println("Performance: Parsing JMeter report file '" + reportFile + "'.");
+                listener.getLogger().println("Performance: Parsing report file '" + reportFile + "' with filterRegex '"+filterRegex+"'.");
                 final PerformanceReport report = parse(reportFile);
                 result.add(report);
                 passBaselineBuild(report);
