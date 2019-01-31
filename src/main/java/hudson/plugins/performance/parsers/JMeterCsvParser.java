@@ -27,9 +27,13 @@ public class JMeterCsvParser extends AbstractParser {
     public int sentBytesIdx = -1;
 
 
-    @DataBoundConstructor
     public JMeterCsvParser(String glob, String percentiles) {
-        super(glob, percentiles);
+        this(glob, percentiles, PerformanceReport.INCLUDE_ALL);
+    }
+    
+    @DataBoundConstructor
+    public JMeterCsvParser(String glob, String percentiles, String filterRegex) {
+        super(glob, percentiles, filterRegex);
     }
 
     @Extension
@@ -49,7 +53,7 @@ public class JMeterCsvParser extends AbstractParser {
     PerformanceReport parse(File reportFile) throws Exception {
         clearDateFormat();
 
-        final PerformanceReport report = new PerformanceReport(percentiles);
+        final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 

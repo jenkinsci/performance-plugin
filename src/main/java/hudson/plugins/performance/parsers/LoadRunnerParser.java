@@ -33,9 +33,13 @@ public class LoadRunnerParser extends AbstractParser {
         "join Result on Result.[Result ID] = e.[Result ID]"+
         "where [Event Type] = 'Transaction'";
 
-    @DataBoundConstructor
     public LoadRunnerParser(String glob, String percentiles) {
-        super(glob, percentiles);
+        super(glob, percentiles, PerformanceReport.INCLUDE_ALL);
+    }
+    
+    @DataBoundConstructor
+    public LoadRunnerParser(String glob, String percentiles, String filterRegex) {
+        super(glob, percentiles, filterRegex);
     }
 
     @Extension
@@ -72,7 +76,7 @@ public class LoadRunnerParser extends AbstractParser {
 
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
-        final PerformanceReport report = new PerformanceReport(percentiles);
+        final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 

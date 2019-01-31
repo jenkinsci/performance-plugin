@@ -3,6 +3,7 @@ package hudson.plugins.performance.parsers;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
+import hudson.plugins.performance.reports.PerformanceReport;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,9 +33,13 @@ public class ParserFactory {
     }
 
     public static List<PerformanceReportParser> getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env, String percentiles) throws IOException, InterruptedException {
+        return getParser(build, workspace, logger, glob, env, percentiles, PerformanceReport.INCLUDE_ALL);
+        
+    }
+    public static List<PerformanceReportParser> getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env, String percentiles, String filterRegex) throws IOException, InterruptedException {
         String expandGlob = env.expand(glob);
         if (defaultGlobPatterns.containsKey(expandGlob)) {
-            return Collections.singletonList(getParser(defaultGlobPatterns.get(expandGlob), expandGlob, percentiles));
+            return Collections.singletonList(getParser(defaultGlobPatterns.get(expandGlob), expandGlob, percentiles, filterRegex));
         }
 
         File path = new File(expandGlob);
@@ -131,24 +136,27 @@ public class ParserFactory {
         return null;
     }
 
-
     private static PerformanceReportParser getParser(String parserName, String glob, String percentiles) {
+        return getParser(parserName, glob, percentiles,PerformanceReport.INCLUDE_ALL);
+    }
+
+    private static PerformanceReportParser getParser(String parserName, String glob, String percentiles, String filterRegex) {
         if (parserName.equals(JMeterParser.class.getSimpleName())) {
-            return new JMeterParser(glob, percentiles);
+            return new JMeterParser(glob, percentiles, filterRegex);
         } else if (parserName.equals(JMeterCsvParser.class.getSimpleName())) {
-            return new JMeterCsvParser(glob, percentiles);
+            return new JMeterCsvParser(glob, percentiles, filterRegex);
         } else if (parserName.equals(JUnitParser.class.getSimpleName())) {
-            return new JUnitParser(glob, percentiles);
+            return new JUnitParser(glob, percentiles, filterRegex);
         } else if (parserName.equals(TaurusParser.class.getSimpleName())) {
-            return new TaurusParser(glob, percentiles);
+            return new TaurusParser(glob, percentiles, filterRegex);
         } else if (parserName.equals(WrkSummarizerParser.class.getSimpleName())) {
-            return new WrkSummarizerParser(glob, percentiles);
+            return new WrkSummarizerParser(glob, percentiles, filterRegex);
         } else if (parserName.equals(JmeterSummarizerParser.class.getSimpleName())) {
-            return new JmeterSummarizerParser(glob, percentiles);
+            return new JmeterSummarizerParser(glob, percentiles, filterRegex);
         } else if (parserName.equals(IagoParser.class.getSimpleName())) {
-            return new IagoParser(glob, percentiles);
+            return new IagoParser(glob, percentiles, filterRegex);
         } else if (parserName.equals(LoadRunnerParser.class.getSimpleName())) {
-            return new LoadRunnerParser(glob, percentiles);
+            return new LoadRunnerParser(glob, percentiles, filterRegex);
         } else {
             throw new IllegalArgumentException("Unknown parser type: " + parserName);
         }

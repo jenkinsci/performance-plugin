@@ -31,9 +31,14 @@ public class JMeterParser extends AbstractParser {
         }
     }
 
-    @DataBoundConstructor
+
     public JMeterParser(String glob, String percentiles) {
-        super(glob, percentiles);
+        super(glob, percentiles, PerformanceReport.INCLUDE_ALL);
+    }
+    
+    @DataBoundConstructor
+    public JMeterParser(String glob, String percentiles, String filterRegex) {
+        super(glob, percentiles, filterRegex);
     }
 
     @Override
@@ -85,7 +90,7 @@ public class JMeterParser extends AbstractParser {
         factory.setValidating(false);
         factory.setNamespaceAware(false);
 
-        final PerformanceReport report = new PerformanceReport(percentiles);
+        final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 

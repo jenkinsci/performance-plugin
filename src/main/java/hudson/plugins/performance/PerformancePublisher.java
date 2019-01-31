@@ -164,6 +164,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private transient List<PerformanceReportParser> parsers;
 
     private String sourceDataFiles;
+    private String filterRegex;
 
     /**
      * Optional filename indicating whether and where a JUnit compatible XML report should be written
@@ -331,7 +332,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             for (String filePath : sourceDataFiles.split(";")) {
                 if (!filePath.isEmpty()) {
                     try {
-                        parsers.addAll(ParserFactory.getParser(build, workspace, logger, filePath, env, percentiles));
+                        parsers.addAll(ParserFactory.getParser(build, workspace, logger, filePath, env, percentiles, filterRegex));
                     } catch (IOException ex) {
                         logger.println("Cannot detect file type because of error: " + ex.getMessage());
                     }
@@ -1547,6 +1548,20 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             items.add("Percentile Response Time", "PRT");
             return items;
         }
+    }
+
+    /**
+     * @return the filterRegex
+     */
+    public String getFilterRegex() {
+        return filterRegex;
+    }
+
+    /**
+     * @param filterRegex the filterRegex to set
+     */
+    public void setFilterRegex(String filterRegex) {
+        this.filterRegex = filterRegex;
     }
 }
 

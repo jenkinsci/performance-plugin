@@ -1,12 +1,5 @@
 package hudson.plugins.performance.parsers;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.UriReport;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -28,6 +21,14 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
 
 /**
  * An abstraction for parsing data to PerformanceReport instances. This class
@@ -58,14 +59,17 @@ public abstract class AbstractParser extends PerformanceReportParser {
 
     protected String percentiles;
 
-    public AbstractParser(String glob, String percentiles) {
+    protected String filterRegex;
+
+    public AbstractParser(String glob, String percentiles, String filterRegex) {
         super(glob);
         this.percentiles = percentiles;
+        this.filterRegex = filterRegex;
     }
 
     @Override
     public Collection<PerformanceReport> parse(Run<?, ?> build, Collection<File> reports, TaskListener listener) throws IOException {
-        final List<PerformanceReport> result = new ArrayList<PerformanceReport>();
+        final List<PerformanceReport> result = new ArrayList<>();
 
         for (File reportFile : reports) {
             // Attempt to load previously serialized instances from file or cache.
@@ -191,7 +195,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
     }
 
     public static class ObjectInputStreamWithClassMapping extends ObjectInputStream {
-        protected Hashtable<String, Class> classMapping = new Hashtable<String, Class>();
+        protected Hashtable<String, Class> classMapping = new Hashtable<>();
 
         public ObjectInputStreamWithClassMapping(InputStream in) throws IOException {
             super(in);
@@ -257,5 +261,9 @@ public abstract class AbstractParser extends PerformanceReportParser {
                         ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), ex);
             }
         }
+    }
+
+    protected PerformanceReport createPerformanceReport() {
+        return new PerformanceReport(percentiles, filterRegex);
     }
 }

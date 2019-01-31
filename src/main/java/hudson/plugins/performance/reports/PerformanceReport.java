@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
@@ -32,6 +33,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private static final long serialVersionUID = 675698410989941826L;
 
 
+    public static final String INCLUDE_ALL = null;
+
+
     private transient PerformanceBuildAction buildAction;
 
 
@@ -40,7 +44,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     /**
      * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
      */
-    private final Map<String, UriReport> uriReportMap = new LinkedHashMap<String, UriReport>();
+    private final Map<String, UriReport> uriReportMap = new LinkedHashMap<>();
 
     private PerformanceReport lastBuildReport;
 
@@ -95,14 +99,21 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     protected String percentiles;
     protected int baselineBuild = 0;
 
+    private Pattern filterRegexPattern;
+
     public PerformanceReport() {
-        if (StringUtils.isBlank(percentiles)) {
-            this.percentiles = DEFAULT_PERCENTILES;
-        }
+        this(DEFAULT_PERCENTILES, INCLUDE_ALL);
     }
 
-    public PerformanceReport(String percentiles) {
+    public PerformanceReport(String percentiles, String filterRegex) {
         this.percentiles = percentiles;
+        if (filterRegex!=null) {
+            this.filterRegexPattern = Pattern.compile(filterRegex);
+        } 
+    }
+
+    public PerformanceReport(String defaultPercentiles) {
+        this(defaultPercentiles, INCLUDE_ALL);
     }
 
     public Object readResolve() {
@@ -141,6 +152,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
                             + "name properly for each http sample: skipping sample");
             return;
         }
+        if(!isIncluded(uri)) {
+            return;
+        }
         String staplerUri = PerformanceReport.asStaplerURI(uri);
         synchronized (uriReportMap) {
             UriReport uriReport = uriReportMap.get(staplerUri);
@@ -167,6 +181,14 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         totalSizeInKB += pHttpSample.getSizeInKb();
     }
 
+    private boolean isIncluded(String name) {
+        if (filterRegexPattern!=null) {
+            return filterRegexPattern.matcher(name).matches();
+        } else {
+            return true;
+        }
+    }
+
     public void addSample(TaurusFinalStats sample, boolean isSummaryReport) {
         String uri = sample.getLabel();
         if (uri == null) {
@@ -176,6 +198,10 @@ public class PerformanceReport extends AbstractReport implements Serializable,
                             + "name properly for each http sample: skipping sample");
             return;
         }
+        if(!isIncluded(uri)) {
+            return;
+        }
+
 
         if (isSummaryReport) {
             summarizerErrors = nbError = sample.getFail();

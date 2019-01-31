@@ -1,21 +1,5 @@
 package hudson.plugins.performance.parsers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.annotations.SerializedName;
-import hudson.Extension;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
-import hudson.plugins.performance.reports.PerformanceReport;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.xml.sax.SAXException;
-
-import javax.xml.bind.ValidationException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -28,6 +12,25 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.bind.ValidationException;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.xml.sax.SAXException;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.annotations.SerializedName;
+
+import hudson.Extension;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
 
 /**
  * Parses Iago results as dumped by the server.
@@ -46,9 +49,13 @@ public class IagoParser extends AbstractParser {
         }
     }
 
-    @DataBoundConstructor
     public IagoParser(String glob, String percentiles) {
-        super(glob, percentiles);
+        this(glob, percentiles, PerformanceReport.INCLUDE_ALL);
+    }
+    
+    @DataBoundConstructor
+    public IagoParser(String glob, String percentiles, String filterRegex) {
+        super(glob, percentiles, filterRegex);
         this.statsDateFormat = getStatsDateFormat();
     }
 
@@ -67,7 +74,7 @@ public class IagoParser extends AbstractParser {
 
     @Override
     PerformanceReport parse(File reportFile) throws Exception {
-        final PerformanceReport report = new PerformanceReport(percentiles);
+        final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
