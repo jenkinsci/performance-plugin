@@ -193,7 +193,7 @@ public class JMeterParser extends AbstractParser {
      * A delegate for {@link #parse(File)} that can process CSV data.
      */
     PerformanceReport parseCsv(File reportFile) throws Exception {
-        final JMeterCsvParser delegate = new JMeterCsvParser(this.glob, this.percentiles);
+        final JMeterCsvParser delegate = new JMeterCsvParser(this.glob, this.percentiles, this.filterRegex);
         return delegate.parse(reportFile);
     }
 

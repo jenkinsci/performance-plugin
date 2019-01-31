@@ -232,9 +232,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundConstructor
-    public PerformancePublisher(String sourceDataFiles, String filterRegex) {
+    public PerformancePublisher(String sourceDataFiles) {
         this.sourceDataFiles = sourceDataFiles;
-        this.filterRegex = filterRegex;
     }
 
     public static File getPerformanceReport(Run<?, ?> build, String parserDisplayName,
@@ -1553,6 +1552,21 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             items.add("Percentile Response Time", "PRT");
             return items;
         }
+    }
+
+    /**
+     * @return the filterRegex
+     */
+    public String getFilterRegex() {
+        return filterRegex;
+    }
+
+    /**
+     * @param filterRegex the filterRegex to set
+     */
+    @DataBoundSetter
+    public void setFilterRegex(String filterRegex) {
+        this.filterRegex = filterRegex;
     }
 }
 
