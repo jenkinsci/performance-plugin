@@ -1,6 +1,22 @@
 package hudson.plugins.performance.build;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.junit.Test;
+import org.jvnet.hudson.test.HudsonTestCase;
+
 import com.google.common.io.Files;
+
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -10,22 +26,10 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
+import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.tasks.Publisher;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.junit.Test;
-import org.jvnet.hudson.test.HudsonTestCase;
-
-import javax.annotation.Nonnull;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 
 public class PerformanceTestBuildTest extends HudsonTestCase {
@@ -283,10 +287,10 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String jobLog = new String(stream.toByteArray());
 
         File reportFile = new File(run.getRootDir(), "performance-reports/Taurus/aggregate-results.xml");
-        assertTrue(jobLog, jobLog.contains("Performance: Recording Taurus reports"));
-        assertTrue(jobLog, jobLog.contains("aggregate-results.xml'"));
-        assertTrue(jobLog, jobLog.contains("Performance: Parsing JMeter report file '" + reportFile.getAbsolutePath() + "'."));
-        assertTrue(jobLog, reportFile.exists());
+        assertTrue("Report file "+ reportFile.getAbsolutePath()+" expected to exist", reportFile.exists());
+        assertTrue("Job log expected to contains 'Performance: Recording Taurus reports', jobLog:"+jobLog, jobLog.contains("Performance: Recording Taurus reports"));
+        assertTrue("Job log expected to contains 'aggregate-results.xml', jobLog:"+jobLog, jobLog.contains("aggregate-results.xml'"));
+        assertTrue("Job log expected to contains 'Performance: Parsing report file ...', jobLog:"+jobLog, jobLog.contains("Performance: Parsing report file '" + reportFile.getAbsolutePath() + "' with filterRegex '"+PerformanceReport.INCLUDE_ALL+"'."));
     }
 
 
