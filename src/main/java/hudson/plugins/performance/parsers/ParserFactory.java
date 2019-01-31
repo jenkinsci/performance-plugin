@@ -1,10 +1,5 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.EnvVars;
-import hudson.FilePath;
-import hudson.model.Run;
-import hudson.plugins.performance.reports.PerformanceReport;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -15,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import hudson.EnvVars;
+import hudson.FilePath;
+import hudson.model.Run;
 
 public class ParserFactory {
     private static final Logger LOGGER = Logger.getLogger(ParserFactory.class.getName());
@@ -32,22 +31,20 @@ public class ParserFactory {
         defaultGlobPatterns.put("**/*.mdb", LoadRunnerParser.class.getSimpleName());
     }
 
-    public static List<PerformanceReportParser> getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env, String percentiles) throws IOException, InterruptedException {
-        return getParser(build, workspace, logger, glob, env, percentiles, PerformanceReport.INCLUDE_ALL);
-        
-    }
-    public static List<PerformanceReportParser> getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, EnvVars env, String percentiles, String filterRegex) throws IOException, InterruptedException {
+    public static List<PerformanceReportParser> getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, 
+            EnvVars env, String percentiles, String filterRegex) throws IOException, InterruptedException {
         String expandGlob = env.expand(glob);
         if (defaultGlobPatterns.containsKey(expandGlob)) {
             return Collections.singletonList(getParser(defaultGlobPatterns.get(expandGlob), expandGlob, percentiles, filterRegex));
         }
 
         File path = new File(expandGlob);
-        return path.isAbsolute() ? getParserWithAbsolutePath(build, workspace, logger, path, percentiles) : getParserWithRelativePath(build, workspace, logger, expandGlob, percentiles);
+        return path.isAbsolute() ? getParserWithAbsolutePath(build, workspace, logger, path, percentiles, filterRegex) : 
+            getParserWithRelativePath(build, workspace, logger, expandGlob, percentiles, filterRegex);
     }
 
-    private static List<PerformanceReportParser> getParserWithRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, String percentiles) throws IOException, InterruptedException {
-        List<PerformanceReportParser> result = getParserUsingAntPatternRelativePath(build, workspace, logger, glob, percentiles);
+    private static List<PerformanceReportParser> getParserWithRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, String percentiles, String filterRegex) throws IOException, InterruptedException {
+        List<PerformanceReportParser> result = getParserUsingAntPatternRelativePath(build, workspace, logger, glob, percentiles, filterRegex);
         if (result != null && !result.isEmpty()) {
             return result;
         }
@@ -57,13 +54,14 @@ public class ParserFactory {
             // if report on remote slave
             FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + glob));
             localReport.copyFrom(new FilePath(workspace, glob));
-            return Collections.singletonList(getParser(ParserDetector.detect(localReport.getRemote()), glob, percentiles));
+            return Collections.singletonList(getParser(ParserDetector.detect(localReport.getRemote()), glob, percentiles, filterRegex));
         }
 
-        return Collections.singletonList(getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob, percentiles));
+        return Collections.singletonList(getParser(ParserDetector.detect(workspace.getRemote() + '/' + glob), workspace.getRemote() + '/' + glob, percentiles, filterRegex));
     }
 
-    private static List<PerformanceReportParser> getParserUsingAntPatternRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, String percentiles) throws InterruptedException {
+    private static List<PerformanceReportParser> getParserUsingAntPatternRelativePath(Run<?, ?> build, FilePath workspace, PrintStream logger, 
+            String glob, String percentiles, String filterRegex) throws InterruptedException {
         try {
             FilePath[] pathList = workspace.list(glob);
             List<PerformanceReportParser> result = new ArrayList<>();
@@ -75,7 +73,7 @@ public class ParserFactory {
                     continue;
                 }
                 src.copyTo(new FilePath(localReport));
-                result.add(getParser(ParserDetector.detect(localReport.getPath()), glob, percentiles));
+                result.add(getParser(ParserDetector.detect(localReport.getPath()), glob, percentiles, filterRegex));
             }
             return result;
         } catch (IOException ignored) {
@@ -85,8 +83,8 @@ public class ParserFactory {
     }
 
 
-    private static List<PerformanceReportParser> getParserWithAbsolutePath(Run<?, ?> build, FilePath workspace, PrintStream logger, File path, String percentiles) throws IOException, InterruptedException {
-        List<PerformanceReportParser> result = getParserUsingAntPatternAbsolutePath(build, workspace, logger, path, percentiles);
+    private static List<PerformanceReportParser> getParserWithAbsolutePath(Run<?, ?> build, FilePath workspace, PrintStream logger, File path, String percentiles, String filterRegex) throws IOException, InterruptedException {
+        List<PerformanceReportParser> result = getParserUsingAntPatternAbsolutePath(build, workspace, logger, path, percentiles, filterRegex);
         if (result != null && !result.isEmpty()) {
             return result;
         }
@@ -95,14 +93,14 @@ public class ParserFactory {
             // if report on remote slave
             FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + path.getName()));
             localReport.copyFrom(new FilePath(workspace.getChannel(), path.getAbsolutePath()));
-            return Collections.singletonList(getParser(ParserDetector.detect(localReport.getRemote()), path.getName(), percentiles));
+            return Collections.singletonList(getParser(ParserDetector.detect(localReport.getRemote()), path.getName(), percentiles, filterRegex));
         }
 
 
-        return Collections.singletonList(getParser(ParserDetector.detect(path.getAbsolutePath()), path.getAbsolutePath(), percentiles));
+        return Collections.singletonList(getParser(ParserDetector.detect(path.getAbsolutePath()), path.getAbsolutePath(), percentiles, filterRegex));
     }
 
-    private static List<PerformanceReportParser> getParserUsingAntPatternAbsolutePath(Run<?, ?> build, FilePath wsp, PrintStream logger, File path, String percentiles) throws InterruptedException {
+    private static List<PerformanceReportParser> getParserUsingAntPatternAbsolutePath(Run<?, ?> build, FilePath wsp, PrintStream logger, File path, String percentiles, String filterRegex) throws InterruptedException {
         try {
             File parent = path.getParentFile();
             FilePath workspace = new FilePath(wsp.getChannel(), parent.getAbsolutePath());
@@ -127,7 +125,7 @@ public class ParserFactory {
                 }
                 src.copyTo(new FilePath(localReport));
 
-                parsers.add(getParser(ParserDetector.detect(localReport.getPath()), localReport.getPath(), percentiles));
+                parsers.add(getParser(ParserDetector.detect(localReport.getPath()), localReport.getPath(), percentiles, filterRegex));
             }
             return parsers;
         } catch (IOException ignored) {
@@ -136,9 +134,6 @@ public class ParserFactory {
         return null;
     }
 
-    private static PerformanceReportParser getParser(String parserName, String glob, String percentiles) {
-        return getParser(parserName, glob, percentiles,PerformanceReport.INCLUDE_ALL);
-    }
 
     private static PerformanceReportParser getParser(String parserName, String glob, String percentiles, String filterRegex) {
         if (parserName.equals(JMeterParser.class.getSimpleName())) {

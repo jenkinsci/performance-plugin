@@ -99,15 +99,18 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     protected String percentiles;
     protected int baselineBuild = 0;
 
-    private Pattern filterRegexPattern;
+    private transient Pattern filterRegexPattern;
+
+    private String filterRegex;
 
     public PerformanceReport() {
-        this(DEFAULT_PERCENTILES, INCLUDE_ALL);
+        this(DEFAULT_PERCENTILES);
     }
 
     public PerformanceReport(String percentiles, String filterRegex) {
         this.percentiles = percentiles;
-        if (filterRegex!=null) {
+        this.filterRegex = filterRegex;
+        if (filterRegex!=null && filterRegex.trim().length()>0) {
             this.filterRegexPattern = Pattern.compile(filterRegex);
         } 
     }
@@ -557,5 +560,19 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     public void setBaselineBuild(int baselineBuild) {
         this.baselineBuild = baselineBuild;
+    }
+
+    /**
+     * @return the filterRegex
+     */
+    public String getFilterRegex() {
+        return filterRegex;
+    }
+
+    /**
+     * @param filterRegex the filterRegex to set
+     */
+    public void setFilterRegex(String filterRegex) {
+        this.filterRegex = filterRegex;
     }
 }

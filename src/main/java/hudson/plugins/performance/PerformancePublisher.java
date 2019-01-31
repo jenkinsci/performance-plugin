@@ -232,8 +232,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundConstructor
-    public PerformancePublisher(String sourceDataFiles) {
+    public PerformancePublisher(String sourceDataFiles, String filterRegex) {
         this.sourceDataFiles = sourceDataFiles;
+        this.filterRegex = filterRegex;
     }
 
     public static File getPerformanceReport(Run<?, ?> build, String parserDisplayName,
@@ -332,6 +333,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             for (String filePath : sourceDataFiles.split(";")) {
                 if (!filePath.isEmpty()) {
                     try {
+                        logger.println("Creating parser with percentiles:'"+percentiles+",' filterRegex:"+filterRegex);
                         parsers.addAll(ParserFactory.getParser(build, workspace, logger, filePath, env, percentiles, filterRegex));
                     } catch (IOException ex) {
                         logger.println("Cannot detect file type because of error: " + ex.getMessage());
@@ -343,7 +345,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     /**
-     * Used for migrate from user choose of parser to autodetect parser
+     * Used to migrate from user selected parser to autodetected parser
      */
     private void migrateParsers() {
         if (parsers != null && !this.parsers.isEmpty()) {
@@ -369,7 +371,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         if (parsers == null)
             parsers = new ArrayList<PerformanceReportParser>();
         if (filename != null) {
-            parsers.add(new JMeterParser(filename, percentiles));
+            parsers.add(new JMeterParser(filename, percentiles, filterRegex));
             filename = null;
         }
         // Migrate parsers to simple field sourceDataFiles.
@@ -463,7 +465,10 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 return null;
             }
 
+            logger.println("Performance: " + parser.getReportName() + " copying reports to master, files '" + files+"'");
             List<File> localReports = copyReportsToMaster(run, logger, files, parser.getDescriptor().getDisplayName());
+            logger.println("Performance: " + parser.getReportName() + " parsing local reports '" + localReports
+                    + "'");
             performanceReports.addAll(parser.parse(run, localReports, listener));
         }
         return performanceReports;
@@ -1548,20 +1553,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             items.add("Percentile Response Time", "PRT");
             return items;
         }
-    }
-
-    /**
-     * @return the filterRegex
-     */
-    public String getFilterRegex() {
-        return filterRegex;
-    }
-
-    /**
-     * @param filterRegex the filterRegex to set
-     */
-    public void setFilterRegex(String filterRegex) {
-        this.filterRegex = filterRegex;
     }
 }
 

@@ -626,7 +626,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         final RunExt prevBuild = new RunExt(freeStyleProject);
         prevBuild.onStartBuilding();
 
-        PerformancePublisher publisher = new PerformancePublisher("") {
+        PerformancePublisher publisher = new PerformancePublisher("", PerformanceReport.INCLUDE_ALL) {
             @Override
             protected List<PerformanceReportParser> getParsers(Run<?, ?> build, FilePath workspace, PrintStream logger, EnvVars env) throws IOException, InterruptedException {
                 List<PerformanceReportParser> parsers = new ArrayList<>();
