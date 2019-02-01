@@ -287,10 +287,13 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String jobLog = new String(stream.toByteArray());
 
         File reportFile = new File(run.getRootDir(), "performance-reports/Taurus/aggregate-results.xml");
-        assertTrue("Report file "+ reportFile.getAbsolutePath()+" expected to exist", reportFile.exists());
-        assertTrue("Job log expected to contains 'Performance: Recording Taurus reports', jobLog:"+jobLog, jobLog.contains("Performance: Recording Taurus reports"));
-        assertTrue("Job log expected to contains 'aggregate-results.xml', jobLog:"+jobLog, jobLog.contains("aggregate-results.xml'"));
-        assertTrue("Job log expected to contains 'Performance: Parsing report file ...', jobLog:"+jobLog, jobLog.contains("Performance: Parsing report file '" + reportFile.getAbsolutePath() + "' with filterRegex '"+PerformanceReport.INCLUDE_ALL+"'."));
+        assertTrue("Report file " + reportFile.getAbsolutePath() + " expected to exist", reportFile.exists());
+        assertTrue("Job log expected to contains 'Performance: Recording Taurus reports', jobLog:" + jobLog, 
+                jobLog.contains("Performance: Recording Taurus reports"));
+        assertTrue("Job log expected to contains 'aggregate-results.xml', jobLog:" + jobLog, jobLog.contains("aggregate-results.xml'"));
+        assertTrue("Job log expected to contains 'Performance: Parsing report file ...', jobLog:" + jobLog, 
+                jobLog.contains("Performance: Parsing report file '" + reportFile.getAbsolutePath() + "' with filterRegex '" 
+                        + PerformanceReport.INCLUDE_ALL + "'."));
     }
 
 

@@ -185,7 +185,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     }
 
     private boolean isIncluded(String name) {
-        if (filterRegexPattern!=null) {
+        if (filterRegexPattern != null) {
             return filterRegexPattern.matcher(name).matches();
         } else {
             return true;
@@ -201,7 +201,8 @@ public class PerformanceReport extends AbstractReport implements Serializable,
                             + "name properly for each http sample: skipping sample");
             return;
         }
-        if(!isIncluded(uri)) {
+        
+        if (!isIncluded(uri)) {
             return;
         }
 
