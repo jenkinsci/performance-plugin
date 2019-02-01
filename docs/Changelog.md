@@ -5,7 +5,7 @@
 - ADD: Add ability to select which transactions/samplers are included in report through regular expression. Developed by [Philippe M.](https://github.com/pmouawad) and sponsored by [Ubik Load Pack](https://ubikloadpack.com)
 
 ## v3.15 (29th of January, 2019)
-- ADD: network traffic when parsing JMeter CSV. Developed by [Philippe M.](https://leanpub.com/master-jmeter-from-load-test-to-devops) and sponsored by [Ubik Load Pack](https://ubikloadpack.com) 
+- ADD: network traffic when parsing JMeter CSV. Developed by [Philippe M.](https://github.com/pmouawad) and sponsored by [Ubik Load Pack](https://ubikloadpack.com) 
 
 ## v3.14 (14th of December, 2018)
 - FIX: StackOverflowError for jobs with 2k+ builds
