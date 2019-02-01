@@ -332,7 +332,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             for (String filePath : sourceDataFiles.split(";")) {
                 if (!filePath.isEmpty()) {
                     try {
-                        logger.println("Creating parser with percentiles:'"+percentiles+",' filterRegex:"+filterRegex);
+                        logger.println("Creating parser with percentiles:'" + percentiles + ",' filterRegex:" + filterRegex);
                         parsers.addAll(ParserFactory.getParser(build, workspace, logger, filePath, env, percentiles, filterRegex));
                     } catch (IOException ex) {
                         logger.println("Cannot detect file type because of error: " + ex.getMessage());
