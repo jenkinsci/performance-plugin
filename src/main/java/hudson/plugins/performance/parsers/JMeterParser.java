@@ -1,20 +1,22 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.Extension;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
-import hudson.plugins.performance.reports.PerformanceReport;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.parsers.SAXParserFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
+
+import javax.xml.parsers.SAXParserFactory;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import hudson.Extension;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
 
 /**
  * Parser for JMeter.
@@ -66,19 +68,16 @@ public class JMeterParser extends AbstractParser {
      * @return <code>true</code> if the file content has been determined to be XML, otherwise <code>false</code>.
      */
     public static boolean isXmlFile(File file) throws IOException {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(file));
+        try (FileReader fr = new FileReader(file);
+                BufferedReader reader = new BufferedReader(fr)) {
             String firstLine;
             while ((firstLine = reader.readLine()) != null) {
-                if (firstLine.trim().length() == 0) continue; // skip empty lines.
-                return firstLine != null && firstLine.toLowerCase().trim().startsWith("<?xml ");
+                if (firstLine.trim().length() == 0) {
+                    continue; // skip empty lines.
+                }
+                return firstLine.toLowerCase().trim().startsWith("<?xml ");
             }
             return false;
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
         }
     }
 
