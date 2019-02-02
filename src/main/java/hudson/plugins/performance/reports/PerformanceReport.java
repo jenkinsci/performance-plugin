@@ -146,7 +146,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         return uri.replace("http:", "").replace("https:", "").replaceAll("/", "_").replaceAll(":", "_");
     }
 
-    public void addSample(HttpSample pHttpSample) throws SAXException {
+    public void addSample(HttpSample pHttpSample) {
         String uri = pHttpSample.getUri();
         if (uri == null) {
             buildAction
@@ -497,7 +497,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         PerformanceReportParser parser = buildAction.getParserByDisplayName("JmeterSummarizer");
         if (parser != null) {
             String fileExt = parser.glob;
-            String parts[] = fileExt.split("\\s*[;:,]+\\s*");
+            String[] parts = fileExt.split("\\s*[;:,]+\\s*");
             for (String path : parts) {
                 if (filename.endsWith(path.substring(5))) {
                     return true;
@@ -505,10 +505,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             }
         }
         parser = buildAction.getParserByDisplayName("Iago");
-        if (parser != null) {
-            return true;
-        }
-        return false;
+        return parser != null;
     }
 
     public void setSummarizerSize(long summarizerSize) {
