@@ -152,7 +152,7 @@ public class ConstraintReport {
             } else if (ce.getAbstractConstraint() instanceof RelativeConstraint) {
                 this.allConstraints++;
                 this.relativeConstraints++;
-                if (ce.getAbstractConstraint().getSuccess() == true) {
+                if (ce.getAbstractConstraint().getSuccess()) {
                     this.successfulConstraints++;
                 } else {
                     this.violatedConstraints++;
