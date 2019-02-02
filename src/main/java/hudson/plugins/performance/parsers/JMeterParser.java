@@ -70,14 +70,18 @@ public class JMeterParser extends AbstractParser {
     public static boolean isXmlFile(File file) throws IOException {
         try (FileReader fr = new FileReader(file);
                 BufferedReader reader = new BufferedReader(fr)) {
-            String firstLine;
-            while ((firstLine = reader.readLine()) != null) {
-                if (firstLine.trim().length() == 0) {
+            String line;
+            boolean isXml = false;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().length() == 0) {
                     continue; // skip empty lines.
+                } 
+                if (line.toLowerCase().trim().startsWith("<?xml ")) {
+                    isXml = true;
                 }
-                return firstLine.toLowerCase().trim().startsWith("<?xml ");
+                break;
             }
-            return false;
+            return isXml;
         }
     }
 
@@ -174,11 +178,7 @@ public class JMeterParser extends AbstractParser {
             public void endElement(String uri, String localName, String qName) {
                 if ("httpSample".equalsIgnoreCase(qName) || "sample".equalsIgnoreCase(qName)) {
                     if (counter == 1) {
-                        try {
-                            report.addSample(currentSample);
-                        } catch (SAXException e) {
-                            e.printStackTrace();
-                        }
+                        report.addSample(currentSample);
                     }
                     counter--;
                 }

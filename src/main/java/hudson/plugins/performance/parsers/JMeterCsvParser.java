@@ -78,12 +78,7 @@ public class JMeterCsvParser extends AbstractParser {
         Iterable<CSVRecord> records = csvFormat.parse(in);
         for (CSVRecord record : records) {
             final HttpSample sample = getSample(record);
-            try {
-                report.addSample(sample);
-            } catch (SAXException e) {
-                throw new IllegalStateException("Error parsing file '" + report.getReportFileName() + "': Unable to add sample for CSVRecord " + record, e);
-
-            }
+            report.addSample(sample);
         }
     }
 

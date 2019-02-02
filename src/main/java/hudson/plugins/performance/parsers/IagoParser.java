@@ -77,11 +77,7 @@ public class IagoParser extends AbstractParser {
                 final HttpSample sample = this.getSample(line, reportFile.getName());
                 String nextLine = reader.readLine();
                 if (sample != null) {
-                    try {
-                        report.addSample(sample);
-                    } catch (SAXException e) {
-                        throw new IllegalArgumentException("Error parsing file '" + reportFile + "': Unable to add sample for line " + line, e);
-                    }
+                    report.addSample(sample);
                 }
                 line = nextLine;
             }
