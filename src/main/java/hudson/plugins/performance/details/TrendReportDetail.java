@@ -71,7 +71,7 @@ public class TrendReportDetail implements ModelObject,
 
     public class Row {
 
-        int entry;
+        private int entry;
 
         public Row(int entry) {
             this.entry = entry;
@@ -87,7 +87,7 @@ public class TrendReportDetail implements ModelObject,
 
         public List<Number> getValues() {
             int count = dataSet.getRowCount();
-            List<Number> list = new ArrayList<Number>(count);
+            List<Number> list = new ArrayList<>(count);
             for (int i = 0; i < count; i++) {
                 list.add(dataSet.getValue(dataSet.getRowKey(i),
                         dataSet.getColumnKey(entry)));
