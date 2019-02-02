@@ -125,7 +125,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
      */
     protected static PerformanceReport loadSerializedReport(File reportFile) {
         if (reportFile == null) {
-            throw new NullPointerException("Argument 'reportFile' cannot be null.");
+            throw new IllegalArgumentException("Argument 'reportFile' cannot be null.");
         }
         final String serialized = reportFile.getPath() + SERIALIZED_DATA_FILE_SUFFIX;
         File file = new File(serialized);
@@ -158,10 +158,10 @@ public abstract class AbstractParser extends PerformanceReportParser {
      */
     protected static void saveSerializedReport(File reportFile, PerformanceReport report) {
         if (reportFile == null) {
-            throw new NullPointerException("Argument 'reportFile' cannot be null.");
+            throw new IllegalArgumentException("Argument 'reportFile' cannot be null.");
         }
         if (report == null) {
-            throw new NullPointerException("Argument 'report' cannot be null.");
+            throw new IllegalArgumentException("Argument 'report' cannot be null.");
         }
         final String serialized = reportFile.getPath() + SERIALIZED_DATA_FILE_SUFFIX;
 

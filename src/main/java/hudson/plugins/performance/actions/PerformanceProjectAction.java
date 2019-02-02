@@ -473,7 +473,6 @@ public class PerformanceProjectAction implements Action {
                         Messages.ProjectAction_Line90(), label);
             }
             nbBuildsToAnalyze--;
-            continue;
         }
 
         String legendLimit = request.getParameter("legendLimit");

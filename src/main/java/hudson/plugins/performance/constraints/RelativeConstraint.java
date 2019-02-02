@@ -332,6 +332,7 @@ public class RelativeConstraint extends AbstractConstraint {
                 break;
             default:
                 setSuccess(false);
+                break;
         }
         ConstraintEvaluation evaluation = new ConstraintEvaluation(this, result, calculatedValue);
 
