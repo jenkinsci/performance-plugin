@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -91,14 +90,14 @@ public class RelativeConstraint extends AbstractConstraint {
 
 
         public FormValidation doCheckRelatedPerfReport(@QueryParameter String relatedPerfReport) {
-            if (StringUtils.isBlank(relatedPerfReport)) {
+            if (relatedPerfReport == null || relatedPerfReport.isEmpty()) {
                 return FormValidation.error("This field must not be empty");
             }
             return FormValidation.ok();
         }
 
         public FormValidation doCheckTestCase(@QueryParameter String testCase) {
-            if (StringUtils.isBlank(testCase)) {
+            if (testCase == null || testCase.isEmpty()) {
                 return FormValidation.error("This field must not be empty");
             }
             return FormValidation.ok();
