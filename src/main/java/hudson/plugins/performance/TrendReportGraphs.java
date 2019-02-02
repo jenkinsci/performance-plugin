@@ -38,19 +38,17 @@ public class TrendReportGraphs implements ModelObject {
         PerformanceBuildAction performanceBuildAction = build
                 .getAction(PerformanceBuildAction.class);
 
-        if (performanceBuildAction != null) {
-            if (performanceReport != null) {
-                String uri = performanceReportPosition.getSummarizerTrendUri();
-                if (uri != null) {
-                    UriReport uriReport = performanceReport.getUriReportMap().get(uri);
-                    uriReport.doSummarizerTrendGraph(request, response);
-                }
+        if (performanceBuildAction != null && performanceReport != null) {
+            String uri = performanceReportPosition.getSummarizerTrendUri();
+            if (uri != null) {
+                UriReport uriReport = performanceReport.getUriReportMap().get(uri);
+                uriReport.doSummarizerTrendGraph(request, response);
             }
         }
     }
 
     public ArrayList<String> getUris() {
-        ArrayList<String> uriList = new ArrayList<String>();
+        ArrayList<String> uriList = new ArrayList<>();
         PerformanceReport report = getPerformanceReport();
 
         if (report != null) {

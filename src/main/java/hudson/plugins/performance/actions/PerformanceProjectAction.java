@@ -312,10 +312,8 @@ public class PerformanceProjectAction implements Action {
 
     private String getPerformanceReportNameFile(final PerformanceReportPosition performanceReportPosition) {
         String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
-        if (performanceReportNameFile == null) {
-            if (getPerformanceReportList().size() == 1) {
-                performanceReportNameFile = getPerformanceReportList().get(0);
-            }
+        if (performanceReportNameFile == null && getPerformanceReportList().size() == 1) {
+            performanceReportNameFile = getPerformanceReportList().get(0);
         }
         return performanceReportNameFile;
     }
