@@ -51,9 +51,9 @@ public abstract class AbstractParser extends PerformanceReportParser {
     private static final Cache<String, PerformanceReport> CACHE = CacheBuilder.newBuilder().maximumSize(1000).softValues().build();
 
     protected boolean isNumberDateFormat = false;
-    protected transient SimpleDateFormat format;
+    protected SimpleDateFormat format;
 
-    protected final static String[] DATE_FORMATS = new String[]{
+    protected static final String[] DATE_FORMATS = new String[]{
             "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss,SSS", "yyyy/mm/dd HH:mm:ss"
     };
 
@@ -128,28 +128,20 @@ public abstract class AbstractParser extends PerformanceReportParser {
             throw new NullPointerException("Argument 'reportFile' cannot be null.");
         }
         final String serialized = reportFile.getPath() + SERIALIZED_DATA_FILE_SUFFIX;
-
-        ObjectInputStream in = null;
+        File file = new File(serialized);
         synchronized (CACHE) {
-            try {
-                PerformanceReport report = CACHE.getIfPresent(serialized);
-                if (report == null) {
-                    in = new ObjectInputStreamWithClassMapping(new BufferedInputStream(new FileInputStream(serialized)));
-                    report = (PerformanceReport) in.readObject();
-                    CACHE.put(serialized, report);
-                }
-                return report;
-            } catch (FileNotFoundException ex) {
-                // That's OK
-            } catch (Exception ex) {
-                LOGGER.log(Level.WARNING, "Reading serialized PerformanceReport instance from file '" + serialized + "' failed.", ex);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException ex) {
-                        LOGGER.log(Level.WARNING, "Unable to close inputstream after attempt to read data from file '" + serialized + "'.", ex);
-                    }
+            PerformanceReport report = CACHE.getIfPresent(serialized);
+            if (report == null && file.exists() && file.canRead()) {
+                try (FileInputStream fis = new FileInputStream(serialized);
+                        BufferedInputStream bis = new BufferedInputStream(fis);
+                        ObjectInputStream in = new ObjectInputStreamWithClassMapping(bis)) {
+                        report = (PerformanceReport) in.readObject();
+                        CACHE.put(serialized, report);
+                    return report;
+                } catch (FileNotFoundException ex) {
+                    // That's OK
+                } catch (Exception ex) {
+                    LOGGER.log(Level.WARNING, "Reading serialized PerformanceReport instance from file '" + serialized + "' failed.", ex);
                 }
             }
             return null;
@@ -176,26 +168,17 @@ public abstract class AbstractParser extends PerformanceReportParser {
         synchronized (CACHE) {
             CACHE.put(serialized, report);
         }
-
-        ObjectOutputStream out = null;
-        try {
-            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(serialized)));
+        try (FileOutputStream fos = new FileOutputStream(serialized);
+                BufferedOutputStream bos = new BufferedOutputStream(fos);
+                ObjectOutputStream out = new ObjectOutputStream(bos)) {
             out.writeObject(report);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Saving serialized PerformanceReport instance to file '" + serialized + "' failed.", ex);
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, "Unable to close outputstream after attempt to write data to file '" + serialized + "'.", ex);
-                }
-            }
         }
     }
 
     public static class ObjectInputStreamWithClassMapping extends ObjectInputStream {
-        protected Hashtable<String, Class> classMapping = new Hashtable<>();
+        protected Hashtable<String, Class> classMapping = new Hashtable<>(); 
 
         public ObjectInputStreamWithClassMapping(InputStream in) throws IOException {
             super(in);
@@ -211,8 +194,6 @@ public abstract class AbstractParser extends PerformanceReportParser {
                     classMapping.get(desc.getName()) :
                     super.resolveClass(desc);
         }
-
-
     }
 
 
@@ -231,7 +212,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
                     new Date(Long.valueOf(timestamp)) :
                     format.parse(timestamp);
         } catch (ParseException e) {
-            throw new RuntimeException("Cannot parse timestamp: " + timestamp +
+            throw new IllegalArgumentException("Cannot parse timestamp: " + timestamp +
                     ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), e);
         }
     }
@@ -257,7 +238,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
                 Long.valueOf(timestamp);
                 isNumberDateFormat = true;
             } catch (NumberFormatException ex) {
-                throw new RuntimeException("Cannot parse timestamp: " + timestamp +
+                throw new IllegalArgumentException("Cannot parse timestamp: " + timestamp +
                         ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), ex);
             }
         }

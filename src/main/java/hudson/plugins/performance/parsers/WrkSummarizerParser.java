@@ -196,14 +196,14 @@ public class WrkSummarizerParser extends AbstractParser {
      * Calculate 'factor' so that we can get the input time in ms (eg: 5m =
      * 300000, 3s = 3000)
      */
-        if (timeUnitString.equals("ms")) {
+        if ("ms".equals(timeUnitString)) {
             factor = 1;
-        } else if (timeUnitString.equals("s")) {
+        } else if ("s".equals(timeUnitString)) {
             factor = 1000;
-        } else if (timeUnitString.equals("m")) {
-            factor = 1000 * 60;
-        } else if (timeUnitString.equals("h")) {
-            factor = 1000 * 60 * 60;
+        } else if ("m".equals(timeUnitString)) {
+            factor = 1000 * 60d;
+        } else if ("h".equals(timeUnitString)) {
+            factor = 1000 * 60 * 60d;
         }
 
         double timeValue = Double.parseDouble(timeValueString);
@@ -222,29 +222,29 @@ public class WrkSummarizerParser extends AbstractParser {
      * @return LineType indicating how the rest of the line should be processed
      */
     public LineType determineLineType(String t1, String t2) {
-        if (t1.equals("running")) {
+        if ("running".equals(t1)) {
             return LineType.RUNNING;
-        } else if (t1.equals("thread")) {
+        } else if ("thread".equals(t1)) {
             return LineType.OUTPUT_HEADER;
-        } else if (t1.equals("latency")) {
-            if (t2.equals("distribution"))
+        } else if ("latency".equals(t1)) {
+            if ("distribution".equals(t2))
                 return LineType.LATENCY_DIST_BUCKET_HEADER;
             else
                 return LineType.LATENCY_DIST;
-        } else if (t1.equals("req/sec")) {
+        } else if ("req/sec".equals(t1)) {
             return LineType.REQ_SEC_DIST;
-        } else if (t1.equals("requests/sec:")) {
+        } else if ("requests/sec:".equals(t1)) {
             return LineType.REQ_SEC;
-        } else if (t1.equals("transfer/sec:")) {
+        } else if ("transfer/sec:".equals(t1)) {
             return LineType.TRANSFER_SEC;
-        } else if (t1.equals("non-2xx")) {
+        } else if ("non-2xx".equals(t1)) {
             return LineType.ERROR_COUNT;
         } else {
             try {
                 Long.parseLong(t1);
-                if (t2.equals("threads")) {
+                if ("threads".equals(t2)) {
                     return LineType.THREAD_CONN_COUNT;
-                } else if (t2.equals("requests")) {
+                } else if ("requests".equals(t2)) {
                     return LineType.SUMMARY;
                 } else {
                     try {

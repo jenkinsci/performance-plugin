@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -90,14 +91,14 @@ public class RelativeConstraint extends AbstractConstraint {
 
 
         public FormValidation doCheckRelatedPerfReport(@QueryParameter String relatedPerfReport) {
-            if (relatedPerfReport.equals("")) {
+            if (StringUtils.isBlank(relatedPerfReport)) {
                 return FormValidation.error("This field must not be empty");
             }
             return FormValidation.ok();
         }
 
         public FormValidation doCheckTestCase(@QueryParameter String testCase) {
-            if (testCase.equals("")) {
+            if (StringUtils.isBlank(testCase)) {
                 return FormValidation.error("This field must not be empty");
             }
             return FormValidation.ok();
@@ -108,7 +109,7 @@ public class RelativeConstraint extends AbstractConstraint {
         }
 
         public FormValidation doCheckTimeframeEndString(@QueryParameter String timeframeEndString) {
-            if (timeframeEndString.equals("now")) {
+            if (NOW.equals(timeframeEndString)) {
                 return FormValidation.ok();
             }
             return dateCheck(timeframeEndString);
@@ -132,7 +133,7 @@ public class RelativeConstraint extends AbstractConstraint {
         }
 
         public FormValidation doCheckPreviousResultsString(@QueryParameter String previousResultsString, @AncestorInPath AbstractProject<?, ?> project) {
-            if (previousResultsString.equals("*")) {
+            if (ANY.equals(previousResultsString)) {
                 return FormValidation.ok();
             }
             int previousResults;
@@ -219,7 +220,7 @@ public class RelativeConstraint extends AbstractConstraint {
         this.tolerance = tolerance;
         this.previousResultsBlock = previousResultsBlock;
         if (this.previousResultsBlock.isChoicePreviousResults()) {
-            if (this.previousResultsBlock.getPreviousResultsString().equals("*")) {
+            if (ANY.equals(this.previousResultsBlock.getPreviousResultsString())) {
                 this.previousResults = -1;
             } else {
                 try {
@@ -241,7 +242,7 @@ public class RelativeConstraint extends AbstractConstraint {
             try {
                 final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 this.timeframeStart = dfLong.parse(this.timeframeStartString);
-                if (!this.timeframeEndString.equals("now")) {
+                if (!NOW.equals(this.timeframeEndString)) {
                     this.timeframeEnd = dfLong.parse(this.timeframeEndString);
                 }
             } catch (ParseException e) {
@@ -424,7 +425,7 @@ public class RelativeConstraint extends AbstractConstraint {
         Calendar timeframeEndAsCalendar = Calendar.getInstance();
         timeframeEndAsCalendar.setTime(getTimeframeEnd());
 
-        if (getTimeframeEndString().equals("now")) {
+        if (NOW.equals(getTimeframeEndString())) {
             timeframeEndAsCalendar.setTime(new Date());
         }
         

@@ -29,12 +29,12 @@ public class ConstraintFactory {
         /*
 		 * Checking the test case field and handle comma separated lists and wildcard
 		 */
-        List<AbstractConstraint> createdConstraints = new ArrayList<AbstractConstraint>();
+        List<AbstractConstraint> createdConstraints = new ArrayList<>();
         for (AbstractConstraint c : constraints) {
-            List<String> testCases = new ArrayList<String>();
+            List<String> testCases = new ArrayList<>();
             if (c.isSpecifiedTestCase()) {
                 String testCase = c.getTestCaseBlock().getTestCase();
-                if ("*".equals(testCase)) {
+                if (AbstractConstraint.ANY.equals(testCase)) {
                     PerformanceReport pr = build.getAction(PerformanceBuildAction.class).getPerformanceReportMap().getPerformanceReport(c.getRelatedPerfReport());
                     for (UriReport ur : pr.getUriListOrdered()) {
                         testCases.add(ur.getUri());
@@ -51,7 +51,7 @@ public class ConstraintFactory {
 				 * Creating clones based on the test cases
 				 */
                 for (String s : testCases) {
-                    AbstractConstraint constraint = (AbstractConstraint) c.clone();
+                    AbstractConstraint constraint = c.clone();
                     constraint.getTestCaseBlock().setTestCase(s);
                     createdConstraints.add(constraint);
                 }

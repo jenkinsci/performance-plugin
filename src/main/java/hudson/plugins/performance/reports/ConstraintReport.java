@@ -261,7 +261,7 @@ public class ConstraintReport {
             if (!c.getSuccess()) {
                 loggerMsg += String.format(logFormat,
                     c.getRelatedPerfReport(),
-                    c.isSpecifiedTestCase() ? c.getTestCaseBlock().getTestCase() : "*",
+                    c.isSpecifiedTestCase() ? c.getTestCaseBlock().getTestCase() : AbstractConstraint.ANY,
                     c.getMeteredValue().toString(),
                     c.getOperator().toString(),
                     c instanceof RelativeConstraint ? String.format("%9.3f%%", ((RelativeConstraint)c).getTolerance()) 
