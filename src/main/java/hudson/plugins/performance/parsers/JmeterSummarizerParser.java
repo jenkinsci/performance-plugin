@@ -1,14 +1,15 @@
 package hudson.plugins.performance.parsers;
 
+import java.io.File;
+import java.util.Scanner;
+import java.util.regex.Pattern;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+
 import hudson.Extension;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.io.File;
-import java.util.Scanner;
-import java.util.regex.Pattern;
 
 /**
  * Parses JMeter Summarized results
@@ -48,10 +49,7 @@ public class JmeterSummarizerParser extends AbstractParser {
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
-        Scanner fileScanner = null;
-        try {
-            fileScanner = new Scanner(reportFile);
-            String key;
+        try (Scanner fileScanner = new Scanner(reportFile)){
             String line;
             String lastEqualsLine = null;
             while (fileScanner.hasNextLine()) {
@@ -66,10 +64,8 @@ public class JmeterSummarizerParser extends AbstractParser {
             long reportMin = Long.MAX_VALUE;
             long reportMax = Long.MIN_VALUE;
             String reportErrorPercent = "";
-            Scanner lineScanner = null;
             if (lastEqualsLine != null) {
-                try {
-                    lineScanner = new Scanner(lastEqualsLine);
+                try (Scanner lineScanner = new Scanner(lastEqualsLine)) {
                     final Pattern delimiter = lineScanner.delimiter();
                     lineScanner.useDelimiter("INFO"); // as jmeter logs INFO mode
                     final HttpSample sample = new HttpSample();
@@ -77,7 +73,7 @@ public class JmeterSummarizerParser extends AbstractParser {
                     sample.setDate(parseTimestamp(dateString));
                     lineScanner.findInLine("Summariser:");
                     lineScanner.useDelimiter("\\=");
-                    key = lineScanner.next().trim();
+                    String key = lineScanner.next().trim();
                     lineScanner.useDelimiter(delimiter);
                     lineScanner.next();
                     reportSamples = lineScanner.nextLong();
@@ -107,8 +103,6 @@ public class JmeterSummarizerParser extends AbstractParser {
                     // Float.valueOf(scanner.next().replaceAll("[()%]","")));
                     sample.setUri(key);
                     report.addSample(sample);
-                } finally {
-                    if (lineScanner != null) lineScanner.close();
                 }
             }
 
@@ -119,8 +113,6 @@ public class JmeterSummarizerParser extends AbstractParser {
             report.setSummarizerErrors(reportErrorPercent);
 
             return report;
-        } finally {
-            if (fileScanner != null) fileScanner.close();
         }
     }
 }

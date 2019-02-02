@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -18,8 +18,8 @@ import hudson.model.Run;
 public class ParserFactory {
     private static final Logger LOGGER = Logger.getLogger(ParserFactory.class.getName());
 
-    protected static final Map<String, String> defaultGlobPatterns = new Hashtable<String, String>();
-
+    protected static final Map<String, String> defaultGlobPatterns = Collections.synchronizedMap(new HashMap<String, String>());
+    private static final String TEMP_FOLDER = "/temp/";
     static {
         defaultGlobPatterns.put("parrot-server-stats.log", IagoParser.class.getSimpleName());
         defaultGlobPatterns.put("**/*.csv", JMeterCsvParser.class.getSimpleName());
@@ -52,7 +52,7 @@ public class ParserFactory {
         File report = new File(workspace.getRemote() + '/' + glob);
         if (!report.exists()) {
             // if report on remote slave
-            FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + glob));
+            FilePath localReport = new FilePath(new File(build.getRootDir(), TEMP_FOLDER + glob));
             localReport.copyFrom(new FilePath(workspace, glob));
             return Collections.singletonList(getParser(ParserDetector.detect(localReport.getRemote()), glob, percentiles, filterRegex));
         }
@@ -67,7 +67,7 @@ public class ParserFactory {
             List<PerformanceReportParser> result = new ArrayList<>();
             for (FilePath src : pathList) {
                 // copy file (it can be on remote slave) to "../build/../temp/" folder
-                final File localReport = new File(build.getRootDir(), "/temp/" + src.getName());
+                final File localReport = new File(build.getRootDir(), TEMP_FOLDER + src.getName());
                 if (src.isDirectory()) {
                     logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
                     continue;
@@ -79,7 +79,7 @@ public class ParserFactory {
         } catch (IOException ignored) {
             LOGGER.log(Level.FINE, "Cannot find report file using Ant pattern", ignored);
         }
-        return null;
+        return Collections.emptyList();
     }
 
 
@@ -91,7 +91,7 @@ public class ParserFactory {
 
         if (!path.exists()) {
             // if report on remote slave
-            FilePath localReport = new FilePath(new File(build.getRootDir(), "/temp/" + path.getName()));
+            FilePath localReport = new FilePath(new File(build.getRootDir(), TEMP_FOLDER + path.getName()));
             localReport.copyFrom(new FilePath(workspace.getChannel(), path.getAbsolutePath()));
             return Collections.singletonList(getParser(ParserDetector.detect(localReport.getRemote()), path.getName(), percentiles, filterRegex));
         }
@@ -109,7 +109,7 @@ public class ParserFactory {
                 if (parent != null) {
                     workspace = new FilePath(wsp.getChannel(), parent.getAbsolutePath());
                 } else {
-                    return null;
+                    return Collections.emptyList();
                 }
             }
 
@@ -118,7 +118,7 @@ public class ParserFactory {
             List<PerformanceReportParser> parsers = new ArrayList<>();
             for (FilePath src : pathList) {
                 // copy file (it can be on remote slave) to "../build/../temp/" folder
-                final File localReport = new File(build.getRootDir(), "/temp/" + src.getName());
+                final File localReport = new File(build.getRootDir(), TEMP_FOLDER + src.getName());
                 if (src.isDirectory()) {
                     logger.println("Performance: File '" + src.getName() + "' is a directory, not a Performance Report");
                     continue;
@@ -131,7 +131,7 @@ public class ParserFactory {
         } catch (IOException ignored) {
             LOGGER.log(Level.FINE, "Cannot find report file using Ant pattern", ignored);
         }
-        return null;
+        return Collections.emptyList();
     }
 
 

@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 import javax.xml.bind.ValidationException;
 
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
