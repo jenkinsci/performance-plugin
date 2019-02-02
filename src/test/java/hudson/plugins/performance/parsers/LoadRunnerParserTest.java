@@ -1,15 +1,16 @@
 package hudson.plugins.performance.parsers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.File;
+import java.util.Map;
+
+import org.junit.Test;
+
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.plugins.performance.reports.UriReport;
-import org.junit.Test;
-import java.io.File;
-import java.util.Date;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class LoadRunnerParserTest {
     private static final String NO_GLOB = null;

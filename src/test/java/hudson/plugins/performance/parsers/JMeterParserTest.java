@@ -1,13 +1,17 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.PerformanceReportTest;
-import hudson.plugins.performance.reports.UriReport;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 
 /**
  * This class contains basic tests that verify the parsing behavior of
