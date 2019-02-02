@@ -1,18 +1,20 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.Extension;
-import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.data.TaurusFinalStats;
+import java.io.File;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
+import hudson.Extension;
+import hudson.plugins.performance.data.TaurusFinalStats;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
 
 /**
  * Parser for Taurus
@@ -103,13 +105,13 @@ public class TaurusParser extends AbstractParser {
             String attributeParam = ((Element) nNode).getAttribute("param");
             Double valueInMs = Double.valueOf(((Element) nNode).getAttribute("value")) * 1000;
             
-            if (attributeParam.equals("50.0")) {
+            if ("50.0".equals(attributeParam)) {
                 report.setPerc50(valueInMs); // to ms
-            } else if (attributeParam.equals("90.0")) {
+            } else if ("90.0".equals(attributeParam)) {
                 report.setPerc90(valueInMs); // to ms
-            } else if (attributeParam.equals("0.0")) {
+            } else if ("0.0".equals(attributeParam)) {
                 report.setPerc0(valueInMs); // to ms
-            } else if (attributeParam.equals("100.0")) {
+            } else if ("100.0".equals(attributeParam)) {
                 report.setPerc100(valueInMs); // to ms
             }
         }
