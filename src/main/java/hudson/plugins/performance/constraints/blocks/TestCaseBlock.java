@@ -13,6 +13,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * @author Rene Kugel
  */
 public class TestCaseBlock extends AbstractDescribableImpl<TestCaseBlock> {
+    private String testCase;
 
     @Symbol("testCase")
     @Extension
@@ -22,8 +23,6 @@ public class TestCaseBlock extends AbstractDescribableImpl<TestCaseBlock> {
             return "TestCaseBlock";
         }
     }
-
-    private String testCase;
 
     @DataBoundConstructor
     public TestCaseBlock(String testCase) {

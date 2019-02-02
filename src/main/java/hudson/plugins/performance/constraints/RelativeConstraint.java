@@ -39,6 +39,45 @@ import hudson.util.RunList;
  * @author Rene Kugel
  */
 public class RelativeConstraint extends AbstractConstraint {
+    /**
+     * Percentage value of the tolerance
+     */
+    private double tolerance = 0;
+    /**
+     * True: relative constraint includes a user defined number of builds into the evaluation False:
+     * relative constraint includes all builds that have taken place in an user defined time frame
+     */
+    private boolean choicePreviousResults = true;
+
+    /**
+     * Start of the time frame (for internal use)
+     */
+    private Date timeframeStart = new Date();
+    /**
+     * End of the time frame (for internal use)
+     */
+    private Date timeframeEnd = new Date();
+    /**
+     * Holds the relevant information to determine which builds get included into the evaluation
+     */
+    private PreviousResultsBlock previousResultsBlock;
+    /**
+     * Start of the time frame (for UI use)
+     */
+    private String timeframeStartString = "";
+    /**
+     * End of the time frame (for UI use)
+     */
+    private String timeframeEndString = "";
+    /**
+     * Holds the user defined number of builds which are to include to the evaluation (for internal
+     * use)
+     */
+    private int previousResults = 0;
+    /**
+     * Holds the user defined number of builds which are to include to the evaluation (for UI use)
+     */
+    private String previousResultsString = "";
 
     @Symbol("relative")
     @Extension
@@ -172,47 +211,7 @@ public class RelativeConstraint extends AbstractConstraint {
         }
     }
 
-    /**
-     * Percentage value of the tolerance
-     */
-    private double tolerance = 0;
-    /**
-     * True: relative constraint includes a user defined number of builds into the evaluation False:
-     * relative constraint includes all builds that have taken place in an user defined time frame
-     */
-    private boolean choicePreviousResults = true;
-
-    /**
-     * Start of the time frame (for internal use)
-     */
-    private Date timeframeStart = new Date();
-    /**
-     * End of the time frame (for internal use)
-     */
-    private Date timeframeEnd = new Date();
-    /**
-     * Holds the relevant information to determine which builds get included into the evaluation
-     */
-    private PreviousResultsBlock previousResultsBlock;
-    /**
-     * Start of the time frame (for UI use)
-     */
-    private String timeframeStartString = "";
-    /**
-     * End of the time frame (for UI use)
-     */
-    private String timeframeEndString = "";
-    /**
-     * Holds the user defined number of builds which are to include to the evaluation (for internal
-     * use)
-     */
-    private int previousResults = 0;
-    /**
-     * Holds the user defined number of builds which are to include to the evaluation (for UI use)
-     */
-    private String previousResultsString = "";
-
-    @DataBoundConstructor
+     @DataBoundConstructor
     public RelativeConstraint(Metric meteredValue, Operator operator, String relatedPerfReport, Escalation escalationLevel, boolean success, TestCaseBlock testCaseBlock,
                               PreviousResultsBlock previousResultsBlock, double tolerance) {
 
@@ -246,7 +245,11 @@ public class RelativeConstraint extends AbstractConstraint {
                     this.timeframeEnd = dfLong.parse(this.timeframeEndString);
                 }
             } catch (ParseException e) {
-
+                PrintStream logger = getSettings().getListener().getLogger();
+                logger.print("Error occurred parsing one of those dates, timeframeStartString:"+timeframeStartString
+                        +", timeframeEndString:"+timeframeEndString
+                        +" using format:yyyy-MM-dd HH:mm, message:"+e.getMessage());
+                e.printStackTrace(logger);
             }
         }
     }

@@ -25,6 +25,11 @@ import org.kohsuke.stapler.QueryParameter;
  */
 public class AbsoluteConstraint extends AbstractConstraint {
 
+    /**
+     * User defined absolute value which must not be exceeded
+     */
+    private long value = 0;
+
     @Symbol("absolute")
     @Extension
     public static class DescriptorImpl extends ConstraintDescriptor {
@@ -49,10 +54,6 @@ public class AbsoluteConstraint extends AbstractConstraint {
         }
     }
 
-    /**
-     * User defined absolute value which must not be exceeded
-     */
-    private long value = 0;
 
     @DataBoundConstructor
     public AbsoluteConstraint(Metric meteredValue, Operator operator, String relatedPerfReport, Escalation escalationLevel, boolean success, TestCaseBlock testCaseBlock, long value) {
