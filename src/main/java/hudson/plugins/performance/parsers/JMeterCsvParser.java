@@ -1,19 +1,19 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.Extension;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
-import hudson.plugins.performance.reports.PerformanceReport;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.xml.sax.SAXException;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import hudson.Extension;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
 
 public class JMeterCsvParser extends AbstractParser {
 

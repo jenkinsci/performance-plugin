@@ -11,7 +11,6 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
-import org.xml.sax.SAXException;
 
 import hudson.model.Run;
 import hudson.plugins.performance.Messages;
