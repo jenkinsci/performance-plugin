@@ -662,7 +662,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
 
             @Override
-            public Run<?, ?> getnthBuild(Run<?, ?> build) throws IOException {
+            public Run<?, ?> getnthBuild(Run<?, ?> build) {
                 return prevBuild;
             }
         };
