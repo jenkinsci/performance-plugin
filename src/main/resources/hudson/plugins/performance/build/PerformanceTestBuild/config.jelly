@@ -12,11 +12,21 @@
             <f:textbox />
         </f:entry>
         <f:entry>
-            <f:optionalBlock field="alwaysUseVirtualenv" title="${%Use virtualenv}" />
-            <f:optionalBlock field="generatePerformanceTrend" checked="true" title="${%Auto report}" />
-            <f:optionalBlock field="useBztExitCode" checked="true" title="${%Use bzt code}" />
-            <f:optionalBlock field="printDebugOutput" title="${%Debug mode}" />
-            <f:optionalBlock field="useSystemSitePackages"  checked="true" title="${%Virtualenv option}" />
+            <f:entry>
+                <f:checkbox field="alwaysUseVirtualenv" title="${%Use virtualenv}" />
+            </f:entry>
+            <f:entry>
+                <f:checkbox field="generatePerformanceTrend" checked="true" title="${%Auto report}" />
+            </f:entry>
+            <f:entry>
+                <f:checkbox field="useBztExitCode" checked="true" title="${%Use bzt code}" />
+            </f:entry>
+            <f:entry>
+                <f:checkbox field="printDebugOutput" title="${%Debug mode}" />
+            </f:entry>
+            <f:entry>
+                <f:checkbox field="useSystemSitePackages"  checked="true" title="${%Virtualenv option}" />
+            </f:entry>
         </f:entry>
     </f:advanced>
 </j:jelly>
