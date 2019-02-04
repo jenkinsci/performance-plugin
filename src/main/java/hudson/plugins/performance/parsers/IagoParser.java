@@ -15,7 +15,7 @@ import hudson.plugins.performance.reports.PerformanceReport;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.ValidationException;
+import java.lang.IllegalArgumentException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -127,7 +127,7 @@ public class IagoParser extends AbstractParser {
         try {
             statsObject = gson.fromJson(statsString, Stats.class);
         } catch (JsonParseException e) {
-            throw new ValidationException("Invalid stat data " + statsString + ":" + e.getLocalizedMessage());
+            throw new IllegalArgumentException("Invalid stat data " + statsString + ":" + e.getLocalizedMessage());
         }
 
         //Set the sample data
