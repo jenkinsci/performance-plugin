@@ -12,45 +12,11 @@
             <f:textbox />
         </f:entry>
         <f:entry>
-            <table>
-                <tbody>
-                     <tr>
-                         <td>
-                             <f:checkbox field="alwaysUseVirtualenv" title="${%Use virtualenv}">
-                                 ${%Use virtualenv}
-                             </f:checkbox>
-                         </td>
-                     </tr>
-                    <tr>
-                        <td>
-                            <f:checkbox field="generatePerformanceTrend" default="true" title="${%Auto report}">
-                		        ${%Auto report}
-                            </f:checkbox>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <f:checkbox field="useBztExitCode" default="true" title="${%Use bzt code}">
-                                ${%Use bzt code}
-                            </f:checkbox>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <f:checkbox field="printDebugOutput" title="${%Debug mode}">
-  		                        ${%Debug mode}
-                            </f:checkbox>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <f:checkbox field="useSystemSitePackages"  default="true" title="${%Virtualenv option}">
-                                ${%Virtualenv option}
-                           </f:checkbox>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <f:optionalBlock field="alwaysUseVirtualenv" title="${%Use virtualenv}" />
+            <f:optionalBlock field="generatePerformanceTrend" checked="true" title="${%Auto report}" />
+            <f:optionalBlock field="useBztExitCode" checked="true" title="${%Use bzt code}" />
+            <f:optionalBlock field="printDebugOutput" title="${%Debug mode}" />
+            <f:optionalBlock field="useSystemSitePackages"  checked="true" title="${%Virtualenv option}" />
         </f:entry>
     </f:advanced>
 </j:jelly>
