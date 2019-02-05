@@ -129,7 +129,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     /**
      * @deprecated as of 1.3. for compatibility
      */
-    private String filename;
+    private transient String filename; // NOSONAR On purpose keep of transient, we don't want to save it
 
     private boolean modeThroughput;
 
@@ -156,7 +156,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      * Now this param use for restore previous job configs in GUI mode.
      */
     @Deprecated
-    private List<PerformanceReportParser> parsers;
+    private transient List<PerformanceReportParser> parsers; // NOSONAR On purpose keep of transient, we don't want to save it
 
     private String sourceDataFiles;
     private String filterRegex;
