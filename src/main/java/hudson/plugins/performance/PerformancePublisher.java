@@ -1,5 +1,29 @@
 package hudson.plugins.performance;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nonnull;
+
+import org.jenkinsci.Symbol;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -53,29 +77,6 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
-import org.apache.commons.io.FileUtils;
-import org.jenkinsci.Symbol;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-
-import javax.annotation.Nonnull;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.Set;
 
 public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
@@ -116,13 +117,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     public String optionType = "ART";
 
-    File xmlfile = null;
-
-    String xmlDir = null;
-
-    String xml = "";
-
-    private static final String archive_directory = "archive";
+    private static final String ARCHIVE_DIRECTORY = "archive";
 
     private boolean modePerformancePerTestCase = false;
 
@@ -134,7 +129,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     /**
      * @deprecated as of 1.3. for compatibility
      */
-    private transient String filename;
+    private transient String filename; // NOSONAR On purpose keep of transient, we don't want to save it
 
     private boolean modeThroughput;
 
@@ -161,9 +156,10 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      * Now this param use for restore previous job configs in GUI mode.
      */
     @Deprecated
-    private transient List<PerformanceReportParser> parsers;
+    private transient List<PerformanceReportParser> parsers; // NOSONAR On purpose keep of transient, we don't want to save it
 
     private String sourceDataFiles;
+    private String filterRegex;
 
     /**
      * Optional filename indicating whether and where a JUnit compatible XML report should be written
@@ -286,9 +282,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      */
         // Agoley : Possible fix, if we specify more than one result file pattern
         try {
-            String parts[] = includes.split("\\s*[;:,]+\\s*");
+            String[] parts = includes.split("\\s*[;:,]+\\s*");
 
-            List<FilePath> files = new ArrayList<FilePath>();
+            List<FilePath> files = new ArrayList<>();
             for (String path : parts) {
                 FilePath[] ret = workspace.list(path);
                 if (ret.length > 0) {
@@ -299,12 +295,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 return files;
 
         } catch (IOException ignored) {
+            // NOOP
         }
 
         // Agoley: seems like this block doesn't work
         // If it fails, do a legacy search
-        ArrayList<FilePath> files = new ArrayList<FilePath>();
-        String parts[] = includes.split("\\s*[;:,]+\\s*");
+        ArrayList<FilePath> files = new ArrayList<>();
+        String[] parts = includes.split("\\s*[;:,]+\\s*");
         for (String path : parts) {
             FilePath src = workspace.child(path);
             if (src.exists()) {
@@ -331,7 +328,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             for (String filePath : sourceDataFiles.split(";")) {
                 if (!filePath.isEmpty()) {
                     try {
-                        parsers.addAll(ParserFactory.getParser(build, workspace, logger, filePath, env, percentiles));
+                        logger.println("Creating parser with percentiles:'" + percentiles + ",' filterRegex:" + filterRegex);
+                        parsers.addAll(ParserFactory.getParser(build, workspace, logger, filePath, env, percentiles, filterRegex));
                     } catch (IOException ex) {
                         logger.println("Cannot detect file type because of error: " + ex.getMessage());
                     }
@@ -342,7 +340,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     /**
-     * Used for migrate from user choose of parser to autodetect parser
+     * Used to migrate from user selected parser to autodetected parser
      */
     private void migrateParsers() {
         if (parsers != null && !this.parsers.isEmpty()) {
@@ -366,9 +364,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     public Object readResolve() {
         // data format migration
         if (parsers == null)
-            parsers = new ArrayList<PerformanceReportParser>();
+            parsers = new ArrayList<>();
         if (filename != null) {
-            parsers.add(new JMeterParser(filename, percentiles));
+            parsers.add(new JMeterParser(filename, percentiles, filterRegex));
             filename = null;
         }
         // Migrate parsers to simple field sourceDataFiles.
@@ -417,7 +415,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
         Collection<PerformanceReport> parsedReports = locatePerformanceReports(run, workspace, listener, parsers);
         if (parsedReports == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         addExternalReportActionsToBuild(run, parsers);
@@ -451,7 +449,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             List<FilePath> files = locatePerformanceReports(workspace, glob);
             if (files.isEmpty()) {
                 if (run.getResult().isWorseThan(Result.UNSTABLE)) {
-                    return null;
+                    return Collections.emptyList();
                 }
 
                 if (failBuildIfNoResultFile) {
@@ -459,10 +457,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 }
                 logger.println("Performance: no " + parser.getReportName() + " files matching '" + glob
                         + "' have been found. Has the report generated?. Setting Build to " + run.getResult());
-                return null;
+                return Collections.emptyList();
             }
 
+            logger.println("Performance: " + parser.getReportName() + " copying reports to master, files '" + files+"'");
             List<File> localReports = copyReportsToMaster(run, logger, files, parser.getDescriptor().getDisplayName());
+            logger.println("Performance: " + parser.getReportName() + " parsing local reports '" + localReports
+                    + "'");
             performanceReports.addAll(parser.parse(run, localReports, listener));
         }
         return performanceReports;
@@ -487,7 +488,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         if (locatePerformanceReports) {
             Collection<PerformanceReport> performanceReports = locatePerformanceReports(build, workspace, listener, parsers);
             if (performanceReports == null) {
-                return null;
+                return Collections.emptyList();
             }
 
             for (PerformanceReport r : performanceReports) {
@@ -496,7 +497,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 uriReports.addAll(r.getUriListOrdered());
             }
         } else {
-            Set<PerformanceReport> parsedReports = new HashSet<PerformanceReport>();
+            Set<PerformanceReport> parsedReports = new HashSet<>();
 
             for (PerformanceReportParser parser : parsers) {
                 // add the report to the build object.
@@ -595,31 +596,17 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     // write 'standard mode' report in xml containing each of the populated columns otherwise found in the jelly output.
     // producing an on disk, machine parseable format allows for archiving and automation.
     private void writeStandardResultsToXML(Run<?, ?> run, Collection<PerformanceReport> parsedReports) throws IOException {
-        FileWriter fw = null;
-        BufferedWriter bw = null;
-        try {
-            xmlDir = run.getRootDir().getAbsolutePath();
-            xmlDir += File.separator + archive_directory;
-
-            xmlfile = new File(xmlDir + File.separator + "standardResults.xml");
-            FileUtils.touch(xmlfile);
-
-            fw = new FileWriter(xmlfile);
-            bw = new BufferedWriter(fw);
-
-            xml = new StringBuilder("<?xml version=\"1.0\"?>\n")
+        File xmlDirectory = createArchiveDirectoryIfMissing(run);
+        File xmlfile = new File(xmlDirectory, "standardResults.xml");
+        try (FileWriter fw = new FileWriter(xmlfile);
+                BufferedWriter bw = new BufferedWriter(fw)){
+            
+            String xml = new StringBuilder("<?xml version=\"1.0\"?>\n")
                     .append("<results>\n")
                     .append(appendStandardResultsStatsToXml(parsedReports))
                     .append("</results>\n").toString();
 
             bw.write(xml);
-        } finally {
-            if (bw != null) {
-                bw.close();
-            }
-            if (fw != null) {
-                fw.close();
-            }
         }
     }
 
@@ -645,25 +632,16 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     // write report in xml, when checked Error Threshold comparison
     private void writeErrorThresholdReportInXML(Run<?, ?> run, PerformanceReport performanceReport) throws IOException {
-        FileWriter fw = null;
-        BufferedWriter bw = null;
-        try {
-            xmlDir = run.getRootDir().getAbsolutePath();
-            xmlDir += "/" + archive_directory;
+        File xmlDirectory = createArchiveDirectoryIfMissing(run);
+        
+        String glob = performanceReport.getReportFileName();
+        String[] arr = glob.split("/");
 
-            String glob = performanceReport.getReportFileName();
-            String[] arr = glob.split("/");
-            if (!new File(xmlDir).exists()) {
-                new File(xmlDir).mkdirs();
-            }
+        File xmlfile = new File(xmlDirectory, "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
 
-            xmlfile = new File(xmlDir + "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
-            xmlfile.createNewFile();
-
-            fw = new FileWriter(xmlfile.getAbsoluteFile());
-            bw = new BufferedWriter(fw);
-
-            xml = "<?xml version=\"1.0\"?>\n";
+        try (FileWriter fw = new FileWriter(xmlfile);
+                BufferedWriter bw = new BufferedWriter(fw)) {            
+            String xml = "<?xml version=\"1.0\"?>\n";
             xml += "<results>\n";
             xml += "<absoluteDefinition>\n";
             xml += "\t<unstable>" + errorUnstableThreshold + "</unstable>\n";
@@ -671,22 +649,15 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             xml += "\t<calculated>" + performanceReport.errorPercent() + "</calculated>\n";
             xml += "</absoluteDefinition>\n";
 
-            appendStatsToXml(performanceReport.getUriListOrdered());
+            xml += appendStatsToXml(performanceReport.getUriListOrdered());
 
             xml += "</results>";
 
             bw.write(xml);
-        } finally {
-            if (bw != null) {
-                bw.close();
-            }
-            if (fw != null) {
-                fw.close();
-            }
         }
     }
 
-    private void appendStatsToXml(List<UriReport> reports) {
+    private String appendStatsToXml(List<UriReport> reports) {
         final StringBuilder averageBuffer = new StringBuilder("<average>\n");
         final StringBuilder medianBuffer = new StringBuilder("<median>\n");
         final StringBuilder percentileBuffer = new StringBuilder("<percentile>\n");
@@ -710,9 +681,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         medianBuffer.append("</median>\n");
         percentileBuffer.append("</percentile>\n");
 
-        xml += averageBuffer;
-        xml += medianBuffer;
-        xml += percentileBuffer;
+        StringBuilder result = new StringBuilder();
+        result.append(averageBuffer);
+        result.append(medianBuffer);
+        result.append(percentileBuffer);
+        return result.toString();
     }
 
 
@@ -720,7 +693,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         HashMap<String, String> responseTimeThresholdMap = null;
         if (!"".equals(this.errorUnstableResponseTimeThreshold) && this.errorUnstableResponseTimeThreshold != null) {
 
-            responseTimeThresholdMap = new HashMap<String, String>();
+            responseTimeThresholdMap = new HashMap<>();
             String[] lines = this.errorUnstableResponseTimeThreshold.split("\n");
 
             for (String line : lines) {
@@ -872,7 +845,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         double relativeDiffPercent = 0;
 
         if (configType.equalsIgnoreCase("ART")) {
-            relativeDiff = currentReport.getAverage() - reportForComparison.getAverage();
+            relativeDiff = (double) currentReport.getAverage() - reportForComparison.getAverage();
             relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getAverage());
 
             logger.println(String.format(logFormat, reportForComparison.getStaplerUri(),
@@ -880,7 +853,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 relativeDiff, relativeDiffPercent));
 
         } else if (configType.equalsIgnoreCase("MRT")) {
-            relativeDiff = currentReport.getMedian() - reportForComparison.getMedian();
+            relativeDiff = (double) currentReport.getMedian() - reportForComparison.getMedian();
             relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getMedian());
 
             logger.println(String.format(logFormat, reportForComparison.getStaplerUri(),
@@ -888,7 +861,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 relativeDiff, relativeDiffPercent));
 
         } else if (configType.equalsIgnoreCase("PRT")) {
-            relativeDiff = currentReport.get90Line() - reportForComparison.get90Line();
+            relativeDiff = (double) currentReport.get90Line() - reportForComparison.get90Line();
             relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.get90Line());
 
             logger.println(String.format(logFormat, reportForComparison.getStaplerUri(),
@@ -900,22 +873,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private void writeRelativeThresholdReportInXML(Run<?, ?> run, StringBuilder averageBuffer,
                                                    StringBuilder medianBuffer, StringBuilder percentileBuffer) throws IOException {
+        File xmlDirectory = createArchiveDirectoryIfMissing(run);
 
-        FileWriter fw = null;
-        BufferedWriter bw = null;
-        try {
-            xmlDir = run.getRootDir().getAbsolutePath();
-            xmlDir += "/" + archive_directory;
+        File xmlfile = new File(xmlDirectory, "dashBoard_results.xml");
 
-            if (!new File(xmlDir).exists()) {
-                new File(xmlDir).mkdirs();
-            }
-
-            xmlfile = new File(xmlDir + "/dashBoard_results.xml");
-            xmlfile.createNewFile();
-
-            fw = new FileWriter(xmlfile.getAbsoluteFile());
-            bw = new BufferedWriter(fw);
+        try (FileWriter fw = new FileWriter(xmlfile);
+                BufferedWriter bw = new BufferedWriter(fw)) {            
 
             String buildNo = "\t<buildNum>" + (compareBuildPrevious ? "previous" : nthBuildNumber) + "</buildNum>\n";
 
@@ -950,19 +913,20 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             }
 
             bw.write("</results>");
-        } finally {
-            if (bw != null) {
-                bw.close();
-            }
-            if (fw != null) {
-                fw.close();
-            }
         }
+    }
+
+    private File createArchiveDirectoryIfMissing(Run<?, ?> run) {
+        File xmlDirectory = new File(run.getRootDir(), ARCHIVE_DIRECTORY);
+        if (!xmlDirectory.exists() && !xmlDirectory.mkdirs()) {
+            throw new IllegalStateException("Could not create archive directory "+xmlDirectory.getAbsolutePath());
+        }
+        return xmlDirectory;
     }
 
 
     private void appendRelativeInfoAboutAverage(UriReport currentReport, UriReport reportForComparison, StringBuilder averageBuffer) {
-        double relativeDiff = currentReport.getAverage() - reportForComparison.getAverage();
+        double relativeDiff = (double) currentReport.getAverage() - reportForComparison.getAverage();
         double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getAverage());
 
         averageBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
@@ -974,7 +938,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     private void appendRelativeInfoAboutMedian(UriReport currentReport, UriReport reportForComparison, StringBuilder medianBuffer) {
-        double relativeDiff = currentReport.getMedian() - reportForComparison.getMedian();
+        double relativeDiff = (double) currentReport.getMedian() - reportForComparison.getMedian();
         double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.getMedian());
 
         medianBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
@@ -986,7 +950,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     }
 
     private void appendRelativeInfoAbout90Line(UriReport currentReport, UriReport reportForComparison, StringBuilder percentileBuffer) {
-        double relativeDiff = currentReport.get90Line() - reportForComparison.get90Line();
+        double relativeDiff = (double) currentReport.get90Line() - reportForComparison.get90Line();
         double relativeDiffPercent = calculateDiffInPercents(relativeDiff, reportForComparison.get90Line());
 
         percentileBuffer.append("\t<").append(currentReport.getStaplerUri()).append(">\n");
@@ -1063,7 +1027,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         ConstraintSettings settings = new ConstraintSettings(listener, ignoreFailedBuilds, ignoreUnstableBuilds,
                 persistConstraintLog);
         ConstraintChecker checker = new ConstraintChecker(settings, run.getParent().getBuilds());
-        ArrayList<ConstraintEvaluation> ceList = new ArrayList<ConstraintEvaluation>();
+        ArrayList<ConstraintEvaluation> ceList = new ArrayList<>();
         try {
             ceList = checker.checkAllConstraints(factory.createConstraintClones(run, constraints));
         } catch (Exception e) {
@@ -1097,7 +1061,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private List<File> copyReportsToMaster(Run<?, ?> build, PrintStream logger, List<FilePath> files,
                                            String parserDisplayName) throws IOException, InterruptedException {
-        List<File> localReports = new ArrayList<File>();
+        List<File> localReports = new ArrayList<>();
         for (FilePath src : files) {
             final File localReport = getPerformanceReport(build, parserDisplayName, src.getName());
             if (src.isDirectory()) {
@@ -1178,8 +1142,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     public static File[] getPerformanceReportDirectory(Run<?, ?> build, String parserDisplayName,
                                                        PrintStream logger) {
-        File folder = new File(
-                build.getRootDir() + "/" + PerformanceReportMap.getPerformanceReportFileRelativePath(parserDisplayName, ""));
+        File folder = new File(build.getRootDir(), PerformanceReportMap.getPerformanceReportFileRelativePath(parserDisplayName, ""));
         return folder.listFiles();
     }
 
@@ -1193,7 +1156,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      */
 
     // @psingh5 -
-    public Run<?, ?> getnthBuild(Run<?, ?> build) throws IOException {
+    public Run<?, ?> getnthBuild(Run<?, ?> build) {
         Run<?, ?> nthBuild = build;
 
         int nextBuildNumber = build.number - nthBuildNumber;
@@ -1206,10 +1169,9 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         return (nthBuildNumber == 0) ? null : nthBuild;
     }
 
-    private List<File> getExistingReports(Run<?, ?> build, PrintStream logger, String parserDisplayName)
-            throws IOException, InterruptedException {
-        List<File> localReports = new ArrayList<File>();
-        final File localReport[] = getPerformanceReportDirectory(build, parserDisplayName, logger);
+    private List<File> getExistingReports(Run<?, ?> build, PrintStream logger, String parserDisplayName) {
+        List<File> localReports = new ArrayList<>();
+        final File[] localReport = getPerformanceReportDirectory(build, parserDisplayName, logger);
 
         for (int i = 0; i < localReport.length; i++) {
 
@@ -1547,6 +1509,21 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             items.add("Percentile Response Time", "PRT");
             return items;
         }
+    }
+
+    /**
+     * @return the filterRegex
+     */
+    public String getFilterRegex() {
+        return filterRegex;
+    }
+
+    /**
+     * @param filterRegex the filterRegex to set
+     */
+    @DataBoundSetter
+    public void setFilterRegex(String filterRegex) {
+        this.filterRegex = filterRegex;
     }
 }
 

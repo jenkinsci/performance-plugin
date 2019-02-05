@@ -1,5 +1,19 @@
 package hudson.plugins.performance.constraints;
 
+import java.io.PrintStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.ListIterator;
+
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.model.AbstractProject;
@@ -17,19 +31,6 @@ import hudson.plugins.performance.tools.SafeMaths;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
-import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-
-import java.io.PrintStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Compares new load test results with 1 or more load test results in the past in a dynamically
@@ -38,137 +39,6 @@ import java.util.ListIterator;
  * @author Rene Kugel
  */
 public class RelativeConstraint extends AbstractConstraint {
-
-    @Symbol("relative")
-    @Extension
-    public static class DescriptorImpl extends ConstraintDescriptor {
-
-        @Override
-        public String getDisplayName() {
-            return "Relative Constraint";
-        }
-
-
-        public FormValidation doCheckRelatedPerfReport(@QueryParameter String relatedPerfReport) {
-            if (relatedPerfReport.equals("")) {
-                return FormValidation.error("This field must not be empty");
-            }
-            return FormValidation.ok();
-        }
-
-        public FormValidation doCheckTestCase(@QueryParameter String testCase) {
-            if (testCase.equals("")) {
-                return FormValidation.error("This field must not be empty");
-            }
-            return FormValidation.ok();
-        }
-
-        public FormValidation doCheckTimeframeStartString(@QueryParameter String timeframeStartString) {
-            return dateCheck(timeframeStartString);
-        }
-
-        public FormValidation doCheckTimeframeEndString(@QueryParameter String timeframeEndString) {
-            if (timeframeEndString.equals("now")) {
-                return FormValidation.ok();
-            }
-            return dateCheck(timeframeEndString);
-        }
-
-        private FormValidation dateCheck(String dateString) {
-            final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            final SimpleDateFormat dfShort = new SimpleDateFormat("yyyy-MM-dd");
-
-            dfLong.setLenient(false);
-            dfShort.setLenient(false);
-            try {
-                if (dfShort.parse(dateString) != null && dateString.length() == 10) {
-                    dateString = dateString + " 23:59";
-                    return FormValidation.ok();
-                } else if (dfLong.parse(dateString) != null && dateString.length() == 16) {
-                    return FormValidation.ok();
-                }
-            } catch (ParseException e1) {
-                return FormValidation.error("Not a valid date!");
-            }
-            return FormValidation.error("Not a valid date!");
-        }
-
-        public FormValidation doCheckPreviousResultsString(@QueryParameter String previousResultsString, @AncestorInPath AbstractProject<?, ?> project) {
-            if (previousResultsString.equals("*")) {
-                return FormValidation.ok();
-            }
-            int previousResults;
-            try {
-                previousResults = Integer.parseInt(previousResultsString);
-            } catch (NumberFormatException e) {
-                return FormValidation.error("This is not a valid number");
-            }
-            if (previousResults < 1) {
-                return FormValidation.error("This value can't be smaller 1");
-            }
-            /*
-			 * Problem description: if you want to evaluate the 15 last builds in a relative
-			 * constraint, but you only store 10 builds of your job you will get in trouble.
-			 * similiar problem: you store 10 builds in you job and evaluate the last 7 SUCCESSFUL
-			 * builds with a relative constraint. what if 5 of your 10 stored builds are in status
-			 * FAILED or UNSTABLE? -> problem. this form validation solves this problem if your
-			 * enter a number greater than the available builds (regarding your confiugration
-			 * 'ignoreFailed' and 'ignoreUnstable') you will get a form validation error note: if
-			 * you change 'ignoreFailed' or 'ignoreUnstable' you first have to save your
-			 * configuration before you change the number of previous builds
-			 */
-            if (project == null) { // Counting builds makes no sense when in Pipeline snippet generator
-                return FormValidation.ok();
-            }
-            RunList<?> builds = project.getBuilds();
-            int buildsToAnalyze = 0;
-            int successBuilds = 0;
-            int failedBuilds = 0;
-            int unstableBuilds = 0;
-            String buildSizeMessage = "This value cant be bigger than the amount of stored builds with the status: SUCCESS";
-            ListIterator<?> it = builds.listIterator();
-            while (it.hasNext()) {
-                Object next = it.next();
-                if (next instanceof FreeStyleBuild) {
-                    FreeStyleBuild b = (FreeStyleBuild) next;
-                    if (b.getResult().equals(Result.FAILURE)) {
-                        failedBuilds++;
-                    } else if (b.getResult().equals(Result.UNSTABLE)) {
-                        unstableBuilds++;
-                    } else if (b.getResult().equals(Result.SUCCESS)) {
-                        successBuilds++;
-                    }
-                }
-            }
-            buildsToAnalyze = successBuilds;
-            boolean ignoreFailedBuilds = false;
-            boolean ignoreUnstableBuilds = false;
-            List<Publisher> list = project.getPublishersList().toList();
-            for (Publisher p : list) {
-                if (p instanceof PerformancePublisher) {
-                    PerformancePublisher pp = (PerformancePublisher) p;
-
-                    // MWA: uncomment and check
-//					ignoreFailedBuilds = pp.isIgnoreFailedBuilds();
-//					ignoreUnstableBuilds = pp.isIgnoreUnstableBuilds();
-                }
-            }
-            if (!ignoreUnstableBuilds) {
-                buildsToAnalyze += unstableBuilds;
-                buildSizeMessage = buildSizeMessage + ", UNSTABLE";
-            }
-            if (!ignoreFailedBuilds) {
-                buildsToAnalyze += failedBuilds;
-                buildSizeMessage = buildSizeMessage + ", FAILED";
-            }
-            if (previousResults > buildsToAnalyze+1) { // at the time of evaluation there will be one more build (the next build that is run, which could be the very first or only build)
-                return FormValidation.error(buildSizeMessage);
-            } else {
-                return FormValidation.ok();
-            }
-        }
-    }
-
     /**
      * Percentage value of the tolerance
      */
@@ -209,7 +79,139 @@ public class RelativeConstraint extends AbstractConstraint {
      */
     private String previousResultsString = "";
 
-    @DataBoundConstructor
+    @Symbol("relative")
+    @Extension
+    public static class DescriptorImpl extends ConstraintDescriptor {
+
+        @Override
+        public String getDisplayName() {
+            return "Relative Constraint";
+        }
+
+
+        public FormValidation doCheckRelatedPerfReport(@QueryParameter String relatedPerfReport) {
+            if (relatedPerfReport == null || relatedPerfReport.isEmpty()) {
+                return FormValidation.error("This field must not be empty");
+            }
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckTestCase(@QueryParameter String testCase) {
+            if (testCase == null || testCase.isEmpty()) {
+                return FormValidation.error("This field must not be empty");
+            }
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckTimeframeStartString(@QueryParameter String timeframeStartString) {
+            return dateCheck(timeframeStartString);
+        }
+
+        public FormValidation doCheckTimeframeEndString(@QueryParameter String timeframeEndString) {
+            if (NOW.equals(timeframeEndString)) {
+                return FormValidation.ok();
+            }
+            return dateCheck(timeframeEndString);
+        }
+
+        private FormValidation dateCheck(String dateString) {
+            final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            final SimpleDateFormat dfShort = new SimpleDateFormat("yyyy-MM-dd");
+            dfLong.setLenient(false);
+            dfShort.setLenient(false);
+            try {
+                if (
+                        (dfShort.parse(dateString) != null && dateString.length() == 10) 
+                        || (dfLong.parse(dateString) != null && dateString.length() == 16)) { 
+                    return FormValidation.ok();
+                }
+            } catch (ParseException e1) {
+                return FormValidation.error("Not a valid date!");
+            }
+            return FormValidation.error("Not a valid date!");
+        }
+
+        public FormValidation doCheckPreviousResultsString(@QueryParameter String previousResultsString, @AncestorInPath AbstractProject<?, ?> project) {
+            if (ANY.equals(previousResultsString)) {
+                return FormValidation.ok();
+            }
+            int previousResults;
+            try {
+                previousResults = Integer.parseInt(previousResultsString);
+            } catch (NumberFormatException e) {
+                return FormValidation.error("This is not a valid number");
+            }
+            if (previousResults < 1) {
+                return FormValidation.error("This value can't be smaller 1");
+            }
+            /*
+			 * Problem description: if you want to evaluate the 15 last builds in a relative
+			 * constraint, but you only store 10 builds of your job you will get in trouble.
+			 * similiar problem: you store 10 builds in you job and evaluate the last 7 SUCCESSFUL
+			 * builds with a relative constraint. what if 5 of your 10 stored builds are in status
+			 * FAILED or UNSTABLE? -> problem. this form validation solves this problem if your
+			 * enter a number greater than the available builds (regarding your confiugration
+			 * 'ignoreFailed' and 'ignoreUnstable') you will get a form validation error note: if
+			 * you change 'ignoreFailed' or 'ignoreUnstable' you first have to save your
+			 * configuration before you change the number of previous builds
+			 */
+            if (project == null) { // Counting builds makes no sense when in Pipeline snippet generator
+                return FormValidation.ok();
+            }
+            RunList<?> builds = project.getBuilds();
+            int buildsToAnalyze = 0;
+            int successBuilds = 0;
+            int failedBuilds = 0;
+            int unstableBuilds = 0;
+            String buildSizeMessage = "This value cant be bigger than the amount of stored builds with the status: SUCCESS";
+            ListIterator<?> it = builds.listIterator();
+            while (it.hasNext()) {
+                Object next = it.next();
+                if (next instanceof FreeStyleBuild) {
+                    FreeStyleBuild b = (FreeStyleBuild) next;
+                    Result buildResult = b.getResult();
+                    if (buildResult != null) {
+                        if (buildResult.equals(Result.FAILURE)) {
+                            failedBuilds++;
+                        } else if (buildResult.equals(Result.UNSTABLE)) {
+                            unstableBuilds++;
+                        } else if (buildResult.equals(Result.SUCCESS)) {
+                            successBuilds++;
+                        }
+                    }
+                }
+            }
+            buildsToAnalyze = successBuilds;
+            boolean ignoreFailedBuilds = false;
+            boolean ignoreUnstableBuilds = false;
+            List<Publisher> list = project.getPublishersList().toList();
+            for (Publisher p : list) {
+                if (p instanceof PerformancePublisher) {
+                    PerformancePublisher pp = (PerformancePublisher) p;
+
+                    // MWA: uncomment and check
+					ignoreFailedBuilds = pp.isIgnoreFailedBuilds();
+					ignoreUnstableBuilds = pp.isIgnoreUnstableBuilds();
+					break;
+                }
+            }
+            if (!ignoreUnstableBuilds) {
+                buildsToAnalyze += unstableBuilds;
+                buildSizeMessage = buildSizeMessage + ", UNSTABLE";
+            }
+            if (!ignoreFailedBuilds) {
+                buildsToAnalyze += failedBuilds;
+                buildSizeMessage = buildSizeMessage + ", FAILED";
+            }
+            if (previousResults > buildsToAnalyze+1) { // at the time of evaluation there will be one more build (the next build that is run, which could be the very first or only build)
+                return FormValidation.error(buildSizeMessage);
+            } else {
+                return FormValidation.ok();
+            }
+        }
+    }
+
+     @DataBoundConstructor
     public RelativeConstraint(Metric meteredValue, Operator operator, String relatedPerfReport, Escalation escalationLevel, boolean success, TestCaseBlock testCaseBlock,
                               PreviousResultsBlock previousResultsBlock, double tolerance) {
 
@@ -217,7 +219,7 @@ public class RelativeConstraint extends AbstractConstraint {
         this.tolerance = tolerance;
         this.previousResultsBlock = previousResultsBlock;
         if (this.previousResultsBlock.isChoicePreviousResults()) {
-            if (this.previousResultsBlock.getPreviousResultsString().equals("*")) {
+            if (ANY.equals(this.previousResultsBlock.getPreviousResultsString())) {
                 this.previousResults = -1;
             } else {
                 try {
@@ -239,11 +241,15 @@ public class RelativeConstraint extends AbstractConstraint {
             try {
                 final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 this.timeframeStart = dfLong.parse(this.timeframeStartString);
-                if (!this.timeframeEndString.equals("now")) {
+                if (!NOW.equals(this.timeframeEndString)) {
                     this.timeframeEnd = dfLong.parse(this.timeframeEndString);
                 }
             } catch (ParseException e) {
-
+                PrintStream logger = getSettings().getListener().getLogger();
+                logger.print("Error occurred parsing one of those dates, timeframeStartString:"+timeframeStartString
+                        +", timeframeEndString:"+timeframeEndString
+                        +" using format:yyyy-MM-dd HH:mm, message:"+e.getMessage());
+                e.printStackTrace(logger);
             }
         }
     }
@@ -254,14 +260,15 @@ public class RelativeConstraint extends AbstractConstraint {
      * @return clone of this object
      */
     public RelativeConstraint clone() {
-        RelativeConstraint clone = new RelativeConstraint(this.getMeteredValue(), this.getOperator(), this.getRelatedPerfReport(), this.getEscalationLevel(), this.getSuccess(), new TestCaseBlock(this
-                .getTestCaseBlock().getTestCase()), new PreviousResultsBlock(String.valueOf(this.getPreviousResultsBlock().isChoicePreviousResults()), this.getPreviousResultsString(),
+        return new RelativeConstraint(this.getMeteredValue(), this.getOperator(), 
+                this.getRelatedPerfReport(), this.getEscalationLevel(), this.getSuccess(), 
+                new TestCaseBlock(this.getTestCaseBlock().getTestCase()), 
+                new PreviousResultsBlock(String.valueOf(this.getPreviousResultsBlock().isChoicePreviousResults()), this.getPreviousResultsString(),
                 this.getTimeframeStartString(), this.getTimeframeEndString()), this.getTolerance());
-        return clone;
     }
 
     @Override
-    public ConstraintEvaluation evaluate(List<? extends Run<?, ?>> builds) throws IllegalArgumentException, AbortException, ParseException {
+    public ConstraintEvaluation evaluate(List<? extends Run<?, ?>> builds) throws AbortException, ParseException {
         if (builds.isEmpty()) {
             throw new AbortException("Performance: No builds found to evaluate!");
         }
@@ -303,34 +310,28 @@ public class RelativeConstraint extends AbstractConstraint {
         }
         double result = 0;
         if (getOperator().equals(Operator.NOT_GREATER)) {
-            result = (double) (calculatedValue * (1 + getTolerance() / 100));
+            result = calculatedValue * (1 + getTolerance() / 100);
         } else if (getOperator().equals(Operator.NOT_LESS)) {
-            result = (double) (calculatedValue * (1 - getTolerance() / 100));
+            result = calculatedValue * (1 - getTolerance() / 100);
         } else {
             try {
                 throw new AbortException("Performance Plugin: Relative Constraints can only handle \"not greater than\" and \"not less than\" operators. Please check your constraint configuration");
             } catch (AbortException e) {
-                e.printStackTrace();
+                PrintStream logger = getSettings().getListener().getLogger();
+                e.printStackTrace(logger);
             }
         }
 
         switch (getOperator()) {
             case NOT_LESS:
-                if (result < newValue) {
-                    setSuccess(true);
-                } else {
-                    setSuccess(false);
-                }
+                setSuccess(result < newValue);
                 break;
             case NOT_GREATER:
-                if (result >= newValue) {
-                    setSuccess(true);
-                } else {
-                    setSuccess(false);
-                }
+                setSuccess(result >= newValue);
                 break;
             default:
                 setSuccess(false);
+                break;
         }
         ConstraintEvaluation evaluation = new ConstraintEvaluation(this, result, calculatedValue);
 
@@ -346,10 +347,10 @@ public class RelativeConstraint extends AbstractConstraint {
         }
 
         String unit = getMeteredValue()==Metric.ERRORPRC ? "percent" : "milliseconds";
-        setJunitResult(String.format("<testcase classname=\"%s\" name=\"%s of %s must %s %.3f percent above/below previous\">\n",
+        setJunitResult(String.format("<testcase classname=\"%s\" name=\"%s of %s must %s %.3f percent above/below previous\">%n",
             getRelatedPerfReport(), getMeteredValue(), measuredLevel, getOperator().text, getTolerance())
             + (getSuccess() ? "" :
-                String.format("    <failure type=\"%s\">Measured value for %s: %.0f %s. Previous value: %.0f %s. Deviation: %.3f %%</failure>\n",
+                String.format("    <failure type=\"%s\">Measured value for %s: %.0f %s. Previous value: %.0f %s. Deviation: %.3f %%</failure>%n",
                 getEscalationLevel(), getMeteredValue(), newValue, unit, calculatedValue, unit, (newValue/calculatedValue-1)*100))
             + "</testcase>\n");
 
@@ -418,21 +419,28 @@ public class RelativeConstraint extends AbstractConstraint {
      * the constraint settings
      */
     private List<Run<?, ?>> evaluateDate(List<? extends Run<?, ?>> builds) {
-        List<Run<?, ?>> result = new ArrayList<Run<?, ?>>();
-        Calendar timeframeStart = Calendar.getInstance();
-        timeframeStart.setTime(getTimeframeStart());
-        Calendar timeframeEnd = Calendar.getInstance();
-        timeframeEnd.setTime(getTimeframeEnd());
+        List<Run<?, ?>> result = new ArrayList<>();
+        Calendar timeframeStartAsCalendar = Calendar.getInstance();
+        timeframeStartAsCalendar.setTime(getTimeframeStart());
+        Calendar timeframeEndAsCalendar = Calendar.getInstance();
+        timeframeEndAsCalendar.setTime(getTimeframeEnd());
 
-        if (getTimeframeEndString().equals("now")) {
-            timeframeEnd.setTime(new Date());
+        if (NOW.equals(getTimeframeEndString())) {
+            timeframeEndAsCalendar.setTime(new Date());
         }
+        
         for (Run<?, ?> build : builds) {
-            if (build.getResult().equals(Result.SUCCESS) || build.getResult().equals(Result.UNSTABLE) && getSettings().isIgnoreUnstableBuilds() == false || build.getResult().equals(Result.FAILURE)
-                    && getSettings().isIgnoreFailedBuilds() == false) {
-                if (!build.getTimestamp().before(timeframeStart) && !build.getTimestamp().after(timeframeEnd) && !build.equals(builds.get(0))) {
-                    result.add(build);
-                }
+            Result buildResult = build.getResult();
+            if (buildResult != null && 
+                    (buildResult.equals(Result.SUCCESS) 
+                        || (buildResult.equals(Result.UNSTABLE) 
+                        && !getSettings().isIgnoreUnstableBuilds()) 
+                        || (buildResult.equals(Result.FAILURE)
+                        && !getSettings().isIgnoreFailedBuilds()))
+                        && (!build.getTimestamp().before(timeframeStartAsCalendar) 
+                                && !build.getTimestamp().after(timeframeEndAsCalendar) 
+                                && !build.equals(builds.get(0)))) {
+                result.add(build);
             }
         }
         return result;
@@ -446,14 +454,17 @@ public class RelativeConstraint extends AbstractConstraint {
      * @return build list of previous builds that get included into the evaluation
      */
     private List<Run<?, ?>> evaluatePreviousBuilds(List<? extends Run<?, ?>> builds) {
-        List<Run<?, ?>> result = new ArrayList<Run<?, ?>>();
+        List<Run<?, ?>> result = new ArrayList<>();
         if (getPreviousResults() == -1) {
             setPreviousResults(builds.size() - 1);
         }
-        int i = 1, j = 0;
+        int i = 1;
+        int j = 0;
         while (j < getPreviousResults() && i < builds.size()) {
-            if (builds.get(i).getResult().equals(Result.SUCCESS) || builds.get(i).getResult().equals(Result.UNSTABLE) && getSettings().isIgnoreUnstableBuilds() == false
-                    || builds.get(i).getResult().equals(Result.FAILURE) && getSettings().isIgnoreFailedBuilds() == false) {
+            if (builds.get(i).getResult().equals(Result.SUCCESS) 
+                    || (builds.get(i).getResult().equals(Result.UNSTABLE) 
+                    && !getSettings().isIgnoreUnstableBuilds())
+                    || (builds.get(i).getResult().equals(Result.FAILURE) && !getSettings().isIgnoreFailedBuilds())) {
                 result.add(builds.get(i));
                 j++;
             }

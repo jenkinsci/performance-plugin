@@ -1,12 +1,5 @@
 package hudson.plugins.performance.parsers;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.UriReport;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -29,6 +22,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
+
 /**
  * An abstraction for parsing data to PerformanceReport instances. This class
  * provides functionality that optimizes the parsing process, such as caching as
@@ -50,22 +51,25 @@ public abstract class AbstractParser extends PerformanceReportParser {
     private static final Cache<String, PerformanceReport> CACHE = CacheBuilder.newBuilder().maximumSize(1000).softValues().build();
 
     protected boolean isNumberDateFormat = false;
-    protected transient SimpleDateFormat format;
+    protected SimpleDateFormat format;
 
-    protected final static String[] DATE_FORMATS = new String[]{
+    protected static final String[] DATE_FORMATS = new String[]{
             "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss,SSS", "yyyy/mm/dd HH:mm:ss"
     };
 
     protected String percentiles;
 
-    public AbstractParser(String glob, String percentiles) {
+    protected String filterRegex;
+
+    public AbstractParser(String glob, String percentiles, String filterRegex) {
         super(glob);
         this.percentiles = percentiles;
+        this.filterRegex = filterRegex;
     }
 
     @Override
     public Collection<PerformanceReport> parse(Run<?, ?> build, Collection<File> reports, TaskListener listener) throws IOException {
-        final List<PerformanceReport> result = new ArrayList<PerformanceReport>();
+        final List<PerformanceReport> result = new ArrayList<>();
 
         for (File reportFile : reports) {
             // Attempt to load previously serialized instances from file or cache.
@@ -77,7 +81,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
 
             // When serialized data cannot be used, the original JMeter files are to be processed.
             try {
-                listener.getLogger().println("Performance: Parsing JMeter report file '" + reportFile + "'.");
+                listener.getLogger().println("Performance: Parsing report file '" + reportFile + "' with filterRegex '"+filterRegex+"'.");
                 final PerformanceReport report = parse(reportFile);
                 result.add(report);
                 passBaselineBuild(report);
@@ -121,31 +125,23 @@ public abstract class AbstractParser extends PerformanceReportParser {
      */
     protected static PerformanceReport loadSerializedReport(File reportFile) {
         if (reportFile == null) {
-            throw new NullPointerException("Argument 'reportFile' cannot be null.");
+            throw new IllegalArgumentException("Argument 'reportFile' cannot be null.");
         }
         final String serialized = reportFile.getPath() + SERIALIZED_DATA_FILE_SUFFIX;
-
-        ObjectInputStream in = null;
+        File file = new File(serialized);
         synchronized (CACHE) {
-            try {
-                PerformanceReport report = CACHE.getIfPresent(serialized);
-                if (report == null) {
-                    in = new ObjectInputStreamWithClassMapping(new BufferedInputStream(new FileInputStream(serialized)));
-                    report = (PerformanceReport) in.readObject();
-                    CACHE.put(serialized, report);
-                }
-                return report;
-            } catch (FileNotFoundException ex) {
-                // That's OK
-            } catch (Exception ex) {
-                LOGGER.log(Level.WARNING, "Reading serialized PerformanceReport instance from file '" + serialized + "' failed.", ex);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException ex) {
-                        LOGGER.log(Level.WARNING, "Unable to close inputstream after attempt to read data from file '" + serialized + "'.", ex);
-                    }
+            PerformanceReport report = CACHE.getIfPresent(serialized);
+            if (report == null && file.exists() && file.canRead()) {
+                try (FileInputStream fis = new FileInputStream(serialized);
+                        BufferedInputStream bis = new BufferedInputStream(fis);
+                        ObjectInputStream in = new ObjectInputStreamWithClassMapping(bis)) {
+                        report = (PerformanceReport) in.readObject();
+                        CACHE.put(serialized, report);
+                    return report;
+                } catch (FileNotFoundException ex) {
+                    // That's OK
+                } catch (Exception ex) {
+                    LOGGER.log(Level.WARNING, "Reading serialized PerformanceReport instance from file '" + serialized + "' failed.", ex);
                 }
             }
             return null;
@@ -162,36 +158,27 @@ public abstract class AbstractParser extends PerformanceReportParser {
      */
     protected static void saveSerializedReport(File reportFile, PerformanceReport report) {
         if (reportFile == null) {
-            throw new NullPointerException("Argument 'reportFile' cannot be null.");
+            throw new IllegalArgumentException("Argument 'reportFile' cannot be null.");
         }
         if (report == null) {
-            throw new NullPointerException("Argument 'report' cannot be null.");
+            throw new IllegalArgumentException("Argument 'report' cannot be null.");
         }
         final String serialized = reportFile.getPath() + SERIALIZED_DATA_FILE_SUFFIX;
 
         synchronized (CACHE) {
             CACHE.put(serialized, report);
         }
-
-        ObjectOutputStream out = null;
-        try {
-            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(serialized)));
+        try (FileOutputStream fos = new FileOutputStream(serialized);
+                BufferedOutputStream bos = new BufferedOutputStream(fos);
+                ObjectOutputStream out = new ObjectOutputStream(bos)) {
             out.writeObject(report);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Saving serialized PerformanceReport instance to file '" + serialized + "' failed.", ex);
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, "Unable to close outputstream after attempt to write data to file '" + serialized + "'.", ex);
-                }
-            }
         }
     }
 
     public static class ObjectInputStreamWithClassMapping extends ObjectInputStream {
-        protected Hashtable<String, Class> classMapping = new Hashtable<String, Class>();
+        protected Hashtable<String, Class> classMapping = new Hashtable<>(); 
 
         public ObjectInputStreamWithClassMapping(InputStream in) throws IOException {
             super(in);
@@ -207,8 +194,6 @@ public abstract class AbstractParser extends PerformanceReportParser {
                     classMapping.get(desc.getName()) :
                     super.resolveClass(desc);
         }
-
-
     }
 
 
@@ -227,7 +212,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
                     new Date(Long.valueOf(timestamp)) :
                     format.parse(timestamp);
         } catch (ParseException e) {
-            throw new RuntimeException("Cannot parse timestamp: " + timestamp +
+            throw new IllegalArgumentException("Cannot parse timestamp: " + timestamp +
                     ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), e);
         }
     }
@@ -253,9 +238,13 @@ public abstract class AbstractParser extends PerformanceReportParser {
                 Long.valueOf(timestamp);
                 isNumberDateFormat = true;
             } catch (NumberFormatException ex) {
-                throw new RuntimeException("Cannot parse timestamp: " + timestamp +
+                throw new IllegalArgumentException("Cannot parse timestamp: " + timestamp +
                         ". Please, use one of supported formats: " + Arrays.toString(DATE_FORMATS), ex);
             }
         }
+    }
+
+    protected PerformanceReport createPerformanceReport() {
+        return new PerformanceReport(percentiles, filterRegex);
     }
 }

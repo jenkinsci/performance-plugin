@@ -13,16 +13,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * @author Rene Kugel
  */
 public class PreviousResultsBlock extends AbstractDescribableImpl<PreviousResultsBlock> {
-
-    @Symbol("previous")
-    @Extension
-    public static class DescriptorImpl extends Descriptor<PreviousResultsBlock> {
-        @Override
-        public String getDisplayName() {
-            return "PreviousResultsBlock";
-        }
-    }
-
     /**
      * True: relative constraint includes a user defined number of builds into the evaluation False:
      * relative constraint includes all builds that have taken place in an user defined time frame
@@ -40,6 +30,15 @@ public class PreviousResultsBlock extends AbstractDescribableImpl<PreviousResult
      * End of the time frame
      */
     private String timeframeEndString;
+
+    @Symbol("previous")
+    @Extension
+    public static class DescriptorImpl extends Descriptor<PreviousResultsBlock> {
+        @Override
+        public String getDisplayName() {
+            return "PreviousResultsBlock";
+        }
+    }
 
     @DataBoundConstructor
     public PreviousResultsBlock(String value, String previousResultsString, String timeframeStartString, String timeframeEndString) {

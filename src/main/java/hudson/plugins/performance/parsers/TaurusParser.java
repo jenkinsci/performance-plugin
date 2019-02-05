@@ -1,18 +1,20 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.Extension;
-import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.data.TaurusFinalStats;
+import java.io.File;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
+import hudson.Extension;
+import hudson.plugins.performance.data.TaurusFinalStats;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
 
 /**
  * Parser for Taurus
@@ -27,9 +29,13 @@ public class TaurusParser extends AbstractParser {
         }
     }
 
-    @DataBoundConstructor
     public TaurusParser(String glob, String percentiles) {
-        super(glob, percentiles);
+        super(glob, percentiles, PerformanceReport.INCLUDE_ALL);
+    }
+    
+    @DataBoundConstructor
+    public TaurusParser(String glob, String percentiles, String filterRegex) {
+        super(glob, percentiles, filterRegex);
     }
 
     @Override
@@ -43,7 +49,7 @@ public class TaurusParser extends AbstractParser {
     }
 
     private PerformanceReport readFromXML(File reportFile) throws Exception {
-        final PerformanceReport report = new PerformanceReport(percentiles);
+        final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
@@ -53,9 +59,9 @@ public class TaurusParser extends AbstractParser {
         Document doc = dBuilder.parse(reportFile);
         doc.getDocumentElement().normalize();
 
-        Node URLNode = doc.getElementsByTagName("ReportURL").item(0);
-        if (URLNode != null) {
-            reportURL = URLNode.getTextContent();
+        Node urlNode = doc.getElementsByTagName("ReportURL").item(0);
+        if (urlNode != null) {
+            reportURL = urlNode.getTextContent();
         }
 
         Node testDurationNode = doc.getElementsByTagName("TestDuration").item(0);
@@ -85,30 +91,34 @@ public class TaurusParser extends AbstractParser {
     private TaurusFinalStats getTaurusFinalStats(Element group) {
         final TaurusFinalStats report = new TaurusFinalStats();
 
-        report.setBytes(Long.valueOf(((Element) group.getElementsByTagName("bytes").item(0)).getAttribute("value")));
-        report.setFail(Integer.valueOf(((Element) group.getElementsByTagName("fail").item(0)).getAttribute("value")));
-        report.setSucc(Integer.valueOf(((Element) group.getElementsByTagName("succ").item(0)).getAttribute("value")));
-        report.setThroughput(Long.valueOf(((Element) group.getElementsByTagName("throughput").item(0)).getAttribute("value")));
+        report.setBytes(Long.valueOf(getValueAttribute("bytes", group)));
+        report.setFail(Integer.valueOf(getValueAttribute("fail", group)));
+        report.setSucc(Integer.valueOf(getValueAttribute("succ", group)));
         if (group.getElementsByTagName("throughput").getLength() > 0) {
-            report.setThroughput(Long.valueOf(((Element) group.getElementsByTagName("throughput").item(0)).getAttribute("value")));
+            report.setThroughput(Long.valueOf(getValueAttribute("throughput", group)));
         }
-        report.setAverageResponseTime(Double.valueOf(((Element) group.getElementsByTagName("avg_rt").item(0)).getAttribute("value")) * 1000); // to ms
+        report.setAverageResponseTime(Double.valueOf(getValueAttribute("avg_rt", group)) * 1000); // to ms
 
         NodeList perc = group.getElementsByTagName("perc");
         for (int i = 0; i < perc.getLength(); i++) {
             Node nNode = perc.item(i);
-            if (((Element) nNode).getAttribute("param").equals("50.0")) {
-                report.setPerc50(Double.valueOf(((Element) nNode).getAttribute("value")) * 1000); // to ms
-            } else if (((Element) nNode).getAttribute("param").equals("90.0")) {
-                report.setPerc90(Double.valueOf(((Element) nNode).getAttribute("value")) * 1000); // to ms
-            } else if (((Element) nNode).getAttribute("param").equals("0.0")) {
-                report.setPerc0(Double.valueOf(((Element) nNode).getAttribute("value")) * 1000); // to ms
-            } else if (((Element) nNode).getAttribute("param").equals("100.0")) {
-                report.setPerc100(Double.valueOf(((Element) nNode).getAttribute("value")) * 1000); // to ms
+            String attributeParam = ((Element) nNode).getAttribute("param");
+            Double valueInMs = Double.valueOf(((Element) nNode).getAttribute("value")) * 1000;
+            
+            if ("50.0".equals(attributeParam)) {
+                report.setPerc50(valueInMs); // to ms
+            } else if ("90.0".equals(attributeParam)) {
+                report.setPerc90(valueInMs); // to ms
+            } else if ("0.0".equals(attributeParam)) {
+                report.setPerc0(valueInMs); // to ms
+            } else if ("100.0".equals(attributeParam)) {
+                report.setPerc100(valueInMs); // to ms
             }
         }
-
-
         return report;
+    }
+
+    private String getValueAttribute(String elementName, Element group) {
+        return ((Element) group.getElementsByTagName(elementName).item(0)).getAttribute("value");
     }
 }

@@ -5,8 +5,8 @@
   Since we don't really have anything dynamic here, let's just use static HTML. 
 -->
 <div>
-  This plugin integrates <a href="http://jakarta.apache.org/jmeter/">JMeter reports</a>,
-  <a href="http://www.junit.org/">JUnit reports</a>, 
-  <a href="http://github.com/wk/wrk">wrk output</a>,
-  and <a href="http://twitter.github.io/iago/"></a>Iago reports into Hudson. 
+This plugin allows tracking performance KPIs, based on results read from popular testing tools (
+<a href="https://jmeter.apache.org/">Apache JMeter</a>,
+<a href="https://junit.org/junit5/">JUnit</a>,
+<a href="http://gettaurus.org/">Taurus</a>). 
 </div>

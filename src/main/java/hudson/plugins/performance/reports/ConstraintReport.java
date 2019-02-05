@@ -1,5 +1,12 @@
 package hudson.plugins.performance.reports;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.Result;
@@ -10,13 +17,6 @@ import hudson.plugins.performance.constraints.AbstractConstraint;
 import hudson.plugins.performance.constraints.ConstraintEvaluation;
 import hudson.plugins.performance.constraints.RelativeConstraint;
 import jenkins.model.Jenkins;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 /**
  * Creates a report of the constraint evaluation and stores it into a consecutive log file, a build
@@ -96,7 +96,7 @@ public class ConstraintReport {
      */
     private String junitReport;
 
-    public ConstraintReport(ArrayList<ConstraintEvaluation> ceList, Run<?, ?> globBuild, boolean persistConstraintLog) throws IOException, InterruptedException {
+    public ConstraintReport(ArrayList<ConstraintEvaluation> ceList, Run<?, ?> globBuild, boolean persistConstraintLog) throws IOException {
         this.newBuild = globBuild;
         this.createMetaData(ceList, newBuild);
         this.createLoggerMsg(ceList);
@@ -133,7 +133,7 @@ public class ConstraintReport {
             if (ce.getAbstractConstraint() instanceof AbsoluteConstraint) {
                 this.allConstraints++;
                 this.absoluteConstraints++;
-                if (ce.getAbstractConstraint().getSuccess() == true) {
+                if (ce.getAbstractConstraint().getSuccess()) {
                     this.successfulConstraints++;
                 } else {
                     this.violatedConstraints++;
@@ -146,13 +146,15 @@ public class ConstraintReport {
                             break;
                         case 2:
                             this.violatedError++;
+                            break;
+                        default:
                             break;
                     }
                 }
             } else if (ce.getAbstractConstraint() instanceof RelativeConstraint) {
                 this.allConstraints++;
                 this.relativeConstraints++;
-                if (ce.getAbstractConstraint().getSuccess() == true) {
+                if (ce.getAbstractConstraint().getSuccess()) {
                     this.successfulConstraints++;
                 } else {
                     this.violatedConstraints++;
@@ -165,6 +167,8 @@ public class ConstraintReport {
                             break;
                         case 2:
                             this.violatedError++;
+                            break;
+                        default:
                             break;
                     }
                 }
@@ -261,7 +265,7 @@ public class ConstraintReport {
             if (!c.getSuccess()) {
                 loggerMsg += String.format(logFormat,
                     c.getRelatedPerfReport(),
-                    c.isSpecifiedTestCase() ? c.getTestCaseBlock().getTestCase() : "*",
+                    c.isSpecifiedTestCase() ? c.getTestCaseBlock().getTestCase() : AbstractConstraint.ANY,
                     c.getMeteredValue().toString(),
                     c.getOperator().toString(),
                     c instanceof RelativeConstraint ? String.format("%9.3f%%", ((RelativeConstraint)c).getTolerance()) 
@@ -288,7 +292,7 @@ public class ConstraintReport {
      * Depends on results from previous createMetaData call.
      */
     private String createJunitReport(ArrayList<ConstraintEvaluation> ceList) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("<testsuite tests=\""+getAllConstraints()+"\" failures=\""+getViolatedConstraints()+"\" >\n");
         for (ConstraintEvaluation ce : ceList) {
             AbstractConstraint c = ce.getAbstractConstraint();
@@ -305,27 +309,27 @@ public class ConstraintReport {
      * @throws IOException
      * @throws InterruptedException
      */
-    public void writeResultsToFile() throws InterruptedException, IOException {
+    public void writeResultsToFile() throws IOException {
         performanceLog = new File(newBuild.getRootDir() + File.separator + "performance-results" + File.separator + "performance.log");
         if (!performanceLog.exists()) {
             performanceLog.getParentFile().mkdirs();
-            performanceLog.createNewFile();
+            if (!performanceLog.createNewFile()) {
+                throw new IOException("Cannot create new file "+performanceLog.getAbsolutePath());
+            }
         }
-        FileOutputStream outWriter = new FileOutputStream(performanceLog, true);
-        try {
+        try (FileOutputStream outWriter = new FileOutputStream(performanceLog, true)){
             outWriter.write(getLoggerMsgAdv().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            outWriter.close();
         }
+
     }
 
     /**
      * Writes the complete report to the environment variable: BUILD_CONSTRAINT_LOG
      */
     public void writeResultsToEnvVar() {
-        List<ParameterValue> params = new ArrayList<ParameterValue>();
+        List<ParameterValue> params = new ArrayList<>();
         params.add(new StringParameterValue("BUILD_CONSTRAINT_LOG", getLoggerMsgAdv()));
         newBuild.addAction(new ParametersAction(params));
     }

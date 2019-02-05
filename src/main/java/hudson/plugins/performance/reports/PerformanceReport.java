@@ -8,9 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
-import org.xml.sax.SAXException;
 
 import hudson.model.Run;
 import hudson.plugins.performance.Messages;
@@ -32,6 +32,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private static final long serialVersionUID = 675698410989941826L;
 
 
+    public static final String INCLUDE_ALL = null;
+
+
     private transient PerformanceBuildAction buildAction;
 
 
@@ -40,7 +43,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     /**
      * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
      */
-    private final Map<String, UriReport> uriReportMap = new LinkedHashMap<String, UriReport>();
+    private final Map<String, UriReport> uriReportMap = new LinkedHashMap<>();
 
     private PerformanceReport lastBuildReport;
 
@@ -95,14 +98,24 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     protected String percentiles;
     protected int baselineBuild = 0;
 
+    private transient Pattern filterRegexPattern;
+
+    private String filterRegex;
+
     public PerformanceReport() {
-        if (StringUtils.isBlank(percentiles)) {
-            this.percentiles = DEFAULT_PERCENTILES;
-        }
+        this(DEFAULT_PERCENTILES);
     }
 
-    public PerformanceReport(String percentiles) {
+    public PerformanceReport(String percentiles, String filterRegex) {
         this.percentiles = percentiles;
+        this.filterRegex = filterRegex;
+        if (filterRegex!=null && filterRegex.trim().length()>0) {
+            this.filterRegexPattern = Pattern.compile(filterRegex);
+        } 
+    }
+
+    public PerformanceReport(String defaultPercentiles) {
+        this(defaultPercentiles, INCLUDE_ALL);
     }
 
     public Object readResolve() {
@@ -132,13 +145,16 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         return uri.replace("http:", "").replace("https:", "").replaceAll("/", "_").replaceAll(":", "_");
     }
 
-    public void addSample(HttpSample pHttpSample) throws SAXException {
+    public void addSample(HttpSample pHttpSample) {
         String uri = pHttpSample.getUri();
         if (uri == null) {
             buildAction
                     .getHudsonConsoleWriter()
                     .println("label cannot be empty, please ensure your jmx file specifies "
                             + "name properly for each http sample: skipping sample");
+            return;
+        }
+        if(!isIncluded(uri)) {
             return;
         }
         String staplerUri = PerformanceReport.asStaplerURI(uri);
@@ -167,6 +183,14 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         totalSizeInKB += pHttpSample.getSizeInKb();
     }
 
+    private boolean isIncluded(String name) {
+        if (filterRegexPattern != null) {
+            return filterRegexPattern.matcher(name).matches();
+        } else {
+            return true;
+        }
+    }
+
     public void addSample(TaurusFinalStats sample, boolean isSummaryReport) {
         String uri = sample.getLabel();
         if (uri == null) {
@@ -176,6 +200,11 @@ public class PerformanceReport extends AbstractReport implements Serializable,
                             + "name properly for each http sample: skipping sample");
             return;
         }
+        
+        if (!isIncluded(uri)) {
+            return;
+        }
+
 
         if (isSummaryReport) {
             summarizerErrors = nbError = sample.getFail();
@@ -467,7 +496,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         PerformanceReportParser parser = buildAction.getParserByDisplayName("JmeterSummarizer");
         if (parser != null) {
             String fileExt = parser.glob;
-            String parts[] = fileExt.split("\\s*[;:,]+\\s*");
+            String[] parts = fileExt.split("\\s*[;:,]+\\s*");
             for (String path : parts) {
                 if (filename.endsWith(path.substring(5))) {
                     return true;
@@ -475,10 +504,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             }
         }
         parser = buildAction.getParserByDisplayName("Iago");
-        if (parser != null) {
-            return true;
-        }
-        return false;
+        return parser != null;
     }
 
     public void setSummarizerSize(long summarizerSize) {
@@ -531,5 +557,19 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     public void setBaselineBuild(int baselineBuild) {
         this.baselineBuild = baselineBuild;
+    }
+
+    /**
+     * @return the filterRegex
+     */
+    public String getFilterRegex() {
+        return filterRegex;
+    }
+
+    /**
+     * @param filterRegex the filterRegex to set
+     */
+    public void setFilterRegex(String filterRegex) {
+        this.filterRegex = filterRegex;
     }
 }

@@ -75,7 +75,7 @@ public class PerformanceProjectAction implements Action {
 
     public final Job<?, ?> job;
 
-    private transient List<String> performanceReportList;
+    private List<String> performanceReportList;
 
     public String getDisplayName() {
         return Messages.ProjectAction_DisplayName();
@@ -312,10 +312,8 @@ public class PerformanceProjectAction implements Action {
 
     private String getPerformanceReportNameFile(final PerformanceReportPosition performanceReportPosition) {
         String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
-        if (performanceReportNameFile == null) {
-            if (getPerformanceReportList().size() == 1) {
-                performanceReportNameFile = getPerformanceReportList().get(0);
-            }
+        if (performanceReportNameFile == null && getPerformanceReportList().size() == 1) {
+            performanceReportNameFile = getPerformanceReportList().get(0);
         }
         return performanceReportNameFile;
     }
@@ -332,7 +330,7 @@ public class PerformanceProjectAction implements Action {
             response.sendRedirect2(request.getContextPath() + "/images/headless.png");
             return;
         }
-        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderErrors = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderErrors = new DataSetBuilder<>();
         List<? extends Run<?, ?>> builds = getJob().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
@@ -382,7 +380,7 @@ public class PerformanceProjectAction implements Action {
             response.sendRedirect2(request.getContextPath() + "/images/headless.png");
             return;
         }
-        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<>();
         ReportValueSelector valueSelector = ReportValueSelector.get(getJob());
         List<? extends Run<?, ?>> builds = getJob().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
@@ -440,7 +438,7 @@ public class PerformanceProjectAction implements Action {
             response.sendRedirect2(request.getContextPath() + "/images/headless.png");
             return;
         }
-        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<>();
         List<? extends Run<?, ?>> builds = getJob().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
@@ -473,7 +471,6 @@ public class PerformanceProjectAction implements Action {
                         Messages.ProjectAction_Line90(), label);
             }
             nbBuildsToAnalyze--;
-            continue;
         }
 
         String legendLimit = request.getParameter("legendLimit");
@@ -494,7 +491,7 @@ public class PerformanceProjectAction implements Action {
             return;
         }
 
-        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        final DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<>();
         final List<? extends Run<?, ?>> builds = getJob().getBuilds();
         final Range buildsLimits = getFirstAndLastBuild(request, builds);
 
@@ -544,8 +541,8 @@ public class PerformanceProjectAction implements Action {
             // "/images/headless.png");
             return;
         }
-        DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
-        DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizerErrors = new DataSetBuilder<NumberOnlyBuildLabel, String>();
+        DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<>();
+        DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizerErrors = new DataSetBuilder<>();
         ReportValueSelector valueSelector = ReportValueSelector.get(getJob());
 
         List<?> builds = getJob().getBuilds();
@@ -640,23 +637,23 @@ public class PerformanceProjectAction implements Action {
                     lastDate.set(GregorianCalendar.HOUR_OF_DAY, 23);
                     lastDate.set(GregorianCalendar.MINUTE, 59);
                     lastDate.set(GregorianCalendar.SECOND, 59);
+                    for (Object build : builds) {
+                        Run<?, ?> currentBuild = (Run<?, ?>) build;
+                        GregorianCalendar buildDate = new GregorianCalendar();
+                        buildDate.setTime(currentBuild.getTimestamp().getTime());
+                        if (firstDate.getTime().before(buildDate.getTime())) {
+                            firstBuild = var;
+                        }
+                        if (lastBuild < 0 && lastDate.getTime().after(buildDate.getTime())) {
+                            lastBuild = var;
+                        }
+                        var--;
+                    }
+                    return new Range(firstBuild, lastBuild);
                 } catch (ParseException e) {
                     LOGGER
                             .log(Level.SEVERE, "Error during the manage of the Calendar", e);
                 }
-                for (Object build : builds) {
-                    Run<?, ?> currentBuild = (Run<?, ?>) build;
-                    GregorianCalendar buildDate = new GregorianCalendar();
-                    buildDate.setTime(currentBuild.getTimestamp().getTime());
-                    if (firstDate.getTime().before(buildDate.getTime())) {
-                        firstBuild = var;
-                    }
-                    if (lastBuild < 0 && lastDate.getTime().after(buildDate.getTime())) {
-                        lastBuild = var;
-                    }
-                    var--;
-                }
-                return new Range(firstBuild, lastBuild);
             }
         }
         throw new IllegalArgumentException("unsupported configType + "
@@ -673,7 +670,7 @@ public class PerformanceProjectAction implements Action {
 
     public final Run getSomeBuildWithWorkspace() {
         byte cnt = 0;
-        for(Run run = job.getLastBuild(); cnt < 5 && run != null; run = run.getPreviousBuild()) {
+        for (Run run = job.getLastBuild(); cnt < 5 && run != null; run = run.getPreviousBuild()) {
             if (!run.isBuilding()) {
                 if (run instanceof AbstractBuild) {
                     FilePath ws = ((AbstractBuild) run).getWorkspace();
@@ -761,9 +758,7 @@ public class PerformanceProjectAction implements Action {
      * @return a view to configure the trend graph for the current user
      */
     private Object createUserConfiguration(final StaplerRequest request) {
-        GraphConfigurationDetail graph = new GraphConfigurationDetail(job,
-                PLUGIN_NAME, request);
-        return graph;
+        return new GraphConfigurationDetail(job, PLUGIN_NAME, request);
     }
 
     /**
@@ -799,7 +794,7 @@ public class PerformanceProjectAction implements Action {
     private DataSetBuilder<String, NumberOnlyBuildLabel> getTrendReportData(final StaplerRequest request,
                                                                             String performanceReportNameFile) {
 
-        DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+        DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<>();
         List<? extends Run<?, ?>> builds = getJob().getBuilds();
         Range buildsLimits = getFirstAndLastBuild(request, builds);
 
@@ -819,16 +814,18 @@ public class PerformanceProjectAction implements Action {
                     nbBuildsToAnalyze--;
                     continue;
                 }
-                dataSet.add(Math.round(report.getAverage()),
+                dataSet.add(report.getAverage(),
                         Messages.ProjectAction_Average(), label);
                 Map<Double, Long> percentilesValues = report.getPercentilesValues();
-                for (Double perc : percentilesValues.keySet()) {
-                    dataSet.add(Math.round(percentilesValues.get(perc)),
-                            report.getPercentileLabel(perc), label);
+                
+                for (Map.Entry<Double, Long> entry : percentilesValues.entrySet()) {
+                    dataSet.add(entry.getValue(),
+                            report.getPercentileLabel(entry.getKey()), label);
                 }
+
                 dataSet.add(Math.round(report.errorPercent()),
                         Messages.ProjectAction_PercentageOfErrors(), label);
-                dataSet.add(Math.round(report.countErrors()),
+                dataSet.add(report.countErrors(),
                         Messages.ProjectAction_Errors(), label);
                 dataSet.add(report.getTotalTrafficInKb(),
                         Messages.ProjectAction_TotalTrafficKB(), label);
@@ -891,12 +888,7 @@ public class PerformanceProjectAction implements Action {
         }
 
         public boolean includedByStep(int buildNumber) {
-            if (buildNumber % step == 0) {
-                return true;
-            }
-            return false;
+            return (buildNumber % step == 0);
         }
-
     }
-
 }

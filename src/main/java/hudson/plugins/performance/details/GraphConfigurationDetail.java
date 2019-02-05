@@ -17,15 +17,15 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
-import hudson.model.Job;
-import hudson.plugins.performance.Messages;
-import hudson.plugins.performance.cookie.CookieHandler;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import hudson.model.Job;
 import hudson.model.ModelObject;
+import hudson.plugins.performance.Messages;
+import hudson.plugins.performance.cookie.CookieHandler;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
@@ -97,8 +97,6 @@ public class GraphConfigurationDetail implements ModelObject {
         return DEFAULT_DATE.compareTo(firstDayCount) == 0
                 && DEFAULT_DATE.compareTo(lastDayCount) == 0;
     }
-
-    static DateFormat format = new SimpleDateFormat(DEFAULT_DATE);
 
     public GraphConfigurationDetail(final Job<?, ?> project,
                                     final String pluginName, final StaplerRequest request) {
@@ -362,6 +360,7 @@ public class GraphConfigurationDetail implements ModelObject {
      */
     public static GregorianCalendar getGregorianCalendarFromString(
             String dateString) throws ParseException {
+        DateFormat format = new SimpleDateFormat(DEFAULT_DATE);
         Date date = format.parse(dateString);
         GregorianCalendar outCalendar = new GregorianCalendar();
         outCalendar.setTime(date);

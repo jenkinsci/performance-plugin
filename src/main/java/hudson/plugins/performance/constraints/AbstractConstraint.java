@@ -24,7 +24,8 @@ import java.util.List;
  * @author Rene Kugel
  */
 public abstract class AbstractConstraint implements Describable<AbstractConstraint>, ExtensionPoint {
-
+    public static final String ANY = "*";
+    protected static final String NOW = "now";
     /**
      * Holds the information whether constraint is fulfilled(true) or violated(false)
      */
@@ -203,7 +204,7 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
                 final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 try {
                     rc.setTimeframeStart(dfLong.parse(rc.getTimeframeStartString()));
-                    if (!rc.getTimeframeEndString().equals("now")) {
+                    if (!NOW.equals(rc.getTimeframeEndString())) {
                         rc.setTimeframeEnd(dfLong.parse(rc.getTimeframeEndString()));
                     }
                 } catch (ParseException e) {

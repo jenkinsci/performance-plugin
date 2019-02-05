@@ -1,19 +1,19 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.Extension;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
-import hudson.plugins.performance.reports.PerformanceReport;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.xml.sax.SAXException;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import hudson.Extension;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
 
 public class JMeterCsvParser extends AbstractParser {
 
@@ -27,9 +27,13 @@ public class JMeterCsvParser extends AbstractParser {
     public int sentBytesIdx = -1;
 
 
-    @DataBoundConstructor
     public JMeterCsvParser(String glob, String percentiles) {
-        super(glob, percentiles);
+        this(glob, percentiles, PerformanceReport.INCLUDE_ALL);
+    }
+    
+    @DataBoundConstructor
+    public JMeterCsvParser(String glob, String percentiles, String filterRegex) {
+        super(glob, percentiles, filterRegex);
     }
 
     @Extension
@@ -49,7 +53,7 @@ public class JMeterCsvParser extends AbstractParser {
     PerformanceReport parse(File reportFile) throws Exception {
         clearDateFormat();
 
-        final PerformanceReport report = new PerformanceReport(percentiles);
+        final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
@@ -74,12 +78,7 @@ public class JMeterCsvParser extends AbstractParser {
         Iterable<CSVRecord> records = csvFormat.parse(in);
         for (CSVRecord record : records) {
             final HttpSample sample = getSample(record);
-            try {
-                report.addSample(sample);
-            } catch (SAXException e) {
-                throw new IllegalStateException("Error parsing file '" + report.getReportFileName() + "': Unable to add sample for CSVRecord " + record, e);
-
-            }
+            report.addSample(sample);
         }
     }
 

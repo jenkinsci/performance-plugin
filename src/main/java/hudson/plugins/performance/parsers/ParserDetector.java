@@ -1,10 +1,5 @@
 package hudson.plugins.performance.parsers;
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +9,12 @@ import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -21,7 +22,9 @@ import com.google.common.annotations.VisibleForTesting;
  */
 public class ParserDetector {
 
-
+    private ParserDetector() {
+        super();
+    }
     /**
      * Detect report file type using file content.
      * @return report file type.
@@ -131,7 +134,7 @@ public class ParserDetector {
         try (InputStream in = new FileInputStream(reportPath)) {
             return detectXMLFileType(in);
         } catch (Exception ex) {
-            throw new RuntimeException("XML parsing error: ", ex);
+            throw new IllegalStateException("XML parsing error: ", ex);
         }
     }
 
@@ -159,6 +162,6 @@ public class ParserDetector {
                 }
             }
         }
-        throw new RuntimeException("XML parsing error: no start element");
+        throw new IllegalStateException("XML parsing error: no start element");
     }
 }

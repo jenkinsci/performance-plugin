@@ -190,7 +190,7 @@ public class PerformanceReportMap implements ModelObject {
         return PLUGIN_NAME;
     }
 
-    void setBuildAction(PerformanceBuildAction buildAction) {
+    public void setBuildAction(PerformanceBuildAction buildAction) {
         this.buildAction = buildAction;
     }
 

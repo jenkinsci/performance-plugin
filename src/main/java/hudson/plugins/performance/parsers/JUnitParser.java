@@ -33,9 +33,13 @@ public class JUnitParser extends AbstractParser {
         }
     }
 
-    @DataBoundConstructor
     public JUnitParser(String glob, String percentiles) {
-        super(glob, percentiles);
+        super(glob, percentiles, PerformanceReport.INCLUDE_ALL);
+    }
+    
+    @DataBoundConstructor
+    public JUnitParser(String glob, String percentiles, String filterRegex) {
+        super(glob, percentiles, filterRegex);
     }
 
     @Override
@@ -51,7 +55,7 @@ public class JUnitParser extends AbstractParser {
         factory.setNamespaceAware(false);
 
         final SAXParser parser = factory.newSAXParser();
-        final PerformanceReport report = new PerformanceReport(percentiles);
+        final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
         parser.parse(reportFile, new DefaultHandler() {

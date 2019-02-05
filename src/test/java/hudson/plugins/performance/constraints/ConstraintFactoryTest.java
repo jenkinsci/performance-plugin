@@ -105,7 +105,7 @@ public class ConstraintFactoryTest {
     }
 
     @Test
-    public void test_happyPath() {
+    public void testHappyPath() {
         /**
          * Executing method
          */
@@ -136,7 +136,7 @@ public class ConstraintFactoryTest {
     }
 
     @Test
-    public void test_optionalBlock() {
+    public void testOptionalBlock() {
         /**
          * Executing method
          */

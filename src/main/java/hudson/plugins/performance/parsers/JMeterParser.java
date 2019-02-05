@@ -1,20 +1,22 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.Extension;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
-import hudson.plugins.performance.reports.PerformanceReport;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.parsers.SAXParserFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
+
+import javax.xml.parsers.SAXParserFactory;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import hudson.Extension;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
 
 /**
  * Parser for JMeter.
@@ -31,9 +33,14 @@ public class JMeterParser extends AbstractParser {
         }
     }
 
-    @DataBoundConstructor
+
     public JMeterParser(String glob, String percentiles) {
-        super(glob, percentiles);
+        super(glob, percentiles, PerformanceReport.INCLUDE_ALL);
+    }
+    
+    @DataBoundConstructor
+    public JMeterParser(String glob, String percentiles, String filterRegex) {
+        super(glob, percentiles, filterRegex);
     }
 
     @Override
@@ -61,19 +68,20 @@ public class JMeterParser extends AbstractParser {
      * @return <code>true</code> if the file content has been determined to be XML, otherwise <code>false</code>.
      */
     public static boolean isXmlFile(File file) throws IOException {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(file));
-            String firstLine;
-            while ((firstLine = reader.readLine()) != null) {
-                if (firstLine.trim().length() == 0) continue; // skip empty lines.
-                return firstLine != null && firstLine.toLowerCase().trim().startsWith("<?xml ");
+        try (FileReader fr = new FileReader(file);
+                BufferedReader reader = new BufferedReader(fr)) {
+            String line;
+            boolean isXml = false;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().length() == 0) {
+                    continue; // skip empty lines.
+                } 
+                if (line.toLowerCase().trim().startsWith("<?xml ")) {
+                    isXml = true;
+                }
+                break;
             }
-            return false;
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
+            return isXml;
         }
     }
 
@@ -85,7 +93,7 @@ public class JMeterParser extends AbstractParser {
         factory.setValidating(false);
         factory.setNamespaceAware(false);
 
-        final PerformanceReport report = new PerformanceReport(percentiles);
+        final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
         report.setReportFileName(reportFile.getName());
 
@@ -170,11 +178,7 @@ public class JMeterParser extends AbstractParser {
             public void endElement(String uri, String localName, String qName) {
                 if ("httpSample".equalsIgnoreCase(qName) || "sample".equalsIgnoreCase(qName)) {
                     if (counter == 1) {
-                        try {
-                            report.addSample(currentSample);
-                        } catch (SAXException e) {
-                            e.printStackTrace();
-                        }
+                        report.addSample(currentSample);
                     }
                     counter--;
                 }
@@ -188,7 +192,7 @@ public class JMeterParser extends AbstractParser {
      * A delegate for {@link #parse(File)} that can process CSV data.
      */
     PerformanceReport parseCsv(File reportFile) throws Exception {
-        final JMeterCsvParser delegate = new JMeterCsvParser(this.glob, this.percentiles);
+        final JMeterCsvParser delegate = new JMeterCsvParser(this.glob, this.percentiles, this.filterRegex);
         return delegate.parse(reportFile);
     }
 

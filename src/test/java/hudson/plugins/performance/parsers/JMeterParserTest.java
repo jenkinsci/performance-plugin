@@ -1,13 +1,17 @@
 package hudson.plugins.performance.parsers;
 
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.PerformanceReportTest;
-import hudson.plugins.performance.reports.UriReport;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
 
 /**
  * This class contains basic tests that verify the parsing behavior of
@@ -91,7 +95,7 @@ public class JMeterParserTest {
     @Test
     public void testParseXmlJtlFile() throws Exception {
         // Setup fixture.
-        final JMeterParser parser = new JMeterParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
+        final AbstractParser parser = new JMeterParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         final File reportFile = new File(getClass().getResource("/JMeterResults.jtl").toURI());
 
         // Execute system under test.
@@ -114,7 +118,7 @@ public class JMeterParserTest {
     @Test
     public void testParseCsvJtlFile() throws Exception {
         // Setup fixture.
-        final JMeterParser parser = new JMeterParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
+        final AbstractParser parser = new JMeterParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         final File reportFile = new File(getClass().getResource("/JENKINS-16627_CSV_instead_of_XML.jtl").toURI());
 
         // Execute system under test.

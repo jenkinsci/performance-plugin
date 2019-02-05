@@ -1,9 +1,5 @@
 package hudson.plugins.performance.reports;
 
-import hudson.plugins.performance.data.HttpSample;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.Stapler;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -13,6 +9,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.Stapler;
+
+import hudson.plugins.performance.data.HttpSample;
 
 /**
  * Abstract class for classes with samplesCount, error, mean, average, 90 line, min and max attributes
@@ -30,21 +31,20 @@ public abstract class AbstractReport {
 
     protected Map<Double, Long> percentilesValues = new TreeMap<>();
     protected Map<Double, Long> percentilesDiffValues = new TreeMap<>();
-    protected transient boolean isCalculatedPercentilesValues = false;
-
+    protected boolean isCalculatedPercentilesValues = false;
 
     /**
      * Exclude response time of errored samples
      */
     protected boolean excludeResponseTime;
 
-    abstract public int countErrors();
+    public abstract int countErrors();
 
-    abstract public double errorPercent();
+    public abstract double errorPercent();
 
-    abstract public void calculatePercentiles();
+    public abstract void calculatePercentiles();
 
-    abstract public void calculateDiffPercentiles();
+    public abstract void calculateDiffPercentiles();
 
     public AbstractReport() {
         final Locale useThisLocale = (Stapler.getCurrentRequest() != null) ? Stapler.getCurrentRequest().getLocale() : Locale.getDefault();
@@ -93,47 +93,47 @@ public abstract class AbstractReport {
         return res;
     }
 
-    abstract public long getAverage();
+    public abstract long getAverage();
 
     public String getAverageFormated() {
         return dataFormat.get().format(getAverage());
     }
 
-    abstract public long getMedian();
+    public abstract long getMedian();
 
     public String getMeanFormated() {
         return dataFormat.get().format(getMedian());
     }
 
-    abstract public long get90Line();
+    public abstract long get90Line();
 
     public String get90LineFormated() {
         return dataFormat.get().format(get90Line());
     }
 
-    abstract public long getMax();
+    public abstract long getMax();
 
     public String getMaxFormated() {
         return dataFormat.get().format(getMax());
     }
 
-    abstract public long getMin();
+    public abstract long getMin();
 
-    abstract public int samplesCount();
+    public abstract int samplesCount();
 
-    abstract public String getHttpCode();
+    public abstract String getHttpCode();
 
-    abstract public long getAverageDiff();
+    public abstract long getAverageDiff();
 
-    abstract public long getMedianDiff();
+    public abstract long getMedianDiff();
 
-    abstract public long get90LineDiff();
+    public abstract long get90LineDiff();
 
-    abstract public double getErrorPercentDiff();
+    public abstract double getErrorPercentDiff();
 
-    abstract public String getLastBuildHttpCodeIfChanged();
+    public abstract String getLastBuildHttpCodeIfChanged();
 
-    abstract public int getSamplesCountDiff();
+    public abstract int getSamplesCountDiff();
 
     public boolean isExcludeResponseTime() {
         return excludeResponseTime;
@@ -174,5 +174,4 @@ public abstract class AbstractReport {
             return "Line " + perc + "(ms)";
         }
     }
-
 }

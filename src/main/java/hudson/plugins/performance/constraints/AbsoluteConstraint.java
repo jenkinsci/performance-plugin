@@ -25,6 +25,11 @@ import org.kohsuke.stapler.QueryParameter;
  */
 public class AbsoluteConstraint extends AbstractConstraint {
 
+    /**
+     * User defined absolute value which must not be exceeded
+     */
+    private long value = 0;
+
     @Symbol("absolute")
     @Extension
     public static class DescriptorImpl extends ConstraintDescriptor {
@@ -49,10 +54,6 @@ public class AbsoluteConstraint extends AbstractConstraint {
         }
     }
 
-    /**
-     * User defined absolute value which must not be exceeded
-     */
-    private long value = 0;
 
     @DataBoundConstructor
     public AbsoluteConstraint(Metric meteredValue, Operator operator, String relatedPerfReport, Escalation escalationLevel, boolean success, TestCaseBlock testCaseBlock, long value) {
@@ -67,9 +68,11 @@ public class AbsoluteConstraint extends AbstractConstraint {
      * @return clone of this object
      */
     public AbsoluteConstraint clone() {
-        AbsoluteConstraint clone = new AbsoluteConstraint(this.getMeteredValue(), this.getOperator(), this.getRelatedPerfReport(), this.getEscalationLevel(), this.getSuccess(), new TestCaseBlock(this
-                .getTestCaseBlock().getTestCase()), this.getValue());
-        return clone;
+        return new AbsoluteConstraint(this.getMeteredValue(), this.getOperator(), 
+                this.getRelatedPerfReport(), this.getEscalationLevel(), 
+                this.getSuccess(), 
+                new TestCaseBlock(this.getTestCaseBlock().getTestCase()), 
+                this.getValue());
     }
 
     @Override
@@ -104,25 +107,15 @@ public class AbsoluteConstraint extends AbstractConstraint {
     private ConstraintEvaluation check(double newValue) {
         switch (getOperator()) {
             case NOT_LESS:
-                if (newValue >= getValue()) {
-                    setSuccess(true);
-                } else {
-                    setSuccess(false);
-                }
+                setSuccess(newValue >= getValue());
                 break;
             case NOT_GREATER:
-                if (newValue <= getValue()) {
-                    setSuccess(true);
-                } else {
-                    setSuccess(false);
-                }
+                setSuccess(newValue <= getValue());
                 break;
             case NOT_EQUAL:
-                if (newValue != getValue()) {
-                    setSuccess(true);
-                } else {
-                    setSuccess(false);
-                }
+                setSuccess(newValue != getValue());
+                break;
+            default:
                 break;
         }
 
@@ -138,10 +131,10 @@ public class AbsoluteConstraint extends AbstractConstraint {
         }
 
         String unit = getMeteredValue()==Metric.ERRORPRC ? "percent" : "milliseconds";
-        setJunitResult(String.format("<testcase classname=\"%s\" name=\"%s of %s must %s %d %s\">\n", 
+        setJunitResult(String.format("<testcase classname=\"%s\" name=\"%s of %s must %s %d %s\">%n", 
             getRelatedPerfReport(), getMeteredValue(), measuredLevel, getOperator().text, getValue(), unit)
             + (getSuccess() ? "" :
-                String.format("    <failure type=\"%s\">Measured value for %s: %.0f %s</failure>\n",
+                String.format("    <failure type=\"%s\">Measured value for %s: %.0f %s</failure>%n",
                 getEscalationLevel(), getMeteredValue(), newValue, unit))
             + "</testcase>\n");
 

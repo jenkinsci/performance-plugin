@@ -96,8 +96,27 @@ public class JMeterCsvParserTest {
             } else {
                 fail("Wrong uri sampler");
             }
-
         }
+    }
+    
+    @Test
+    public void testCSVWithRegex() throws Exception {
+        final JMeterCsvParser parser = new JMeterCsvParser(
+                null, PerformanceReportTest.DEFAULT_PERCENTILES, "^(HP|Scenario|Search)(-success|-failure)?$");
+        final File reportFile = new File(getClass().getResource("/filewithtransactions.csv").toURI());
 
+        // Execute system under test.
+        PerformanceReport performanceReport = parser.parse(reportFile);
+
+        Map<String, UriReport> reportMap = performanceReport.getUriReportMap();
+
+        assertEquals(3, reportMap.size());
+        assertEquals("Search", reportMap.get("Search").getUri());
+        assertEquals("Scenario", reportMap.get("Scenario").getUri());
+        assertEquals("HP", reportMap.get("HP").getUri());
+        
+        assertEquals(37, reportMap.get("HP").samplesCount());
+        assertEquals(33, reportMap.get("Search").samplesCount());
+        assertEquals(33, reportMap.get("Scenario").samplesCount());
     }
 }
