@@ -8,11 +8,11 @@ It includes the feature of setting the final build status as good, unstable or f
 
 Report formats supported:
 - Taurus Tool's [Final Stats XML](http://gettaurus.org/docs/Reporting/?utm_source=jenkins&utm_medium=link&utm_campaign=wiki#BlazeMeter-Reporter) - through it, you can publish summaries from JMeter, Gatling, Grinder, Siege, ab, Selenium and many others
-- [Apache JMeter](http://jmeter.apache.org/) XML and CSV format, also its Summarizer log output
-- [JUnit](http://www.junit.org/) format (used by SoapUI for example)
+- [Apache JMeter](https://jmeter.apache.org/) CSV and XML format, also its Summarizer log output
+- [JUnit](https://junit.org/junit5/) format (used by SoapUI for example)
 - Twitter's [Iago](https://github.com/twitter/iago)
 - [wrk](https://github.com/wg/wrk)
-- [HPE LoadRunner](https://saas.hpe.com/en-us/software/loadrunner)
+- [HPE LoadRunner](https://www.microfocus.com/en-us/products/loadrunner-load-testing/overview)
 
 ## Browsing Reports
 
@@ -47,7 +47,7 @@ In the performance trend page, the links to Trend report shows a report with the
 
 ## Jenkins GUI Configuration
 
-If you are using GUI to configure Jenkins jobs, start with adding "Publisth Pefrormance test result report" item into your post-build actions:
+If you are using GUI to configure Jenkins jobs, start with adding "Publish Pefrormance test result report" item into your post-build actions:
 
 ![](report_step_choice.png)
 
@@ -61,9 +61,17 @@ You can configure the error percentage thresholds and the relative percentage th
 
 You can use Pipleline Script builder to build groovy script piece from GUI. Additinally, Performance Plugin offers "perfReport" Groovy command that allows shorthand use to simply build report, it will autodetect source file format:
  
+### Minimal configuration 
 ```groovy
 perfReport 'result.csv'
 ```
+
+### More advanced configuration
+```groovy
+perfReport filterRegex: '', relativeFailedThresholdNegative: 1.2, relativeFailedThresholdPositive: 1.89, relativeUnstableThresholdNegative: 1.8, relativeUnstableThresholdPositive: 1.5, sourceDataFiles: 'results.csv'
+```
+
+### Minimal command for old-style invocation is this:
 
 Minimal command for old-style invocation is this:
 
