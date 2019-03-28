@@ -1,8 +1,10 @@
 <small>[<< Back to main page](./)</small>
 # Changelog
 
-## v3.16 (31th of January, 2019)
+## v3.16 (28th of March, 2019)
 - ADD: Add ability to select which transactions/samplers are included in report through regular expression. Developed by [Philippe M.](https://github.com/pmouawad) and sponsored by [Ubik Load Pack](https://ubikloadpack.com)
+- FIX: Switch from table to entry [JENKINS-55787](https://issues.jenkins-ci.org/browse/JENKINS-55787)
+- FIX: java 9 compatibility
 
 ## v3.15 (29th of January, 2019)
 - ADD: network traffic when parsing JMeter CSV. Developed by [Philippe M.](https://github.com/pmouawad) and sponsored by [Ubik Load Pack](https://ubikloadpack.com) 
