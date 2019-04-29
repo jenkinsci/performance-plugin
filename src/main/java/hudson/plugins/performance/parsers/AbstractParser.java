@@ -135,8 +135,8 @@ public abstract class AbstractParser extends PerformanceReportParser {
                 try (FileInputStream fis = new FileInputStream(serialized);
                         BufferedInputStream bis = new BufferedInputStream(fis);
                         ObjectInputStream in = new ObjectInputStreamWithClassMapping(bis)) {
-                        report = (PerformanceReport) in.readObject();
-                        CACHE.put(serialized, report);
+                    report = (PerformanceReport) in.readObject();
+                    CACHE.put(serialized, report);
                     return report;
                 } catch (FileNotFoundException ex) {
                     // That's OK
@@ -144,7 +144,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
                     LOGGER.log(Level.WARNING, "Reading serialized PerformanceReport instance from file '" + serialized + "' failed.", ex);
                 }
             }
-            return null;
+            return report;
         }
     }
 
