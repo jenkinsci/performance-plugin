@@ -14,12 +14,14 @@ public class AbstractParserTest {
     public void testDeserialized() throws Exception {
         File serializedFile = new File(getClass().getResource("/results.v.2.0.jtl.serialized").toURI());
         String reportFilePath = serializedFile.getAbsolutePath().replace(".serialized", "");
-        PerformanceReport report = AbstractParser.loadSerializedReport(new File(reportFilePath));
+        File reportFile = new File(reportFilePath);
+        PerformanceReport report = AbstractParser.loadSerializedReport(reportFile);
+        assertNotNull(report);
+        report = AbstractParser.loadSerializedReport(reportFile); // subsequent calls should be cached
         assertNotNull(report);
         assertEquals("totalDuration", 2030.47, report.getTotalTrafficInKb(), 0.001);
         assertEquals("samples count", 200, report.samplesCount());
     }
-
 
     @Test
     public void testUploadOldReport() throws Exception {
