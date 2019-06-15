@@ -86,7 +86,6 @@ public class PerformanceReportMap implements ModelObject {
         }, null);
 
         if (isTopLevel) {
-            loadPreviousBuilds();
             addPreviousBuildReports();
         }
     }
