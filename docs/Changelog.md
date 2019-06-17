@@ -1,6 +1,10 @@
 <small>[<< Back to main page](./)</small>
 # Changelog
 
+## v3.17 (17th of June, 2019)
+- FIX: Fix ineffective report cache [JENKINS-57997](https://issues.jenkins-ci.org/browse/JENKINS-57997)
+- FIX: Remove redundant report loading
+
 ## v3.16 (28th of March, 2019)
 - ADD: Add ability to select which transactions/samplers are included in report through regular expression. Developed by [Philippe M.](https://github.com/pmouawad) and sponsored by [Ubik Load Pack](https://ubikloadpack.com)
 - FIX: Switch from table to entry [JENKINS-55787](https://issues.jenkins-ci.org/browse/JENKINS-55787)
