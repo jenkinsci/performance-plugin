@@ -1025,7 +1025,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         PrintStream logger = listener.getLogger();
         ConstraintFactory factory = new ConstraintFactory();
         ConstraintSettings settings = new ConstraintSettings(listener, ignoreFailedBuilds, ignoreUnstableBuilds,
-                persistConstraintLog);
+                persistConstraintLog, getBaselineBuild());
         ConstraintChecker checker = new ConstraintChecker(settings, run.getParent().getBuilds());
         ArrayList<ConstraintEvaluation> ceList = new ArrayList<>();
         try {

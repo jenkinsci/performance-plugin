@@ -29,11 +29,18 @@ public class ConstraintSettings {
      */
     private boolean persistConstraintLog;
 
-    public ConstraintSettings(TaskListener listener, boolean ignoreFailedBuilds, boolean ignoreUnstableBuilds, boolean persistConstraintLog) {
+    /**
+     * Relative constraints may need access to globally configured baseline build number to evaluate against
+     */
+    private int baselineBuild;
+
+    public ConstraintSettings(TaskListener listener, boolean ignoreFailedBuilds, boolean ignoreUnstableBuilds, boolean persistConstraintLog,
+                              int baselineBuild) {
         this.setListener(listener);
         this.setIgnoreFailedBuilds(ignoreFailedBuilds);
         this.setIgnoreUnstableBuilds(ignoreUnstableBuilds);
         this.setPersistConstraintLog(persistConstraintLog);
+        this.setBaselineBuild(baselineBuild);
     }
 
     public TaskListener getListener() {
@@ -66,5 +73,13 @@ public class ConstraintSettings {
 
     public void setPersistConstraintLog(boolean persistConstraintLog) {
         this.persistConstraintLog = persistConstraintLog;
+    }
+
+    public int getBaselineBuild() {
+        return baselineBuild;
+    }
+
+    public void setBaselineBuild(int baselineBuild) {
+        this.baselineBuild = baselineBuild;
     }
 }
