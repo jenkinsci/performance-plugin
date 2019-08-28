@@ -110,7 +110,7 @@
           	<table>
           		<tr>
           			<td>
-            			<f:radioBlock name="${radioId}.previousResultsBlock" field="previousResultsBlock" value="false" title="Compare with Builds within a timeframe" checked="${!instance.getPreviousResultsBlock().isChoicePreviousResults()}">
+            			<f:radioBlock name="${radioId}.previousResultsBlock" field="previousResultsBlock" value="false" title="Compare with Builds within a timeframe" checked="${instance.getPreviousResultsBlock().isChoiceTimeframe()}">
 						<f:entry>
             				<table cellspacing="5">
             					<tr>
@@ -138,7 +138,19 @@
             	</tr>  	
             </table>
           </td>
-        </tr>	
+        </tr>
+        <tr>
+          <td colspan="4">
+        	<table>
+          		<tr>
+          			<td>
+            			<f:radioBlock name="${radioId}.previousResultsBlock" field="previousResultsBlock" value="BASELINE" title="Compare with baseline build" checked="${instance.getPreviousResultsBlock().isChoiceBaselineBuild()}">
+           				</f:radioBlock>
+            		</td>
+            	</tr>
+            </table>
+          </td>
+        </tr>
       </table>
      </f:entry>
 		

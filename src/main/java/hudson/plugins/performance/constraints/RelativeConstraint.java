@@ -229,7 +229,8 @@ public class RelativeConstraint extends AbstractConstraint {
                 }
             }
             this.previousResultsString = this.previousResultsBlock.getPreviousResultsString();
-        } else {
+        }
+        if (this.previousResultsBlock.isChoiceTimeframe()) {
             this.timeframeStartString = this.previousResultsBlock.getTimeframeStartString();
             this.timeframeEndString = this.previousResultsBlock.getTimeframeEndString();
             if (this.timeframeStartString.length() == 10) {
@@ -252,6 +253,9 @@ public class RelativeConstraint extends AbstractConstraint {
                 e.printStackTrace(logger);
             }
         }
+        if (this.previousResultsBlock.isChoiceBaselineBuild()) {
+             // nothing to do, baseline build number comes from settings
+        }
     }
 
     /**
@@ -262,8 +266,8 @@ public class RelativeConstraint extends AbstractConstraint {
     public RelativeConstraint clone() {
         return new RelativeConstraint(this.getMeteredValue(), this.getOperator(), 
                 this.getRelatedPerfReport(), this.getEscalationLevel(), this.getSuccess(), 
-                new TestCaseBlock(this.getTestCaseBlock().getTestCase()), 
-                new PreviousResultsBlock(String.valueOf(this.getPreviousResultsBlock().isChoicePreviousResults()), this.getPreviousResultsString(),
+                new TestCaseBlock(this.getTestCaseBlock().getTestCase()),
+                new PreviousResultsBlock(this.getPreviousResultsBlock().getValue(), this.getPreviousResultsString(),
                 this.getTimeframeStartString(), this.getTimeframeEndString()), this.getTolerance());
     }
 
@@ -365,15 +369,19 @@ public class RelativeConstraint extends AbstractConstraint {
      * @return average of measured metric over included builds
      */
     private long calcAveOfReports(List<? extends Run<?, ?>> builds) {
-        List<Run<?, ?>> buildsToAnalyze;
+        List<Run<?, ?>> buildsToAnalyze = new ArrayList<>();
         long tmpResult = 0;
         int counter = 0;
         long result = 0;
         Run<?, ?> newBuild = builds.get(0);
-        if (!getPreviousResultsBlock().isChoicePreviousResults()) {
-            buildsToAnalyze = evaluateDate(builds);
-        } else {
-            buildsToAnalyze = evaluatePreviousBuilds(builds);
+        if (getPreviousResultsBlock().isChoiceTimeframe()) {
+            buildsToAnalyze.addAll(evaluateDate(builds));
+        }
+        if (getPreviousResultsBlock().isChoicePreviousResults()) {
+            buildsToAnalyze.addAll(evaluatePreviousBuilds(builds));
+        }
+        if (getPreviousResultsBlock().isChoiceBaselineBuild()) {
+            buildsToAnalyze.add(builds.get(getSettings().getBaselineBuild()));
         }
         setPreviousResults(buildsToAnalyze.size());
         if (!buildsToAnalyze.isEmpty()) {

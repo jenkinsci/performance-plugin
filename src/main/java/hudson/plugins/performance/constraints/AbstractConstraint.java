@@ -200,7 +200,7 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
             if (rc.getTimeframeStart().after(rc.getTimeframeEnd())) {
                 throw new AbortException("Performance Plugin: The start date of a Relative Constraint can't be after the end date");
             }
-            if (!rc.getPreviousResultsBlock().isChoicePreviousResults()) {
+            if (rc.getPreviousResultsBlock().isChoiceTimeframe()) {
                 final SimpleDateFormat dfLong = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 try {
                     rc.setTimeframeStart(dfLong.parse(rc.getTimeframeStartString()));
