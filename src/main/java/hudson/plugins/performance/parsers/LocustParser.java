@@ -14,34 +14,28 @@ import java.io.Reader;
 import java.util.Date;
 import java.util.List;
 
-public class LocustParser extends AbstractParser
-{
-    enum ReportColumns
-    {
+public class LocustParser extends AbstractParser {
+    enum ReportColumns {
         Method(0), Name(1), Requests(2), Failures(3), Median(4),
         Average(5), Min(6), Max(7), AvgContentSize(8), Rps(9);
 
         int column;
 
-        ReportColumns(final int order)
-        {
+        ReportColumns(final int order) {
             this.column = order;
         }
 
-        int getColumn()
-        {
+        int getColumn() {
             return column;
         }
     }
 
-    public LocustParser(final String glob, final String percentiles, final String filterRegex)
-    {
+    public LocustParser(final String glob, final String percentiles, final String filterRegex) {
         super(glob, percentiles, filterRegex);
     }
 
     @Override
-    PerformanceReport parse(final File reportFile) throws Exception
-    {
+    PerformanceReport parse(final File reportFile) throws Exception {
         PerformanceReport report = createPerformanceReport();
         report.setReportFileName(reportFile.getName());
         report.setExcludeResponseTime(excludeResponseTime);
@@ -83,8 +77,7 @@ public class LocustParser extends AbstractParser
         return report;
     }
 
-    List<CSVRecord> getCsvData(final File reportFile)
-    {
+    List<CSVRecord> getCsvData(final File reportFile) {
         List<CSVRecord> records = null;
         try (Reader reader = new BufferedReader(new FileReader(reportFile))) {
             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
@@ -97,8 +90,7 @@ public class LocustParser extends AbstractParser
     }
 
     @Override
-    public String getDefaultGlobPattern()
-    {
+    public String getDefaultGlobPattern() {
         return "**/*.csv";
     }
 }
