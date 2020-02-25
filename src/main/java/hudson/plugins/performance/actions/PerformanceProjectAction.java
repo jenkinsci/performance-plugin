@@ -298,7 +298,10 @@ public class PerformanceProjectAction implements Action {
         final DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
 
-        final XYItemRenderer renderer = plot.getRenderer();
+        final XYDotRenderer renderer = new XYDotRenderer(); // scatter plot
+        plot.setRenderer(renderer);
+        renderer.setDotWidth(2);
+        renderer.setDotHeight(2);
         renderer.setSeriesPaint(0, ColorPalette.RED);
 
         return chart;
