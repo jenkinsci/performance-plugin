@@ -33,9 +33,11 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
@@ -300,6 +302,56 @@ public class PerformanceProjectAction implements Action {
 
         final XYItemRenderer renderer = plot.getRenderer();
         renderer.setSeriesPaint(0, ColorPalette.RED);
+
+        return chart;
+    }
+
+    public static JFreeChart createUriPercentileChart(XYDataset dataset, String uri) {
+        final JFreeChart chart = ChartFactory.createXYLineChart(uri, Messages.TrendReportDetail_Percent(),
+                Messages.TrendReportDetail_ResponseTime(), dataset,
+                PlotOrientation.VERTICAL, true, true, false);
+        chart.setBackgroundPaint(Color.WHITE);
+
+        final XYPlot plot = chart.getXYPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setDomainGridlinePaint(Color.BLACK);
+        plot.setRangeGridlinePaint(Color.BLACK);
+
+        // Exclude zeroes to make sure y-axis aligns with response time auto range:
+        final NumberAxis yaxis = (NumberAxis) plot.getRangeAxis();
+        yaxis.setAutoRange(true);
+        yaxis.setAutoRangeIncludesZero(false);
+
+        final NumberAxis xaxis = (NumberAxis) plot.getDomainAxis();
+        xaxis.setRange(0, 100); // avoid auto margin
+
+        final XYItemRenderer renderer = plot.getRenderer();
+        renderer.setSeriesPaint(0, ColorPalette.RED);
+
+        return chart;
+    }
+
+    public static JFreeChart createUriThroughputChart(IntervalXYDataset dataset, String uri) {
+        final JFreeChart chart = ChartFactory.createXYBarChart(uri,  Messages.TrendReportDetail_Time(), true,
+                Messages.TrendReportDetail_RequestsPerMinute(), dataset,
+                PlotOrientation.VERTICAL,true, true, false);
+        chart.setBackgroundPaint(Color.WHITE);
+
+        final XYPlot plot = chart.getXYPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setDomainGridlinePaint(Color.BLACK);
+        plot.setRangeGridlinePaint(Color.BLACK);
+
+        final DateAxis axis = (DateAxis) plot.getDomainAxis();
+        axis.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
+
+        final XYBarRenderer renderer = (XYBarRenderer) plot.getRenderer();
+        // As of Jenkins v2.198 jfreechart v1.0.19 paints bars with a gradient by default
+        // which can't be turned off in v1.0.9 the plugin is compiled against
+        // so instead use a red outline and fill with white:
+        renderer.setSeriesPaint(0, Color.WHITE);
+        renderer.setDrawBarOutline(true);
+        renderer.setSeriesOutlinePaint(0, ColorPalette.RED);
 
         return chart;
     }
