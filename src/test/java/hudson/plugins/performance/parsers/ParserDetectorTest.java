@@ -64,6 +64,11 @@ public class ParserDetectorTest {
         assertEquals(JMeterParser.class.getSimpleName(), ParserDetector.detectXMLFileType(getHugeJMeterInputStream()));
     }
 
+    @Test
+    public void testLocustReport() throws Exception {
+        String filePath = getClass().getResource("/test_results_requests.csv").toURI().getPath();
+        assertEquals(LocustParser.class.getSimpleName(), ParserDetector.detect(filePath));
+    }
 
     public static InputStream getHugeJMeterInputStream() {
         return new SequenceInputStream(getPrefixInputStream(), getInfiniteSampleInputStream());
