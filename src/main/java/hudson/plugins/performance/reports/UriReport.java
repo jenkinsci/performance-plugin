@@ -8,20 +8,27 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.jfree.data.time.FixedMillisecond;
+import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import hudson.model.ModelObject;
 import hudson.model.Run;
+import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
@@ -456,6 +463,52 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
         ChartUtil.generateGraph(request, response,
                 PerformanceProjectAction.createSummarizerTrend(dataset, uri), 400, 200);
+    }
+
+    public void doPercentileGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+        final ConcurrentSkipListMap<Long, Long> responseTimesHistogram = new ConcurrentSkipListMap<>(); // we want keys in sorted order
+        long totalNoOfSamples = 0L;
+        synchronized (samples) {
+            for (Sample sample : samples) {
+                if (isIncludeResponseTime(sample)) {
+                    totalNoOfSamples++;
+                    // count number of sample occurrences with the same response time value:
+                    responseTimesHistogram.put(sample.duration,
+                        responseTimesHistogram.containsKey(sample.duration) ? responseTimesHistogram.get(sample.duration)+1 : 1);
+                }
+            }
+        }
+        XYSeries percentiles = new XYSeries(Messages.TrendReportDetail_ResponseTimePercentiles());
+        long cumulativeTotal = 0; // adds up the running total number of samples for percentile calculation
+        percentiles.add(0, responseTimesHistogram.firstKey()); // add 0th percentile (minimum response time)
+
+        for (Map.Entry<Long, Long> responseTimeOccurrence : responseTimesHistogram.entrySet()) {
+            cumulativeTotal += responseTimeOccurrence.getValue();
+            percentiles.addOrUpdate(100.0*cumulativeTotal/totalNoOfSamples, responseTimeOccurrence.getKey()); // float value will result in smoother curve
+        }
+
+        ChartUtil.generateGraph(request, response,
+                PerformanceProjectAction.createUriPercentileChart(new XYSeriesCollection(percentiles), uri), 400, 200);
+    }
+
+    public void doThroughputGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+        final Map<Minute, Long> throughputIntervals = new HashMap<>();
+        synchronized (samples) {
+            for (Sample sample : samples) {
+                if (isIncludeResponseTime(sample)) {
+                    Minute timeBucket = new Minute(sample.date);
+                    // count number of samples in the same time bucket
+                    throughputIntervals.put(timeBucket,
+                            throughputIntervals.containsKey(timeBucket) ? throughputIntervals.get(timeBucket)+1: 1);
+                }
+            }
+        }
+        TimeSeries throughput = new TimeSeries(Messages.TrendReportDetail_RequestThroughput(), Minute.class);
+        for (Map.Entry<Minute, Long> timeBucket : throughputIntervals.entrySet()) {
+            throughput.add(timeBucket.getKey(), timeBucket.getValue());
+        }
+        ChartUtil.generateGraph(request, response,
+                PerformanceProjectAction.createUriThroughputChart(new TimeSeriesCollection(throughput), uri), 400, 200);
     }
 
     public Date getStart() {

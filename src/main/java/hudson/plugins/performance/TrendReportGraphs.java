@@ -29,8 +29,7 @@ public class TrendReportGraphs implements ModelObject {
         this.project = project;
     }
 
-    public void doRespondingTimeGraph(StaplerRequest request,
-                                      StaplerResponse response) throws IOException {
+    private UriReport getUriReportForRequest(StaplerRequest request) {
 
         PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
@@ -41,9 +40,33 @@ public class TrendReportGraphs implements ModelObject {
         if (performanceBuildAction != null && performanceReport != null) {
             String uri = performanceReportPosition.getSummarizerTrendUri();
             if (uri != null) {
-                UriReport uriReport = performanceReport.getUriReportMap().get(uri);
-                uriReport.doSummarizerTrendGraph(request, response);
+                return performanceReport.getUriReportMap().get(uri);
             }
+        }
+        return null;
+    }
+
+    public void doRespondingTimeGraph(StaplerRequest request,
+                                      StaplerResponse response) throws IOException {
+        UriReport uriReport = getUriReportForRequest(request);
+        if (uriReport != null) {
+            uriReport.doSummarizerTrendGraph(request, response);
+        }
+    }
+
+    public void doPercentileGraph(StaplerRequest request,
+                                  StaplerResponse response) throws IOException {
+        UriReport uriReport = getUriReportForRequest(request);
+        if (uriReport != null) {
+            uriReport.doPercentileGraph(request, response);
+        }
+    }
+
+    public void doThroughputGraph(StaplerRequest request,
+                                  StaplerResponse response) throws IOException {
+        UriReport uriReport = getUriReportForRequest(request);
+        if (uriReport != null) {
+            uriReport.doThroughputGraph(request, response);
         }
     }
 
