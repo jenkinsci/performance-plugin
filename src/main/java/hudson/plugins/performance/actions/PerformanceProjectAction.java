@@ -33,6 +33,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.XYDotRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
@@ -298,7 +299,10 @@ public class PerformanceProjectAction implements Action {
         final DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
 
-        final XYItemRenderer renderer = plot.getRenderer();
+        final XYDotRenderer renderer = new XYDotRenderer(); // scatter plot
+        plot.setRenderer(renderer);
+        renderer.setDotWidth(2);
+        renderer.setDotHeight(2);
         renderer.setSeriesPaint(0, ColorPalette.RED);
 
         return chart;
