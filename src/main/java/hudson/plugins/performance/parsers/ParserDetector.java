@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,10 +49,12 @@ public class ParserDetector {
                 return JmeterSummarizerParser.class.getSimpleName();
             } else if (isLoadRunnerFileType(line)) {
                 return LoadRunnerParser.class.getSimpleName();
+            } else if (isLocustFileType(line)) {
+                return LocustParser.class.getSimpleName();
             } else {
                 try {
                     return detectXMLFileType(reportPath);
-                } catch (IllegalArgumentException ex) {
+                } catch (IllegalArgumentException | IllegalStateException ex) {
                     throw new IllegalArgumentException("Can not detect file type: " + reportPath, ex);
                 }
             }
@@ -164,4 +167,18 @@ public class ParserDetector {
         }
         throw new IllegalStateException("XML parsing error: no start element");
     }
+
+    /**
+     * Detect Locust report type using verification of csv header. Header names and order is asserted.
+     * @param line - single report file line
+     * @return true if Locust expected header found
+     */
+    private static boolean isLocustFileType(String line) {
+        String[] fileLineHeader = line.replaceAll("\"", "").split(",");
+        String[] expectedHeaderFields = new String[]{"Method", "Name", "# requests", "# failures",
+                "Median response time", "Average response time", "Min response time", "Max response time",
+                "Average Content Size", "Requests/s"};
+        return (Arrays.equals(fileLineHeader, expectedHeaderFields));
+    }
+
 }
