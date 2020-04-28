@@ -278,8 +278,8 @@ public class PerformanceProjectAction implements Action {
     public static JFreeChart createSummarizerTrend(
             ArrayList<XYDataset> dataset, String uri) {
 
-        final JFreeChart chart = ChartFactory.createTimeSeriesChart(uri, "Time",
-                "Response Time", dataset.get(0), true, true, false);
+        final JFreeChart chart = ChartFactory.createTimeSeriesChart(uri, Messages.TrendReportDetail_Time(),
+                Messages.TrendReportDetail_ResponseTime(), dataset.get(0), true, true, false);
         chart.setBackgroundPaint(Color.WHITE);
 
         final XYPlot plot = chart.getXYPlot();

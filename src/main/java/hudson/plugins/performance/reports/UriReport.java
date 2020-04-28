@@ -446,7 +446,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public void doSummarizerTrendGraph(StaplerRequest request, StaplerResponse response) throws IOException {
-        TimeSeries responseTimes = new TimeSeries("Response Time", FixedMillisecond.class);
+        TimeSeries responseTimes = new TimeSeries(Messages.ProjectAction_RespondingTime(), FixedMillisecond.class);
         synchronized (samples) {
             for (Sample sample : samples) {
                 if (isIncludeResponseTime(sample)) {
@@ -461,6 +461,23 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         ArrayList<XYDataset> dataset = new ArrayList<>();
         dataset.add(resp);
 
+        ChartUtil.generateGraph(request, response,
+                PerformanceProjectAction.createSummarizerTrend(dataset, uri), 400, 200);
+    }
+
+    public void doErrorGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+        TimeSeries errors = new TimeSeries(Messages.ProjectAction_Errors(), FixedMillisecond.class);
+        synchronized (samples) {
+            for (Sample sample : samples) {
+                if (sample.isFailed() && !sample.isSummarizer()) {
+                    errors.addOrUpdate(new FixedMillisecond(sample.date), sample.duration);
+                }
+            }
+        }
+        ArrayList<XYDataset> dataset = new ArrayList<>();
+        dataset.add(new TimeSeriesCollection(errors));
+
+        // Re-use the same scatter plotter for error response times:
         ChartUtil.generateGraph(request, response,
                 PerformanceProjectAction.createSummarizerTrend(dataset, uri), 400, 200);
     }
