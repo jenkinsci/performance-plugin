@@ -14,6 +14,9 @@
             <a href="./throughputGraph?width=1500&amp;height=650&amp;performanceReportPosition=${it.filename}&amp;summarizerTrendUri=${URI}" title="${%Click for larger image}">
                 <img class="trend" src="./throughputGraph?width=600&amp;height=325&amp;performanceReportPosition=${it.filename}&amp;summarizerTrendUri=${URI}" width="600" height="325" />
             </a>
+            <a href="./errorGraph?width=1500&amp;height=650&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
+                <img class="trend" src="./errorGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport}" width="600" height="325" />
+            </a>
         </j:if>
         <br></br>
       <strong class="uri">URI: ${it.uri}</strong>

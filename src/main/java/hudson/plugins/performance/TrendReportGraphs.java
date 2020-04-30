@@ -70,6 +70,14 @@ public class TrendReportGraphs implements ModelObject {
         }
     }
 
+    public void doErrorGraph(StaplerRequest request,
+                                  StaplerResponse response) throws IOException {
+        UriReport uriReport = getUriReportForRequest(request);
+        if (uriReport != null) {
+            uriReport.doErrorGraph(request, response);
+        }
+    }
+
     public ArrayList<String> getUris() {
         ArrayList<String> uriList = new ArrayList<>();
         PerformanceReport report = getPerformanceReport();
