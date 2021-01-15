@@ -78,6 +78,7 @@ public class LoadRunnerParser extends AbstractParser {
     PerformanceReport parse(File reportFile) throws Exception {
         final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
+        report.setShowTrendGraphs(showTrendGraphs);
         report.setReportFileName(reportFile.getName());
 
         try (Connection con = DriverManager.getConnection(jdbcUrlForFile(reportFile));

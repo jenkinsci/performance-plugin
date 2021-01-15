@@ -47,6 +47,7 @@ public class JmeterSummarizerParser extends AbstractParser {
 
         final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
+        report.setShowTrendGraphs(showTrendGraphs);
         report.setReportFileName(reportFile.getName());
 
         try (Scanner fileScanner = new Scanner(reportFile)){

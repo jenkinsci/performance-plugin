@@ -7,32 +7,32 @@
       <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
         <h2>${%Performance Breakdown by URI}: ${performanceReport.getReportFileName()}</h2>
 
-         <j:if test="${it.ifModeThroughputUsed()}">
-             <img class="trend" src="./throughputGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
-         </j:if>
+          <j:if test="${it.ifShowTrendGraphsUsed()}">
+            <j:if test="${it.ifModeThroughputUsed()}">
+              <img class="trend" src="./throughputGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+            </j:if>
 
-         <j:choose>
-          <j:when test="${performanceReport.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
-            <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="325" />
-          </j:when>
-          <j:otherwise>
             <j:choose>
-                <j:when test="${it.ifModePerformancePerTestCaseUsed()}">
-                    <a href="./respondingTimeGraphPerTestCaseMode?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport.getReportFileName()}" title="${%Click for larger image}">
-                        <img class="trend" src="./respondingTimeGraphPerTestCaseMode?width=600&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+              <j:when test="${performanceReport.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+                <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="325" />
+              </j:when>
+              <j:otherwise>
+                <j:choose>
+                  <j:when test="${it.ifModePerformancePerTestCaseUsed()}">
+                    <a href="./respondingTimeGraphPerTestCaseMode?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport.getReportFileName()}" title="${%Click for larger image}">                                <img class="trend" src="./respondingTimeGraphPerTestCaseMode?width=600&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
                     </a>
-                </j:when>
-                <j:otherwise>
+                  </j:when>
+                  <j:otherwise>
                     <a href="./respondingTimeGraph?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport.getReportFileName()}" title="${%Click for larger image}">
-                        <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                      <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;legendLimit=5&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
                     </a>
-                </j:otherwise>
+                  </j:otherwise>
+                </j:choose>
+              </j:otherwise>
             </j:choose>
-          </j:otherwise>
-         </j:choose>
 
-        <img class="trend" src="./errorsGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
-
+            <img class="trend" src="./errorsGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+          </j:if>
         <p><a href="./trendReport?performanceReportPosition=${performanceReport.getReportFileName()}">${% Response time trends for build: }"${it.build}" </a></p>
 
         <j:choose>
@@ -73,7 +73,7 @@
            </j:otherwise>
           </j:choose>
         </table>
-      </j:forEach> 
+      </j:forEach>
     </l:main-panel>
   </l:layout>
 </j:jelly>

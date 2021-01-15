@@ -81,6 +81,7 @@ public class WrkSummarizerParser extends AbstractParser {
     PerformanceReport parse(File reportFile) throws Exception {
         final PerformanceReport r = createPerformanceReport();
         r.setExcludeResponseTime(excludeResponseTime);
+        r.setShowTrendGraphs(showTrendGraphs);
         r.setReportFileName(reportFile.getName());
 
         Scanner s = null;

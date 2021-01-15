@@ -35,6 +35,7 @@ public abstract class PerformanceReportParser implements
      * Exclude response time of errored samples
      */
     protected boolean excludeResponseTime;
+    protected boolean showTrendGraphs;
     protected int baselineBuild;
 
     protected PerformanceReportParser(String glob) {
@@ -73,6 +74,14 @@ public abstract class PerformanceReportParser implements
 
     public void setExcludeResponseTime(boolean excludeResponseTime) {
         this.excludeResponseTime = excludeResponseTime;
+    }
+
+    public boolean isShowTrendGraphs() {
+        return showTrendGraphs;
+    }
+
+    public void setShowTrendGraphs(boolean showTrendGraphs) {
+        this.showTrendGraphs = showTrendGraphs;
     }
 
     public void setBaselineBuild(int baselineBuild) {

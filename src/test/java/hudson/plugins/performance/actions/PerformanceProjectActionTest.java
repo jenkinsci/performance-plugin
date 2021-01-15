@@ -53,7 +53,7 @@ public class PerformanceProjectActionTest {
         assertFalse(performanceProjectAction.ifModePerformancePerTestCaseUsed());
         assertTrue(performanceProjectAction.ifModeThroughputUsed());
 
-        freeStyleProject.getPublishersList().add(new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, false, "", true, false, false, true, null));
+        freeStyleProject.getPublishersList().add(new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, false, "", true, false, false, true,false, null));
         assertFalse(performanceProjectAction.ifModePerformancePerTestCaseUsed());
         assertTrue(performanceProjectAction.ifModeThroughputUsed());
     }

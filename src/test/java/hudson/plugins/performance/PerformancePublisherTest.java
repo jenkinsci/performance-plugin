@@ -61,7 +61,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
+                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, null));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -93,7 +93,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
         parsers.add(new JMeterParser("test.jtl", PerformanceReportTest.DEFAULT_PERCENTILES));
 
-        PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, parsers);
+        PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, parsers);
         publisher.setModeEvaluation(false);
         p.getPublishersList().add(publisher);
 
@@ -143,7 +143,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
+                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, null));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -174,7 +174,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("test.jtl", 0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
+                new PerformancePublisher("test.jtl", 0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, null));
 
         FreeStyleBuild b = assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -205,7 +205,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false, false, null));
+                new PerformancePublisher("", 0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, null));
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
@@ -233,7 +233,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         FreeStyleProject p = createFreeStyleProject();
 
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, false, null));
+                new PerformancePublisher("", 0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, false,false, null));
         // first build
         p.getBuildersList().add(new TestBuilder() {
             @Override
@@ -268,7 +268,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
     @Test
     public void testEmptyReportParsersList() throws Exception {
         PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, true, "MRT",
-                true, true, true, true, null);
+                true, true, true, true,false, null);
         RunExt run = new RunExt( createFreeStyleProject());
         run.onStartBuilding();
         try {
@@ -294,7 +294,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
     public void testOptionMethods() throws Exception {
         final double DELTA = 0.001;
         PerformancePublisher publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
-                true, true, true, true, null);
+                true, true, true, true,false, null);
         assertEquals("reportFile.xml", publisher.getSourceDataFiles());
         assertEquals(15, publisher.getErrorFailedThreshold());
         assertEquals(16, publisher.getErrorUnstableThreshold());
@@ -357,13 +357,13 @@ public class PerformancePublisherTest extends HudsonTestCase {
         assertEquals(allConstraints, publisher.getConstraints());
 
         publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
-                true, true, true, true, null);
+                true, true, true, true,false, null);
         assertTrue(publisher.isMRT());
         publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "ART",
-                true, true, true, true, null);
+                true, true, true, true,false, null);
         assertTrue(publisher.isART());
         publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "PRT",
-                true, true, true, true, null);
+                true, true, true, true,false, null);
         assertTrue(publisher.isPRT());
 
         publisher.setFilename("testfilename");
@@ -382,7 +382,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 1,  // errorUnstableThreshold
                 "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
                 false, // modeOfThreshold (false = Error Threshold)
-                true, true, true, null);
+                true, true, true,false, null);
 
         FreeStyleProject project = createFreeStyleProject();
 
@@ -406,10 +406,10 @@ public class PerformancePublisherTest extends HudsonTestCase {
     public void testErrorThresholdFailed() throws Exception {
 
         PerformancePublisher publisherFailed = new PerformancePublisher("JMeterPublisher.csv",
-                 2, //errorFailedThreshold
+                2, //errorFailedThreshold
                 -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
                 false, // modeOfThreshold (false = Error Threshold)
-                true, true, true, null);
+                true, true, true,false, null);
 
         FreeStyleProject project = createFreeStyleProject();
 
@@ -435,7 +435,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         PerformancePublisher publisherART = new PerformancePublisher("JMeterPublisher.csv", -1, -1,
                 "JMeterPublisher.csv:1000", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
                 false, // modeOfThreshold (false = Error Threshold)
-                true, true, true, null);
+                true, true, true,false, null);
 
         FreeStyleProject project = createFreeStyleProject();
 
@@ -471,7 +471,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         parsers.add(new JMeterCsvParser("test1", PerformanceReportTest.DEFAULT_PERCENTILES));
         parsers.add(new JMeterParser("test2", PerformanceReportTest.DEFAULT_PERCENTILES));
 
-        PerformancePublisher publisher = new PerformancePublisher("", -1, -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT", false, true, true, true, parsers);
+        PerformancePublisher publisher = new PerformancePublisher("", -1, -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT", false, true, true, true,false, parsers);
 
         assertEquals("test1;test2", publisher.getSourceDataFiles());
         assertNull(publisher.getParsers());
@@ -494,7 +494,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 5.0, // relativeUnstableThresholdNegative
                 1, true, "MRT",
                 true, // modeOfThreshold (true = Relative Threshold)
-                true, true, true, null);
+                true, true, true,false, null);
 
         p.getPublishersList().add(publisher);
         // first build
@@ -528,7 +528,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 -0.1, // relativeUnstableThresholdNegative
                 1, true, "ART",
                 true, // modeOfThreshold (true = Relative Threshold)
-                true, true, true, null);
+                true, true, true,false, null);
 
         p.getPublishersList().add(publisher);
         // first build
@@ -562,7 +562,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 -0.1, -0.1, 1, true, "PRT",
                 true, // modeOfThreshold (true = Relative Threshold)
                 true, false, // false - means compare with Build Number
-                true, null);
+                true,false, null);
 
         p.getPublishersList().add(publisher);
         // first build
@@ -596,7 +596,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 -0.1, -0.1, -0.1, 1, true, "PRT",
                 true, // modeOfThreshold (true = Relative Threshold)
                 true, false, // false - means compare with Build Number
-                true, null);
+                true,false, null);
 
         p.getPublishersList().add(publisher);
         // first build

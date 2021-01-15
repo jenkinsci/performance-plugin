@@ -39,6 +39,7 @@ public class LocustParser extends AbstractParser {
         PerformanceReport report = createPerformanceReport();
         report.setReportFileName(reportFile.getName());
         report.setExcludeResponseTime(excludeResponseTime);
+        report.setShowTrendGraphs(showTrendGraphs);
         List<CSVRecord> reportData = getCsvData(reportFile);
         final Date now = new Date();
 

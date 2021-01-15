@@ -127,6 +127,11 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private boolean excludeResponseTime;
 
     /**
+     * Show Trends mode.
+     */
+    private boolean showTrendGraphs;
+
+    /**
      * @deprecated as of 1.3. for compatibility
      */
     private transient String filename; // NOSONAR On purpose keep of transient, we don't want to save it
@@ -198,9 +203,10 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                                 boolean failBuildIfNoResultFile,
                                 boolean compareBuildPrevious,
                                 boolean modeThroughput,
+                                boolean showTrendGraphs,
                                 /**
-                                 * Deprecated. Now use for support previous pipeline jobs.
-                                 */
+                                     * Deprecated. Now use for support previous pipeline jobs.
+                                     */
                                 List<PerformanceReportParser> parsers) {
         this.parsers = parsers;
         this.sourceDataFiles = sourceDataFiles;
@@ -209,6 +215,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         this.errorFailedThreshold = errorFailedThreshold;
         this.errorUnstableThreshold = errorUnstableThreshold;
         this.errorUnstableResponseTimeThreshold = errorUnstableResponseTimeThreshold;
+        this.showTrendGraphs = showTrendGraphs;
 
         this.relativeFailedThresholdPositive = relativeFailedThresholdPositive;
         this.relativeFailedThresholdNegative = relativeFailedThresholdNegative;
@@ -475,6 +482,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private void prepareParsers(Collection<PerformanceReportParser> performanceReportParsers) {
         for (PerformanceReportParser parser : performanceReportParsers) {
             parser.setExcludeResponseTime(excludeResponseTime);
+            parser.setShowTrendGraphs(showTrendGraphs);
             parser.setBaselineBuild(baselineBuild);
         }
     }
@@ -1320,6 +1328,19 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setModeEvaluation(boolean modeEvaluation) {
         this.modeEvaluation = modeEvaluation;
+    }
+
+    @DataBoundSetter
+    public void setShowTrendGraphs(boolean showTrendGraphs) {
+        this.showTrendGraphs = showTrendGraphs;
+    }
+
+    public boolean isShowTrendGraphs() {
+        return showTrendGraphs;
+    }
+
+    public boolean getShowTrendGraphs() {
+        return showTrendGraphs;
     }
 
     public String getSourceDataFiles() {
