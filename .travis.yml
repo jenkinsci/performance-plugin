@@ -1,11 +1,18 @@
 language: java
 jdk:
   - oraclejdk8
+addons:
+  apt:
+    sources:
+      - deadsnakes
+    packages:
+      - python3.7
 before_install:
 - sudo apt-get update
-- sudo apt-get install python3 python3-pip
+- sudo apt-get install python3 python3-pip python3-setuptools
+- pip3 install --upgrade pip
 install:
-- pip3 install setuptools virtualenv bzt --user
+- pip3 install virtualenv bzt --user
 - "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dmaven.test.skip=true clean install --batch-mode"
 script: "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Djava.awt.headless=true -Dmaven.test.redirectTestOutputToFile=true -Dcobertura.report.format=xml --fail-at-end --batch-mode cobertura:cobertura test"
 after_success:
