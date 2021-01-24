@@ -1150,9 +1150,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
      * Gets the Build object entered in the text box "Compare with nth Build"
      *
      * @param build, listener
-     * @param build
+     *
      * @return build object
-     * @throws IOException
      */
 
     // @psingh5 -
