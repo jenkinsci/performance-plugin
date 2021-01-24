@@ -5,7 +5,8 @@ jdk:
 #- sudo apt-get update
 #- sudo apt-get install python3.6-pip
 install:
-- pip install bzt --user
+- pyenv global 3.6
+- pip3 install bzt --user
 - "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Djenkins.version=1.642.3 -Dmaven.test.skip=true clean install --batch-mode -e"
 script: "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Djava.awt.headless=true -Dmaven.test.redirectTestOutputToFile=true -Dcobertura.report.format=xml --fail-at-end --batch-mode cobertura:cobertura test"
 after_success:
