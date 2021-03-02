@@ -85,6 +85,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean useBztExitCode = true;
     private String bztVersion = "";
     private String workingDirectory = "";
+    private String virtualEnvCommand = "";
     /**
      * Use 'workingDirectory' for set bzt working directory
      */
@@ -411,7 +412,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         return new String[]{getVirtualenvPath(workspace) + "bzt", HELP_OPTION};
     }
 
+    private String getVirtualEnvCommand(EnvVars envVars) {
+        return virtualEnvCommand == null || virtualEnvCommand.trim().isEmpty() ? VIRTUALENV_COMMAND : envVars.expand(virtualEnvCommand);s
+    }
+
     public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+        if (commands[0].equals(VIRTUALENV_COMMAND)) {
+            commands[0] = getVirtualEnvCommand(envVars);
+        }
         try {
             return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join();
         } catch (IOException ex) {
@@ -508,5 +516,14 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setWorkingDirectory(String workingDirectory) {
         this.workingDirectory = workingDirectory;
+    }
+
+    public String getVirtualEnvCommand() {
+        return virtualEnvCommand;
+    }
+
+    @DataBoundSetter
+    public void setVirtualEnvCommand(String virtualEnvCommand) {
+        this.virtualEnvCommand = virtualEnvCommand;
     }
 }
