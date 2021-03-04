@@ -413,7 +413,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
     private String getVirtualEnvCommand(EnvVars envVars) {
-        return virtualEnvCommand == null || virtualEnvCommand.trim().isEmpty() ? VIRTUALENV_COMMAND : envVars.expand(virtualEnvCommand);s
+        return virtualEnvCommand == null || virtualEnvCommand.trim().isEmpty() ? VIRTUALENV_COMMAND : envVars.expand(virtualEnvCommand);
     }
 
     public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
