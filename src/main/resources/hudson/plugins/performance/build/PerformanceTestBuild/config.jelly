@@ -5,6 +5,9 @@
     </f:entry>
 
     <f:advanced>
+        <f:entry title="${%VEnv path}" field="virtualEnvCommand" >
+            <f:textbox />
+        </f:entry>
         <f:entry title="${%Change workingDirectory}" field="workingDirectory" >
             <f:textbox />
         </f:entry>

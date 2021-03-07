@@ -1,14 +1,17 @@
-sudo: false
 language: java
 jdk:
-  - oraclejdk8
+  - openjdk8
+#before_install:
+#- sudo apt-get update
+#- sudo apt-get install python3.6-pip
 install:
-- pip install bzt --user
-- "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dmaven.test.skip=true clean install --batch-mode"
+- pyenv global 3.6
+- pip3 install --upgrade pip
+- pip3 install bzt --user
+- "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Djenkins.version=1.642.3 -Dmaven.test.skip=true clean install --batch-mode -e"
 script: "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Djava.awt.headless=true -Dmaven.test.redirectTestOutputToFile=true -Dcobertura.report.format=xml --fail-at-end --batch-mode cobertura:cobertura test"
 after_success:
 - cobertura:dump-datafile
 - bash <(curl -s https://codecov.io/bash)
-sudo: required
-dist: trusty
-group: deprecated-2017Q4
+os: linux
+dist: bionic

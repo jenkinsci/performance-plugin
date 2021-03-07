@@ -3,7 +3,7 @@ execution:
 - hold-for: 5s
   ramp-up: 5s
   concurrency: 2
-  executor: nose
+  executor: apiritif
   scenario:
     retrieve-resources: false
     requests:

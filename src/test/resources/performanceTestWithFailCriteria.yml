@@ -3,7 +3,7 @@ execution:
   ramp-up: 5s
   hold-for: 5s
   scenario: quick-test
-  executor: nose
+  executor: apiritif
 
 scenarios:
   quick-test:
