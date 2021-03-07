@@ -223,7 +223,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     }
 
     protected void generatePerformanceTrend(String path, Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
-        new PerformancePublisher(path + "/aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, null).
+        new PerformancePublisher(path + "/aggregate-results.xml", -1, -1, "", 0, 0, 0, 0, 0, false, "", false, false, false, false,true, null).
                 perform(run, workspace, launcher, listener);
     }
 

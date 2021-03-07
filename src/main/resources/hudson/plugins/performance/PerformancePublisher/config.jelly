@@ -10,8 +10,7 @@
    </f:entry>
 
   <f:entry title="Show Trend Graphs" field="showTrendGraphs" >
-    <f:checkbox name="showTrendGraphs" field="showTrendGraphs" >
-    </f:checkbox>
+    <f:checkbox name="showTrendGraphs" field="showTrendGraphs" checked="true"  />
   </f:entry>
 
   <f:entry title="Select evaluation mode" field="modeEvaluation">
