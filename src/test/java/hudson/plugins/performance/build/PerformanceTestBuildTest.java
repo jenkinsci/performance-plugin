@@ -404,8 +404,14 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         assertTrue(jobLog, jobLog.contains("Cannot create working directory because of error: Failed to mkdirs: /rootWorkspace"));
     }
 
+    private void resetVirtualEnvCommands() {
+        PerformanceTestBuild.CHECK_VIRTUALENV_COMMAND[0] = PerformanceTestBuild.VIRTUALENV_COMMAND;
+        PerformanceTestBuild.CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION[0] = PerformanceTestBuild.VIRTUALENV_COMMAND;
+        PerformanceTestBuild.CREATE_LOCAL_PYTHON_COMMAND[0] = PerformanceTestBuild.VIRTUALENV_COMMAND;
+    }
     @Test
     public void testDefaultVirtualEnvCommand() throws Exception {
+        resetVirtualEnvCommands();
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
         FreeStyleProject project = createFreeStyleProject();
@@ -438,11 +444,14 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
         assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue(buildTest.commands.get(0)[0], buildTest.commands.get(0)[0].equals("virtualenv"));
+        assertTrue("Command should have been 'virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'",
+                buildTest.commands.get(0)[0].equals("virtualenv"));
+        resetVirtualEnvCommands();
     }
 
     @Test
     public void testHardcodedVirtualEnvCommand() throws Exception {
+        resetVirtualEnvCommands();
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
         FreeStyleProject project = createFreeStyleProject();
@@ -476,11 +485,14 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
         assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue(buildTest.commands.get(0)[0], buildTest.commands.get(0)[0].equals("/path/to/virtualenv"));
+        assertTrue("Command should have been '/path/to/virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'",
+                buildTest.commands.get(0)[0].equals("/path/to/virtualenv"));
+        resetVirtualEnvCommands();
     }
 
     @Test
     public void testVariableVirtualEnvCommand() throws Exception {
+        resetVirtualEnvCommands();
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
         FreeStyleProject project = createFreeStyleProject();
@@ -514,6 +526,8 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
         assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue(buildTest.commands.get(0)[0], buildTest.commands.get(0)[0].equals(workspace + "/virtualenv"));
+        assertTrue("Command should have been '" + workspace + "/virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'",
+                buildTest.commands.get(0)[0].equals(workspace + "/virtualenv"));
+        resetVirtualEnvCommands();
     }
 }
