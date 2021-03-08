@@ -138,6 +138,11 @@ public class PerformanceReportMap implements ModelObject {
         return publisher == null || publisher.isModeThroughput();
     }
 
+    public boolean ifShowTrendGraphsUsed() {
+        PerformancePublisher publisher = getPublisher();
+        return publisher.isShowTrendGraphs();
+    }
+
     public boolean ifModePerformancePerTestCaseUsed() {
         PerformancePublisher publisher = getPublisher();
         return publisher == null || publisher.isModePerformancePerTestCase();

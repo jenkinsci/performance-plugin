@@ -95,6 +95,7 @@ public class JMeterParser extends AbstractParser {
 
         final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
+        report.setShowTrendGraphs(showTrendGraphs);
         report.setReportFileName(reportFile.getName());
 
         factory.newSAXParser().parse(reportFile, new DefaultHandler() {

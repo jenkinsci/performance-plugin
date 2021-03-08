@@ -9,6 +9,10 @@
       <f:textbox />
    </f:entry>
 
+  <f:entry title="Show Trend Graphs" field="showTrendGraphs" >
+    <f:checkbox name="showTrendGraphs" field="showTrendGraphs" checked="true"  />
+  </f:entry>
+
   <f:entry title="Select evaluation mode" field="modeEvaluation">
     <f:booleanRadio name="modeEvaluation"  false="Standard Mode" true="Expert Mode" />
   </f:entry> 

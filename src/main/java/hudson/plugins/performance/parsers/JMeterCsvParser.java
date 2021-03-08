@@ -55,6 +55,7 @@ public class JMeterCsvParser extends AbstractParser {
 
         final PerformanceReport report = createPerformanceReport();
         report.setExcludeResponseTime(excludeResponseTime);
+        report.setShowTrendGraphs(showTrendGraphs);
         report.setReportFileName(reportFile.getName());
 
         String[] header = null;

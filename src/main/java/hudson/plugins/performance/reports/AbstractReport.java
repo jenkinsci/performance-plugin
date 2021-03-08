@@ -38,6 +38,8 @@ public abstract class AbstractReport {
      */
     protected boolean excludeResponseTime;
 
+    protected boolean showTrendGraphs;
+
     public abstract int countErrors();
 
     public abstract double errorPercent();
@@ -141,6 +143,14 @@ public abstract class AbstractReport {
 
     public void setExcludeResponseTime(boolean excludeResponseTime) {
         this.excludeResponseTime = excludeResponseTime;
+    }
+
+    public boolean isShowTrendGraphs() {
+        return showTrendGraphs;
+    }
+
+    public void setShowTrendGraphs(boolean showTrendGraphs) {
+        this.showTrendGraphs = showTrendGraphs;
     }
 
     protected boolean isIncludeResponseTime(HttpSample sample) {

@@ -51,6 +51,7 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
         PerformanceReportMap reportMap = new PerformanceReportMap(performanceBuildAction, mock(TaskListener.class));
         assertTrue(reportMap.ifModeThroughputUsed());
         assertFalse(reportMap.ifModePerformancePerTestCaseUsed());
+        assertFalse(reportMap.ifShowTrendGraphsUsed());
         assertEquals(performanceBuildAction, reportMap.getBuildAction());
         assertEquals("Performance", reportMap.getDisplayName());
         assertEquals("performance", reportMap.getUrlName());
