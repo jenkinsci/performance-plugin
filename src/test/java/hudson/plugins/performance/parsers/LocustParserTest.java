@@ -10,7 +10,7 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 public class LocustParserTest {
-    final static String FILE_NAME = "test_results_requests.csv";
+    final static String FILE_NAME = "test_results_stats.csv";
     File requestReportFile;
     LocustParser locustParser;
     PerformanceReport report;
@@ -18,7 +18,7 @@ public class LocustParserTest {
     @Before
     public void setUp() throws Exception {
         requestReportFile = new File(getClass().getResource(String.format("/%s", FILE_NAME)).toURI());
-        locustParser = new LocustParser(null, PerformanceReportTest.DEFAULT_PERCENTILES, PerformanceReport.INCLUDE_ALL);
+        locustParser = new LocustParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         report = locustParser.parse(requestReportFile);
     }
 
@@ -29,7 +29,7 @@ public class LocustParserTest {
 
     @Test
     public void parserShouldReturnGlobPattern() throws Exception {
-        assertEquals("**/*.csv", locustParser.getDefaultGlobPattern());
+        assertEquals("**/*_stats.csv", locustParser.getDefaultGlobPattern());
     }
 
     @Test
