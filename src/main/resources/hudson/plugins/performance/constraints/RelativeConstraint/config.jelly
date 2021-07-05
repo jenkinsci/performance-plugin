@@ -1,159 +1,106 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-		
-	<f:block>
-		
-	<f:entry title="Define Relative Constraint:   ">
-      <table width="500" cellspacing="0" border="0px">
-      	<tr>
-            <f:block>
-  				<table>
-      					<f:entry field="relatedPerfReport">
-       						<label> Related Report ${radioId3}</label><f:textbox name="relatedPerfReport"/>
-      					</f:entry>
- 				</table>
-			</f:block>
-        </tr>
-        <tr>
-            <f:block>
-  				<table>
-    				<f:optionalBlock name="testCaseBlock" title="Specify a test case" checked="${instance.getTestCaseBlock() != null}">
-      					<f:entry field="testCase">
-       						<f:textbox name="testCase"/>
-      					</f:entry>
-    				</f:optionalBlock>
- 				</table>
-			</f:block>
-        </tr>
-        <tr>
-        	<td width="25%" align="center">
-            	<label> Metric </label>
-          	</td>
-          	<td width="30%" align="center">
-        		<label> Operator </label>
-          	</td>
-          	<td width="15%" align="center">
-       			<label> Tolerance-%</label>
-          	</td>
-          	<td width="30%" align="center">
-        		<label> Escalation ${radioId}</label>
-          	</td>
-        </tr>
-        <tr>
-        	<td style="vertical-align: middle">
-        		<table>
-          			<tr>
-          				<f:entry field="meteredValue" name="meteredValue">
-          					<f:enum>${it}</f:enum>
-          				</f:entry>
-          			</tr>
-          		</table>
-        	</td>
-        	<td style="vertical-align: middle">
-        		<table>
-        			<tr>
-        				<f:entry field="operator" name="operator">
-        					<f:enum>
-        						<j:if test="${!it.text.equals('not be equal to')}">
-   									${it}
-								</j:if>	
-        					</f:enum>
-          				</f:entry>
-        			</tr>
-        		</table>
-        	</td>
-        	<td style="vertical-align: middle">
-        	    <f:number field="tolerance" name="tolerance" default="0" min="0"/>
-        	</td>
-        	<td style="vertical-align: middle">
-        		<table>
-        			<tr>
-        				<f:entry field="escalationLevel" name="escalationLevel">
-          	  				<f:enum>${it}</f:enum>
-          				</f:entry>
-        			</tr>
-        		</table>
-        	</td>	
-        </tr>
-        <tr>
-          <td colspan="4">
-        	<table>
-          		<tr>
-          			<td>
-          				<j:set var="radioId" value="${h.generateId()}"/>
-            			<f:radioBlock name="${radioId}.previousResultsBlock" field="previousResultsBlock" value="true" title="Compare with number of previous builds" checked="${instance.getPreviousResultsBlock().isChoicePreviousResults()}">
-						<f:entry>
-            					<table cellspacing="5">
-            						<tr>
-            							<td>
-            								<label>Last </label>
-            							</td>
-            							<td width="40px">
-											<f:entry field="previousResultsString">
-												<f:textbox />
-											</f:entry>
-            							</td>
-            							<td>
-            								<label> builds</label>
-            							</td>
-            						</tr>
-            					</table>
-							</f:entry>	
-           				</f:radioBlock>
-            		</td>
-            	</tr>  	
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="4">
-          	<table>
-          		<tr>
-          			<td>
-            			<f:radioBlock name="${radioId}.previousResultsBlock" field="previousResultsBlock" value="false" title="Compare with Builds within a timeframe" checked="${instance.getPreviousResultsBlock().isChoiceTimeframe()}">
-						<f:entry>
-            				<table cellspacing="5">
-            					<tr>
-            						<td>
-            							<label>Builds between </label>
-            						</td>
-            						<td width="70px">
-										<f:entry field="timeframeStartString">
-											<f:textbox maxlength="16"/>
-										</f:entry>	
-            						</td>
-            						<td>
-            							<label> and </label>
-            						</td>
-            						<td width="70px">
-										<f:entry field="timeframeEndString">
-											<f:textbox maxlength="16"/>
-										</f:entry>	
-            						</td>
-            					</tr>
-            				</table>
-						</f:entry>	
-            			</f:radioBlock>
-            		</td>
-            	</tr>  	
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="4">
-        	<table>
-          		<tr>
-          			<td>
-            			<f:radioBlock name="${radioId}.previousResultsBlock" field="previousResultsBlock" value="BASELINE" title="Compare with baseline build" checked="${instance.getPreviousResultsBlock().isChoiceBaselineBuild()}">
-           				</f:radioBlock>
-            		</td>
-            	</tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-     </f:entry>
-		
-	</f:block>
-
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:p="/lib/performance">
+  <f:block>
+    <f:entry>
+      <p:blockWrapper tableStyle="width: 500px; cellspacing:0; border:0px;">
+        <f:block>
+          <f:entry title="Related Report" field="relatedPerfReport">
+            <f:textbox name="relatedPerfReport"/>
+          </f:entry>
+        </f:block>
+        <f:block>
+          <f:optionalBlock name="testCaseBlock" title="Specify a test case" checked="${instance.getTestCaseBlock() != null}">
+            <f:entry field="testCase">
+              <f:textbox name="testCase"/>
+            </f:entry>
+          </f:optionalBlock>
+        </f:block>
+        <f:block>
+          <table>
+            <tr>
+              <td width="25%" align="center">
+                <label> Metric </label>
+              </td>
+              <td width="30%" align="center">
+                <label> Operator </label>
+              </td>
+              <td width="15%" align="center">
+                <label> Tolerance-%</label>
+              </td>
+              <td width="30%" align="center">
+                <label> Escalation ${radioId}</label>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: middle">
+                <table>
+                  <tr>
+                    <f:entry field="meteredValue" name="meteredValue">
+                      <f:enum>${it}</f:enum>
+                    </f:entry>
+                  </tr>
+                </table>
+              </td>
+              <td style="vertical-align: middle">
+                <table>
+                  <tr>
+                    <f:entry field="operator" name="operator">
+                      <f:enum>
+                        <j:if test="${!it.text.equals('not be equal to')}">${it}</j:if>
+                      </f:enum>
+                    </f:entry>
+                  </tr>
+                </table>
+              </td>
+              <td style="vertical-align: middle">
+                <table>
+                  <tr>
+                    <f:entry field="tolerance" name="tolerance">
+                      <f:number field="tolerance" name="tolerance" default="0" min="0"/>
+                    </f:entry>
+                  </tr>
+                </table>
+              </td>
+              <td style="vertical-align: middle">
+                <table>
+                  <tr>
+                    <f:entry field="escalationLevel" name="escalationLevel">
+                      <f:enum>${it}</f:enum>
+                    </f:entry>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </f:block>
+        <j:set var="radioId" value="${h.generateId()}"/>
+        <f:block>
+          <f:radioBlock name="${radioId}.previousResultsBlock" field="previousResultsBlock" value="true"
+              title="Compare with number of previous builds" checked="${instance.getPreviousResultsBlock().isChoicePreviousResults()}">
+            <f:entry title="Number of previous builds" field="previousResultsString">
+              <f:number min="1" />
+            </f:entry>
+          </f:radioBlock>
+        </f:block>
+        <f:block>
+          <f:radioBlock name="${radioId}.previousResultsBlock" field="previousResultsBlock" value="false"
+              title="Compare with Builds within a timeframe" checked="${instance.getPreviousResultsBlock().isChoiceTimeframe()}">
+            <f:entry>
+              <f:entry title="Min date/time" field="timeframeStartString">
+                <f:textbox maxlength="16"/>
+              </f:entry>
+              <f:entry title="Max date/time" field="timeframeEndString">
+                <f:textbox maxlength="16"/>
+              </f:entry>
+            </f:entry>
+          </f:radioBlock>
+        </f:block>
+        <f:block>
+          <f:radioBlock name="${radioId}.previousResultsBlock" field="previousResultsBlock" value="BASELINE"
+              title="Compare with baseline build" checked="${instance.getPreviousResultsBlock().isChoiceBaselineBuild()}">
+          </f:radioBlock>
+        </f:block>
+      </p:blockWrapper>
+    </f:entry>
+  </f:block>
 </j:jelly>

@@ -1,0 +1,35 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <st:documentation>
+    This adds a wrapper allowing adding an ID to a field or group of fields that can be targeted by JavaScript
+    The wrapper will be a `table` tag on Jenkins Core less than 2.264, and a `div` tag after that.
+
+    <st:attribute name="id">
+      ID to add to the wrapper
+    </st:attribute>
+    <st:attribute name="style">
+      Inline style to pass to the wrapper tag
+    </st:attribute>
+    <st:attribute name="tableStyle">
+      Inline style to pass to the wrapper tag (table only)
+    </st:attribute>
+    <st:attribute name="divStyle">
+      Inline style to pass to the wrapper tag (div only)
+    </st:attribute>
+
+  </st:documentation>
+
+  <j:choose>
+    <j:when test="${divBasedFormLayout}">
+      <div id="${attrs.id}" style="${attrs.style};${attrs.divStyle}">
+        <d:invokeBody/>
+      </div>
+    </j:when>
+    <j:otherwise>
+      <table id="${attrs.id}" style="${attrs.style};${attrs.tableStyle}">
+        <d:invokeBody/>
+      </table>
+    </j:otherwise>
+  </j:choose>
+
+</j:jelly>

@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:p="/lib/performance">
 
   <f:entry title="${%Source files}" field="sourceDataFiles">
     <f:textbox />
@@ -15,160 +15,120 @@
 
   <f:entry title="Select evaluation mode" field="modeEvaluation">
     <f:booleanRadio name="modeEvaluation"  false="Standard Mode" true="Expert Mode" />
-  </f:entry> 
+  </f:entry>
 
   <f:entry>
-    <table style="border:1;border-style:solid">
+    <p:blockWrapper style="border:1;border-style:solid;" divStyle="margin-left:50px; padding-left:6px; padding-right:6px;">
       <p><b>Standard Mode</b></p>
-      <f:entry title="Select mode:   ">
-        <f:booleanRadio name="modeOfThreshold" field="modeOfThreshold" true="Relative Threshold" false="Error Threshold" />
-      </f:entry>
-
       <f:block>
-        <f:entry title="Use Error thresholds on single build:   ">
-          <table width="500px">
-            <tr>
-              <td>
-                <label>${%Unstable}</label>
-              </td>
-              <td>
-                <f:textbox field="errorUnstableThreshold" default="-1"/>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label>${%Failed}</label>
-              </td>
-              <td>
-                <f:textbox field="errorFailedThreshold" default="-1"/>
-              </td>
-            </tr>
-          </table>
+        <f:radioBlock name="_.modeOfThreshold" field="modeOfThreshold" value="false" title="Error Threshold" checked="${!instance.getModeOfThreshold()}" inline="true" help="${null}">
+          <f:entry title="Use Error thresholds on single build:   ">
+            <p:blockWrapper>
+              <f:block>
+                <f:entry title="${%Unstable}">
+                  <f:textbox field="errorUnstableThreshold" default="-1"/>
+                </f:entry>
+                <f:entry title="${%Failed}">
+                  <f:textbox field="errorFailedThreshold" default="-1"/>
+                </f:entry>
+                <f:advanced>
+                  <f:entry title="${%Average response time threshold}" field="errorUnstableResponseTimeThreshold">
+                    <f:textarea style="height:100px;"/>
+                  </f:entry>
+                </f:advanced>
+              </f:block>
+            </p:blockWrapper>
+          </f:entry>
+        </f:radioBlock>
+        <f:radioBlock name="_.modeOfThreshold" field="modeOfThreshold" value="true" title="Relative Threshold" checked="${instance.getModeOfThreshold()}" inline="true" help="${null}">
+          <f:entry title="Use Relative thresholds for build comparison:   ">
+            <p:blockWrapper>
+              <f:block>
+                <table cellspacing="5">
+                  <tr>
+                    <td width="25%">
+                      <label> </label>
+                    </td>
+                    <td width="20%" align="center">
+                      <label>(-)</label>
+                    </td>
+                    <td width="20%" align="center">
+                      <label>(+)</label>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="25%">
+                      <label>Unstable % Range</label>
+                    </td>
+                    <td>
+                      <f:number field="relativeUnstableThresholdNegative" default="-1.0"/>
+                    </td>
+                    <td>
+                      <f:number field="relativeUnstableThresholdPositive" default="-1.0"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="25%">
+                      <label>Failed % Range</label>
+                    </td>
+                    <td>
+                      <f:number field="relativeFailedThresholdNegative" default="-1.0"/>
+                    </td>
+                    <td>
+                      <f:number field="relativeFailedThresholdPositive" default="-1.0"/>
+                    </td>
+                  </tr>
+                </table>
+                <f:radioBlock name="_.compareBuildPrevious" field="compareBuildPrevious" value="true" title="Compare with previous Build" checked="${instance.getCompareBuildPrevious()}" inline="true">
+                </f:radioBlock>
+                <f:radioBlock name="_.compareBuildPrevious" field="compareBuildPrevious" value="false" title="Compare with Build number" checked="${!instance.getCompareBuildPrevious()}" inline="true">
+                  <f:entry title="Build number">
+                    <f:number field="nthBuildNumber"/>
+                  </f:entry>
+                </f:radioBlock>
+                <f:entry title="${%Compare based on}" field="configType" name="configType">
+                  <f:select name="configType">
+                    <option value="ART">Average Response Time</option>
+                    <option value="MRT">Median Response Time</option>
+                    <option value="PRT">90% ResponseTime</option>
+                  </f:select>
+                </f:entry>
+              </f:block>
+            </p:blockWrapper>
+          </f:entry>
+        </f:radioBlock>
+      </f:block>
+    </p:blockWrapper>
+  </f:entry>
+
+  <f:entry>
+    <p:blockWrapper style="border:1;border-style:solid;" divStyle="margin-left:50px; padding-left:6px; padding-right:6px;">
+      <p><b>Expert Mode</b></p>
+      <f:block>
+        <f:entry title="Constraint settings">
+          <f:entry>
+            <f:checkbox name="ignoreFailedBuilds" title="Ignore Failed Builds"  checked="${instance.isIgnoreFailedBuilds()}"/>
+          </f:entry>
+          <f:entry>
+            <f:checkbox name="ignoreUnstableBuilds" title="Ignore Unstable Builds" field="ignoreUnstableBuilds" checked="${instance.isIgnoreUnstableBuilds()}"/>
+          </f:entry>
+          <f:entry>
+            <f:checkbox name="persistConstraintLog" title="Save constraint log to workspace"  checked="${instance.isPersistConstraintLog()}"/>
+          </f:entry>
         </f:entry>
 
-        <f:advanced>
-          <f:entry title="${%Average response time threshold}" field="errorUnstableResponseTimeThreshold">
-            <table>
-              <tbody>
-                <tr>
-                  <td>
-                    <f:textarea style="width:600px;height:100px;"/>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </f:entry>
-        </f:advanced>
+        <f:entry title="${%JUnit output file}">
+          <f:textbox name="junitOutput" field="junitOutput" default=""/>
+        </f:entry>
 
-        <f:entry title="Use Relative thresholds for build comparison:   ">
-          <table width="500px" cellspacing="5">
-            <tr>
-              <td width="25%">
-                <label> </label>
-              </td>
-              <td width="20%" align="center">
-                <label>(-)</label>
-              </td>
-              <td width="20%" align="center">
-                <label>(+)</label>
-              </td>
-            </tr>
-            <tr>
-              <td width="25%">
-                <label>Unstable % Range</label>
-              </td>
-              <td>
-                <f:number field="relativeUnstableThresholdNegative" default="-1.0"/>
-              </td>
-              <td>
-                <f:number field="relativeUnstableThresholdPositive" default="-1.0"/>
-              </td>
-            </tr>
-            <tr>
-              <td width="25%">
-                <label>Failed % Range</label>
-              </td>
-              <td>
-                <f:number field="relativeFailedThresholdNegative" default="-1.0"/>
-              </td>
-              <td>
-                <f:number field="relativeFailedThresholdPositive" default="-1.0"/>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="3">
-                <table>
-                  <tr>
-                    <td width="85%">
-                      <f:booleanRadio name="compareBuildPrevious" field="compareBuildPrevious" true="Compare with previous Build" false="Compare with Build number" />
-                    </td>
-                    <td width="15%">
-                      <f:number field="nthBuildNumber"/>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td width="25%">
-                <label>${%Compare based on}</label>
-              </td>
-              <td colspan="2">
-                <table>
-                  <tr>
-                    <f:entry field="configType" name="configType">
-                      <f:select name="configType">
-                        <option value="ART">Average Response Time</option>
-                        <option value="MRT">Median Response Time</option>
-                        <option value="PRT">90% ResponseTime</option>
-                      </f:select>
-                    </f:entry>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
+        <f:entry title="Constraints" field="constraints">
+          <f:hetero-list name="constraints" hasHeader="true"
+                     descriptors="${descriptor.getConstraintDescriptors()}"
+                     items="${instance.constraints}"
+                     addCaption="${%Add a new constraint}"/>
         </f:entry>
       </f:block>
-    </table>
-  </f:entry>                 
-  
-  <f:entry>
-    <table style="border:1;border-style:solid">
-      <p><b>Expert Mode</b></p>
-      <f:entry title="Constraint settings">
-        <table width="500px">
-          <tbody>
-            <tr>
-              <td>
-                <f:checkbox name="ignoreFailedBuilds" title="Ignore Failed Builds"  checked="${instance.isIgnoreFailedBuilds()}"/>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <f:checkbox name="ignoreUnstableBuilds" title="Ignore Unstable Builds" field="ignoreUnstableBuilds" checked="${instance.isIgnoreUnstableBuilds()}"/>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <f:checkbox name="persistConstraintLog" title="Save constraint log to workspace"  checked="${instance.isPersistConstraintLog()}"/>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </f:entry>
-
-      <f:entry title="${%JUnit output file}">
-        <f:textbox name="junitOutput" field="junitOutput" default=""/>
-      </f:entry>
-  
-  <f:entry title="Constraints" field="constraints">
-    <f:hetero-list name="constraints" hasHeader="true"
-                   descriptors="${descriptor.getConstraintDescriptors()}"
-                   items="${instance.constraints}"
-                   addCaption="${%Add a new constraint}"/>
-      </f:entry>
-    </table>
+    </p:blockWrapper>
   </f:entry>
 
   <f:advanced>
@@ -185,41 +145,30 @@
     </f:entry>
 
     <f:entry title="${%Performance display}">
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <f:checkbox name="modePerformancePerTestCase" title="Display Performance Report Per Test Case" field="modePerformancePerTestCase">
-                Display Performance Report Per Test Case
-              </f:checkbox>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <f:checkbox name="modeThroughput" title="Display Performance Report with Throughput (requests per second)" field="modeThroughput">
-                Display Performance Report with Throughput (requests per second)
-              </f:checkbox>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <f:checkbox name="excludeResponseTime" title="Exclude response time of errored samples" field="excludeResponseTime">
-                Exclude response time of errored samples
-              </f:checkbox>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <f:checkbox name="failBuildIfNoResultFile" title="Fail build when result files are not present" default="true" field="failBuildIfNoResultFile">
-                Fail build when result files are not present
-              </f:checkbox>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <f:entry>
+        <f:checkbox name="modePerformancePerTestCase" title="Display Performance Report Per Test Case" field="modePerformancePerTestCase">
+          Display Performance Report Per Test Case
+        </f:checkbox>
+      </f:entry>
+      <f:entry>
+        <f:checkbox name="modeThroughput" title="Display Performance Report with Throughput (requests per second)" field="modeThroughput">
+          Display Performance Report with Throughput (requests per second)
+        </f:checkbox>
+      </f:entry>
+      <f:entry>
+        <f:checkbox name="excludeResponseTime" title="Exclude response time of errored samples" field="excludeResponseTime">
+          Exclude response time of errored samples
+        </f:checkbox>
+      </f:entry>
+      <f:entry>
+        <f:checkbox name="failBuildIfNoResultFile" title="Fail build when result files are not present" default="true" field="failBuildIfNoResultFile">
+          Fail build when result files are not present
+        </f:checkbox>
+      </f:entry>
     </f:entry>
     <f:entry title="Baseline build number">
       <f:number name="baselineBuild" field="baselineBuild" />
     </f:entry>
   </f:advanced>
+
 </j:jelly>
