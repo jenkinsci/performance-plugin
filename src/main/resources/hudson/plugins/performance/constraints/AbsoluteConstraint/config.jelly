@@ -1,80 +1,77 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-	
-	<f:block>
-		
-	<f:entry title="Define Absolute Constraint:   ">
-      <table width="500" cellspacing="0" border="0px">
-      	<tr>
-            <f:block>
-  				<table>
-      					<f:entry field="relatedPerfReport">
-       						<label> Related Report </label><f:textbox name="relatedPerfReport"/>
-      					</f:entry>
- 				</table>
-			</f:block>
-        </tr>
-        <tr>
-            <f:block>
-  				<table>
-    				<f:optionalBlock name="testCaseBlock" title="Specify a test case" checked="${instance.getTestCaseBlock() != null}">
-      					<f:entry field="testCase">
-       						<f:textbox name="testCase"/>
-      					</f:entry>
-    				</f:optionalBlock>
- 				</table>
-			</f:block>
-        </tr>
-        <tr>
-        	<td width="25%" align="center">
-            	<label> Metric </label>
-          	</td>
-          	<td width="30%" align="center">
-        		<label> Operator </label>
-          	</td>
-          	<td width="15%" align="center">
-       			<label> Value </label>
-          	</td>
-          	<td width="30%" align="center">
-        		<label> Escalation </label>
-          	</td>
-        </tr>
-        <tr>
-        	<td style="vertical-align: middle">
-        		<table>
-          			<tr>
-          				<f:entry field="meteredValue" name="meteredValue">
-          					<f:enum>${it}</f:enum>
-          				</f:entry>
-          			</tr>
-          		</table>
-        	</td>
-        	<td style="vertical-align: middle">
-        		<table>
-        			<tr>
-        				<f:entry field="operator" name="operator">
-        					<f:enum>${it}</f:enum>
-          				</f:entry>
-        			</tr>
-        		</table>
-        	</td>
-        	<td style="vertical-align: middle">
-        		<f:number field="value" name="value" default="0" min="0"/>
-        	</td>
-        	<td style="vertical-align: middle">
-        		<table>
-        			<tr>
-        				<f:entry field="escalationLevel" name="escalationLevel">
-        					<f:enum>${it}</f:enum>
-          				</f:entry>
-        			</tr>
-        		</table>
-        	</td>	
-        </tr>	
-      </table>
-     </f:entry>
-		
-	</f:block>
-  
-
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:p="/lib/performance">
+  <f:block>
+    <f:entry>
+      <p:blockWrapper tableStyle="width: 500px; cellspacing:0; border:0px;">
+        <f:block>
+          <f:entry title="Related Report" field="relatedPerfReport">
+            <f:textbox name="relatedPerfReport"/>
+          </f:entry>
+        </f:block>
+        <f:block>
+          <f:optionalBlock name="testCaseBlock" title="Specify a test case" checked="${instance.getTestCaseBlock() != null}">
+            <f:entry field="testCase">
+              <f:textbox name="testCase"/>
+            </f:entry>
+          </f:optionalBlock>
+        </f:block>
+        <f:block>
+          <table>
+            <tr>
+              <td width="25%" align="center">
+                <label> Metric </label>
+              </td>
+              <td width="30%" align="center">
+                <label> Operator </label>
+              </td>
+              <td width="15%" align="center">
+                <label> Value </label>
+              </td>
+              <td width="30%" align="center">
+                <label> Escalation </label>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: middle">
+                <table>
+                  <tr>
+                    <f:entry field="meteredValue" name="meteredValue">
+                      <f:enum>${it}</f:enum>
+                    </f:entry>
+                  </tr>
+                </table>
+              </td>
+              <td style="vertical-align: middle">
+                <table>
+                  <tr>
+                    <f:entry field="operator" name="operator">
+                      <f:enum>${it}</f:enum>
+                    </f:entry>
+                  </tr>
+                </table>
+              </td>
+              <td style="vertical-align: middle">
+                <table>
+                  <tr>
+                    <f:entry field="value" name="value">
+                      <f:number field="value" name="value" default="0" min="0"/>
+                    </f:entry>
+                  </tr>
+                </table>
+              </td>
+              <td style="vertical-align: middle">
+                <table>
+                  <tr>
+                    <f:entry field="escalationLevel" name="escalationLevel">
+                      <f:enum>${it}</f:enum>
+                    </f:entry>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </f:block>
+      </p:blockWrapper>
+    </f:entry>
+  </f:block>
 </j:jelly>
