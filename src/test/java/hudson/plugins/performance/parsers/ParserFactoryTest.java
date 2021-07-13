@@ -57,6 +57,9 @@ public class ParserFactoryTest {
 
         filePath = getClass().getResource("/summary.log").toURI().getPath();
         assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES, PerformanceReport.INCLUDE_ALL).get(0) instanceof JmeterSummarizerParser);
+
+        filePath = getClass().getResource("/test_results_stats.csv").toURI().getPath();
+        assertTrue(ParserFactory.getParser(build, workspace, null, filePath, envVars, PerformanceReportTest.DEFAULT_PERCENTILES, PerformanceReport.INCLUDE_ALL).get(0) instanceof LocustParser);
     }
 
     @Test
@@ -69,6 +72,7 @@ public class ParserFactoryTest {
         assertTrue(ParserFactory.getParser(null, null, null, "**/*.wrk", envVars, PerformanceReportTest.DEFAULT_PERCENTILES, PerformanceReport.INCLUDE_ALL).get(0) instanceof WrkSummarizerParser);
         assertTrue(ParserFactory.getParser(null, null, null, "**/*.csv", envVars, PerformanceReportTest.DEFAULT_PERCENTILES, PerformanceReport.INCLUDE_ALL).get(0) instanceof JMeterCsvParser);
         assertTrue(ParserFactory.getParser(null, null, null, "**/*.log", envVars, PerformanceReportTest.DEFAULT_PERCENTILES, PerformanceReport.INCLUDE_ALL).get(0) instanceof JmeterSummarizerParser);
+        assertTrue(ParserFactory.getParser(null, null, null, "**/*_stats.csv", envVars, PerformanceReportTest.DEFAULT_PERCENTILES, PerformanceReport.INCLUDE_ALL).get(0) instanceof LocustParser);
     }
 
     @Test

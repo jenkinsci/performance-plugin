@@ -29,6 +29,7 @@ public class ParserFactory {
         defaultGlobPatterns.put("**/*.xml", TaurusParser.class.getSimpleName());
         defaultGlobPatterns.put("**/*.wrk", WrkSummarizerParser.class.getSimpleName());
         defaultGlobPatterns.put("**/*.mdb", LoadRunnerParser.class.getSimpleName());
+        defaultGlobPatterns.put("**/*_stats.csv", LocustParser.class.getSimpleName());
     }
 
     public static List<PerformanceReportParser> getParser(Run<?, ?> build, FilePath workspace, PrintStream logger, String glob, 
@@ -152,6 +153,8 @@ public class ParserFactory {
             return new IagoParser(glob, percentiles, filterRegex);
         } else if (parserName.equals(LoadRunnerParser.class.getSimpleName())) {
             return new LoadRunnerParser(glob, percentiles, filterRegex);
+        } else if (parserName.equals(LocustParser.class.getSimpleName())) {
+            return new LocustParser(glob, percentiles, filterRegex);
         } else {
             throw new IllegalArgumentException("Unknown parser type: " + parserName);
         }
