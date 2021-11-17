@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -14,8 +15,6 @@ import javax.annotation.Nonnull;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Test;
 import org.jvnet.hudson.test.HudsonTestCase;
-
-import com.google.common.io.Files;
 
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -41,7 +40,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         buildExt.setWorkspace(workspace);
         buildExt.onStartBuilding();
 
@@ -79,7 +78,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         buildExt.setWorkspace(workspace);
         buildExt.onStartBuilding();
 
@@ -118,7 +117,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         buildExt.setWorkspace(workspace);
         buildExt.onStartBuilding();
 
@@ -156,7 +155,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         buildExt.setWorkspace(workspace);
         buildExt.onStartBuilding();
 
@@ -274,7 +273,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         p.createExecutable();
         Run run = p.getFirstBuild();
         String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]";
@@ -312,7 +311,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String path = getClass().getResource("/performanceTestWithFailCriteria.yml").getPath();
 
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         p.createExecutable();
         Run run = p.getFirstBuild();
         String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]" ;
@@ -365,7 +364,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
     @Test
     public void testPWD() throws Exception {
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
-        File buildWorkspace = Files.createTempDir();
+        File buildWorkspace = Files.createTempDirectory(null).toFile();
         FilePath workspace = new FilePath(buildWorkspace);
         p.createExecutable();
         Run run = p.getFirstBuild();
@@ -417,7 +416,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         buildExt.setWorkspace(workspace);
         buildExt.onStartBuilding();
 
@@ -457,7 +456,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         buildExt.setWorkspace(workspace);
         buildExt.onStartBuilding();
 
@@ -498,7 +497,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         buildExt.setWorkspace(workspace);
         buildExt.onStartBuilding();
 

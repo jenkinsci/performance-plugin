@@ -1,6 +1,5 @@
 package hudson.plugins.performance.build;
 
-import com.google.common.base.Throwables;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -425,7 +424,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         } catch (IOException ex) {
             logger.write(ex.getMessage().getBytes());
             if (printDebugOutput) {
-                logger.write(Throwables.getStackTraceAsString(ex).getBytes());
+                logger.write(Functions.printThrowable(ex).getBytes());
             }
             return 1;
         }
