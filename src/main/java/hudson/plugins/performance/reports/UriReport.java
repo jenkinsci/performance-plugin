@@ -501,7 +501,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
         for (Map.Entry<Long, Long> responseTimeOccurrence : responseTimesHistogram.entrySet()) {
             cumulativeTotal += responseTimeOccurrence.getValue();
-            percentiles.addOrUpdate(100.0*cumulativeTotal/totalNoOfSamples, responseTimeOccurrence.getKey()); // float value will result in smoother curve
+            percentiles.addOrUpdate((double) 100.0*cumulativeTotal/totalNoOfSamples, (double) responseTimeOccurrence.getKey()); // float value will result in smoother curve
         }
 
         ChartUtil.generateGraph(request, response,
