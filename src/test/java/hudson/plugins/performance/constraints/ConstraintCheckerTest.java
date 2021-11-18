@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -27,9 +28,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import com.steadystate.css.parser.ParseException;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -196,13 +195,12 @@ public class ConstraintCheckerTest {
      * @throws NoSuchMethodException
      * @throws SecurityException
      * @throws ParseException
-     * @throws java.text.ParseException
      */
 
     @Test
     public void happyPathForAbsoluteConstraints()
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException, IOException, InterruptedException, ParseException, java.text.ParseException {
+            InvocationTargetException, IOException, InterruptedException, ParseException {
 
         List<AbstractConstraint> constraints = new ArrayList<AbstractConstraint>();
         constraints.add(ac0);
@@ -234,7 +232,7 @@ public class ConstraintCheckerTest {
     @Test
     public void happyPathForRelativeConstraints()
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException, IOException, InterruptedException, ParseException, java.text.ParseException {
+            InvocationTargetException, IOException, InterruptedException, ParseException {
 
         List<AbstractConstraint> constraints = new ArrayList<AbstractConstraint>();
         constraints.add(rc0);
@@ -269,7 +267,7 @@ public class ConstraintCheckerTest {
     @Test
     public void happyPathForMixedConstraints()
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException, IOException, InterruptedException, ParseException, java.text.ParseException {
+            InvocationTargetException, IOException, InterruptedException, ParseException {
 
         List<AbstractConstraint> constraints = new ArrayList<AbstractConstraint>();
         constraints.add(rc0);
