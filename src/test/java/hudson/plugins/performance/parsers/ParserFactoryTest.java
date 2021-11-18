@@ -3,6 +3,7 @@ package hudson.plugins.performance.parsers;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 
 import javax.annotation.Nonnull;
@@ -11,8 +12,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import com.google.common.io.Files;
 
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -33,7 +32,7 @@ public class ParserFactoryTest {
         FreeStyleProject project = j.createFreeStyleProject();
         FreeStyleBuildExt build = new FreeStyleBuildExt(project);
 
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         build.setWorkspace(workspace);
         String filePath;
 
@@ -78,7 +77,7 @@ public class ParserFactoryTest {
         FreeStyleBuildExt build = new FreeStyleBuildExt(project);
         EnvVars envVars = new EnvVars(new HashMap<String, String>());
 
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         build.setWorkspace(workspace);
 
         FilePath results = workspace.child("results");
@@ -103,7 +102,7 @@ public class ParserFactoryTest {
         FreeStyleBuildExt build = new FreeStyleBuildExt(project);
         EnvVars envVars = new EnvVars(new HashMap<String, String>());
 
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         build.setWorkspace(workspace);
 
         String absPath1 = getClass().getResource("/WrkResultsQuick.wrk").getPath();
@@ -132,7 +131,7 @@ public class ParserFactoryTest {
         FreeStyleBuildExt build = new FreeStyleBuildExt(project);
         EnvVars envVars = new EnvVars(new HashMap<String, String>());
 
-        FilePath workspace = new FilePath(Files.createTempDir());
+        FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         build.setWorkspace(workspace);
 
         String path = getClass().getResource("/single_result/res.csv").getPath();

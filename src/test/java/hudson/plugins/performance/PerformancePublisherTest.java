@@ -1,6 +1,5 @@
 package hudson.plugins.performance;
 
-import com.google.common.io.Files;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -36,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -101,7 +101,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         b.getAction(PerformanceBuildAction.class);
 
         String standardExportFilename = b.getRootDir().getAbsolutePath() + File.separator + "archive" + File.separator + "standardResults.xml";
-        String content = new String (java.nio.file.Files.readAllBytes(Paths.get(standardExportFilename)));
+        String content = new String(Files.readAllBytes(Paths.get(standardExportFilename)));
         Assert.assertEquals("<?xml version=\"1.0\"?>\n" +
                 "<results>\n" +
                 "<api>\n" +
@@ -387,7 +387,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
-        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
+        buildExt.setWorkspace(new FilePath(Files.createTempDirectory(null).toFile()));
         buildExt.onStartBuilding();
 
         buildExt.getRootDir().mkdirs();
@@ -414,7 +414,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
-        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
+        buildExt.setWorkspace(new FilePath(Files.createTempDirectory(null).toFile()));
         buildExt.onStartBuilding();
 
         buildExt.getRootDir().mkdirs();
@@ -440,7 +440,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
         FreeStyleProject project = createFreeStyleProject();
 
         PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
-        buildExt.setWorkspace(new FilePath(Files.createTempDir()));
+        buildExt.setWorkspace(new FilePath(Files.createTempDirectory(null).toFile()));
         buildExt.onStartBuilding();
 
         buildExt.getRootDir().mkdirs();
