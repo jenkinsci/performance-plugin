@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
@@ -89,7 +89,7 @@ public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTe
             super(project);
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public List<String> getPerformanceReportList() {
             return Collections.singletonList("JMeterResults.jtl");

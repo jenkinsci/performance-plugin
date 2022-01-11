@@ -9,7 +9,7 @@ import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.actions.PerformanceProjectAction;
 import jenkins.model.TransientActionFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -21,9 +21,9 @@ public class WorkflowActionsFactory extends TransientActionFactory<Job> {
         return Job.class;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Collection<? extends Action> createFor(@Nonnull Job job) {
+    public Collection<? extends Action> createFor(@NonNull Job job) {
         if (job.getClass().getCanonicalName().startsWith("org.jenkinsci.plugins.workflow")) {
             final Run<?, ?> r = job.getLastSuccessfulBuild();
             if (r != null && !r.getActions(PerformanceBuildAction.class).isEmpty()) {

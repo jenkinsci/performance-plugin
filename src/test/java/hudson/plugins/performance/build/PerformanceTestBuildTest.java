@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Test;
@@ -211,7 +211,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         }
 
         @Override
-        public void setWorkspace(@Nonnull FilePath ws) {
+        public void setWorkspace(@NonNull FilePath ws) {
             super.setWorkspace(ws);
         }
 
