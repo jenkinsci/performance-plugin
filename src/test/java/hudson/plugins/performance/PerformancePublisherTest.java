@@ -30,7 +30,7 @@ import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -280,7 +280,7 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
     private class RunExt extends Run {
 
-        protected RunExt(@Nonnull Job job) throws IOException {
+        protected RunExt(@NonNull Job job) throws IOException {
             super(job);
         }
 

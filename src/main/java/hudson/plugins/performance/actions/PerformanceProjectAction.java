@@ -45,7 +45,7 @@ import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -742,7 +742,7 @@ public class PerformanceProjectAction implements Action {
         return null;
     }
 
-    @Nonnull
+    @NonNull
     public List<String> getPerformanceReportList() {
         this.performanceReportList = new ArrayList<>(0);
         if (null == this.job) {

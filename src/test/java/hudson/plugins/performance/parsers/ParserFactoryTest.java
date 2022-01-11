@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -156,7 +156,7 @@ public class ParserFactoryTest {
         }
 
         @Override
-        protected void setWorkspace(@Nonnull FilePath ws) {
+        protected void setWorkspace(@NonNull FilePath ws) {
             super.setWorkspace(ws);
         }
     }
