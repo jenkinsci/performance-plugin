@@ -56,6 +56,7 @@ public class TaurusParser extends AbstractParser {
 
         DocumentBuilderFactory dbFactory
                 = DocumentBuilderFactory.newInstance();
+        dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(reportFile);
         doc.getDocumentElement().normalize();

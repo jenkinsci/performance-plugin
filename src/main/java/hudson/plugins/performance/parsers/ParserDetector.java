@@ -144,6 +144,7 @@ public class ParserDetector {
     @VisibleForTesting
     protected static String detectXMLFileType(final InputStream in) throws XMLStreamException {
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
         XMLEventReader eventReader = inputFactory.createXMLEventReader(in);
 
         while (eventReader.hasNext()) {

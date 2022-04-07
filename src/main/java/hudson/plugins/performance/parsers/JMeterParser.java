@@ -90,6 +90,7 @@ public class JMeterParser extends AbstractParser {
      */
     PerformanceReport parseXml(File reportFile) throws Exception {
         final SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         factory.setValidating(false);
         factory.setNamespaceAware(false);
 
