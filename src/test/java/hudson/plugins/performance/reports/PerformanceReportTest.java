@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class PerformanceReportTest {
-    public static final String DEFAULT_PERCENTILES = "0,50,90,100";
+    public static final String DEFAULT_PERCENTILES = "0,50,90,95,100";
 
     private PerformanceReport performanceReport;
 
@@ -41,7 +41,7 @@ public class PerformanceReportTest {
     public void testAddSample() throws Exception {
         PrintStream printStream = EasyMock.createMock(PrintStream.class);
         EasyMock.expect(
-                performanceReport.getBuildAction().getHudsonConsoleWriter())
+                        performanceReport.getBuildAction().getHudsonConsoleWriter())
                 .andReturn(printStream);
         printStream
                 .println("label cannot be empty, please ensure your jmx file specifies name properly for each http sample: skipping sample");
@@ -74,7 +74,7 @@ public class PerformanceReportTest {
     public void testAddTaurusSample() throws Exception {
         PrintStream printStream = EasyMock.createMock(PrintStream.class);
         EasyMock.expect(
-                performanceReport.getBuildAction().getHudsonConsoleWriter())
+                        performanceReport.getBuildAction().getHudsonConsoleWriter())
                 .andReturn(printStream);
         printStream
                 .println("label cannot be empty, please ensure your jmx file specifies name properly for each http sample: skipping sample");
@@ -196,9 +196,21 @@ public class PerformanceReportTest {
     }
 
     @Test
+    public void testCanGetCorrect95LineValue() throws IOException, URISyntaxException {
+        PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsTenSamples.jtl").toURI()));
+        assertEquals(9L, performanceReport.get95Line());
+    }
+
+    @Test
     public void testCanGetCorrect90LineValueWithThreeSamples() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsThreeSamples.jtl").toURI()));
         assertEquals(2L, performanceReport.get90Line());
+    }
+
+    @Test
+    public void testCanGetCorrect95LineValueWithThreeSamples() throws IOException, URISyntaxException {
+        PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsThreeSamples.jtl").toURI()));
+        assertEquals(2L, performanceReport.get95Line());
     }
 
     @Test

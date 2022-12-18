@@ -1,5 +1,6 @@
 package hudson.plugins.performance.actions;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -15,8 +16,8 @@ import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
 import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.UriReport;
 import hudson.plugins.performance.reports.ThroughputReport;
+import hudson.plugins.performance.reports.UriReport;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.ColorPalette;
@@ -45,7 +46,6 @@ import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -290,14 +290,14 @@ public class PerformanceProjectAction implements Action {
         plot.setDomainCrosshairVisible(true);
         plot.setRangeCrosshairVisible(true);
 
-    /*
-     * final NumberAxis axis2 = new NumberAxis("Errors"); axis2.isAutoRange();
-     * axis2.setLowerBound(0); plot.setRangeAxis(1, axis2); plot.setDataset(1,
-     * dataset.get(1)); plot.mapDatasetToRangeAxis(1, 1);
-     *
-     * final StandardXYItemRenderer renderer2 = new StandardXYItemRenderer();
-     * renderer2.setSeriesPaint(0, Color.black); plot.setRenderer(1, renderer2);
-     */
+        /*
+         * final NumberAxis axis2 = new NumberAxis("Errors"); axis2.isAutoRange();
+         * axis2.setLowerBound(0); plot.setRangeAxis(1, axis2); plot.setDataset(1,
+         * dataset.get(1)); plot.mapDatasetToRangeAxis(1, 1);
+         *
+         * final StandardXYItemRenderer renderer2 = new StandardXYItemRenderer();
+         * renderer2.setSeriesPaint(0, Color.black); plot.setRenderer(1, renderer2);
+         */
         final DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
 
@@ -336,9 +336,9 @@ public class PerformanceProjectAction implements Action {
     }
 
     public static JFreeChart createUriThroughputChart(IntervalXYDataset dataset, String uri) {
-        final JFreeChart chart = ChartFactory.createXYBarChart(uri,  Messages.TrendReportDetail_Time(), true,
+        final JFreeChart chart = ChartFactory.createXYBarChart(uri, Messages.TrendReportDetail_Time(), true,
                 Messages.TrendReportDetail_RequestsPerMinute(), dataset,
-                PlotOrientation.VERTICAL,true, true, false);
+                PlotOrientation.VERTICAL, true, true, false);
         chart.setBackgroundPaint(Color.WHITE);
 
         final XYPlot plot = chart.getXYPlot();
@@ -420,7 +420,7 @@ public class PerformanceProjectAction implements Action {
                 createErrorsGraph(dataSetBuilderErrors.build()), 400, 200);
     }
 
-    protected  JFreeChart createErrorsGraph(CategoryDataset dataset) {
+    protected JFreeChart createErrorsGraph(CategoryDataset dataset) {
         return createErrorsChart(dataset);
     }
 
@@ -525,6 +525,8 @@ public class PerformanceProjectAction implements Action {
                         Messages.ProjectAction_Average(), label);
                 dataSetBuilderAverage.add(performanceReport.get90Line(),
                         Messages.ProjectAction_Line90(), label);
+                dataSetBuilderAverage.add(performanceReport.get95Line(),
+                        Messages.ProjectAction_Line95(), label);
             }
             nbBuildsToAnalyze--;
         }
@@ -873,7 +875,7 @@ public class PerformanceProjectAction implements Action {
                 dataSet.add(report.getAverage(),
                         Messages.ProjectAction_Average(), label);
                 Map<Double, Long> percentilesValues = report.getPercentilesValues();
-                
+
                 for (Map.Entry<Double, Long> entry : percentilesValues.entrySet()) {
                     dataSet.add(entry.getValue(),
                             report.getPercentileLabel(entry.getKey()), label);

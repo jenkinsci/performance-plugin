@@ -6,7 +6,8 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class AbstractParserTest {
 
@@ -31,14 +32,16 @@ public class AbstractParserTest {
         PerformanceReport report = AbstractParser.loadSerializedReport(new File(reportFilePath));
         assertNotNull(report);
         Map<Double, Long> percentilesValues = report.getPercentilesValues();
-        assertEquals(4, percentilesValues.size());
+        assertEquals(5, percentilesValues.size());
         assertEquals(new Long(320), percentilesValues.get(50d));
         assertEquals(new Long(449), percentilesValues.get(90d));
+        assertEquals(new Long(455), percentilesValues.get(95d));
         assertEquals(new Long(100), percentilesValues.get(0d));
         assertEquals(new Long(468), percentilesValues.get(100d));
 
         assertEquals(320, report.getMedian());
         assertEquals(449, report.get90Line());
+        assertEquals(455, report.get95Line());
         assertEquals(100, report.getMin());
         assertEquals(468, report.getMax());
 

@@ -1,10 +1,27 @@
 package hudson.plugins.performance.constraints;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import static org.mockito.Mockito.when;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.plugins.performance.PerformanceReportMap;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
+import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
+import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
+import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import hudson.plugins.performance.data.ConstraintSettings;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
+import jenkins.model.Jenkins;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -18,29 +35,10 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 
-import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
-import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
-import hudson.plugins.performance.data.ConstraintSettings;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.plugins.performance.actions.PerformanceBuildAction;
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.PerformanceReportMap;
-import hudson.plugins.performance.reports.UriReport;
-import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
-import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
-import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
-import jenkins.model.Jenkins;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConstraintCheckerTest {
@@ -165,6 +163,7 @@ public class ConstraintCheckerTest {
     AbsoluteConstraint ac3;
     AbsoluteConstraint ac4;
     AbsoluteConstraint ac5;
+    AbsoluteConstraint ac6;
     PreviousResultsBlock rb0;
     PreviousResultsBlock rb1;
     PreviousResultsBlock rb2;
@@ -179,6 +178,7 @@ public class ConstraintCheckerTest {
     RelativeConstraint rc4;
     RelativeConstraint rc5;
     RelativeConstraint rc6;
+    RelativeConstraint rc7;
 
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
@@ -209,17 +209,19 @@ public class ConstraintCheckerTest {
         constraints.add(ac3);
         constraints.add(ac4);
         constraints.add(ac5);
+        constraints.add(ac6);
 
         ArrayList<ConstraintEvaluation> result = new ArrayList<ConstraintEvaluation>();
         result = constraintChecker.checkAllConstraints(constraints);
 
-        assertEquals(6, result.size());
+        assertEquals(7, result.size());
         assertEquals(ac0, result.get(0).getAbstractConstraint());
         assertEquals(ac1, result.get(1).getAbstractConstraint());
         assertEquals(ac2, result.get(2).getAbstractConstraint());
         assertEquals(ac3, result.get(3).getAbstractConstraint());
         assertEquals(ac4, result.get(4).getAbstractConstraint());
         assertEquals(ac5, result.get(5).getAbstractConstraint());
+        assertEquals(ac6, result.get(6).getAbstractConstraint());
 
         assertTrue(result.get(0).getAbstractConstraint().getSuccess());
         assertTrue(result.get(4).getAbstractConstraint().getSuccess());
@@ -242,11 +244,12 @@ public class ConstraintCheckerTest {
         constraints.add(rc4);
         constraints.add(rc5);
         constraints.add(rc6);
+        constraints.add(rc7);
 
         ArrayList<ConstraintEvaluation> result = new ArrayList<ConstraintEvaluation>();
         result = constraintChecker.checkAllConstraints(constraints);
 
-        assertEquals(7, result.size());
+        assertEquals(8, result.size());
         assertEquals(rc0, result.get(0).getAbstractConstraint());
         assertEquals(rc1, result.get(1).getAbstractConstraint());
         assertEquals(rc2, result.get(2).getAbstractConstraint());
@@ -254,6 +257,7 @@ public class ConstraintCheckerTest {
         assertEquals(rc4, result.get(4).getAbstractConstraint());
         assertEquals(rc5, result.get(5).getAbstractConstraint());
         assertEquals(rc6, result.get(6).getAbstractConstraint());
+        assertEquals(rc7, result.get(7).getAbstractConstraint());
 
         assertTrue(result.get(0).getAbstractConstraint().getSuccess());
         assertTrue(result.get(4).getAbstractConstraint().getSuccess());
@@ -276,17 +280,19 @@ public class ConstraintCheckerTest {
         constraints.add(ac3);
         constraints.add(ac4);
         constraints.add(ac5);
+        constraints.add(rc7);
 
         ArrayList<ConstraintEvaluation> result = new ArrayList<ConstraintEvaluation>();
         result = constraintChecker.checkAllConstraints(constraints);
 
-        assertEquals(6, result.size());
+        assertEquals(7, result.size());
         assertEquals(rc0, result.get(0).getAbstractConstraint());
         assertEquals(rc1, result.get(1).getAbstractConstraint());
         assertEquals(rc2, result.get(2).getAbstractConstraint());
         assertEquals(ac3, result.get(3).getAbstractConstraint());
         assertEquals(ac4, result.get(4).getAbstractConstraint());
         assertEquals(ac5, result.get(5).getAbstractConstraint());
+        assertEquals(rc7, result.get(6).getAbstractConstraint());
 
         assertTrue(result.get(0).getAbstractConstraint().getSuccess());
         assertTrue(result.get(2).getAbstractConstraint().getSuccess());
@@ -327,6 +333,8 @@ public class ConstraintCheckerTest {
         ac5 = new AbsoluteConstraint(Metric.MINIMUM, Operator.NOT_LESS, "testResult1.xml", Escalation.ERROR, false, ob2,
                 100L);
         ac5.setSpecifiedTestCase(false);
+        ac6 = new AbsoluteConstraint(Metric.LINE95, Operator.NOT_GREATER, "testResult0.xml", Escalation.WARNING, false, ob0,
+                100L);
 
         rb0 = new PreviousResultsBlock("true", "3", "", "");
         rb1 = new PreviousResultsBlock("true", "*", "", "");
@@ -352,6 +360,8 @@ public class ConstraintCheckerTest {
         rc5.setSpecifiedTestCase(false);
         rc6 = new RelativeConstraint(Metric.AVERAGE, Operator.NOT_GREATER, "testResult0.xml", Escalation.INFORMATION, false,
                 ob0, rb0, 10); // same as rc0 but against baseline build
+        rc7 = new RelativeConstraint(Metric.LINE95, Operator.NOT_GREATER, "testResult0.xml", Escalation.WARNING, false, ob0,
+                rb2, 10);
 
         abstractBuildsList.add(abstractBuild0);
         abstractBuildsList.add(abstractBuild1);
@@ -482,188 +492,236 @@ public class ConstraintCheckerTest {
         when(uriReport0_0_0.getAverage()).thenReturn((long) 10);
         when(uriReport0_0_0.errorPercent()).thenReturn((double) 10);
         when(uriReport0_0_0.get90Line()).thenReturn((long) 10);
+        when(uriReport0_0_0.get95Line()).thenReturn((long) 10);
         when(uriReport0_0_0.getMax()).thenReturn((long) 10);
         when(uriReport0_0_0.getMedian()).thenReturn((long) 10);
         when(uriReport0_0_0.getMin()).thenReturn((long) 10);
+        when(uriReport0_0_0.get95Line()).thenReturn((long) 10);
 
         when(uriReport0_0_1.getUri()).thenReturn("testUri1");
         when(uriReport0_0_1.getAverage()).thenReturn((long) 10);
         when(uriReport0_0_1.errorPercent()).thenReturn((double) 10);
         when(uriReport0_0_1.get90Line()).thenReturn((long) 10);
+        when(uriReport0_0_1.get95Line()).thenReturn((long) 10);
         when(uriReport0_0_1.getMax()).thenReturn((long) 10);
         when(uriReport0_0_1.getMedian()).thenReturn((long) 10);
         when(uriReport0_0_1.getMin()).thenReturn((long) 10);
+        when(uriReport0_0_1.get95Line()).thenReturn((long) 10);
 
         when(uriReport0_1_0.getUri()).thenReturn("testUri0");
         when(uriReport0_1_0.getAverage()).thenReturn((long) 10);
         when(uriReport0_1_0.errorPercent()).thenReturn((double) 10);
         when(uriReport0_1_0.get90Line()).thenReturn((long) 10);
+        when(uriReport0_1_0.get95Line()).thenReturn((long) 10);
         when(uriReport0_1_0.getMax()).thenReturn((long) 10);
         when(uriReport0_1_0.getMedian()).thenReturn((long) 10);
         when(uriReport0_1_0.getMin()).thenReturn((long) 10);
+        when(uriReport0_1_0.get95Line()).thenReturn((long) 10);
 
         when(uriReport0_1_1.getUri()).thenReturn("testUri1");
         when(uriReport0_1_1.getAverage()).thenReturn((long) 10);
         when(uriReport0_1_1.errorPercent()).thenReturn((double) 10);
         when(uriReport0_1_1.get90Line()).thenReturn((long) 10);
+        when(uriReport0_1_1.get95Line()).thenReturn((long) 10);
         when(uriReport0_1_1.getMax()).thenReturn((long) 10);
         when(uriReport0_1_1.getMedian()).thenReturn((long) 10);
         when(uriReport0_1_1.getMin()).thenReturn((long) 10);
+        when(uriReport0_1_1.get95Line()).thenReturn((long) 10);
 
         when(uriReport1_0_0.getUri()).thenReturn("testUri0");
         when(uriReport1_0_0.getAverage()).thenReturn((long) 10);
         when(uriReport1_0_0.errorPercent()).thenReturn((double) 10);
         when(uriReport1_0_0.get90Line()).thenReturn((long) 10);
+        when(uriReport1_0_0.get95Line()).thenReturn((long) 10);
         when(uriReport1_0_0.getMax()).thenReturn((long) 10);
         when(uriReport1_0_0.getMedian()).thenReturn((long) 10);
         when(uriReport1_0_0.getMin()).thenReturn((long) 10);
+        when(uriReport1_0_0.get95Line()).thenReturn((long) 10);
 
         when(uriReport1_0_1.getUri()).thenReturn("testUri1");
         when(uriReport1_0_1.getAverage()).thenReturn((long) 10);
         when(uriReport1_0_1.errorPercent()).thenReturn((double) 10);
         when(uriReport1_0_1.get90Line()).thenReturn((long) 10);
+        when(uriReport1_0_1.get95Line()).thenReturn((long) 10);
         when(uriReport1_0_1.getMax()).thenReturn((long) 10);
         when(uriReport1_0_1.getMedian()).thenReturn((long) 10);
         when(uriReport1_0_1.getMin()).thenReturn((long) 10);
+        when(uriReport1_0_1.get95Line()).thenReturn((long) 10);
 
         when(uriReport1_1_0.getUri()).thenReturn("testUri0");
         when(uriReport1_1_0.getAverage()).thenReturn((long) 10);
         when(uriReport1_1_0.errorPercent()).thenReturn((double) 10);
         when(uriReport1_1_0.get90Line()).thenReturn((long) 10);
+        when(uriReport1_1_0.get95Line()).thenReturn((long) 10);
         when(uriReport1_1_0.getMax()).thenReturn((long) 10);
         when(uriReport1_1_0.getMedian()).thenReturn((long) 10);
         when(uriReport1_1_0.getMin()).thenReturn((long) 10);
+        when(uriReport1_1_0.get95Line()).thenReturn((long) 10);
 
         when(uriReport1_1_1.getUri()).thenReturn("testUri1");
         when(uriReport1_1_1.getAverage()).thenReturn((long) 10);
         when(uriReport1_1_1.errorPercent()).thenReturn((double) 10);
         when(uriReport1_1_1.get90Line()).thenReturn((long) 10);
+        when(uriReport1_1_1.get95Line()).thenReturn((long) 10);
         when(uriReport1_1_1.getMax()).thenReturn((long) 10);
         when(uriReport1_1_1.getMedian()).thenReturn((long) 10);
         when(uriReport1_1_1.getMin()).thenReturn((long) 10);
+        when(uriReport1_1_1.get95Line()).thenReturn((long) 10);
 
         when(uriReport2_0_0.getUri()).thenReturn("testUri0");
         when(uriReport2_0_0.getAverage()).thenReturn((long) 10);
         when(uriReport2_0_0.errorPercent()).thenReturn((double) 10);
         when(uriReport2_0_0.get90Line()).thenReturn((long) 10);
+        when(uriReport2_0_0.get95Line()).thenReturn((long) 10);
         when(uriReport2_0_0.getMax()).thenReturn((long) 10);
         when(uriReport2_0_0.getMedian()).thenReturn((long) 10);
         when(uriReport2_0_0.getMin()).thenReturn((long) 10);
+        when(uriReport2_0_0.get95Line()).thenReturn((long) 10);
 
         when(uriReport2_0_1.getUri()).thenReturn("testUri1");
         when(uriReport2_0_1.getAverage()).thenReturn((long) 10);
         when(uriReport2_0_1.errorPercent()).thenReturn((double) 10);
         when(uriReport2_0_1.get90Line()).thenReturn((long) 10);
+        when(uriReport2_0_1.get95Line()).thenReturn((long) 10);
         when(uriReport2_0_1.getMax()).thenReturn((long) 10);
         when(uriReport2_0_1.getMedian()).thenReturn((long) 10);
         when(uriReport2_0_1.getMin()).thenReturn((long) 10);
+        when(uriReport2_0_1.get95Line()).thenReturn((long) 10);
 
         when(uriReport2_1_0.getUri()).thenReturn("testUri0");
         when(uriReport2_1_0.getAverage()).thenReturn((long) 10);
         when(uriReport2_1_0.errorPercent()).thenReturn((double) 10);
         when(uriReport2_1_0.get90Line()).thenReturn((long) 10);
+        when(uriReport2_1_0.get95Line()).thenReturn((long) 10);
         when(uriReport2_1_0.getMax()).thenReturn((long) 10);
         when(uriReport2_1_0.getMedian()).thenReturn((long) 10);
         when(uriReport2_1_0.getMin()).thenReturn((long) 10);
+        when(uriReport2_1_0.get95Line()).thenReturn((long) 10);
 
         when(uriReport2_1_1.getUri()).thenReturn("testUri1");
         when(uriReport2_1_1.getAverage()).thenReturn((long) 10);
         when(uriReport2_1_1.errorPercent()).thenReturn((double) 10);
         when(uriReport2_1_1.get90Line()).thenReturn((long) 10);
+        when(uriReport2_1_1.get95Line()).thenReturn((long) 10);
         when(uriReport2_1_1.getMax()).thenReturn((long) 10);
         when(uriReport2_1_1.getMedian()).thenReturn((long) 10);
         when(uriReport2_1_1.getMin()).thenReturn((long) 10);
+        when(uriReport2_1_1.get95Line()).thenReturn((long) 10);
 
         when(uriReport3_0_0.getUri()).thenReturn("testUri0");
         when(uriReport3_0_0.getAverage()).thenReturn((long) 10);
         when(uriReport3_0_0.errorPercent()).thenReturn((double) 10);
         when(uriReport3_0_0.get90Line()).thenReturn((long) 10);
+        when(uriReport3_0_0.get95Line()).thenReturn((long) 10);
         when(uriReport3_0_0.getMax()).thenReturn((long) 10);
         when(uriReport3_0_0.getMedian()).thenReturn((long) 10);
         when(uriReport3_0_0.getMin()).thenReturn((long) 10);
+        when(uriReport3_0_0.get95Line()).thenReturn((long) 10);
 
         when(uriReport3_0_1.getUri()).thenReturn("testUri1");
         when(uriReport3_0_1.getAverage()).thenReturn((long) 10);
         when(uriReport3_0_1.errorPercent()).thenReturn((double) 10);
         when(uriReport3_0_1.get90Line()).thenReturn((long) 10);
+        when(uriReport3_0_1.get95Line()).thenReturn((long) 10);
         when(uriReport3_0_1.getMax()).thenReturn((long) 10);
         when(uriReport3_0_1.getMedian()).thenReturn((long) 10);
         when(uriReport3_0_1.getMin()).thenReturn((long) 10);
+        when(uriReport3_0_1.get95Line()).thenReturn((long) 10);
 
         when(uriReport3_1_0.getUri()).thenReturn("testUri0");
         when(uriReport3_1_0.getAverage()).thenReturn((long) 10);
         when(uriReport3_1_0.errorPercent()).thenReturn((double) 10);
         when(uriReport3_1_0.get90Line()).thenReturn((long) 10);
+        when(uriReport3_1_0.get95Line()).thenReturn((long) 10);
         when(uriReport3_1_0.getMax()).thenReturn((long) 10);
         when(uriReport3_1_0.getMedian()).thenReturn((long) 10);
         when(uriReport3_1_0.getMin()).thenReturn((long) 10);
+        when(uriReport3_1_0.get95Line()).thenReturn((long) 10);
 
         when(uriReport3_1_1.getUri()).thenReturn("testUri1");
         when(uriReport3_1_1.getAverage()).thenReturn((long) 10);
         when(uriReport3_1_1.errorPercent()).thenReturn((double) 10);
         when(uriReport3_1_1.get90Line()).thenReturn((long) 10);
+        when(uriReport3_1_1.get95Line()).thenReturn((long) 10);
         when(uriReport3_1_1.getMax()).thenReturn((long) 10);
         when(uriReport3_1_1.getMedian()).thenReturn((long) 10);
         when(uriReport3_1_1.getMin()).thenReturn((long) 10);
+        when(uriReport3_1_1.get95Line()).thenReturn((long) 10);
 
-    /*
-     * Mocking behaviour of performance Reports
-     */
+        /*
+         * Mocking behaviour of performance Reports
+         */
         when(performanceReport0_0.getAverage()).thenReturn((long) 10);
         when(performanceReport0_0.errorPercent()).thenReturn((double) 10);
         when(performanceReport0_0.get90Line()).thenReturn((long) 10);
+        when(performanceReport0_0.get95Line()).thenReturn((long) 10);
         when(performanceReport0_0.getMax()).thenReturn((long) 10);
         when(performanceReport0_0.getMedian()).thenReturn((long) 10);
         when(performanceReport0_0.getMin()).thenReturn((long) 10);
+        when(performanceReport0_0.get95Line()).thenReturn((long) 10);
 
         when(performanceReport0_1.getAverage()).thenReturn((long) 10);
         when(performanceReport0_1.errorPercent()).thenReturn((double) 10);
         when(performanceReport0_1.get90Line()).thenReturn((long) 10);
+        when(performanceReport0_1.get95Line()).thenReturn((long) 10);
         when(performanceReport0_1.getMax()).thenReturn((long) 10);
         when(performanceReport0_1.getMedian()).thenReturn((long) 10);
         when(performanceReport0_1.getMin()).thenReturn((long) 10);
+        when(performanceReport0_1.get95Line()).thenReturn((long) 10);
 
         when(performanceReport1_0.getAverage()).thenReturn((long) 10);
         when(performanceReport1_0.errorPercent()).thenReturn((double) 10);
         when(performanceReport1_0.get90Line()).thenReturn((long) 10);
+        when(performanceReport1_0.get95Line()).thenReturn((long) 10);
         when(performanceReport1_0.getMax()).thenReturn((long) 10);
         when(performanceReport1_0.getMedian()).thenReturn((long) 10);
         when(performanceReport1_0.getMin()).thenReturn((long) 10);
+        when(performanceReport1_0.get95Line()).thenReturn((long) 10);
 
         when(performanceReport1_1.getAverage()).thenReturn((long) 10);
         when(performanceReport1_1.errorPercent()).thenReturn((double) 10);
         when(performanceReport1_1.get90Line()).thenReturn((long) 10);
+        when(performanceReport1_1.get95Line()).thenReturn((long) 10);
         when(performanceReport1_1.getMax()).thenReturn((long) 10);
         when(performanceReport1_1.getMedian()).thenReturn((long) 10);
         when(performanceReport1_1.getMin()).thenReturn((long) 10);
+        when(performanceReport1_1.get95Line()).thenReturn((long) 10);
 
         when(performanceReport2_0.getAverage()).thenReturn((long) 10);
         when(performanceReport2_0.errorPercent()).thenReturn((double) 10);
         when(performanceReport2_0.get90Line()).thenReturn((long) 10);
+        when(performanceReport2_0.get95Line()).thenReturn((long) 10);
         when(performanceReport2_0.getMax()).thenReturn((long) 10);
         when(performanceReport2_0.getMedian()).thenReturn((long) 10);
         when(performanceReport2_0.getMin()).thenReturn((long) 10);
+        when(performanceReport2_0.get95Line()).thenReturn((long) 10);
 
         when(performanceReport2_1.getAverage()).thenReturn((long) 10);
         when(performanceReport2_1.errorPercent()).thenReturn((double) 10);
         when(performanceReport2_1.get90Line()).thenReturn((long) 10);
+        when(performanceReport2_1.get95Line()).thenReturn((long) 10);
         when(performanceReport2_1.getMax()).thenReturn((long) 10);
         when(performanceReport2_1.getMedian()).thenReturn((long) 10);
         when(performanceReport2_1.getMin()).thenReturn((long) 10);
+        when(performanceReport2_1.get95Line()).thenReturn((long) 10);
 
         when(performanceReport3_0.getAverage()).thenReturn((long) 10);
         when(performanceReport3_0.errorPercent()).thenReturn((double) 10);
         when(performanceReport3_0.get90Line()).thenReturn((long) 10);
+        when(performanceReport3_0.get95Line()).thenReturn((long) 10);
         when(performanceReport3_0.getMax()).thenReturn((long) 10);
         when(performanceReport3_0.getMedian()).thenReturn((long) 10);
         when(performanceReport3_0.getMin()).thenReturn((long) 10);
+        when(performanceReport3_0.get95Line()).thenReturn((long) 10);
 
         when(performanceReport3_1.getAverage()).thenReturn((long) 10);
         when(performanceReport3_1.errorPercent()).thenReturn((double) 10);
         when(performanceReport3_1.get90Line()).thenReturn((long) 10);
+        when(performanceReport3_1.get95Line()).thenReturn((long) 10);
         when(performanceReport3_1.getMax()).thenReturn((long) 10);
         when(performanceReport3_1.getMedian()).thenReturn((long) 10);
         when(performanceReport3_1.getMin()).thenReturn((long) 10);
+        when(performanceReport3_1.get95Line()).thenReturn((long) 10);
     }
 
     @Test
@@ -688,17 +746,19 @@ public class ConstraintCheckerTest {
         constraints.add(ac3);
         constraints.add(ac4);
         constraints.add(ac5);
+        constraints.add(rc7);
 
         ArrayList<ConstraintEvaluation> result = new ArrayList<ConstraintEvaluation>();
         result = constraintChecker.checkAllConstraints(constraints);
-        
+
         List<String> expectedList = Arrays.asList(
-            "<testcase classname=\"testResult0.xml\" name=\"Average of testUri0 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n",
-            "<testcase classname=\"testResult0.xml\" name=\"Error % of testUri1 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n",
-            "<testcase classname=\"testResult0.xml\" name=\"90% Line of testUri0 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n",
-            "<testcase classname=\"testResult1.xml\" name=\"Maximum of testUri1 must not be greater than 100 milliseconds\">\n</testcase>\n",
-            "<testcase classname=\"testResult1.xml\" name=\"Median of all test cases must not be equal to 100 milliseconds\">\n</testcase>\n",
-            "<testcase classname=\"testResult1.xml\" name=\"Minimum of all test cases must not be less than 100 milliseconds\">\n    <failure type=\"Error\">Measured value for Minimum: 10 milliseconds</failure>\n</testcase>\n"
+                "<testcase classname=\"testResult0.xml\" name=\"Average of testUri0 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n",
+                "<testcase classname=\"testResult0.xml\" name=\"Error % of testUri1 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n",
+                "<testcase classname=\"testResult0.xml\" name=\"90% Line of testUri0 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n",
+                "<testcase classname=\"testResult1.xml\" name=\"Maximum of testUri1 must not be greater than 100 milliseconds\">\n</testcase>\n",
+                "<testcase classname=\"testResult1.xml\" name=\"Median of all test cases must not be equal to 100 milliseconds\">\n</testcase>\n",
+                "<testcase classname=\"testResult1.xml\" name=\"Minimum of all test cases must not be less than 100 milliseconds\">\n    <failure type=\"Error\">Measured value for Minimum: 10 milliseconds</failure>\n</testcase>\n",
+                "<testcase classname=\"testResult0.xml\" name=\"95% Line of testUri0 must not be greater than 10.000 percent above/below previous\">\n</testcase>\n"
         );
 
         Iterator<String> expected = expectedList.iterator();
