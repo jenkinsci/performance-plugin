@@ -1,5 +1,15 @@
 package hudson.plugins.performance.reports;
 
+import hudson.model.Run;
+import hudson.plugins.performance.Messages;
+import hudson.plugins.performance.PerformanceReportMap;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.data.TaurusFinalStats;
+import hudson.plugins.performance.parsers.PerformanceReportParser;
+import hudson.plugins.performance.tools.SafeMaths;
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,17 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-
-import hudson.model.Run;
-import hudson.plugins.performance.Messages;
-import hudson.plugins.performance.PerformanceReportMap;
-import hudson.plugins.performance.actions.PerformanceBuildAction;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.data.TaurusFinalStats;
-import hudson.plugins.performance.parsers.PerformanceReportParser;
-import hudson.plugins.performance.tools.SafeMaths;
 
 /**
  * Represents a single performance report, which consists of multiple
@@ -92,6 +91,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     private Long perc0;
     private Long perc50;
     private Long perc90;
+    private Long perc95;
     private Long perc100;
 
     private Long throughput;
@@ -109,9 +109,9 @@ public class PerformanceReport extends AbstractReport implements Serializable,
     public PerformanceReport(String percentiles, String filterRegex) {
         this.percentiles = percentiles;
         this.filterRegex = filterRegex;
-        if (filterRegex!=null && filterRegex.trim().length()>0) {
+        if (filterRegex != null && filterRegex.trim().length() > 0) {
             this.filterRegexPattern = Pattern.compile(filterRegex);
-        } 
+        }
     }
 
     public PerformanceReport(String defaultPercentiles) {
@@ -134,6 +134,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         checkPercentileAndSet(0.0, perc0);
         checkPercentileAndSet(50.0, perc50);
         checkPercentileAndSet(90.0, perc90);
+        checkPercentileAndSet(95.0, perc95);
         checkPercentileAndSet(100.0, perc100);
         if (StringUtils.isBlank(percentiles)) {
             this.percentiles = DEFAULT_PERCENTILES;
@@ -154,7 +155,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
                             + "name properly for each http sample: skipping sample");
             return;
         }
-        if(!isIncluded(uri)) {
+        if (!isIncluded(uri)) {
             return;
         }
         String staplerUri = PerformanceReport.asStaplerURI(uri);
@@ -201,7 +202,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
                             + "name properly for each http sample: skipping sample");
             return;
         }
-        
+
         if (!isIncluded(uri)) {
             return;
         }
@@ -218,22 +219,24 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             average = (long) sample.getAverageResponseTime();
             perc50 = (long) sample.getPerc50();
             perc90 = (long) sample.getPerc90();
+            perc95 = (long) sample.getPerc95();
             perc0 = (long) sample.getPerc0();
             perc100 = (long) sample.getPerc100();
             this.percentilesValues.put(0.0, (long) sample.getPerc0());
             this.percentilesValues.put(50.0, (long) sample.getPerc50());
             this.percentilesValues.put(90.0, (long) sample.getPerc90());
+            this.percentilesValues.put(95.0, (long) sample.getPerc95());
             this.percentilesValues.put(100.0, (long) sample.getPerc100());
             calculateDiffPercentiles();
             isCalculatedPercentilesValues = true;
 
-            long durationSec = (long) Math.ceil((float)totalDuration / 1000);
+            long durationSec = (long) Math.ceil((float) totalDuration / 1000);
             if (durationSec < 1) {
                 LOGGER.log(Level.INFO, String.format("Performance test had a duration of only %d second(s), please check your configuration.", durationSec));
             }
             throughput = (testDuration == null) ?
                     sample.getThroughput() :
-                    (long)SafeMaths.safeDivide(sampleCount, durationSec);
+                    (long) SafeMaths.safeDivide(sampleCount, durationSec);
         } else {
             String staplerUri = PerformanceReport.asStaplerURI(uri);
             synchronized (uriReportMap) {
@@ -286,7 +289,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
 
     public long getAverage() {
         if (average == null) {
-            average = (samplesCount == 0) ? 0 : (long)SafeMaths.safeDivide(totalDuration, samplesCount);
+            average = (samplesCount == 0) ? 0 : (long) SafeMaths.safeDivide(totalDuration, samplesCount);
         }
         return average;
     }
@@ -370,6 +373,13 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             perc90 = getDurationAt(NINETY_PERCENT);
         }
         return perc90;
+    }
+
+    public long get95Line() {
+        if (perc95 == null) {
+            perc95 = getDurationAt(NINETY_FIVE_PERCENT);
+        }
+        return perc95;
     }
 
     public long getMedian() {
@@ -479,6 +489,13 @@ public class PerformanceReport extends AbstractReport implements Serializable,
             return 0;
         }
         return get90Line() - lastBuildReport.get90Line();
+    }
+
+    public long get95LineDiff() {
+        if (lastBuildReport == null) {
+            return 0;
+        }
+        return get95Line() - lastBuildReport.get95Line();
     }
 
     public double getErrorPercentDiff() {

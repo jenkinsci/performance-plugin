@@ -124,6 +124,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     private Long perc0;
     private Long perc50;
     private Long perc90;
+    private Long perc95;
     private Long perc100;
     @Deprecated
     private Long throughput;
@@ -137,6 +138,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         checkPercentileAndSet(0.0, perc0);
         checkPercentileAndSet(50.0, perc50);
         checkPercentileAndSet(90.0, perc90);
+        checkPercentileAndSet(95.0, perc95);
         checkPercentileAndSet(100.0, perc100);
         if (StringUtils.isBlank(percentiles)) {
             this.percentiles = DEFAULT_PERCENTILES;
@@ -168,7 +170,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         summarizerSize += sample.getSummarizerSamples();
         summarizerErrors += sample.getSummarizerErrors();
         sizeInKb += sample.getSizeInKb();
-        
+
         if (start == null || sample.getDate().before(start)) {
             start = sample.getDate();
         }
@@ -179,17 +181,18 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
 
-
     public void setFromTaurusFinalStats(TaurusFinalStats report) {
         average = (long) report.getAverageResponseTime();
         perc0 = (long) report.getPerc0();
         perc50 = (long) report.getPerc50();
         perc90 = (long) report.getPerc90();
+        perc95 = (long) report.getPerc95();
         perc100 = (long) report.getPerc100();
 
         this.percentilesValues.put(0.0, (long) report.getPerc0());
         this.percentilesValues.put(50.0, (long) report.getPerc50());
         this.percentilesValues.put(90.0, (long) report.getPerc90());
+        this.percentilesValues.put(95.0, (long) report.getPerc95());
         this.percentilesValues.put(100.0, (long) report.getPerc100());
         calculateDiffPercentiles();
         isCalculatedPercentilesValues = true;
@@ -233,7 +236,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     public long getAverage() {
         if (average == null) {
             int samplesCount = samplesCount();
-            average = (samplesCount == 0) ? 0 : (long)SafeMaths.safeDivide(totalDuration, samplesCount);
+            average = (samplesCount == 0) ? 0 : (long) SafeMaths.safeDivide(totalDuration, samplesCount);
         }
         return average;
     }
@@ -294,6 +297,13 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
             perc90 = getDurationAt(NINETY_PERCENT);
         }
         return perc90;
+    }
+
+    public long get95Line() {
+        if (perc95 == null) {
+            perc95 = getDurationAt(NINETY_FIVE_PERCENT);
+        }
+        return perc95;
     }
 
     public String getHttpCode() {
@@ -428,6 +438,13 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         return get90Line() - lastBuildUriReport.get90Line();
     }
 
+    public long get95LineDiff() {
+        if (lastBuildUriReport == null) {
+            return 0;
+        }
+        return get95Line() - lastBuildUriReport.get95Line();
+    }
+
     public double getErrorPercentDiff() {
         if (lastBuildUriReport == null) {
             return 0;
@@ -512,7 +529,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
                     totalNoOfSamples++;
                     // count number of sample occurrences with the same response time value:
                     responseTimesHistogram.put(sample.duration,
-                        responseTimesHistogram.containsKey(sample.duration) ? responseTimesHistogram.get(sample.duration)+1 : 1);
+                            responseTimesHistogram.containsKey(sample.duration) ? responseTimesHistogram.get(sample.duration) + 1 : 1);
                 }
             }
         }
@@ -522,7 +539,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
         for (Map.Entry<Long, Long> responseTimeOccurrence : responseTimesHistogram.entrySet()) {
             cumulativeTotal += responseTimeOccurrence.getValue();
-            percentiles.addOrUpdate((double) 100.0*cumulativeTotal/totalNoOfSamples, (double) responseTimeOccurrence.getKey()); // float value will result in smoother curve
+            percentiles.addOrUpdate((double) 100.0 * cumulativeTotal / totalNoOfSamples, (double) responseTimeOccurrence.getKey()); // float value will result in smoother curve
         }
 
         new Graph(-1, 400, 200) {
@@ -541,7 +558,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
                     Minute timeBucket = new Minute(sample.date);
                     // count number of samples in the same time bucket
                     throughputIntervals.put(timeBucket,
-                            throughputIntervals.containsKey(timeBucket) ? throughputIntervals.get(timeBucket)+1: 1);
+                            throughputIntervals.containsKey(timeBucket) ? throughputIntervals.get(timeBucket) + 1 : 1);
                 }
             }
         }
@@ -665,18 +682,18 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     public double getAverageSizeInKb() {
         return SafeMaths.roundTwoDecimals(SafeMaths.safeDivide(sizeInKb, samplesCount()));
     }
-    
+
     public double getTotalTrafficInKb() {
         return SafeMaths.roundTwoDecimals(sizeInKb);
     }
-    
+
     public double getAverageSizeInKbDiff() {
         if (lastBuildUriReport == null) {
             return 0;
         }
         return SafeMaths.roundTwoDecimals(getAverageSizeInKb() - lastBuildUriReport.getAverageSizeInKb());
     }
-    
+
     public double getTotalTrafficInKbDiff() {
         if (lastBuildUriReport == null) {
             return 0;

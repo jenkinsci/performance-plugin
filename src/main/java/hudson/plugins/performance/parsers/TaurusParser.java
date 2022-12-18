@@ -1,20 +1,18 @@
 package hudson.plugins.performance.parsers;
 
-import java.io.File;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import hudson.Extension;
+import hudson.plugins.performance.data.TaurusFinalStats;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
+import hudson.plugins.performance.reports.PerformanceReport;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import hudson.Extension;
-import hudson.plugins.performance.data.TaurusFinalStats;
-import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
-import hudson.plugins.performance.reports.PerformanceReport;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
 
 /**
  * Parser for Taurus
@@ -32,7 +30,7 @@ public class TaurusParser extends AbstractParser {
     public TaurusParser(String glob, String percentiles) {
         super(glob, percentiles, PerformanceReport.INCLUDE_ALL);
     }
-    
+
     @DataBoundConstructor
     public TaurusParser(String glob, String percentiles, String filterRegex) {
         super(glob, percentiles, filterRegex);
@@ -105,13 +103,14 @@ public class TaurusParser extends AbstractParser {
         for (int i = 0; i < perc.getLength(); i++) {
             Node nNode = perc.item(i);
             String attributeParam = ((Element) nNode).getAttribute("param");
-            double valueInMs;
-            valueInMs = Double.parseDouble(((Element) nNode).getAttribute("value")) * 1000;
+            Double valueInMs = Double.valueOf(((Element) nNode).getAttribute("value")) * 1000;
 
             if ("50.0".equals(attributeParam)) {
                 report.setPerc50(valueInMs); // to ms
             } else if ("90.0".equals(attributeParam)) {
                 report.setPerc90(valueInMs); // to ms
+            } else if ("95.0".equals(attributeParam)) {
+                report.setPerc95(valueInMs); // to ms
             } else if ("0.0".equals(attributeParam)) {
                 report.setPerc0(valueInMs); // to ms
             } else if ("100.0".equals(attributeParam)) {

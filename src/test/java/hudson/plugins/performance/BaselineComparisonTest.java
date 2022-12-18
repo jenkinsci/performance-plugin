@@ -78,6 +78,7 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
         sample.setPerc0(num * 10);
         sample.setPerc50(num * 10 + 1);
         sample.setPerc90(num * 10 + 2);
+        sample.setPerc95(num * 10 + 2);
         sample.setPerc100(num * 10 + 3);
         sample.setAverageResponseTime(num * 10 + 6);
         report.addSample(sample, true);
@@ -107,11 +108,13 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
         assertEquals(Long.valueOf(50), percentilesValues.get(0.0));
         assertEquals(Long.valueOf(51), percentilesValues.get(50.0));
         assertEquals(Long.valueOf(52), percentilesValues.get(90.0));
+        assertEquals(Long.valueOf(52), percentilesValues.get(95.0));
         assertEquals(Long.valueOf(53), percentilesValues.get(100.0));
 
         assertEquals(Long.valueOf(20), percentilesDiffValues.get(0.0));
         assertEquals(Long.valueOf(20), percentilesDiffValues.get(50.0));
         assertEquals(Long.valueOf(20), percentilesDiffValues.get(90.0));
+        assertEquals(Long.valueOf(20), percentilesDiffValues.get(95.0));
         assertEquals(Long.valueOf(20), percentilesDiffValues.get(100.0));
     }
 
@@ -137,11 +140,13 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
         assertEquals(Long.valueOf(40), percentilesValues.get(0.0));
         assertEquals(Long.valueOf(41), percentilesValues.get(50.0));
         assertEquals(Long.valueOf(42), percentilesValues.get(90.0));
+        assertEquals(Long.valueOf(42), percentilesValues.get(95.0));
         assertEquals(Long.valueOf(43), percentilesValues.get(100.0));
 
         assertEquals(Long.valueOf(10), percentilesDiffValues.get(0.0));
         assertEquals(Long.valueOf(10), percentilesDiffValues.get(50.0));
         assertEquals(Long.valueOf(10), percentilesDiffValues.get(90.0));
+        assertEquals(Long.valueOf(10), percentilesDiffValues.get(95.0));
         assertEquals(Long.valueOf(10), percentilesDiffValues.get(100.0));
     }
 
@@ -167,11 +172,13 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
         assertEquals(Long.valueOf(30), percentilesValues.get(0.0));
         assertEquals(Long.valueOf(31), percentilesValues.get(50.0));
         assertEquals(Long.valueOf(32), percentilesValues.get(90.0));
+        assertEquals(Long.valueOf(32), percentilesValues.get(95.0));
         assertEquals(Long.valueOf(33), percentilesValues.get(100.0));
 
         assertEquals(Long.valueOf(0), percentilesDiffValues.get(0.0));
         assertEquals(Long.valueOf(0), percentilesDiffValues.get(50.0));
         assertEquals(Long.valueOf(0), percentilesDiffValues.get(90.0));
+        assertEquals(Long.valueOf(0), percentilesDiffValues.get(95.0));
         assertEquals(Long.valueOf(0), percentilesDiffValues.get(100.0));
     }
 }

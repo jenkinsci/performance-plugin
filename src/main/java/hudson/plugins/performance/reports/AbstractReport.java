@@ -1,5 +1,9 @@
 package hudson.plugins.performance.reports;
 
+import hudson.plugins.performance.data.HttpSample;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.Stapler;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -10,21 +14,17 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.Stapler;
-
-import hudson.plugins.performance.data.HttpSample;
-
 /**
- * Abstract class for classes with samplesCount, error, mean, average, 90 line, min and max attributes
+ * Abstract class for classes with samplesCount, error, mean, average, 90 line, 95 line, min and max attributes
  */
 public abstract class AbstractReport {
     public static final Logger LOGGER = Logger.getLogger(AbstractReport.class.getName());
     public static final double ZERO_PERCENT = 0;
     public static final double ONE_HUNDRED_PERCENT = 100;
     public static final double NINETY_PERCENT = 90;
+    public static final double NINETY_FIVE_PERCENT = 95;
     public static final double FIFTY_PERCENT = 50;
-    public static final String DEFAULT_PERCENTILES = "0,50,90,100";
+    public static final String DEFAULT_PERCENTILES = "0,50,90,95,100";
 
     protected final ThreadLocal<DecimalFormat> percentFormat;
     protected final ThreadLocal<DecimalFormat> dataFormat; // three decimals
@@ -113,6 +113,12 @@ public abstract class AbstractReport {
         return dataFormat.get().format(get90Line());
     }
 
+    public abstract long get95Line();
+
+    public String get95LineFormated() {
+        return dataFormat.get().format(get95Line());
+    }
+
     public abstract long getMax();
 
     public String getMaxFormated() {
@@ -130,6 +136,8 @@ public abstract class AbstractReport {
     public abstract long getMedianDiff();
 
     public abstract long get90LineDiff();
+
+    public abstract long get95LineDiff();
 
     public abstract double getErrorPercentDiff();
 
