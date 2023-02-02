@@ -42,7 +42,7 @@ import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
 import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
 import jenkins.model.Jenkins;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ConstraintCheckerTest {
 
     @InjectMocks
