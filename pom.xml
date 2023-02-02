@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>performance</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>${changelist}</version>
     <packaging>hpi</packaging>
 
     <name>Performance Plugin</name>
@@ -27,6 +27,11 @@
             <id>artem_fedorov</id>
             <name>Artem Fedorov (CA BlazeMeter)</name>
             <email>artem.fedorov@blazemeter.com</email>
+        </developer>
+        <developer>
+            <id>a_st</id>
+            <name>Alexander Straube</name>
+            <email>alexander.straube@gmail.com</email>
         </developer>
     </developers>
 
@@ -45,8 +50,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>3.21</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <changelist>999999-SNAPSHOT</changelist>
         <jenkins.version>2.289.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
         <concurrency>2</concurrency>
