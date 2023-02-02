@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.50</version>
+        <version>4.52</version>
         <relativePath />
     </parent>
 
     <artifactId>performance</artifactId>
-    <version>${changelist}</version>
+    <version>${revision}${changelist}</version>
     <packaging>hpi</packaging>
 
     <name>Performance Plugin</name>
@@ -35,11 +37,13 @@
         </developer>
     </developers>
 
-    <scm>
-        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
-        <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
-        <url>https://github.com/${gitHubRepo}</url>
+    <scm child.scm.connection.inherit.append.path="false"
+        child.scm.developerConnection.inherit.append.path="false"
+        child.scm.url.inherit.append.path="false">
+        <connection>scm:git:https://github.com/${gitHubRepo}</connection>
+        <developerConnection>scm:git:https://github.com/${gitHubRepo}</developerConnection>
         <tag>${scmTag}</tag>
+        <url>https://github.com/${gitHubRepo}</url>
     </scm>
 
     <distributionManagement>
@@ -50,8 +54,9 @@
     </distributionManagement>
 
     <properties>
-        <changelist>999999-SNAPSHOT</changelist>
-        <jenkins.version>2.289.3</jenkins.version>
+        <revision>3.21</revision>
+        <changelist>-SNAPSHOT</changelist>
+        <jenkins.version>2.361.4</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
         <concurrency>2</concurrency>
         <!-- disable SpotBugs temporarily since there are 62 bugs -->
@@ -61,13 +66,14 @@
 
     <repositories>
         <repository>
-            <id>maven.jenkins-ci.org</id>
+            <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
     </repositories>
+
     <pluginRepositories>
         <pluginRepository>
-            <id>maven.jenkins-ci.org</id>
+            <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
@@ -76,10 +82,10 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.289.x</artifactId>
-                <version>1500.ve4d05cd32975</version>
-                <scope>import</scope>
+                <artifactId>bom-2.361.x</artifactId>
+                <version>1723.vcb_9fee52c9fc</version>
                 <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -90,8 +96,6 @@
             <artifactId>plexus-utils</artifactId>
             <version>3.4.1</version>
         </dependency>
-
-
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymockclassextension</artifactId>
@@ -146,17 +150,4 @@
             <version>5.0.1</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <!-- Travis build workaround -->
-                    <argLine>-XX:MaxMetaspaceSize=256m -Xmx1024m -XX:-HeapDumpOnOutOfMemoryError</argLine>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
