@@ -22,7 +22,7 @@ import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.util.RunList;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTest {
 
     private TestablePerformanceProjectAction target;

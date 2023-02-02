@@ -400,7 +400,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         testBuild.setWorkspace(rootPath);
         testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
         jobLog = new String(stream.toByteArray());
-        assertTrue(jobLog, jobLog.contains("Cannot create working directory because of error: Failed to mkdirs: /rootWorkspace"));
+        assertTrue(jobLog, jobLog.contains("Cannot create working directory because of error: /rootWorkspace"));
     }
 
     private void resetVirtualEnvCommands() {
