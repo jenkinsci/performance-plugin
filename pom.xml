@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>performance</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>${changelist}</version>
     <packaging>hpi</packaging>
 
     <name>Performance Plugin</name>
@@ -54,8 +54,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>3.21</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <changelist>999999-SNAPSHOT</changelist>
         <jenkins.version>2.361.4</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
         <concurrency>2</concurrency>
