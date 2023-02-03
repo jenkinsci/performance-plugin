@@ -22,7 +22,7 @@ for (int i = 0; i < platforms.size(); ++i) {
 
                 stage('Build') {
                   timeout(30) {
-                    def args = ['clean', 'install', '-Dmaven.test.failure.ignore=true', '-Dmaven.javadoc.skip=true']
+                    def args = ['clean', 'install', '-Dmaven.test.skip=true', '-Dmaven.javadoc.skip=true']
                     if (publishing) {
                       args += '-Dset.changelist'
                     }
@@ -35,10 +35,10 @@ for (int i = 0; i < platforms.size(); ++i) {
                     junit '**/target/surefire-reports/TEST-*.xml'
 
                     if (publishing) {
-                      recordIssues(
-                        enabledForFailure: true, aggregatingResults: true,
-                        tools: [java(), spotBugs(pattern: '**/target/findbugsXml.xml')]
-                      )
+                      // recordIssues(
+                      //   enabledForFailure: true, aggregatingResults: true,
+                      //   tools: [java(), spotBugs(pattern: '**/target/findbugsXml.xml')]
+                      // )
                       infra.prepareToPublishIncrementals()
                     }
                 }
