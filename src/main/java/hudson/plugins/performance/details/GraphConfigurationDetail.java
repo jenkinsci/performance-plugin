@@ -3,6 +3,7 @@ package hudson.plugins.performance.details;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -401,7 +402,7 @@ public class GraphConfigurationDetail implements ModelObject {
         FileInputStream input = null;
         try {
             input = new FileInputStream(defaultsFile);
-            defaultValue = IOUtils.toString(input);
+            defaultValue = IOUtils.toString(input, Charset.defaultCharset());
         } catch (IOException exception) {
             // ignore
         } finally {

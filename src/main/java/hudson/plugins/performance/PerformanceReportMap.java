@@ -20,6 +20,7 @@ import hudson.plugins.performance.reports.UriReport;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.DataSetBuilder;
+import hudson.util.Graph;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
@@ -124,8 +125,8 @@ public class PerformanceReportMap implements ModelObject {
             if (build != null) {
                 Job<?, ?> job = build.getParent();
                 if (job instanceof AbstractProject) {
-                    AbstractProject project = (AbstractProject) job;
-                    Describable describable = project.getPublishersList().get(PerformancePublisher.class);
+                    AbstractProject<?, ?> project = (AbstractProject<?, ?>) job;
+                    Describable<?> describable = project.getPublishersList().get(PerformancePublisher.class);
                     return (describable != null) ? (PerformancePublisher) describable : null;
                 }
             }
@@ -251,8 +252,12 @@ public class PerformanceReportMap implements ModelObject {
         }
         String legendLimit = request.getParameter("legendLimit");
         int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
-        ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilder.build(), limit), 400, 200);
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createRespondingTimeChart(dataSetBuilder.build(), limit);
+            }
+        }.doPng(request, response);
     }
 
     public void doThroughputGraph(StaplerRequest request, StaplerResponse response) throws IOException {
@@ -287,8 +292,12 @@ public class PerformanceReportMap implements ModelObject {
                 dataSetBuilder.add(throughputReport.get(), Messages.ProjectAction_RequestsPerSeconds(), label);
         }
 
-        ChartUtil.generateGraph(request, response,
-                createThroughputChart((dataSetBuilder.build())), 400, 200);
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createThroughputChart((dataSetBuilder.build()));
+            }
+        }.doPng(request, response);
     }
 
     protected JFreeChart createThroughputChart(CategoryDataset dataset) {
@@ -337,8 +346,12 @@ public class PerformanceReportMap implements ModelObject {
 
         String legendLimit = request.getParameter("legendLimit");
         int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
-        ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilder.build(), limit), 600, 200);
+        new Graph(-1, 600, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createRespondingTimeChart(dataSetBuilder.build(), limit);
+            }
+        }.doPng(request, response);
     }
 
     public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
@@ -374,8 +387,12 @@ public class PerformanceReportMap implements ModelObject {
                 dataSetBuilderErrors.add(performanceReport.errorPercent(),
                         Messages.ProjectAction_Errors(), label);
         }
-        ChartUtil.generateGraph(request, response,
-                createErrorsChart(dataSetBuilderErrors.build()), 400, 200);
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createErrorsChart(dataSetBuilderErrors.build());
+            }
+        }.doPng(request, response);
     }
 
     protected JFreeChart createErrorsChart(CategoryDataset dataset) {
@@ -437,10 +454,13 @@ public class PerformanceReportMap implements ModelObject {
             }
 
         }
-        ChartUtil.generateGraph(
-                request,
-                response,
-                createSummarizerChart(dataSetBuilderSummarizer.build()), 400, 200);
+
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createSummarizerChart(dataSetBuilderSummarizer.build());
+            }
+        }.doPng(request, response);
     }
 
     protected JFreeChart createSummarizerChart(CategoryDataset dataset) {
@@ -502,14 +522,6 @@ public class PerformanceReportMap implements ModelObject {
         }
 
         //addPreviousBuildReports();
-    }
-
-    private void loadPreviousBuilds() {
-        Run<?, ?> prev = getBuild().getPreviousCompletedBuild();
-        while (prev != null) {
-            getReportMap(prev);
-            prev = prev.getPreviousCompletedBuild();
-        }
     }
 
     private void addPreviousBuildReports() {

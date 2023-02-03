@@ -13,6 +13,7 @@ import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.ColorPalette;
 import hudson.util.DataSetBuilder;
+import hudson.util.Graph;
 import hudson.util.ShiftedCategoryAxis;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -62,8 +63,14 @@ public class TestSuiteReportDetail implements ModelObject {
             return;
         }
         String testUri = request.getParameter("performanceReportTest");
-        ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(getChartDatasetBuilderForBuilds(testUri, getProject().getBuilds()).build()), 600, 200);
+
+        new Graph(-1, 600, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createRespondingTimeChart(
+                        getChartDatasetBuilderForBuilds(testUri, getProject().getBuilds()).build());
+            }
+        }.doPng(request, response);      
     }
 
     DataSetBuilder<String, NumberOnlyBuildLabel> getChartDatasetBuilderForBuilds(String testUri, List<? extends Run<?, ?>> builds) {
@@ -155,7 +162,6 @@ public class TestSuiteReportDetail implements ModelObject {
 
         List<? extends Run<?, ?>> builds = getProject().getBuilds();
 
-        builds.size();
         for (Run<?, ?> build : builds) {
 
             PerformanceBuildAction performanceBuildAction = build

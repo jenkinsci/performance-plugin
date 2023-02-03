@@ -1044,7 +1044,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
       /*
        * Create Report of evaluated constraints
        */
-        ConstraintReport cr = new ConstraintReport(ceList, run.getParent().getBuilds().get(0), persistConstraintLog);
+        ConstraintReport cr = new ConstraintReport(ceList, run.getParent().getBuilds().iterator().next(), persistConstraintLog);
         logger.print(cr.getLoggerMsg());
       /*
        * Determine build result
