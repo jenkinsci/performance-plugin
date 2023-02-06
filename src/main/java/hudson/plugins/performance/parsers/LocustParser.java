@@ -81,7 +81,8 @@ public class LocustParser extends AbstractParser {
     List<CSVRecord> getCsvData(final File reportFile) {
         List<CSVRecord> records = null;
         try (Reader reader = new BufferedReader(new FileReader(reportFile));
-                CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
+                CSVParser csvParser = new CSVParser(reader,
+                        CSVFormat.Builder.create(CSVFormat.DEFAULT).setHeader().build())) {
             records = csvParser.getRecords();
         } catch (IOException e) {
             e.printStackTrace();
