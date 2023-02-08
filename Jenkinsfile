@@ -1,22 +1,25 @@
 properties([
-    buildDiscarder(logRotator(numToKeepStr: '10')),
+    buildDiscarder(logRotator(numToKeepStr: '5')),
     disableConcurrentBuilds(abortPrevious: true)
 ])
 
-node('maven-11') {
+node('linux-amd64') {
     stage('Checkout') {
         infra.checkoutSCM()
     }
 
     stage('Build') {
-        timeout(30) {
-            def args = ['clean', 'install', '-Dmaven.test.skip=true', '-Dmaven.javadoc.skip=true', '-Dset.changelist']
+        withEnv(['PATH+LOCAL=/home/jenkins/.local/bin']) {
+            sh 'pip install --upgrade pip'
+            sh 'pip install -r requirements.txt'
+            
+            def args = ['clean', 'install', '-Dmaven.javadoc.skip=true', '-Dset.changelist']
             infra.runMaven(args, 11)
         }
     }
 
     stage('Archive') {
-        // junit '**/target/surefire-reports/TEST-*.xml'
+        junit '**/target/surefire-reports/TEST-*.xml'
         infra.prepareToPublishIncrementals()
     }
 }
