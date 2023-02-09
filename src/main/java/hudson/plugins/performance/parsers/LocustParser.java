@@ -61,30 +61,30 @@ public class LocustParser extends AbstractParser {
 
         for (CSVRecord record : reportData) {
             String name = record.get(ReportColumns.Name.getColumn());
-            double average = Double.parseDouble(record.get(ReportColumns.Average.getColumn()));
-            double min = Double.parseDouble(record.get(ReportColumns.Min.getColumn()));
-            double max = Double.parseDouble(record.get(ReportColumns.Max.getColumn()));
-            double failures = Double.parseDouble(record.get(ReportColumns.Failures.getColumn()));
-            double success = Double.parseDouble(record.get(ReportColumns.Requests.getColumn()));
-            double errors = new Double(failures / success);
-            double avgContentSize = Double.parseDouble(record.get(ReportColumns.AvgContentSize.getColumn()));
+            long average = Double.valueOf(record.get(ReportColumns.Average.getColumn())).longValue();
+            long min = Double.valueOf(record.get(ReportColumns.Min.getColumn())).longValue();
+            long max = Double.valueOf(record.get(ReportColumns.Max.getColumn())).longValue();
+            long failures = Double.valueOf(record.get(ReportColumns.Failures.getColumn())).longValue();
+            long success = Double.valueOf(record.get(ReportColumns.Requests.getColumn())).longValue();
+            long errors = Double.valueOf(failures / success).longValue();
+            long avgContentSize = Double.valueOf(record.get(ReportColumns.AvgContentSize.getColumn())).longValue();
 
             if (name.equals("Aggregated")) {
                 report.setSummarizerSize(reportData.size() - 1);
-                report.setSummarizerAvg((long)average);
-                report.setSummarizerMin((long)min);
-                report.setSummarizerMax((long)max);
-                report.setSummarizerErrors(Float.toString((long)errors));
+                report.setSummarizerAvg(average);
+                report.setSummarizerMin(min);
+                report.setSummarizerMax(max);
+                report.setSummarizerErrors(Float.toString(errors));
             } else {
                 HttpSample sample = new HttpSample();
                 sample.setSuccessful(failures == 0);
                 sample.setSummarizer(true);
                 sample.setUri(name);
-                sample.setSummarizerMax((long)max);
-                sample.setSummarizerMin((long)min);
-                sample.setDuration((long)average);
-                sample.setSummarizerSamples((long)success);
-                sample.setSummarizerErrors((long)errors);
+                sample.setSummarizerMax(max);
+                sample.setSummarizerMin(min);
+                sample.setDuration(average);
+                sample.setSummarizerSamples(success);
+                sample.setSummarizerErrors(errors);
                 sample.setSizeInKb(avgContentSize * success);
                 sample.setDate(now);
                 report.addSample(sample);
