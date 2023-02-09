@@ -68,11 +68,11 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
     private ConstraintSettings settings;
 
     public ConstraintDescriptor getDescriptor() {
-        return (ConstraintDescriptor) Jenkins.getInstance().getDescriptorOrDie(getClass());
+        return (ConstraintDescriptor) Jenkins.get().getDescriptorOrDie(getClass());
     }
 
     public static ExtensionList<AbstractConstraint> all() {
-        return Jenkins.getInstance().getExtensionList(AbstractConstraint.class);
+        return Jenkins.get().getExtensionList(AbstractConstraint.class);
     }
 
     protected AbstractConstraint(Metric meteredValue, Operator operator, String relatedPerfReport, Escalation escalationLevel, boolean success, TestCaseBlock testCaseBlock) {

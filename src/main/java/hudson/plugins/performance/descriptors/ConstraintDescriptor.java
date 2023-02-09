@@ -12,7 +12,7 @@ public abstract class ConstraintDescriptor extends Descriptor<AbstractConstraint
     }
 
     public static DescriptorExtensionList<AbstractConstraint, ConstraintDescriptor> all() {
-        return Jenkins.getInstance().getDescriptorList(AbstractConstraint.class);
+        return Jenkins.get().getDescriptorList(AbstractConstraint.class);
     }
 
     public static ConstraintDescriptor getById(String id) {

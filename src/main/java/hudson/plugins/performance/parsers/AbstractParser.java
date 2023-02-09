@@ -178,7 +178,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
     }
 
     public static class ObjectInputStreamWithClassMapping extends ObjectInputStream {
-        protected Hashtable<String, Class> classMapping = new Hashtable<>(); 
+        protected Hashtable<String, Class<?>> classMapping = new Hashtable<>(); 
 
         public ObjectInputStreamWithClassMapping(InputStream in) throws IOException {
             super(in);

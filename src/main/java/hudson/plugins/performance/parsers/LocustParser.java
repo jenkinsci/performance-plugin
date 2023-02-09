@@ -50,7 +50,7 @@ public class LocustParser extends AbstractParser {
             long max = Long.parseLong(record.get(ReportColumns.Max.getColumn()));
             long failures = Long.parseLong(record.get(ReportColumns.Failures.getColumn()));
             long success = Long.parseLong(record.get(ReportColumns.Requests.getColumn()));
-            float errors = new Float(failures / success);
+            float errors = Float.valueOf(failures / success);
             long avgContentSize = Long.parseLong(record.get(ReportColumns.AvgContentSize.getColumn()));
 
             if (name.equals("Total")) {
@@ -80,8 +80,9 @@ public class LocustParser extends AbstractParser {
 
     List<CSVRecord> getCsvData(final File reportFile) {
         List<CSVRecord> records = null;
-        try (Reader reader = new BufferedReader(new FileReader(reportFile))) {
-            CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
+        try (Reader reader = new BufferedReader(new FileReader(reportFile));
+                CSVParser csvParser = new CSVParser(reader,
+                        CSVFormat.Builder.create(CSVFormat.DEFAULT).setHeader().build())) {
             records = csvParser.getRecords();
         } catch (IOException e) {
             e.printStackTrace();

@@ -173,7 +173,7 @@ public class ConstraintReportTest {
         when(uri.getPath()).thenReturn("test-jenkins-filepath/");
 
         PowerMockito.mockStatic(Jenkins.class);
-        when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(Jenkins.get()).thenReturn(jenkins);
         when(jenkins.getRootUrl()).thenReturn("test-jenkins-rooturl");
     }
 

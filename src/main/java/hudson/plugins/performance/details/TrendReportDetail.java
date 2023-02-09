@@ -48,7 +48,7 @@ public class TrendReportDetail implements ModelObject,
         return iterator();
     }
 
-    public List getColumnLabels() {
+    public List<?> getColumnLabels() {
         return dataSet.getRowKeys();
     }
 
@@ -81,7 +81,7 @@ public class TrendReportDetail implements ModelObject,
             return dataSet.getColumnKey(entry);
         }
 
-        public List getLabels() {
+        public List<?> getLabels() {
             return dataSet.getRowKeys();
         }
 

@@ -162,7 +162,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     private void addPipelineEnvVars(Run<?, ?> run, EnvVars envVars) {
         if (run.getClass().getCanonicalName().startsWith("org.jenkinsci.plugins.workflow")) {
-            List<? extends Action> allActions = run.getActions();
+            List<? extends Action> allActions = run.getAllActions();
             if (!allActions.isEmpty()) {
                 for (Action action : allActions) {
                     if ("org.jenkinsci.plugins.workflow.cps.EnvActionImpl".equals(action.getClass().getCanonicalName())) {
@@ -245,7 +245,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     // Step 1.1: Check bzt using "bzt --help".
     private boolean isGlobalBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Checking global bzt installation...");
-        boolean result = isSuccessCode(runCmd(CHECK_BZT_COMMAND, workspace, new NullOutputStream(), launcher, envVars));
+        boolean result = isSuccessCode(runCmd(CHECK_BZT_COMMAND, workspace, NullOutputStream.NULL_OUTPUT_STREAM, launcher, envVars));
         logger.println(result ?
                 "Performance test: Found global bzt installation." :
                 "Performance test: You don't have global bzt installed on this Jenkins host. Installing it globally will speed up job. Run 'sudo pip install bzt' to install it."
