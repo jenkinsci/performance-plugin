@@ -165,7 +165,6 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
      *
      * @param builds all stored jenkins builds
      * @throws AbortException if a parameter in the UI is not processable
-     * @throws ParseException if a timeframe string in the UI is not processable
      */
     protected void checkForDefectiveParams(List<? extends Run<?, ?>> builds) throws AbortException {
         boolean found = false;
