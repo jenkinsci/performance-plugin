@@ -13,7 +13,7 @@ node('linux-amd64') {
             sh 'pip install --upgrade pip'
             sh 'pip install -r requirements.txt'
             
-            def args = ['clean', 'install', '-Dmaven.javadoc.skip=true', '-Dset.changelist']
+            def args = ['clean', 'install', '-Dset.changelist']
             infra.runMaven(args, 11)
         }
     }
