@@ -37,14 +37,14 @@ public class PerformancePipelineTest  {
                         "-o \\'reporting.-1={module: \"junit-xml\", filename: \"report.xml\"}\\' " +
                         "-o \\'execution.0.scenario.requests.1={url: \"http://blazedemo.com/\": assert: [\"yo mamma\"]}\\'";
                 p.setDefinition(new CpsFlowDefinition(
-                        "node('master'){ bzt(params: '" + bztParams + "', useSystemSitePackages: false, printDebugOutput: true, bztVersion: '1.10.5') }", true));
+                        "node('" + story.j.jenkins.getSelfLabel().getName() + "'){ bzt(params: '" + bztParams + "', useSystemSitePackages: false, printDebugOutput: true, bztVersion: '1.16.19') }", true));
                 WorkflowRun r = p.scheduleBuild2(0).waitForStart();
                 story.j.assertBuildStatusSuccess(story.j.waitForCompletion(r));
                 story.j.assertLogContains("Writing JUnit XML report into: report.xml", r);
                 story.j.assertLogContains("File aggregate-results.xml reported", r);
                 story.j.assertLogContains("of errors [SUCCESS].", r);
                 if (JenkinsRule.getLog(r).contains("Performance test: Installing bzt into 'taurus-venv'")) {
-                    story.j.assertLogContains("Taurus CLI Tool v1.10.5", r);
+                    story.j.assertLogContains("Taurus CLI Tool v1.16.19", r);
                 }
             }
         });

@@ -26,11 +26,10 @@ public class JMeterCsvParser extends AbstractParser {
     public int bytesIdx = -1;
     public int sentBytesIdx = -1;
 
-
     public JMeterCsvParser(String glob, String percentiles) {
         this(glob, percentiles, PerformanceReport.INCLUDE_ALL);
     }
-    
+
     @DataBoundConstructor
     public JMeterCsvParser(String glob, String percentiles, String filterRegex) {
         super(glob, percentiles, filterRegex);
@@ -60,14 +59,14 @@ public class JMeterCsvParser extends AbstractParser {
 
         String[] header = null;
         try (FileReader fr = new FileReader(reportFile);
-                BufferedReader reader = new BufferedReader(fr)){
+                BufferedReader reader = new BufferedReader(fr)) {
             String line = reader.readLine();
             if (line != null) {
                 header = readCSVHeader(line);
             }
-        } 
+        }
 
-        try (Reader fileReader = new FileReader(reportFile)){
+        try (Reader fileReader = new FileReader(reportFile)) {
             parseCSV(fileReader, header, report);
         }
 
@@ -75,7 +74,8 @@ public class JMeterCsvParser extends AbstractParser {
     }
 
     protected void parseCSV(Reader in, String[] header, PerformanceReport report) throws IOException {
-        CSVFormat csvFormat = CSVFormat.newFormat(delimiter).withHeader(header).withQuote('"').withSkipHeaderRecord();
+        CSVFormat csvFormat = CSVFormat.Builder.create().setDelimiter(delimiter).setHeader(header).setQuote('"')
+                .setSkipHeaderRecord(true).build();
         Iterable<CSVRecord> records = csvFormat.parse(in);
         for (CSVRecord record : records) {
             final HttpSample sample = getSample(record);
@@ -109,8 +109,8 @@ public class JMeterCsvParser extends AbstractParser {
 
         if (timestampIdx < 0 || elapsedIdx < 0 || responseCodeIdx < 0
                 || successIdx < 0 || urlIdx < 0 || bytesIdx < 0
-                // || sentBytesIdx < 0 // sentBytes was introduced in 3.1
-                ) {
+        // || sentBytesIdx < 0 // sentBytes was introduced in 3.1
+        ) {
             throw new IllegalStateException("Missing required column");
         }
 
@@ -139,7 +139,7 @@ public class JMeterCsvParser extends AbstractParser {
         sample.setHttpCode(record.get(responseCodeIdx));
         sample.setSuccessful(Boolean.valueOf(record.get(successIdx)));
         long bytes = Long.parseLong(record.get(bytesIdx));
-        if(sentBytesIdx != -1) {
+        if (sentBytesIdx != -1) {
             bytes += Long.parseLong(record.get(sentBytesIdx));
         }
         sample.setSizeInKb(Double.valueOf(bytes) / 1024d);

@@ -123,10 +123,10 @@ public class ConstraintReport {
          * Jenkins cannot reliable resolve it's own root URL unless it is set in the Jenkins System
 		 * Configuration. This will cause that getRootUrl() returns null
 		 */
-        if (Jenkins.getInstance().getRootUrl() == null) {
+        if (Jenkins.get().getRootUrl() == null) {
             this.linkToBuild = "Could not resolve URL - Please set the root URL in the Jenkins System Configuration";
         } else {
-            this.linkToBuild = Jenkins.getInstance().getRootUrl() + newBuild.getUrl();
+            this.linkToBuild = Jenkins.get().getRootUrl() + newBuild.getUrl();
         }
 
         for (ConstraintEvaluation ce : ceList) {
@@ -307,7 +307,6 @@ public class ConstraintReport {
      * persistConstraintLog == true
      *
      * @throws IOException
-     * @throws InterruptedException
      */
     public void writeResultsToFile() throws IOException {
         performanceLog = new File(newBuild.getRootDir() + File.separator + "performance-results" + File.separator + "performance.log");

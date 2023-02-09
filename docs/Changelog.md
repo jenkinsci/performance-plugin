@@ -1,6 +1,9 @@
 <small>[<< Back to main page](./)</small>
 # Changelog
 
+## v3.20 (13th of July, 2021)
+- FIX: compatibility with Jenkins 2.264+ (tables to div) [JENKINS-64990](https://issues.jenkins-ci.org/browse/JENKINS-64990)
+
 ## v3.19 (8th of March, 2021)
 - ADD: Option to enable/disable trend graphs within Performance Report [JENKINS-64638](https://issues.jenkins-ci.org/browse/JENKINS-64638)
 - ADD: Possibility yo explicitly set the PATH to `virtualenv`

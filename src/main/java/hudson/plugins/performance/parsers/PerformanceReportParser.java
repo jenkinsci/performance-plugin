@@ -19,7 +19,6 @@ import java.util.Collection;
  * is persisted with {@link PerformancePublisher} into the project
  * configuration.
  * <p>
- * <p>
  * Subtypes can define additional parser-specific parameters as instance fields.
  *
  * @author Kohsuke Kawaguchi
@@ -44,7 +43,7 @@ public abstract class PerformanceReportParser implements
     }
 
     public PerformanceReportParserDescriptor getDescriptor() {
-        return (PerformanceReportParserDescriptor) Jenkins.getInstance()
+        return (PerformanceReportParserDescriptor) Jenkins.get()
                 .getDescriptorOrDie(getClass());
     }
 
@@ -61,7 +60,7 @@ public abstract class PerformanceReportParser implements
      * All registered implementations.
      */
     public static ExtensionList<PerformanceReportParser> all() {
-        return Jenkins.getInstance().getExtensionList(PerformanceReportParser.class);
+        return Jenkins.get().getExtensionList(PerformanceReportParser.class);
     }
 
     public String getReportName() {

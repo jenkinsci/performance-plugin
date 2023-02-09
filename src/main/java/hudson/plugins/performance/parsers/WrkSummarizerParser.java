@@ -15,7 +15,6 @@ import java.util.Scanner;
 /**
  * Parser for wrk (https://github.com/wg/wrk)
  * <p>
- * <p>
  * Note that Wrk does not produce request-level data, and can only be processed
  * in it's summarized form (unless extended to do otherwise).
  *
@@ -177,7 +176,6 @@ public class WrkSummarizerParser extends AbstractParser {
     /**
      * Given a time string (eg: 0ms, 1m, 2s, 3h, etc.) parse and yield the time in
      * a specified time unit (millisecond, second, minute, hour)
-     * <p>
      * <p>
      * If no result can be returned, a 0 value will result and any errors
      * encountered will be logged.

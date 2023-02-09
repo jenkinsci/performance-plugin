@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
@@ -383,7 +383,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener)
+    public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws InterruptedException, IOException {
         run.setResult(Result.SUCCESS);
 
@@ -1044,7 +1044,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
       /*
        * Create Report of evaluated constraints
        */
-        ConstraintReport cr = new ConstraintReport(ceList, run.getParent().getBuilds().get(0), persistConstraintLog);
+        ConstraintReport cr = new ConstraintReport(ceList, run.getParent().getBuilds().iterator().next(), persistConstraintLog);
         logger.print(cr.getLoggerMsg());
       /*
        * Determine build result

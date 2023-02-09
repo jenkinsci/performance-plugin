@@ -22,7 +22,7 @@ public abstract class PerformanceReportParserDescriptor extends
      * Returns all the registered {@link PerformanceReportParserDescriptor}s.
      */
     public static DescriptorExtensionList<PerformanceReportParser, PerformanceReportParserDescriptor> all() {
-        return Jenkins.getInstance().getDescriptorList(PerformanceReportParser.class);
+        return Jenkins.get().getDescriptorList(PerformanceReportParser.class);
     }
 
     public static PerformanceReportParserDescriptor getById(String id) {

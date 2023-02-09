@@ -21,6 +21,7 @@ import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.ColorPalette;
 import hudson.util.DataSetBuilder;
+import hudson.util.Graph;
 import hudson.util.ShiftedCategoryAxis;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -45,7 +46,7 @@ import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -169,7 +170,7 @@ public class PerformanceProjectAction implements Action {
 
         final CategoryPlot plot = chart.getCategoryPlot();
 
-//         plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
+        // plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
         plot.setBackgroundPaint(Color.WHITE);
         plot.setOutlinePaint(null);
         plot.setRangeGridlinesVisible(true);
@@ -242,7 +243,7 @@ public class PerformanceProjectAction implements Action {
     }
 
     public static JFreeChart doCreateSummarizerChart(CategoryDataset dataset,
-                                                     String yAxis, String chartTitle) {
+            String yAxis, String chartTitle) {
 
         final JFreeChart chart = ChartFactory.createBarChart(chartTitle, // chart
                 // title
@@ -290,14 +291,14 @@ public class PerformanceProjectAction implements Action {
         plot.setDomainCrosshairVisible(true);
         plot.setRangeCrosshairVisible(true);
 
-    /*
-     * final NumberAxis axis2 = new NumberAxis("Errors"); axis2.isAutoRange();
-     * axis2.setLowerBound(0); plot.setRangeAxis(1, axis2); plot.setDataset(1,
-     * dataset.get(1)); plot.mapDatasetToRangeAxis(1, 1);
-     *
-     * final StandardXYItemRenderer renderer2 = new StandardXYItemRenderer();
-     * renderer2.setSeriesPaint(0, Color.black); plot.setRenderer(1, renderer2);
-     */
+        /*
+         * final NumberAxis axis2 = new NumberAxis("Errors"); axis2.isAutoRange();
+         * axis2.setLowerBound(0); plot.setRangeAxis(1, axis2); plot.setDataset(1,
+         * dataset.get(1)); plot.mapDatasetToRangeAxis(1, 1);
+         *
+         * final StandardXYItemRenderer renderer2 = new StandardXYItemRenderer();
+         * renderer2.setSeriesPaint(0, Color.black); plot.setRenderer(1, renderer2);
+         */
         final DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
 
@@ -336,9 +337,9 @@ public class PerformanceProjectAction implements Action {
     }
 
     public static JFreeChart createUriThroughputChart(IntervalXYDataset dataset, String uri) {
-        final JFreeChart chart = ChartFactory.createXYBarChart(uri,  Messages.TrendReportDetail_Time(), true,
+        final JFreeChart chart = ChartFactory.createXYBarChart(uri, Messages.TrendReportDetail_Time(), true,
                 Messages.TrendReportDetail_RequestsPerMinute(), dataset,
-                PlotOrientation.VERTICAL,true, true, false);
+                PlotOrientation.VERTICAL, true, true, false);
         chart.setBackgroundPaint(Color.WHITE);
 
         final XYPlot plot = chart.getXYPlot();
@@ -350,7 +351,8 @@ public class PerformanceProjectAction implements Action {
         axis.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
 
         final XYBarRenderer renderer = (XYBarRenderer) plot.getRenderer();
-        // As of Jenkins v2.198 jfreechart v1.0.19 paints bars with a gradient by default
+        // As of Jenkins v2.198 jfreechart v1.0.19 paints bars with a gradient by
+        // default
         // which can't be turned off in v1.0.9 the plugin is compiled against
         // so instead use a red outline and fill with white:
         renderer.setSeriesPaint(0, Color.WHITE);
@@ -416,11 +418,16 @@ public class PerformanceProjectAction implements Action {
             }
             nbBuildsToAnalyze--;
         }
-        ChartUtil.generateGraph(request, response,
-                createErrorsGraph(dataSetBuilderErrors.build()), 400, 200);
+
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createErrorsGraph(dataSetBuilderErrors.build());
+            }
+        }.doPng(request, response);
     }
 
-    protected  JFreeChart createErrorsGraph(CategoryDataset dataset) {
+    protected JFreeChart createErrorsGraph(CategoryDataset dataset) {
         return createErrorsChart(dataset);
     }
 
@@ -465,8 +472,13 @@ public class PerformanceProjectAction implements Action {
         }
         String legendLimit = request.getParameter("legendLimit");
         int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
-        ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilder.build(), limit), 600, 200);
+
+        new Graph(-1, 600, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createRespondingTimeChart(dataSetBuilder.build(), limit);
+            }
+        }.doPng(request, response);
     }
 
     protected PerformanceReport getPerformanceReport(Run<?, ?> build, String reportFileName) {
@@ -531,8 +543,13 @@ public class PerformanceProjectAction implements Action {
 
         String legendLimit = request.getParameter("legendLimit");
         int limit = (legendLimit != null && !legendLimit.isEmpty()) ? Integer.parseInt(legendLimit) : Integer.MAX_VALUE;
-        ChartUtil.generateGraph(request, response,
-                createRespondingTimeChart(dataSetBuilderAverage.build(), limit), 400, 200);
+
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createRespondingTimeChart(dataSetBuilderAverage.build(), limit);
+            }
+        }.doPng(request, response);      
     }
 
     public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
@@ -578,8 +595,12 @@ public class PerformanceProjectAction implements Action {
             nbBuildsToAnalyze--;
         }
 
-        ChartUtil.generateGraph(request, response,
-                createThroughputGraph(dataSetBuilder.build()), 400, 200);
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return createThroughputGraph(dataSetBuilder.build());
+            }
+        }.doPng(request, response);
     }
 
     protected JFreeChart createThroughputGraph(CategoryDataset dataset) {
@@ -629,17 +650,21 @@ public class PerformanceProjectAction implements Action {
                 .getSummarizerReportType();
 
         if (summarizerReportType != null) {
-            ChartUtil.generateGraph(
-                    request,
-                    response,
-                    createSummarizerChart(dataSetBuilderSummarizerErrors.build(), "%",
-                            Messages.ProjectAction_PercentageOfErrors()), 400, 200);
+            new Graph(-1, 400, 200) {
+                @Override
+                protected JFreeChart createGraph() {
+                    return createSummarizerChart(dataSetBuilderSummarizerErrors.build(), "%",
+                            Messages.ProjectAction_PercentageOfErrors());
+                }
+            }.doPng(request, response);
         } else {
-            ChartUtil.generateGraph(
-                    request,
-                    response,
-                    createSummarizerChart(dataSetBuilderSummarizer.build(), "ms",
-                            Messages.ProjectAction_RespondingTime()), 400, 200);
+            new Graph(-1, 400, 200) {
+                @Override
+                protected JFreeChart createGraph() {
+                    return createSummarizerChart(dataSetBuilderSummarizer.build(), "ms",
+                            Messages.ProjectAction_RespondingTime());
+                }
+            }.doPng(request, response);
         }
     }
 
@@ -724,12 +749,12 @@ public class PerformanceProjectAction implements Action {
         return job;
     }
 
-    public final Run getSomeBuildWithWorkspace() {
+    public final Run<?, ?> getSomeBuildWithWorkspace() {
         byte cnt = 0;
-        for (Run run = job.getLastBuild(); cnt < 5 && run != null; run = run.getPreviousBuild()) {
+        for (Run<?, ?> run = job.getLastBuild(); cnt < 5 && run != null; run = run.getPreviousBuild()) {
             if (!run.isBuilding()) {
                 if (run instanceof AbstractBuild) {
-                    FilePath ws = ((AbstractBuild) run).getWorkspace();
+                    FilePath ws = ((AbstractBuild<?, ?>) run).getWorkspace();
                     if (ws != null) {
                         return run;
                     }
@@ -742,7 +767,7 @@ public class PerformanceProjectAction implements Action {
         return null;
     }
 
-    @Nonnull
+    @NonNull
     public List<String> getPerformanceReportList() {
         this.performanceReportList = new ArrayList<>(0);
         if (null == this.job) {
@@ -795,7 +820,7 @@ public class PerformanceProjectAction implements Action {
      * @return the dynamic result of the analysis (detail page).
      */
     public Object getDynamic(final String link, final StaplerRequest request,
-                             final StaplerResponse response) {
+            final StaplerResponse response) {
         if (CONFIGURE_LINK.equals(link)) {
             return createUserConfiguration(request);
         } else if (TRENDREPORT_LINK.equals(link)) {
@@ -848,7 +873,7 @@ public class PerformanceProjectAction implements Action {
     }
 
     private DataSetBuilder<String, NumberOnlyBuildLabel> getTrendReportData(final StaplerRequest request,
-                                                                            String performanceReportNameFile) {
+            String performanceReportNameFile) {
 
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<>();
         List<? extends Run<?, ?>> builds = getJob().getBuilds();
@@ -873,7 +898,7 @@ public class PerformanceProjectAction implements Action {
                 dataSet.add(report.getAverage(),
                         Messages.ProjectAction_Average(), label);
                 Map<Double, Long> percentilesValues = report.getPercentilesValues();
-                
+
                 for (Map.Entry<Double, Long> entry : percentilesValues.entrySet()) {
                     dataSet.add(entry.getValue(),
                             report.getPercentileLabel(entry.getKey()), label);
@@ -902,8 +927,9 @@ public class PerformanceProjectAction implements Action {
 
     public boolean ifModePerformancePerTestCaseUsed() {
         if (this.job instanceof AbstractProject) {
-            AbstractProject project = (AbstractProject) job;
-            PerformancePublisher publisher = (PerformancePublisher) project.getPublishersList().get(PerformancePublisher.class);
+            AbstractProject<?, ?> project = (AbstractProject<?, ?>) job;
+            PerformancePublisher publisher = (PerformancePublisher) project.getPublishersList()
+                    .get(PerformancePublisher.class);
             return publisher != null && publisher.isModePerformancePerTestCase();
         } else {
             return true;
@@ -912,8 +938,9 @@ public class PerformanceProjectAction implements Action {
 
     public boolean ifModeThroughputUsed() {
         if (this.job instanceof AbstractProject) {
-            AbstractProject project = (AbstractProject) job;
-            PerformancePublisher publisher = (PerformancePublisher) project.getPublishersList().get(PerformancePublisher.class);
+            AbstractProject<?, ?> project = (AbstractProject<?, ?>) job;
+            PerformancePublisher publisher = (PerformancePublisher) project.getPublishersList()
+                    .get(PerformancePublisher.class);
             return publisher == null || publisher.isModeThroughput();
         } else {
             return true;

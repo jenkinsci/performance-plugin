@@ -68,11 +68,11 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
     private ConstraintSettings settings;
 
     public ConstraintDescriptor getDescriptor() {
-        return (ConstraintDescriptor) Jenkins.getInstance().getDescriptorOrDie(getClass());
+        return (ConstraintDescriptor) Jenkins.get().getDescriptorOrDie(getClass());
     }
 
     public static ExtensionList<AbstractConstraint> all() {
-        return Jenkins.getInstance().getExtensionList(AbstractConstraint.class);
+        return Jenkins.get().getExtensionList(AbstractConstraint.class);
     }
 
     protected AbstractConstraint(Metric meteredValue, Operator operator, String relatedPerfReport, Escalation escalationLevel, boolean success, TestCaseBlock testCaseBlock) {
@@ -165,7 +165,6 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
      *
      * @param builds all stored jenkins builds
      * @throws AbortException if a parameter in the UI is not processable
-     * @throws ParseException if a timeframe string in the UI is not processable
      */
     protected void checkForDefectiveParams(List<? extends Run<?, ?>> builds) throws AbortException {
         boolean found = false;

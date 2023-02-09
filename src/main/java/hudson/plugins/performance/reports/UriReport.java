@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.jfree.chart.JFreeChart;
 import org.jfree.data.time.FixedMillisecond;
 import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
@@ -34,7 +35,7 @@ import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.tools.SafeMaths;
-import hudson.util.ChartUtil;
+import hudson.util.Graph;
 
 /**
  * A report about a particular tested URI.
@@ -446,7 +447,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public void doSummarizerTrendGraph(StaplerRequest request, StaplerResponse response) throws IOException {
-        TimeSeries responseTimes = new TimeSeries(Messages.ProjectAction_RespondingTime(), FixedMillisecond.class);
+        TimeSeries responseTimes = new TimeSeries(Messages.ProjectAction_RespondingTime());
         synchronized (samples) {
             for (Sample sample : samples) {
                 if (isIncludeResponseTime(sample)) {
@@ -461,12 +462,16 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         ArrayList<XYDataset> dataset = new ArrayList<>();
         dataset.add(resp);
 
-        ChartUtil.generateGraph(request, response,
-                PerformanceProjectAction.createSummarizerTrend(dataset, uri), 400, 200);
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return PerformanceProjectAction.createSummarizerTrend(dataset, uri);
+            }
+        }.doPng(request, response);
     }
 
     public void doErrorGraph(StaplerRequest request, StaplerResponse response) throws IOException {
-        TimeSeries errors = new TimeSeries(Messages.ProjectAction_Errors(), FixedMillisecond.class);
+        TimeSeries errors = new TimeSeries(Messages.ProjectAction_Errors());
         synchronized (samples) {
             for (Sample sample : samples) {
                 if (sample.isFailed() && !sample.isSummarizer()) {
@@ -478,8 +483,12 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         dataset.add(new TimeSeriesCollection(errors));
 
         // Re-use the same scatter plotter for error response times:
-        ChartUtil.generateGraph(request, response,
-                PerformanceProjectAction.createSummarizerTrend(dataset, uri), 400, 200);
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return PerformanceProjectAction.createSummarizerTrend(dataset, uri);
+            }
+        }.doPng(request, response);
     }
 
     public void doPercentileGraph(StaplerRequest request, StaplerResponse response) throws IOException {
@@ -501,11 +510,15 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
 
         for (Map.Entry<Long, Long> responseTimeOccurrence : responseTimesHistogram.entrySet()) {
             cumulativeTotal += responseTimeOccurrence.getValue();
-            percentiles.addOrUpdate(100.0*cumulativeTotal/totalNoOfSamples, responseTimeOccurrence.getKey()); // float value will result in smoother curve
+            percentiles.addOrUpdate((double) 100.0*cumulativeTotal/totalNoOfSamples, (double) responseTimeOccurrence.getKey()); // float value will result in smoother curve
         }
 
-        ChartUtil.generateGraph(request, response,
-                PerformanceProjectAction.createUriPercentileChart(new XYSeriesCollection(percentiles), uri), 400, 200);
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return PerformanceProjectAction.createUriPercentileChart(new XYSeriesCollection(percentiles), uri);
+            }
+        }.doPng(request, response);
     }
 
     public void doThroughputGraph(StaplerRequest request, StaplerResponse response) throws IOException {
@@ -520,12 +533,17 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
                 }
             }
         }
-        TimeSeries throughput = new TimeSeries(Messages.TrendReportDetail_RequestThroughput(), Minute.class);
+        TimeSeries throughput = new TimeSeries(Messages.TrendReportDetail_RequestThroughput());
         for (Map.Entry<Minute, Long> timeBucket : throughputIntervals.entrySet()) {
             throughput.add(timeBucket.getKey(), timeBucket.getValue());
         }
-        ChartUtil.generateGraph(request, response,
-                PerformanceProjectAction.createUriThroughputChart(new TimeSeriesCollection(throughput), uri), 400, 200);
+
+        new Graph(-1, 400, 200) {
+            @Override
+            protected JFreeChart createGraph() {
+                return PerformanceProjectAction.createUriThroughputChart(new TimeSeriesCollection(throughput), uri);
+            }
+        }.doPng(request, response);
     }
 
     public Date getStart() {

@@ -6,14 +6,14 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import hudson.model.AbstractProject;
 import hudson.model.Run;
@@ -22,7 +22,7 @@ import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.util.RunList;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTest {
 
     private TestablePerformanceProjectAction target;
@@ -89,7 +89,7 @@ public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTe
             super(project);
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public List<String> getPerformanceReportList() {
             return Collections.singletonList("JMeterResults.jtl");
