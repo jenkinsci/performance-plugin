@@ -307,7 +307,6 @@ public class ConstraintReport {
      * persistConstraintLog == true
      *
      * @throws IOException
-     * @throws InterruptedException
      */
     public void writeResultsToFile() throws IOException {
         performanceLog = new File(newBuild.getRootDir() + File.separator + "performance-results" + File.separator + "performance.log");
