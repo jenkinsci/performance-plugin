@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -134,7 +135,7 @@ public class ThroughputReportTest {
     public void testDuration() throws IOException, URISyntaxException {
         File report = new File(getClass().getResource("/TaurusXmlWithDuration.xml").getPath());
         TaurusParser parser = new TaurusParser(report.getAbsolutePath(), DEFAULT_PERCENTILES);
-        PerformanceReport performanceReport = parser.parse(null, Collections.singleton(report), new StreamTaskListener(System.out)).iterator().next();
+        PerformanceReport performanceReport = parser.parse(null, Collections.singleton(report), new StreamTaskListener(System.out, StandardCharsets.UTF_8)).iterator().next();
         ThroughputReport throughputReport = new ThroughputReport(performanceReport);
 
         Map<String, UriReport> uriReportMap = performanceReport.getUriReportMap();

@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +23,7 @@ public class WrkSummarizerParserTest {
     @Before
     public void before() {
         parser = new WrkSummarizerParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
-        listener = new StreamTaskListener((java.io.OutputStream) System.out);
+        listener = new StreamTaskListener((java.io.OutputStream) System.out, StandardCharsets.UTF_8);
     }
 
     @Test

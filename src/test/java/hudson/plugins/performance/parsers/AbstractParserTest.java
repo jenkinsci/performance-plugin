@@ -32,10 +32,10 @@ public class AbstractParserTest {
         assertNotNull(report);
         Map<Double, Long> percentilesValues = report.getPercentilesValues();
         assertEquals(4, percentilesValues.size());
-        assertEquals(new Long(320), percentilesValues.get(50d));
-        assertEquals(new Long(449), percentilesValues.get(90d));
-        assertEquals(new Long(100), percentilesValues.get(0d));
-        assertEquals(new Long(468), percentilesValues.get(100d));
+        assertEquals(Long.valueOf(320), percentilesValues.get(50d));
+        assertEquals(Long.valueOf(449), percentilesValues.get(90d));
+        assertEquals(Long.valueOf(100), percentilesValues.get(0d));
+        assertEquals(Long.valueOf(468), percentilesValues.get(100d));
 
         assertEquals(320, report.getMedian());
         assertEquals(449, report.get90Line());

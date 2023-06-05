@@ -3,7 +3,6 @@ package hudson.plugins.performance.constraints;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -18,13 +17,8 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 
-import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
-import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
-import hudson.plugins.performance.data.ConstraintSettings;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -33,13 +27,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
-import hudson.plugins.performance.actions.PerformanceBuildAction;
-import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.PerformanceReportMap;
-import hudson.plugins.performance.reports.UriReport;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
 import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
 import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
+import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import hudson.plugins.performance.data.ConstraintSettings;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
 import jenkins.model.Jenkins;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -179,9 +176,6 @@ public class ConstraintCheckerTest {
     RelativeConstraint rc4;
     RelativeConstraint rc5;
     RelativeConstraint rc6;
-
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
 
     /**
      * TestCase1 HappyPath - Testing every combination of constraints against some

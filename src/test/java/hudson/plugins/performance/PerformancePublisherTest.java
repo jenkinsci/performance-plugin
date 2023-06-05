@@ -1,5 +1,34 @@
 package hudson.plugins.performance;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.TestBuilder;
+
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -23,37 +52,22 @@ import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
-import org.jvnet.hudson.test.HudsonTestCase;
-import org.jvnet.hudson.test.TestBuilder;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PerformancePublisherTest extends HudsonTestCase {
+public class PerformancePublisherTest {
+
+    @Rule
+    public final JenkinsRule jenkinsRule = new JenkinsRule();
 
     @Test
     public void testBuild() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("test.jtl").copyFrom(
                         getClass().getResource("/JMeterResults.jtl"));
@@ -61,15 +75,16 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, null));
+                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, false,
+                        null));
 
-        FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        FreeStyleBuild b = jenkinsRule.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
 
         try {
             //assertNotNull(a);
             // poke a few random pages to verify rendering
-            WebClient wc = createWebClient();
+            WebClient wc = jenkinsRule.createWebClient();
             wc.getPage(b, "performance");
             wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
         } catch (Exception e) {
@@ -79,11 +94,11 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
     @Test
     public void testStandardResultsXML() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("test.jtl").copyFrom(getClass().getResource("/JMeterResults.jtl"));
                 return true;
@@ -93,14 +108,16 @@ public class PerformancePublisherTest extends HudsonTestCase {
         List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
         parsers.add(new JMeterParser("test.jtl", PerformanceReportTest.DEFAULT_PERCENTILES));
 
-        PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, parsers);
+        PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false,
+                false, false, false, parsers);
         publisher.setModeEvaluation(false);
         p.getPublishersList().add(publisher);
 
-        FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        FreeStyleBuild b = jenkinsRule.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         b.getAction(PerformanceBuildAction.class);
 
-        String standardExportFilename = b.getRootDir().getAbsolutePath() + File.separator + "archive" + File.separator + "standardResults.xml";
+        String standardExportFilename = b.getRootDir().getAbsolutePath() + File.separator + "archive" + File.separator
+                + "standardResults.xml";
         String content = new String(Files.readAllBytes(Paths.get(standardExportFilename)));
         Assert.assertEquals("<?xml version=\"1.0\"?>\n" +
                 "<results>\n" +
@@ -131,11 +148,11 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
     @Test
     public void testBuildWithParameters() throws Exception {
-        FreeStyleProject p = createFreeStyleProject("JobTest");
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject("JobTest");
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("JobTest/test.jtl").copyFrom(
                         getClass().getResource("/JMeterResults.jtl"));
@@ -143,15 +160,16 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, null));
+                new PerformancePublisher("", 0, 0, "", 0, 0, 0, 0, 0, false, "", false, false, false, false, false,
+                        null));
 
-        FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        FreeStyleBuild b = jenkinsRule.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
 
         try {
             //assertNotNull(a);
             // poke a few random pages to verify rendering
-            WebClient wc = createWebClient();
+            WebClient wc = jenkinsRule.createWebClient();
             wc.getPage(b, "performance");
             wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
         } catch (Exception e) {
@@ -162,11 +180,11 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
     @Test
     public void testBuildUnstableResponseThreshold() throws Exception {
-        FreeStyleProject p = createFreeStyleProject("TestJob");
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject("TestJob");
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("test.jtl").copyFrom(
                         getClass().getResource("/JMeterResults.jtl"));
@@ -174,16 +192,16 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("test.jtl", 0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, null));
+                new PerformancePublisher("test.jtl", 0, 0, "test.jtl:100", 0, 0, 0, 0, 0, false, "", false, false,
+                        false, false, false, null));
 
-        FreeStyleBuild b = assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
+        FreeStyleBuild b = jenkinsRule.assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
 
         try {
-            //assertNotNull(a);
-
+            assertNotNull(a);
             // poke a few random pages to verify rendering
-            WebClient wc = createWebClient();
+            WebClient wc = jenkinsRule.createWebClient();
             wc.getPage(b, "performance");
             wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
         } catch (Exception e) {
@@ -193,11 +211,11 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
     @Test
     public void testBuildStableResponseThreshold() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("test.jtl").copyFrom(
                         getClass().getResource("/JMeterResults.jtl"));
@@ -205,16 +223,17 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false, false,false, null));
+                new PerformancePublisher("", 0, 0, "test.jtl:5000", 0, 0, 0, 0, 0, false, "", false, false, false,
+                        false, false, null));
 
-        FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        FreeStyleBuild b = jenkinsRule.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         PerformanceBuildAction a = b.getAction(PerformanceBuildAction.class);
 
         try {
             //assertNotNull(a);
 
             // poke a few random pages to verify rendering
-            WebClient wc = createWebClient();
+            WebClient wc = jenkinsRule.createWebClient();
             wc.getPage(b, "performance");
             wc.getPage(b, "performance/uriReport/test.jtl:Home.endperformanceparameter/");
         } catch (Exception e) {
@@ -222,23 +241,24 @@ public class PerformancePublisherTest extends HudsonTestCase {
         }
     }
 
-    @Bug(22011)
-    //TODO - Fix this test case, it was not compiling with forking over
-    //and now its not passing due to second build being successful,
-    //not failing due to threshold problems  Ignore flag not being
-    //used, have to look at dependency tree, most likely pre 4.x
-    //junit dependency
+    @Issue("JENKINS-22011")
+    // TODO - Fix this test case, it was not compiling with forking over
+    // and now its not passing due to second build being successful,
+    // not failing due to threshold problems Ignore flag not being
+    // used, have to look at dependency tree, most likely pre 4.x
+    // junit dependency
     @Ignore
     public void buildUnstableAverageResponseTimeRelativeThreshold() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
         p.getPublishersList().add(
-                new PerformancePublisher("", 0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, false,false, null));
+                new PerformancePublisher("", 0, 0, null, 100.0d, 0, 50.0d, 0, 0, false, "ART", true, false, true, false,
+                        false, null));
         // first build
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("test1.xml").copyFrom(
                         getClass().getResource("/TEST-JUnitResults-relative-thrashould.xml"));
@@ -246,14 +266,13 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
 
-        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
-
+        jenkinsRule.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
 
         // second build with high time
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("test2.xml").copyFrom(
                         getClass().getResource("/TEST-JUnitResults-relative-thrashould-2.xml"));
@@ -261,18 +280,19 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
 
-        assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
+        jenkinsRule.assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
 
     }
 
     @Test
     public void testEmptyReportParsersList() throws Exception {
         PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, true, "MRT",
-                true, true, true, true,false, null);
-        RunExt run = new RunExt( createFreeStyleProject());
+                true, true, true, true, false, null);
+        RunExt run = new RunExt(jenkinsRule.createFreeStyleProject());
         run.onStartBuilding();
         try {
-            publisher.perform(run, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
+            publisher.perform(run, new FilePath(new File(".")), jenkinsRule.createLocalLauncher(),
+                    jenkinsRule.createTaskListener());
         } catch (NullPointerException ex) {
             fail("Plugin must work with empty parser list" + ex.getMessage());
         }
@@ -293,8 +313,9 @@ public class PerformancePublisherTest extends HudsonTestCase {
     @Test
     public void testOptionMethods() throws Exception {
         final double DELTA = 0.001;
-        PerformancePublisher publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
-                true, true, true, true,false, null);
+        PerformancePublisher publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0,
+                8.0, 7.0, 6.0, 3, true, "MRT",
+                true, true, true, true, false, null);
         assertEquals("reportFile.xml", publisher.getSourceDataFiles());
         assertEquals(15, publisher.getErrorFailedThreshold());
         assertEquals(16, publisher.getErrorUnstableThreshold());
@@ -356,14 +377,17 @@ public class PerformancePublisherTest extends HudsonTestCase {
         publisher.setConstraints(allConstraints);
         assertEquals(allConstraints, publisher.getConstraints());
 
-        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "MRT",
-                true, true, true, true,false, null);
+        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3,
+                true, "MRT",
+                true, true, true, true, false, null);
         assertTrue(publisher.isMRT());
-        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "ART",
-                true, true, true, true,false, null);
+        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3,
+                true, "ART",
+                true, true, true, true, false, null);
         assertTrue(publisher.isART());
-        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3, true, "PRT",
-                true, true, true, true,false, null);
+        publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0, 8.0, 7.0, 6.0, 3,
+                true, "PRT",
+                true, true, true, true, false, null);
         assertTrue(publisher.isPRT());
 
         publisher.setFilename("testfilename");
@@ -379,12 +403,12 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
         PerformancePublisher publisherUnstable = new PerformancePublisher("JMeterPublisher.csv",
                 -1,
-                1,  // errorUnstableThreshold
+                1, // errorUnstableThreshold
                 "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
                 false, // modeOfThreshold (false = Error Threshold)
-                true, true, true,false, null);
+                true, true, true, false, null);
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
         buildExt.setWorkspace(new FilePath(Files.createTempDirectory(null).toFile()));
@@ -395,23 +419,26 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 getClass().getResource("/JMeterPublisher.csv"));
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        publisherUnstable.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(new StreamTaskListener(stream)));
+        publisherUnstable.perform(buildExt, buildExt.getWorkspace(), jenkinsRule.createLocalLauncher(),
+                new BuildListenerAdapter(new StreamTaskListener(stream, StandardCharsets.UTF_8)));
 
         String log = new String(stream.toByteArray());
-        assertEquals(log, Result.UNSTABLE, buildExt.getResult());
-        assertTrue(log, log.contains("Performance: File JMeterPublisher.csv reported 33.333% of errors [UNSTABLE]. Build status is: UNSTABLE"));
+        assertEquals(Result.UNSTABLE, buildExt.getResult(), log);
+        assertTrue(log.contains(
+                "Performance: File JMeterPublisher.csv reported 33.333% of errors [UNSTABLE]. Build status is: UNSTABLE"),
+                log);
     }
 
     @Test
     public void testErrorThresholdFailed() throws Exception {
 
         PerformancePublisher publisherFailed = new PerformancePublisher("JMeterPublisher.csv",
-                2, //errorFailedThreshold
+                2, // errorFailedThreshold
                 -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
                 false, // modeOfThreshold (false = Error Threshold)
-                true, true, true,false, null);
+                true, true, true, false, null);
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
         buildExt.setWorkspace(new FilePath(Files.createTempDirectory(null).toFile()));
@@ -422,11 +449,14 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 getClass().getResource("/JMeterPublisher.csv"));
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        publisherFailed.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(new StreamTaskListener(stream)));
+        publisherFailed.perform(buildExt, buildExt.getWorkspace(), jenkinsRule.createLocalLauncher(),
+                new BuildListenerAdapter(new StreamTaskListener(stream, StandardCharsets.UTF_8)));
 
         String log = new String(stream.toByteArray());
-        assertEquals(log, Result.FAILURE, buildExt.getResult());
-        assertTrue(log, log.contains("Performance: File JMeterPublisher.csv reported 33.333% of errors [FAILURE]. Build status is: FAILURE"));
+        assertEquals(Result.FAILURE, buildExt.getResult(), log);
+        assertTrue(log.contains(
+                "Performance: File JMeterPublisher.csv reported 33.333% of errors [FAILURE]. Build status is: FAILURE"),
+                log);
     }
 
     @Test
@@ -435,9 +465,9 @@ public class PerformancePublisherTest extends HudsonTestCase {
         PerformancePublisher publisherART = new PerformancePublisher("JMeterPublisher.csv", -1, -1,
                 "JMeterPublisher.csv:1000", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
                 false, // modeOfThreshold (false = Error Threshold)
-                true, true, true,false, null);
+                true, true, true, false, null);
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         PerformanceTestBuildTest.FreeStyleBuildExt buildExt = new PerformanceTestBuildTest.FreeStyleBuildExt(project);
         buildExt.setWorkspace(new FilePath(Files.createTempDirectory(null).toFile()));
@@ -448,21 +478,23 @@ public class PerformancePublisherTest extends HudsonTestCase {
                 getClass().getResource("/JMeterPublisher.csv"));
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        publisherART.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(new StreamTaskListener(stream)));
+        publisherART.perform(buildExt, buildExt.getWorkspace(), jenkinsRule.createLocalLauncher(),
+                new BuildListenerAdapter(new StreamTaskListener(stream, StandardCharsets.UTF_8)));
 
         String log = new String(stream.toByteArray());
-        assertEquals(log, Result.UNSTABLE, buildExt.getResult());
-        assertTrue(log, log.contains("UNSTABLE: JMeterPublisher.csv has exceeded the threshold of [1000] with the time of [1433]"));
-
+        assertEquals(Result.UNSTABLE, buildExt.getResult(), log);
+        assertTrue(log.contains(
+                "UNSTABLE: JMeterPublisher.csv has exceeded the threshold of [1000] with the time of [1433]"), log);
 
         // For Number Format Exception
         publisherART.setErrorUnstableResponseTimeThreshold("JMeterPublisher.csv:1!00");
         stream = new ByteArrayOutputStream();
-        publisherART.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(new StreamTaskListener(stream)));
+        publisherART.perform(buildExt, buildExt.getWorkspace(), jenkinsRule.createLocalLauncher(),
+                new BuildListenerAdapter(new StreamTaskListener(stream, StandardCharsets.UTF_8)));
 
         log = new String(stream.toByteArray());
-        assertEquals(log, Result.FAILURE, buildExt.getResult());
-        assertTrue(log, log.contains("ERROR: Threshold set to a non-number [1!00]"));
+        assertEquals(Result.FAILURE, buildExt.getResult(), log);
+        assertTrue(log.contains("ERROR: Threshold set to a non-number [1!00]"), log);
     }
 
     @Test
@@ -471,7 +503,8 @@ public class PerformancePublisherTest extends HudsonTestCase {
         parsers.add(new JMeterCsvParser("test1", PerformanceReportTest.DEFAULT_PERCENTILES));
         parsers.add(new JMeterParser("test2", PerformanceReportTest.DEFAULT_PERCENTILES));
 
-        PerformancePublisher publisher = new PerformancePublisher("", -1, -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT", false, true, true, true,false, parsers);
+        PerformancePublisher publisher = new PerformancePublisher("", -1, -1, "", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
+                false, true, true, true, false, parsers);
 
         assertEquals("test1;test2", publisher.getSourceDataFiles());
         assertNull(publisher.getParsers());
@@ -488,20 +521,20 @@ public class PerformancePublisherTest extends HudsonTestCase {
     @Test
     public void testRelativeThresholdUnstableNegative() throws Exception {
 
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
         PerformancePublisher publisher = new PerformancePublisher("JMeterCsvResults.csv", -1, -1, "", -0.1, -0.1, -0.1,
                 5.0, // relativeUnstableThresholdNegative
                 1, true, "MRT",
                 true, // modeOfThreshold (true = Relative Threshold)
-                true, true, true,false, null);
+                true, true, true, false, null);
 
         p.getPublishersList().add(publisher);
         // first build
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
                         getClass().getResource("/JMeterCsvResults.csv"));
@@ -512,30 +545,30 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
 
-        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+        jenkinsRule.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
 
         publisher.setSourceDataFiles("JMeterPublisher.csv");
-        assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
+        jenkinsRule.assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
     }
 
     @Test
     public void testRelativeThresholdUnstablePositive() throws Exception {
 
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
         PerformancePublisher publisher = new PerformancePublisher("JMeterPublisher.csv", -1, -1, "", -0.1, -0.1,
                 9.0, // relativeUnstableThresholdPositive
                 -0.1, // relativeUnstableThresholdNegative
                 1, true, "ART",
                 true, // modeOfThreshold (true = Relative Threshold)
-                true, true, true,false, null);
+                true, true, true, false, null);
 
         p.getPublishersList().add(publisher);
         // first build
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
                         getClass().getResource("/JMeterCsvResults.csv"));
@@ -546,30 +579,30 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
 
-        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+        jenkinsRule.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
 
         publisher.setSourceDataFiles("JMeterCsvResults.csv");
-        assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
+        jenkinsRule.assertBuildStatus(Result.UNSTABLE, p.scheduleBuild2(0).get());
     }
 
     @Test
     public void testRelativeThresholdFailedNegative() throws Exception {
 
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
         PerformancePublisher publisher = new PerformancePublisher("JMeterCsvResults.csv", -1, -1, "", -0.1,
                 5.1, // relativeFailedThresholdNegative
                 -0.1, -0.1, 1, true, "PRT",
                 true, // modeOfThreshold (true = Relative Threshold)
                 true, false, // false - means compare with Build Number
-                true,false, null);
+                true, false, null);
 
         p.getPublishersList().add(publisher);
         // first build
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
                         getClass().getResource("/JMeterCsvResults.csv"));
@@ -580,30 +613,30 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
 
-        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+        jenkinsRule.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
 
         publisher.setSourceDataFiles("JMeterPublisher.csv");
-        assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        jenkinsRule.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
     }
 
     @Test
     public void testRelativeThresholdFailedPositive() throws Exception {
 
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
         PerformancePublisher publisher = new PerformancePublisher("JMeterPublisher.csv", -1, -1, "",
                 5.1, // relativeFailedThresholdPositive
                 -0.1, -0.1, -0.1, 1, true, "PRT",
                 true, // modeOfThreshold (true = Relative Threshold)
                 true, false, // false - means compare with Build Number
-                true,false, null);
+                true, false, null);
 
         p.getPublishersList().add(publisher);
         // first build
         p.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build,
-                                   Launcher launcher, BuildListener listener)
+                    Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 build.getWorkspace().child("JMeterCsvResults.csv").copyFrom(
                         getClass().getResource("/JMeterCsvResults.csv"));
@@ -614,28 +647,31 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
         });
 
-        assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+        jenkinsRule.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
 
         publisher.setSourceDataFiles("JMeterCsvResults.csv");
-        assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        jenkinsRule.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
     }
 
     public void testRelativeThresholds() throws Exception {
-        FreeStyleProject freeStyleProject = createFreeStyleProject();
+        FreeStyleProject freeStyleProject = jenkinsRule.createFreeStyleProject();
 
         final RunExt prevBuild = new RunExt(freeStyleProject);
         prevBuild.onStartBuilding();
 
         PerformancePublisher publisher = new PerformancePublisher("") {
             @Override
-            protected List<PerformanceReportParser> getParsers(Run<?, ?> build, FilePath workspace, PrintStream logger, EnvVars env) throws IOException, InterruptedException {
+            protected List<PerformanceReportParser> getParsers(Run<?, ?> build, FilePath workspace, PrintStream logger,
+                    EnvVars env) throws IOException, InterruptedException {
                 List<PerformanceReportParser> parsers = new ArrayList<>();
                 parsers.add(new JMeterCsvParser("", ""));
                 return parsers;
             }
 
             @Override
-            public Collection<PerformanceReport> prepareEvaluation(Run<?, ?> run, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers) throws IOException, InterruptedException {
+            public Collection<PerformanceReport> prepareEvaluation(Run<?, ?> run, FilePath workspace,
+                    TaskListener listener, List<PerformanceReportParser> parsers)
+                    throws IOException, InterruptedException {
                 List<PerformanceReport> reports = new ArrayList<>();
                 reports.add(new PerformanceReport());
                 reports.add(new PerformanceReport());
@@ -643,7 +679,9 @@ public class PerformancePublisherTest extends HudsonTestCase {
             }
 
             @Override
-            protected List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener, List<PerformanceReportParser> parsers, boolean locatePerformanceReports) throws IOException, InterruptedException {
+            protected List<UriReport> getBuildUriReports(Run<?, ?> build, FilePath workspace, TaskListener listener,
+                    List<PerformanceReportParser> parsers, boolean locatePerformanceReports)
+                    throws IOException, InterruptedException {
                 List<UriReport> uriReports = new ArrayList<>();
                 if (locatePerformanceReports) {
                     UriReport report = new UriReport(new PerformanceReport(), "aaaaa", "bbbbb");
@@ -672,19 +710,22 @@ public class PerformancePublisherTest extends HudsonTestCase {
 
         RunExt run1 = new RunExt(freeStyleProject);
         run1.onStartBuilding();
-        publisher.perform(run1, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
+        publisher.perform(run1, new FilePath(new File(".")), jenkinsRule.createLocalLauncher(),
+                jenkinsRule.createTaskListener());
         assertEquals(Result.SUCCESS, run1.getResult());
 
         publisher.setRelativeUnstableThresholdNegative(10);
         RunExt run2 = new RunExt(freeStyleProject);
         run2.onStartBuilding();
-        publisher.perform(run2, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
+        publisher.perform(run2, new FilePath(new File(".")), jenkinsRule.createLocalLauncher(),
+                jenkinsRule.createTaskListener());
         assertEquals(Result.UNSTABLE, run2.getResult());
 
         publisher.setRelativeFailedThresholdNegative(10);
         RunExt run3 = new RunExt(freeStyleProject);
         run3.onStartBuilding();
-        publisher.perform(run3, new FilePath(new File(".")), createLocalLauncher(), createTaskListener());
+        publisher.perform(run3, new FilePath(new File(".")), jenkinsRule.createLocalLauncher(),
+                jenkinsRule.createTaskListener());
         assertEquals(Result.FAILURE, run3.getResult());
     }
 }

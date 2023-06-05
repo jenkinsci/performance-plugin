@@ -160,10 +160,6 @@ public class ConstraintReportTest {
 
         filePath = Mockito.mock(FilePath.class);
 
-        when(globBuild.getWorkspace()).thenReturn(filePath);
-        when(filePath.toURI()).thenReturn(uri);
-        when(uri.getPath()).thenReturn("test-jenkins-filepath/");
-
         final Jenkins jenkins = Mockito.mock(Jenkins.class);
         staticJenkins.when(Jenkins::get).thenReturn(jenkins);
         when(jenkins.getRootUrl()).thenReturn("test-jenkins-rooturl");

@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -104,12 +105,12 @@ public class PerformanceReportTest {
 
     private PerformanceReport parseOneJMeter(File f) throws IOException {
         return new JMeterParser("", DEFAULT_PERCENTILES).parse(null, Collections.singleton(f),
-                new StreamTaskListener(System.out)).iterator().next();
+                new StreamTaskListener(System.out, StandardCharsets.UTF_8)).iterator().next();
     }
 
     private PerformanceReport parseOneJUnit(File f) throws IOException {
         return new JUnitParser("", PerformanceReportTest.DEFAULT_PERCENTILES).parse(null, Collections.singleton(f),
-                new StreamTaskListener(System.out)).iterator().next();
+                new StreamTaskListener(System.out, StandardCharsets.UTF_8)).iterator().next();
     }
 
     @Test
