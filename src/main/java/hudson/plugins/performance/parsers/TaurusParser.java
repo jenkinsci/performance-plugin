@@ -93,13 +93,13 @@ public class TaurusParser extends AbstractParser {
     private TaurusFinalStats getTaurusFinalStats(Element group) {
         final TaurusFinalStats report = new TaurusFinalStats();
 
-        report.setBytes(Long.valueOf(getValueAttribute("bytes", group)));
-        report.setFail(Integer.valueOf(getValueAttribute("fail", group)));
-        report.setSucc(Integer.valueOf(getValueAttribute("succ", group)));
+        report.setBytes(Long.valueOf(getValue("bytes", group)));
+        report.setFail(Integer.valueOf(getValue("fail", group)));
+        report.setSucc(Integer.valueOf(getValue("succ", group)));
         if (group.getElementsByTagName("throughput").getLength() > 0) {
-            report.setThroughput(Long.valueOf(getValueAttribute("throughput", group)));
+            report.setThroughput(Long.valueOf(getValue("throughput", group)));
         }
-        report.setAverageResponseTime(Double.valueOf(getValueAttribute("avg_rt", group)) * 1000); // to ms
+        report.setAverageResponseTime(Double.valueOf(getValue("avg_rt", group)) * 1000); // to ms
 
         NodeList perc = group.getElementsByTagName("perc");
         for (int i = 0; i < perc.getLength(); i++) {
@@ -120,7 +120,7 @@ public class TaurusParser extends AbstractParser {
         return report;
     }
 
-    private String getValueAttribute(String elementName, Element group) {
+    private String getValue(String elementName, Element group) {
         return ((Element) group.getElementsByTagName(elementName).item(0)).getAttribute("value");
     }
 }
