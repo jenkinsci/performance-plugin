@@ -1,14 +1,9 @@
 package hudson.plugins.performance.reports;
 
-import hudson.plugins.performance.actions.PerformanceBuildAction;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.data.TaurusFinalStats;
-import hudson.plugins.performance.parsers.JMeterParser;
-import hudson.plugins.performance.parsers.JUnitParser;
-import hudson.util.StreamTaskListener;
-import org.easymock.classextension.EasyMock;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,10 +14,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.data.TaurusFinalStats;
+import hudson.plugins.performance.parsers.JMeterParser;
+import hudson.plugins.performance.parsers.JUnitParser;
+import hudson.util.StreamTaskListener;
 
 public class PerformanceReportTest {
     public static final String DEFAULT_PERCENTILES = "0,50,90,100";
@@ -31,22 +32,19 @@ public class PerformanceReportTest {
 
     @Before
     public void setUp() throws Exception {
-        PerformanceBuildAction buildAction = EasyMock
-                .createMock(PerformanceBuildAction.class);
+        PerformanceBuildAction buildAction = Mockito.mock(PerformanceBuildAction.class);
         performanceReport = new PerformanceReport(DEFAULT_PERCENTILES);
         performanceReport.setBuildAction(buildAction);
     }
 
     @Test
     public void testAddSample() throws Exception {
-        PrintStream printStream = EasyMock.createMock(PrintStream.class);
-        EasyMock.expect(
+        PrintStream printStream = Mockito.mock(PrintStream.class);
+        Mockito.when(
                 performanceReport.getBuildAction().getHudsonConsoleWriter())
-                .andReturn(printStream);
+                .thenReturn(printStream);
         printStream
                 .println("label cannot be empty, please ensure your jmx file specifies name properly for each http sample: skipping sample");
-        EasyMock.replay(printStream);
-        EasyMock.replay(performanceReport.getBuildAction());
 
         HttpSample sample1 = new HttpSample();
         sample1.setDate(new Date());
@@ -72,14 +70,12 @@ public class PerformanceReportTest {
 
     @Test
     public void testAddTaurusSample() throws Exception {
-        PrintStream printStream = EasyMock.createMock(PrintStream.class);
-        EasyMock.expect(
+        PrintStream printStream = Mockito.mock(PrintStream.class);
+        Mockito.when(
                 performanceReport.getBuildAction().getHudsonConsoleWriter())
-                .andReturn(printStream);
+                .thenReturn(printStream);
         printStream
                 .println("label cannot be empty, please ensure your jmx file specifies name properly for each http sample: skipping sample");
-        EasyMock.replay(printStream);
-        EasyMock.replay(performanceReport.getBuildAction());
 
         TaurusFinalStats sample = new TaurusFinalStats();
         performanceReport.addSample(sample, true);
