@@ -1,9 +1,14 @@
 package hudson.plugins.performance.build;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -13,8 +18,9 @@ import java.util.List;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.JenkinsRule;
 
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -30,14 +36,16 @@ import hudson.tasks.Publisher;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
 
+public class PerformanceTestBuildTest {
 
-public class PerformanceTestBuildTest extends HudsonTestCase {
+    @Rule
+    public final JenkinsRule jenkinsRule = new JenkinsRule();
 
     @Test
     public void testFlow() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
@@ -46,7 +54,9 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         buildExt.getRootDir().mkdirs();
 
-        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path=" + workspace.getRemote());
+        PerformanceTestBuild buildTest = new PerformanceTestBuild(new File(path).getAbsolutePath() + ' '
+                + "-o modules.jmeter.plugins=[] -o services=[] -o modules.jmeter.version=3.1 -o modules.jmeter.path="
+                + workspace.getRemote());
         buildTest.setGeneratePerformanceTrend(true);
         buildTest.setPrintDebugOutput(true);
         buildTest.setUseSystemSitePackages(false);
@@ -54,10 +64,10 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         assertEquals(PerformanceProjectAction.class, buildTest.getProjectAction((AbstractProject) project).getClass());
 
-
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
-        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), jenkinsRule.createLocalLauncher(),
+                new BuildListenerAdapter(taskListener));
 
         Iterator<Publisher> iterator = project.getPublishersList().iterator();
         StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
@@ -67,7 +77,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
-        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
+        assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
     }
 
     @Test
@@ -75,7 +85,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String path = getClass().getResource("/performanceTest.yml").getPath();
         String gitRepo = "git+https://github.com/Blazemeter/taurus.git";
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
@@ -93,8 +103,9 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildTest.setBztVersion(gitRepo);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
-        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), jenkinsRule.createLocalLauncher(),
+                new BuildListenerAdapter(taskListener));
 
         Iterator<Publisher> iterator = project.getPublishersList().iterator();
         StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
@@ -104,9 +115,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
-        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
-        assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + gitRepo));
+        assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
+        assertEquals(5, buildTest.commands.size(), jobLog);
+        assertTrue(
+                Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + gitRepo),
+                jobLog);
     }
 
     @Test
@@ -114,7 +127,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         String path = getClass().getResource("/performanceTest.yml").getPath();
         String url = "http://gettaurus.org/snapshots/bzt-1.9.5.1622.tar.gz";
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
@@ -132,8 +145,9 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildTest.setBztVersion(url);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
-        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), jenkinsRule.createLocalLauncher(),
+                new BuildListenerAdapter(taskListener));
 
         Iterator<Publisher> iterator = project.getPublishersList().iterator();
         StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
@@ -143,16 +157,17 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
-        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
-        assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + url));
+        assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
+        assertEquals(5, buildTest.commands.size(), jobLog);
+        assertTrue(Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + url),
+                jobLog);
     }
 
     @Test
     public void testInstallFromPath() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
@@ -170,8 +185,9 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildTest.setBztVersion(path);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
-        buildTest.perform(buildExt, buildExt.getWorkspace(), createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), jenkinsRule.createLocalLauncher(),
+                new BuildListenerAdapter(taskListener));
 
         Iterator<Publisher> iterator = project.getPublishersList().iterator();
         StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
@@ -181,9 +197,10 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
-        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
-        assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue(jobLog, Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + path));
+        assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
+        assertEquals(5, buildTest.commands.size(), jobLog);
+        assertTrue(Arrays.toString(buildTest.commands.get(buildTest.commands.size() - 3)).contains("install, " + path),
+                jobLog);
     }
 
     public static class PerformanceTestBuildExt extends PerformanceTestBuild {
@@ -194,7 +211,8 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         public List<String[]> commands = new LinkedList<>();
 
         @Override
-        public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+        public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher,
+                EnvVars envVars) throws InterruptedException, IOException {
             if (launcher instanceof Launcher.DummyLauncher) {
                 super.runCmd(commands, workspace, logger, launcher, envVars);
             }
@@ -202,7 +220,6 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
             return 0;
         }
     }
-
 
     public static class FreeStyleBuildExt extends FreeStyleBuild {
 
@@ -267,12 +284,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         assertEquals("$VARIABLE_PATH/virtualenv", testBuild.getVirtualEnvCommand());
     }
 
-
     @Test
     public void testGenerateReportInPipe() throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
+        WorkflowJob p = jenkinsRule.createProject(WorkflowJob.class, "p");
         FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         p.createExecutable();
         Run run = p.getFirstBuild();
@@ -281,7 +297,6 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         FilePath report = new FilePath(new File(workspace.getRemote(), "aggregate-results.xml"));
         report.copyFrom(getClass().getResource("/aggregate-results.xml"));
 
-
         PerformanceTestBuildExt buildTest = new PerformanceTestBuildExt(args);
         buildTest.setGeneratePerformanceTrend(true);
         buildTest.setPrintDebugOutput(true);
@@ -289,36 +304,37 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildTest.setUseBztExitCode(false);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
-        buildTest.perform(run, workspace, createLocalLauncher(), new BuildListenerAdapter(taskListener));
-
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
+        buildTest.perform(run, workspace, jenkinsRule.createLocalLauncher(), new BuildListenerAdapter(taskListener));
 
         String jobLog = new String(stream.toByteArray());
 
         File reportFile = new File(run.getRootDir(), "performance-reports/Taurus/aggregate-results.xml");
-        assertTrue("Report file " + reportFile.getAbsolutePath() + " expected to exist", reportFile.exists());
-        assertTrue("Job log expected to contains 'Performance: Recording Taurus reports', jobLog:" + jobLog, 
-                jobLog.contains("Performance: Recording Taurus reports"));
-        assertTrue("Job log expected to contains 'aggregate-results.xml', jobLog:" + jobLog, jobLog.contains("aggregate-results.xml'"));
-        assertTrue("Job log expected to contains 'Performance: Parsing report file ...', jobLog:" + jobLog, 
-                jobLog.contains("Performance: Parsing report file '" + reportFile.getAbsolutePath() + "' with filterRegex '" 
-                        + PerformanceReport.INCLUDE_ALL + "'."));
+        assertTrue(reportFile.exists(), "Report file " + reportFile.getAbsolutePath() + " expected to exist");
+        assertTrue(jobLog.contains("Performance: Recording Taurus reports"),
+                "Job log expected to contains 'Performance: Recording Taurus reports', jobLog:" + jobLog);
+        assertTrue(jobLog.contains("aggregate-results.xml'"),
+                "Job log expected to contains 'aggregate-results.xml', jobLog:" + jobLog);
+        assertTrue(jobLog.contains(
+                "Performance: Parsing report file '" + reportFile.getAbsolutePath() + "' with filterRegex '"
+                        + PerformanceReport.INCLUDE_ALL + "'."),
+                "Job log expected to contains 'Performance: Parsing report file ...', jobLog:" + jobLog);
     }
-
 
     @Test
     public void testFailCriteria() throws Exception {
         String path = getClass().getResource("/performanceTestWithFailCriteria.yml").getPath();
 
-        WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
+        WorkflowJob p = jenkinsRule.createProject(WorkflowJob.class, "p");
         FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
         p.createExecutable();
         Run run = p.getFirstBuild();
-        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]" ;
+        String args = new File(path).getAbsolutePath() + ' ' + "-o modules.jmeter.plugins=[] -o services=[]";
 
         PerformanceTestBuild buildTest = new PerformanceTestBuildExt(args) {
             @Override
-            public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
+            public int runCmd(String[] commands, FilePath workspace, OutputStream logger, Launcher launcher,
+                    EnvVars envVars) throws InterruptedException, IOException {
                 for (String cmd : commands) {
                     if (cmd.contains("performanceTestWithFailCriteria.yml")) {
                         logger.write("Done performing with code: 3".getBytes());
@@ -334,12 +350,12 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildTest.setUseBztExitCode(true);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
-        buildTest.perform(run, workspace, createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
+        buildTest.perform(run, workspace, jenkinsRule.createLocalLauncher(), new BuildListenerAdapter(taskListener));
 
         String jobLog = new String(stream.toByteArray());
-        assertEquals(jobLog, Result.UNSTABLE, run.getResult());
-        assertTrue(jobLog, jobLog.contains("Done performing with code: 3"));
+        assertEquals(Result.UNSTABLE, run.getResult(), jobLog);
+        assertTrue(jobLog.contains("Done performing with code: 3"), jobLog);
     }
 
     @Test
@@ -363,13 +379,13 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
     @Test
     public void testPWD() throws Exception {
-        WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
+        WorkflowJob p = jenkinsRule.createProject(WorkflowJob.class, "p");
         File buildWorkspace = Files.createTempDirectory(null).toFile();
         FilePath workspace = new FilePath(buildWorkspace);
         p.createExecutable();
         Run run = p.getFirstBuild();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
 
         PerformanceTestBuildExt testBuild = new PerformanceTestBuildExt("");
         testBuild.setUseSystemSitePackages(false);
@@ -378,29 +394,27 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         // test absolute path
         String absoluteWorkspace = "/tmp/o/work/bzt";
         testBuild.setWorkspace(absoluteWorkspace);
-        testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        testBuild.perform(run, workspace, jenkinsRule.createLocalLauncher(), new BuildListenerAdapter(taskListener));
         String jobLog = new String(stream.toByteArray());
-        assertTrue(jobLog, new File(absoluteWorkspace).isDirectory());
-        assertTrue(jobLog, new File(absoluteWorkspace).exists());
-        assertTrue(jobLog, new File(absoluteWorkspace, "jenkins-report.yml").exists());
+        assertTrue(new File(absoluteWorkspace).isDirectory(), jobLog);
+        assertTrue(new File(absoluteWorkspace).exists(), jobLog);
+        assertTrue(new File(absoluteWorkspace, "jenkins-report.yml").exists(), jobLog);
 
         // test relative path
         String relativeWorkspace = "oooooh/relative/path";
         testBuild.setWorkspace(relativeWorkspace);
-        testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        testBuild.perform(run, workspace, jenkinsRule.createLocalLauncher(), new BuildListenerAdapter(taskListener));
         jobLog = new String(stream.toByteArray());
-        assertTrue(jobLog, new File(buildWorkspace, relativeWorkspace).isDirectory());
-        assertTrue(jobLog, new File(buildWorkspace, relativeWorkspace).exists());
-        assertTrue(jobLog, new File(buildWorkspace, relativeWorkspace + "/jenkins-report.yml").exists());
-
-
+        assertTrue(new File(buildWorkspace, relativeWorkspace).isDirectory(), jobLog);
+        assertTrue(new File(buildWorkspace, relativeWorkspace).exists(), jobLog);
+        assertTrue(new File(buildWorkspace, relativeWorkspace + "/jenkins-report.yml").exists(), jobLog);
 
         // test Permission denied
         String rootPath = "/rootWorkspace/";
         testBuild.setWorkspace(rootPath);
-        testBuild.perform(run, workspace,  createLocalLauncher(), new BuildListenerAdapter(taskListener));
+        testBuild.perform(run, workspace, jenkinsRule.createLocalLauncher(), new BuildListenerAdapter(taskListener));
         jobLog = new String(stream.toByteArray());
-        assertTrue(jobLog, jobLog.contains("Cannot create working directory because of error: /rootWorkspace"));
+        assertTrue(jobLog.contains("Cannot create working directory because of error: /rootWorkspace"), jobLog);
     }
 
     private void resetVirtualEnvCommands() {
@@ -408,12 +422,13 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         PerformanceTestBuild.CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION[0] = PerformanceTestBuild.VIRTUALENV_COMMAND;
         PerformanceTestBuild.CREATE_LOCAL_PYTHON_COMMAND[0] = PerformanceTestBuild.VIRTUALENV_COMMAND;
     }
+
     @Test
     public void testDefaultVirtualEnvCommand() throws Exception {
         resetVirtualEnvCommands();
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
@@ -430,8 +445,9 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildTest.setAlwaysUseVirtualenv(true);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
-        buildTest.perform(buildExt, buildExt.getWorkspace(), new Launcher.DummyLauncher(taskListener), new BuildListenerAdapter(taskListener));
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), new Launcher.DummyLauncher(taskListener),
+                new BuildListenerAdapter(taskListener));
 
         Iterator<Publisher> iterator = project.getPublishersList().iterator();
         StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
@@ -441,10 +457,10 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
-        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
-        assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue("Command should have been 'virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'",
-                buildTest.commands.get(0)[0].equals("virtualenv"));
+        assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
+        assertEquals(5, buildTest.commands.size(), jobLog);
+        assertTrue(buildTest.commands.get(0)[0].equals("virtualenv"),
+                "Command should have been 'virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'");
         resetVirtualEnvCommands();
     }
 
@@ -453,7 +469,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         resetVirtualEnvCommands();
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
@@ -471,8 +487,9 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildTest.setVirtualEnvCommand("/path/to/virtualenv");
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
-        buildTest.perform(buildExt, buildExt.getWorkspace(), new Launcher.DummyLauncher(taskListener), new BuildListenerAdapter(taskListener));
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), new Launcher.DummyLauncher(taskListener),
+                new BuildListenerAdapter(taskListener));
 
         Iterator<Publisher> iterator = project.getPublishersList().iterator();
         StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
@@ -482,10 +499,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
-        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
-        assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue("Command should have been '/path/to/virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'",
-                buildTest.commands.get(0)[0].equals("/path/to/virtualenv"));
+        assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
+        assertEquals(5, buildTest.commands.size(), jobLog);
+        assertTrue(buildTest.commands.get(0)[0].equals("/path/to/virtualenv"),
+                "Command should have been '/path/to/virtualenv', but instead it was: '" + buildTest.commands.get(0)[0]
+                        + "'");
         resetVirtualEnvCommands();
     }
 
@@ -494,7 +512,7 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         resetVirtualEnvCommands();
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
 
         FreeStyleBuildExt buildExt = new FreeStyleBuildExt(project);
         FilePath workspace = new FilePath(Files.createTempDirectory(null).toFile());
@@ -512,8 +530,9 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
         buildTest.setVirtualEnvCommand("$WORKSPACE/virtualenv");
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        StreamTaskListener taskListener = new StreamTaskListener(stream);
-        buildTest.perform(buildExt, buildExt.getWorkspace(), new Launcher.DummyLauncher(taskListener), new BuildListenerAdapter(taskListener));
+        StreamTaskListener taskListener = new StreamTaskListener(stream, StandardCharsets.UTF_8);
+        buildTest.perform(buildExt, buildExt.getWorkspace(), new Launcher.DummyLauncher(taskListener),
+                new BuildListenerAdapter(taskListener));
 
         Iterator<Publisher> iterator = project.getPublishersList().iterator();
         StringBuilder builder = new StringBuilder("\n\nList publishers:\n");
@@ -523,10 +542,11 @@ public class PerformanceTestBuildTest extends HudsonTestCase {
 
         String jobLog = new String(stream.toByteArray()) + builder.toString();
 
-        assertEquals(jobLog, Result.SUCCESS, buildExt.getResult());
-        assertEquals(jobLog, 5, buildTest.commands.size());
-        assertTrue("Command should have been '" + workspace + "/virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'",
-                buildTest.commands.get(0)[0].equals(workspace + "/virtualenv"));
+        assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
+        assertEquals(5, buildTest.commands.size(), jobLog);
+        assertTrue(buildTest.commands.get(0)[0].equals(workspace + "/virtualenv"),
+                "Command should have been '" + workspace + "/virtualenv', but instead it was: '"
+                        + buildTest.commands.get(0)[0] + "'");
         resetVirtualEnvCommands();
     }
 }

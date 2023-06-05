@@ -80,7 +80,7 @@ import jenkins.tasks.SimpleBuildStep;
 
 public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
-    public static final double THRESHOLD_TOLERANCE = 0.00000001;
+    public static final double THRESHOLD_TOLERANCE = 0.0000000000000000000000000000000000000000000000000000000000000000000000000000001;
     private static final double DEFAULT_THRESHOLD = -1;
 
     private int errorFailedThreshold = -1;

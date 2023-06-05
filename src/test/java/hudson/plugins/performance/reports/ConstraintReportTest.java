@@ -1,8 +1,8 @@
 package hudson.plugins.performance.reports;
 
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.Result;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,28 +11,27 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import hudson.plugins.performance.constraints.AbsoluteConstraint;
-import hudson.plugins.performance.constraints.ConstraintEvaluation;
-import hudson.plugins.performance.constraints.RelativeConstraint;
-import jenkins.model.Jenkins;
-import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
-import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
-import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
-
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.Result;
+import hudson.plugins.performance.constraints.AbsoluteConstraint;
+import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
+import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
+import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
+import hudson.plugins.performance.constraints.ConstraintEvaluation;
+import hudson.plugins.performance.constraints.RelativeConstraint;
+import jenkins.model.Jenkins;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, FilePath.class, AbstractBuild.class, Calendar.class})
+@RunWith(MockitoJUnitRunner.class)
 public class ConstraintReportTest {
 
     @Mock
@@ -66,9 +65,6 @@ public class ConstraintReportTest {
 
     @Mock
     Date date;
-
-    @Mock
-    Jenkins jenkins;
 
     @Mock
     Calendar calendar;
@@ -112,6 +108,8 @@ public class ConstraintReportTest {
             "Measured value for Average: 9 \n " +
             "Escalation Level: Warning";
 
+    final MockedStatic<Jenkins> staticJenkins = Mockito.mockStatic(Jenkins.class);
+
     @Before
     public void setUp() throws IOException, InterruptedException {
         when(ce0.getAbstractConstraint()).thenReturn(rc0);
@@ -150,34 +148,28 @@ public class ConstraintReportTest {
         when(ac5.getRelatedPerfReport()).thenReturn("Result.xml");
 
         when(rc0.getOperator()).thenReturn(Operator.NOT_GREATER);
-        when(rc1.getOperator()).thenReturn(Operator.NOT_LESS);
         when(rc2.getOperator()).thenReturn(Operator.NOT_GREATER);
-        when(ac3.getOperator()).thenReturn(Operator.NOT_GREATER);
         when(ac4.getOperator()).thenReturn(Operator.NOT_LESS);
-        when(ac5.getOperator()).thenReturn(Operator.NOT_EQUAL);
 
         when(rc0.getMeteredValue()).thenReturn(Metric.AVERAGE);
-        when(rc1.getMeteredValue()).thenReturn(Metric.AVERAGE);
         when(rc2.getMeteredValue()).thenReturn(Metric.MAXIMUM);
-        when(ac3.getMeteredValue()).thenReturn(Metric.AVERAGE);
         when(ac4.getMeteredValue()).thenReturn(Metric.AVERAGE);
-        when(ac5.getMeteredValue()).thenReturn(Metric.AVERAGE);
 
         when(globBuild.getNumber()).thenReturn(42);
         when(globBuild.getTimestamp()).thenReturn(calendar);
 
-        filePath = PowerMockito.mock(FilePath.class);
+        filePath = Mockito.mock(FilePath.class);
 
-        when(globBuild.getWorkspace()).thenReturn(filePath);
-        when(filePath.toURI()).thenReturn(uri);
-        when(uri.getPath()).thenReturn("test-jenkins-filepath/");
-
-        PowerMockito.mockStatic(Jenkins.class);
-        when(Jenkins.get()).thenReturn(jenkins);
+        final Jenkins jenkins = Mockito.mock(Jenkins.class);
+        staticJenkins.when(Jenkins::get).thenReturn(jenkins);
         when(jenkins.getRootUrl()).thenReturn("test-jenkins-rooturl");
     }
 
-    @Ignore("Fails with java.lang.NoSuchMethodError: 'org.mockito.stubbing.Answer org.mockito.Answers.get()'")
+    @After
+    public void tearDown() {
+        staticJenkins.closeOnDemand();
+    }
+
     @Test
     public void happyPathWithoutConstraintLog() throws IOException, InterruptedException {
 
@@ -206,7 +198,6 @@ public class ConstraintReportTest {
         assertEquals(42, result.getBuildNumber());
     }
 
-    @Ignore("Fails with java.lang.NoSuchMethodError: 'org.mockito.stubbing.Answer org.mockito.Answers.get()'")
     @Test
     public void happyPathWithConstraintLog() throws IOException, InterruptedException {
         ceList = new ArrayList<ConstraintEvaluation>();

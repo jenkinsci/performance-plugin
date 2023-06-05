@@ -6,8 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import java.util.ArrayList;
 import java.util.List;
 
-import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
-import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,13 +17,15 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import hudson.model.AbstractBuild;
-import hudson.plugins.performance.actions.PerformanceBuildAction;
-import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.PerformanceReportMap;
-import hudson.plugins.performance.reports.UriReport;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
 import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
 import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
+import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.UriReport;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -113,26 +114,26 @@ public class ConstraintFactoryTest {
         /**
          * Check list samplesCount
          */
-        Assert.assertThat(result.size(), is(16));
+        MatcherAssert.assertThat(result.size(), is(16));
         /**
          * Check test cases
          */
-        Assert.assertThat(result.get(0).getTestCaseBlock().getTestCase(), is("tc1"));
-        Assert.assertThat(result.get(1).getTestCaseBlock().getTestCase(), is("tc1"));
-        Assert.assertThat(result.get(2).getTestCaseBlock().getTestCase(), is("tc2"));
-        Assert.assertThat(result.get(3).getTestCaseBlock().getTestCase(), is("tc3"));
-        Assert.assertThat(result.get(4).getTestCaseBlock().getTestCase(), is("tc4"));
-        Assert.assertThat(result.get(5).getTestCaseBlock().getTestCase(), is("tc1"));
-        Assert.assertThat(result.get(6).getTestCaseBlock().getTestCase(), is("tc2"));
-        Assert.assertThat(result.get(7).getTestCaseBlock().getTestCase(), is("tc3"));
-        Assert.assertThat(result.get(8).getTestCaseBlock().getTestCase(), is("tc1"));
-        Assert.assertThat(result.get(9).getTestCaseBlock().getTestCase(), is("tc1"));
-        Assert.assertThat(result.get(10).getTestCaseBlock().getTestCase(), is("tc2"));
-        Assert.assertThat(result.get(11).getTestCaseBlock().getTestCase(), is("tc3"));
-        Assert.assertThat(result.get(12).getTestCaseBlock().getTestCase(), is("tc4"));
-        Assert.assertThat(result.get(13).getTestCaseBlock().getTestCase(), is("tc1"));
-        Assert.assertThat(result.get(14).getTestCaseBlock().getTestCase(), is("tc2"));
-        Assert.assertThat(result.get(15).getTestCaseBlock().getTestCase(), is("tc3"));
+        MatcherAssert.assertThat(result.get(0).getTestCaseBlock().getTestCase(), is("tc1"));
+        MatcherAssert.assertThat(result.get(1).getTestCaseBlock().getTestCase(), is("tc1"));
+        MatcherAssert.assertThat(result.get(2).getTestCaseBlock().getTestCase(), is("tc2"));
+        MatcherAssert.assertThat(result.get(3).getTestCaseBlock().getTestCase(), is("tc3"));
+        MatcherAssert.assertThat(result.get(4).getTestCaseBlock().getTestCase(), is("tc4"));
+        MatcherAssert.assertThat(result.get(5).getTestCaseBlock().getTestCase(), is("tc1"));
+        MatcherAssert.assertThat(result.get(6).getTestCaseBlock().getTestCase(), is("tc2"));
+        MatcherAssert.assertThat(result.get(7).getTestCaseBlock().getTestCase(), is("tc3"));
+        MatcherAssert.assertThat(result.get(8).getTestCaseBlock().getTestCase(), is("tc1"));
+        MatcherAssert.assertThat(result.get(9).getTestCaseBlock().getTestCase(), is("tc1"));
+        MatcherAssert.assertThat(result.get(10).getTestCaseBlock().getTestCase(), is("tc2"));
+        MatcherAssert.assertThat(result.get(11).getTestCaseBlock().getTestCase(), is("tc3"));
+        MatcherAssert.assertThat(result.get(12).getTestCaseBlock().getTestCase(), is("tc4"));
+        MatcherAssert.assertThat(result.get(13).getTestCaseBlock().getTestCase(), is("tc1"));
+        MatcherAssert.assertThat(result.get(14).getTestCaseBlock().getTestCase(), is("tc2"));
+        MatcherAssert.assertThat(result.get(15).getTestCaseBlock().getTestCase(), is("tc3"));
     }
 
     @Test
@@ -144,8 +145,8 @@ public class ConstraintFactoryTest {
         /**
          * Checking optional blocks
          */
-        Assert.assertThat(result.get(0).getTestCaseBlock().getTestCase(), is("tc1"));
-        Assert.assertThat(result.get(1).isSpecifiedTestCase(), is(false));
+        MatcherAssert.assertThat(result.get(0).getTestCaseBlock().getTestCase(), is("tc1"));
+        MatcherAssert.assertThat(result.get(1).isSpecifiedTestCase(), is(false));
         Assert.assertNull(result.get(1).getTestCaseBlock());
     }
 }

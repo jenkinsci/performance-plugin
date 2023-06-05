@@ -47,6 +47,7 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
     public void setup() {
         when(build.getPreviousBuild()).thenReturn(prevBuild);
         when(prevBuild.getPreviousBuild()).thenReturn(buildWithNumber3);
+        when(prevBuild.getPreviousCompletedBuild()).thenReturn(buildWithNumber3);
         when(build.getNumber()).thenReturn(5);
         when(prevBuild.getNumber()).thenReturn(4);
         when(buildWithNumber3.getNumber()).thenReturn(3);
