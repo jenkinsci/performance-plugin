@@ -51,7 +51,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
     private static final Cache<String, PerformanceReport> CACHE = CacheBuilder.newBuilder().maximumSize(1000).softValues().build();
 
     protected boolean isNumberDateFormat = false;
-    protected SimpleDateFormat format;
+    protected transient SimpleDateFormat format;
 
     protected static final String[] DATE_FORMATS = new String[]{
             "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss,SSS", "yyyy/mm/dd HH:mm:ss"
