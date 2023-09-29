@@ -93,6 +93,25 @@ public class PerformancePublisherTest {
     }
 
     @Test
+    public void testBuildWithFormattedTimeStamp() throws Exception {
+        final FreeStyleProject p = jenkinsRule.createFreeStyleProject();
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build,
+                    Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("test.csv").copyFrom(
+                        getClass().getResource("/JMeterPublisher_formatted_timeStamp.csv"));
+                return true;
+            }
+        });
+        p.getPublishersList().add(new PerformancePublisher("test.csv"));
+
+        FreeStyleBuild b = jenkinsRule.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0).get());
+        b.save();
+    }
+
+    @Test
     public void testStandardResultsXML() throws Exception {
         FreeStyleProject p = jenkinsRule.createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
