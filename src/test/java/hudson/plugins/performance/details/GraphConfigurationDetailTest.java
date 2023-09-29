@@ -1,7 +1,6 @@
 package hudson.plugins.performance.details;
 
 import hudson.model.FreeStyleProject;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,11 +22,6 @@ public class GraphConfigurationDetailTest {
 
     @Mock
     private StaplerRequest request;
-
-    @After
-    public void shutdown() throws Exception {
-        j.after();
-    }
 
     @Test
     public void testDefault() throws Exception {
