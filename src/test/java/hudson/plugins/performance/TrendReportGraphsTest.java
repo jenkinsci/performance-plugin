@@ -4,7 +4,6 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.PerformanceReportTest;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -14,11 +13,6 @@ import static org.junit.Assert.*;
 public class TrendReportGraphsTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
-
-    @After
-    public void shutdown() throws Exception {
-        j.after();
-    }
 
     @Test
     public void test() throws Exception {
