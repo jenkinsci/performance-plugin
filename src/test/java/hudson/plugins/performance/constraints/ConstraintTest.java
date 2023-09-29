@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,11 +26,6 @@ public class ConstraintTest {
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
-
-    @After
-    public void shutdown() throws Exception {
-        j.after();
-    }
 
     /**
      * Testing: Escalation.INFORMATION
