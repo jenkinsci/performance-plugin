@@ -176,10 +176,9 @@ public class ParserDetector {
      */
     private static boolean isLocustFileType(String line) {
         String[] fileLineHeader = line.replaceAll("\"", "").split(",");
-        String[] expectedHeaderFields = new String[]{"Method", "Name", "# requests", "# failures",
-                "Median response time", "Average response time", "Min response time", "Max response time",
+        String[] expectedHeaderFields = new String[]{"Type", "Name", "Request Count", "Failure Count",
+                "Median Response Time", "Average Response Time", "Min Response Time", "Max Response Time",
                 "Average Content Size", "Requests/s"};
-        return (Arrays.equals(fileLineHeader, expectedHeaderFields));
+        return (Arrays.asList(fileLineHeader).containsAll(Arrays.asList(expectedHeaderFields)));
     }
-
 }

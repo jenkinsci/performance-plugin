@@ -1,6 +1,8 @@
 package hudson.plugins.performance.parsers;
 
+import hudson.Extension;
 import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
 import hudson.plugins.performance.reports.PerformanceReport;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -13,10 +15,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Date;
 import java.util.List;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 public class LocustParser extends AbstractParser {
     enum ReportColumns {
-        Method(0), Name(1), Requests(2), Failures(3), Median(4),
+        Type(0), Name(1), Requests(2), Failures(3), Median(4),
         Average(5), Min(6), Max(7), AvgContentSize(8), Rps(9);
 
         int column;
@@ -30,8 +33,21 @@ public class LocustParser extends AbstractParser {
         }
     }
 
-    public LocustParser(final String glob, final String percentiles, final String filterRegex) {
+    public LocustParser(String glob, String percentiles) {
+        super(glob, percentiles, PerformanceReport.INCLUDE_ALL);
+    }
+
+    @DataBoundConstructor
+    public LocustParser(String glob, String percentiles, String filterRegex) {
         super(glob, percentiles, filterRegex);
+    }
+
+    @Extension
+    public static class DescriptorImpl extends PerformanceReportParserDescriptor {
+        @Override
+        public String getDisplayName() {
+            return "Locust";
+        }
     }
 
     @Override
@@ -45,15 +61,15 @@ public class LocustParser extends AbstractParser {
 
         for (CSVRecord record : reportData) {
             String name = record.get(ReportColumns.Name.getColumn());
-            long average = Long.parseLong(record.get(ReportColumns.Average.getColumn()));
-            long min = Long.parseLong(record.get(ReportColumns.Min.getColumn()));
-            long max = Long.parseLong(record.get(ReportColumns.Max.getColumn()));
-            long failures = Long.parseLong(record.get(ReportColumns.Failures.getColumn()));
-            long success = Long.parseLong(record.get(ReportColumns.Requests.getColumn()));
-            float errors = Float.valueOf(failures / success);
-            long avgContentSize = Long.parseLong(record.get(ReportColumns.AvgContentSize.getColumn()));
+            long average = Double.valueOf(record.get(ReportColumns.Average.getColumn())).longValue();
+            long min = Double.valueOf(record.get(ReportColumns.Min.getColumn())).longValue();
+            long max = Double.valueOf(record.get(ReportColumns.Max.getColumn())).longValue();
+            long failures = Double.valueOf(record.get(ReportColumns.Failures.getColumn())).longValue();
+            long success = Double.valueOf(record.get(ReportColumns.Requests.getColumn())).longValue();
+            long errors = Double.valueOf(failures / success).longValue();
+            long avgContentSize = Double.valueOf(record.get(ReportColumns.AvgContentSize.getColumn())).longValue();
 
-            if (name.equals("Total")) {
+            if (name.equals("Aggregated")) {
                 report.setSummarizerSize(reportData.size() - 1);
                 report.setSummarizerAvg(average);
                 report.setSummarizerMin(min);
@@ -93,6 +109,6 @@ public class LocustParser extends AbstractParser {
 
     @Override
     public String getDefaultGlobPattern() {
-        return "**/*.csv";
+        return "**/*_stats.csv";
     }
 }

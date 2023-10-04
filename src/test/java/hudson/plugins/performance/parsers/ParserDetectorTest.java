@@ -42,6 +42,9 @@ public class ParserDetectorTest {
 
         filePath = getClass().getResource("/lr-session.mdb").toURI().getPath();
         assertEquals(LoadRunnerParser.class.getSimpleName(), ParserDetector.detect(filePath));
+
+        filePath = getClass().getResource("/test_results_stats.csv").toURI().getPath();
+        assertEquals(LocustParser.class.getSimpleName(), ParserDetector.detect(filePath));
     }
 
     @Issue("JENKINS-44317")
@@ -62,12 +65,6 @@ public class ParserDetectorTest {
     @Test
     public void testIssue() throws Exception {
         assertEquals(JMeterParser.class.getSimpleName(), ParserDetector.detectXMLFileType(getHugeJMeterInputStream()));
-    }
-
-    @Test
-    public void testLocustReport() throws Exception {
-        String filePath = getClass().getResource("/test_results_requests.csv").toURI().getPath();
-        assertEquals(LocustParser.class.getSimpleName(), ParserDetector.detect(filePath));
     }
 
     public static InputStream getHugeJMeterInputStream() {
