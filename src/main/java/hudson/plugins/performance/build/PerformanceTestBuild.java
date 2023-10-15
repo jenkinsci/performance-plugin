@@ -44,8 +44,8 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String VIRTUALENV_PATH_UNIX = "/taurus-venv/bin/";
     protected final static String VIRTUALENV_PATH_WINDOWS = "\\taurus-venv\\Scripts\\";
 
-    protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_OPTION};
-    protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_OPTION};
+    final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_OPTION};
+    final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_OPTION};
 
     final static String[] CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION =
             new String[]{VIRTUALENV_COMMAND, "--clear", "--system-site-packages", "taurus-venv"};
