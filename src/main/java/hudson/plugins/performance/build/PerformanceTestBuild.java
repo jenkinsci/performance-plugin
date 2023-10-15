@@ -29,10 +29,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -146,7 +143,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                     getBztJobResult(testExitCode) :
                     getJobResult(testExitCode)
             );
-            if (generatePerformanceTrend && run.getResult().isBetterThan(Result.FAILURE)) {
+            if (generatePerformanceTrend && Result.FAILURE.isWorseThan(Objects.requireNonNull(run.getResult()))) {
                 generatePerformanceTrend(bztWorkingDirectory.getRemote(), run, workspace, launcher, listener);
             }
 
