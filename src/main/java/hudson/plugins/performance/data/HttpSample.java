@@ -127,6 +127,14 @@ public class HttpSample implements Serializable, Comparable<HttpSample> {
         return (int) (getDuration() - o.getDuration());
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        HttpSample that = (HttpSample) obj;
+        return getDuration() == that.getDuration();
+    }
+
     public double getSizeInKb() {
         return sizeInKb;
     }
