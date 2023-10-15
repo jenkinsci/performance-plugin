@@ -23,11 +23,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -149,7 +146,6 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                     getBztJobResult(testExitCode) :
                     getJobResult(testExitCode)
             );
-
             if (generatePerformanceTrend && run.getResult().isBetterThan(Result.FAILURE)) {
                 generatePerformanceTrend(bztWorkingDirectory.getRemote(), run, workspace, launcher, listener);
             }
@@ -432,7 +428,10 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     protected String extractDefaultReportToWorkingDirectory(FilePath workingDirectory) throws IOException, InterruptedException {
         FilePath defaultConfig = workingDirectory.child(DEFAULT_CONFIG_FILE);
-        defaultConfig.copyFrom(getClass().getResourceAsStream(DEFAULT_CONFIG_FILE));
+        try (InputStream is = getClass().getResourceAsStream(DEFAULT_CONFIG_FILE)) {
+            assert is != null;
+            defaultConfig.copyFrom(is);
+        }
         return defaultConfig.getRemote();
     }
 
