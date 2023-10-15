@@ -128,7 +128,7 @@ public class JMeterParser extends AbstractParser {
                 } else {
                     dateValue = attributes.getValue("timeStamp");
                 }
-                sample.setDate(new Date(Long.valueOf(dateValue)));
+                sample.setDate(new Date(Long.parseLong(dateValue)));
 
                 final String durationValue;
                 if (attributes.getValue("t") != null) {
