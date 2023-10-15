@@ -1052,7 +1052,13 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         if (junitOutput != null && !junitOutput.isEmpty()) {
             listener.getLogger().println("Performance: Generating JUnit output: "+junitOutput);
             FilePath output = new FilePath(workspace, junitOutput);
-            output.getParent().mkdirs();
+            FilePath parent = output.getParent();
+            if (parent != null) {
+                parent.mkdirs();
+            } else {
+                // Handle the situation when parent is null
+                listener.getLogger().println("Failed to create parent dirs because the path is null.");
+            }
             try {
                 String junitReport = cr.getJunitReport();
                 if (junitReport != null) {
