@@ -634,6 +634,13 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
             if (duration != other.duration) return false;
             return date != null ? date.equals(other.date) : other.date == null;
         }
+
+        @Override
+        public int hashCode() {
+            int result = (int) (duration ^ (duration >>> 32));
+            result = 31 * result + (date != null ? date.hashCode() : 0);
+            return result;
+        }
     }
 
     @Deprecated
