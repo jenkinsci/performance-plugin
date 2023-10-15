@@ -472,7 +472,7 @@ public class RelativeConstraint extends AbstractConstraint {
             if (builds.get(i).getResult().equals(Result.SUCCESS) 
                     || (builds.get(i).getResult().equals(Result.UNSTABLE) 
                     && !getSettings().isIgnoreUnstableBuilds())
-                    || (builds.get(i).getResult().equals(Result.FAILURE) && !getSettings().isIgnoreFailedBuilds())) {
+                    || (Result.FAILURE.equals(builds.get(i).getResult()) && !getSettings().isIgnoreFailedBuilds())) {
                 result.add(builds.get(i));
                 j++;
             }
