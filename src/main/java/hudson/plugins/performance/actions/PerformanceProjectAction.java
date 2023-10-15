@@ -783,7 +783,7 @@ public class PerformanceProjectAction implements Action {
         File[] files = file.listFiles();
 
         if (files != null) {
-            for (File entry : Objects.requireNonNull(file.listFiles())) {
+            for (File entry : files) {
                 if (entry.isDirectory()) {
                     File[] entryFiles = entry.listFiles();
                     if (entryFiles != null) {
