@@ -443,15 +443,14 @@ public class PerformanceReportMap implements ModelObject {
         Map<Run<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
         DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
         ReportValueSelector valueSelector = ReportValueSelector.get(getBuild().getParent());
-
-        for (Run<?, ?> currentBuild : buildReports.keySet()) {
-            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-            PerformanceReport report = buildReports.get(currentBuild).get(parameter);
+        for (Map.Entry<Run<?, ?>, Map<String, PerformanceReport>> entry : buildReports.entrySet()) {
+            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(entry.getKey());
+            PerformanceReport report = entry.getValue().get(parameter);
 
             // Now we should have the data necessary to generate the graphs!
-            for (Map.Entry<String, UriReport> entry : report.getUriReportMap().entrySet()) {
-                long methodValue = valueSelector.getValue(entry.getValue());
-                dataSetBuilderSummarizer.add(methodValue, label, entry.getKey());
+            for (Map.Entry<String, UriReport> secondEntry : report.getUriReportMap().entrySet()) {
+                long methodValue = valueSelector.getValue(secondEntry.getValue());
+                dataSetBuilderSummarizer.add(methodValue, label, secondEntry.getKey());
             }
         }
 
