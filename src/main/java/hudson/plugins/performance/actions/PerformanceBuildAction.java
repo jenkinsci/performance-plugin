@@ -76,11 +76,13 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
 
     public synchronized PerformanceReportMap getPerformanceReportMap(boolean isInitNextLevel) {
         PerformanceReportMap reportMap = null;
-        WeakReference<PerformanceReportMap> wr = this.performanceReportMap;
-        if (wr != null) {
-            reportMap = wr.get();
-            if (reportMap != null) {
-                return reportMap;
+        synchronized(this) {
+            WeakReference<PerformanceReportMap> wr = this.performanceReportMap;
+            if (wr != null) {
+                reportMap = wr.get();
+                if (reportMap != null) {
+                    return reportMap;
+                }
             }
         }
         try {
