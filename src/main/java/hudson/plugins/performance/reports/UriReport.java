@@ -217,6 +217,11 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         return getUri() != null ? getUri().equals(uriReport.getUri()) : uriReport.getUri() == null;
     }
 
+    @Override
+    public int hashCode() {
+        return getUri() != null ? getUri().hashCode() : 0;
+    }
+
     public int countErrors() {
         return nbError;
     }
