@@ -267,11 +267,11 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
         NOT_GREATER("not be greater than", false), NOT_LESS("not be less than", false), NOT_EQUAL("not be equal to", false);
 
         public final String text;
-        private boolean isSelected;
+        private final boolean isSelected;
 
         private Operator(final String text, boolean isSelected) {
             this.text = text;
-            this.setSelected(isSelected);
+            this.isSelected = isSelected;
         }
 
         @Override
@@ -283,9 +283,6 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
             return isSelected;
         }
 
-        public void setSelected(boolean isSelected) {
-            this.isSelected = isSelected;
-        }
     }
 
     public void setSuccess(boolean success) {
