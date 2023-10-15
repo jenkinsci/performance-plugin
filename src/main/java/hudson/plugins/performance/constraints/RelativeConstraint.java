@@ -34,7 +34,7 @@ import hudson.util.RunList;
  *
  * @author Rene Kugel
  */
-public class RelativeConstraint extends AbstractConstraint {
+public class RelativeConstraint extends AbstractConstraint implements Cloneable {
     /**
      * Percentage value of the tolerance
      */
