@@ -1,11 +1,7 @@
 package hudson.plugins.performance.parsers;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,7 +27,7 @@ public class ParserDetector {
      * @return report file type.
      */
     public static String detect(String reportPath) throws IOException {
-        try (final BufferedReader reader = new BufferedReader(new FileReader(new File(reportPath)))) {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(reportPath)), StandardCharsets.UTF_8))) {
             String line = reader.readLine();
             if (line == null) {
                 throw new IllegalArgumentException("File " + reportPath + " is empty");
