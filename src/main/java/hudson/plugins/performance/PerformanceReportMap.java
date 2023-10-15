@@ -244,9 +244,9 @@ public class PerformanceReportMap implements ModelObject {
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
         ReportValueSelector valueSelector = ReportValueSelector.get(getBuild().getParent());
         String keyLabel = getKeyLabel(valueSelector.getGraphType());
-        for (Run<?, ?> currentBuild : buildReports.keySet()) {
-            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-            PerformanceReport report = buildReports.get(currentBuild).get(parameter);
+        for (Map.Entry<Run<?, ?>, Map<String, PerformanceReport>> entry : buildReports.entrySet()) {
+            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(entry.getKey());
+            PerformanceReport report = entry.getValue().get(parameter);
             dataSetBuilder.add(valueSelector.getValue(report),
                     keyLabel, label);
         }
@@ -511,11 +511,15 @@ public class PerformanceReportMap implements ModelObject {
                             return false;
                         }
                     });
-                    try {
-                        collector.addAll(p.parse(build, Arrays.asList(listFiles), listener));
-                    } catch (IOException ex) {
-                        listener.getLogger().println("Unable to process directory '" + dir + "'.");
-                        ex.printStackTrace(listener.getLogger());
+                    if (listener != null && listener.getLogger() != null) {
+                        try {
+                            collector.addAll(p.parse(build, Arrays.asList(listFiles), listener));
+                        } catch (IOException ex) {
+                            listener.getLogger().println("Unable to process directory '" + dir + "'.");
+                            ex.printStackTrace(listener.getLogger());
+                        }
+                    } else {
+                        // Handle the situation when listener or its logger is null
                     }
                 }
             }
