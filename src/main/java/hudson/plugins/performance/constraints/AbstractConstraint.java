@@ -239,11 +239,11 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
         INFORMATION("Information", false), WARNING("Warning", false), ERROR("Error", false);
 
         private final String text;
-        private boolean isSelected;
+        private final boolean isSelected;
 
         private Escalation(final String text, boolean isSelected) {
             this.text = text;
-            this.setSelected(isSelected);
+            this.isSelected = isSelected;
         }
 
         @Override
@@ -255,9 +255,6 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
             return isSelected;
         }
 
-        public void setSelected(boolean isSelected) {
-            this.isSelected = isSelected;
-        }
     }
 
     public enum Operator {
