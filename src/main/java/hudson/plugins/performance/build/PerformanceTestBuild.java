@@ -28,6 +28,7 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -418,7 +419,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         } catch (IOException ex) {
             logger.write(ex.getMessage().getBytes());
             if (printDebugOutput) {
-                logger.write(Functions.printThrowable(ex).getBytes());
+                logger.write(Functions.printThrowable(ex).getBytes(StandardCharsets.UTF_8));
             }
             return 1;
         }
