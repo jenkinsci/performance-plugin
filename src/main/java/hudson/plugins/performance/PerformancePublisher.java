@@ -1054,7 +1054,12 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
             FilePath output = new FilePath(workspace, junitOutput);
             output.getParent().mkdirs();
             try {
-                output.write(cr.getJunitReport(), null);
+                String junitReport = cr.getJunitReport();
+                if (junitReport != null) {
+                    output.write(junitReport, null);
+                } else {
+                    listener.getLogger().println("Failed to write JUnit file because junitreport is null.");
+                }
             }
             catch (IOException ex) {
                 listener.getLogger().println("Failed to write JUnit file: "+ex.getMessage());
