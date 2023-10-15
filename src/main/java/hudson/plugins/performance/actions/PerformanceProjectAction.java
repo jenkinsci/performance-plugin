@@ -47,6 +47,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -240,7 +241,7 @@ public class PerformanceProjectAction implements Action {
     }
 
     public static JFreeChart doCreateSummarizerChart(CategoryDataset dataset,
-            String yAxis, String chartTitle) {
+                                                     String yAxis, String chartTitle) {
 
         final JFreeChart chart = ChartFactory.createBarChart(chartTitle, // chart
                 // title
@@ -546,7 +547,7 @@ public class PerformanceProjectAction implements Action {
             protected JFreeChart createGraph() {
                 return createRespondingTimeChart(dataSetBuilderAverage.build(), limit);
             }
-        }.doPng(request, response);      
+        }.doPng(request, response);
     }
 
     public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
@@ -784,11 +785,15 @@ public class PerformanceProjectAction implements Action {
 
             for (File entry : Objects.requireNonNull(file.listFiles())) {
                 if (entry.isDirectory()) {
-                    for (File e : Objects.requireNonNull(entry.listFiles())) {
-                        if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
-                            this.performanceReportList.add(e.getName());
+                    File[] entryFiles = entry.listFiles();
+                    if (entryFiles != null) {
+                        for (File e : Objects.requireNonNull(entryFiles)) {
+                            if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
+                                this.performanceReportList.add(e.getName());
+                            }
                         }
                     }
+
                 } else {
                     if (!entry.getName().endsWith(".serialized") && !entry.getName().endsWith(".serialized-v2")) {
                         this.performanceReportList.add(entry.getName());
@@ -823,7 +828,7 @@ public class PerformanceProjectAction implements Action {
      * @return the dynamic result of the analysis (detail page).
      */
     public Object getDynamic(final String link, final StaplerRequest request,
-            final StaplerResponse response) {
+                             final StaplerResponse response) {
         if (CONFIGURE_LINK.equals(link)) {
             return createUserConfiguration(request);
         } else if (TRENDREPORT_LINK.equals(link)) {
@@ -876,7 +881,7 @@ public class PerformanceProjectAction implements Action {
     }
 
     private DataSetBuilder<String, NumberOnlyBuildLabel> getTrendReportData(final StaplerRequest request,
-            String performanceReportNameFile) {
+                                                                            String performanceReportNameFile) {
 
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<>();
         List<? extends Run<?, ?>> builds = getJob().getBuilds();
