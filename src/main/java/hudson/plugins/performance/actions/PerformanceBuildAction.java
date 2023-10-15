@@ -70,7 +70,7 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
         return hudsonConsoleWriter;
     }
 
-    public PerformanceReportMap getPerformanceReportMap() {
+    public synchronized PerformanceReportMap getPerformanceReportMap() {
         return getPerformanceReportMap(true);
     }
 
