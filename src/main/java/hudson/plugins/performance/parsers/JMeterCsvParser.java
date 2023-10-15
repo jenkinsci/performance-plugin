@@ -131,14 +131,14 @@ public class JMeterCsvParser extends AbstractParser {
     private HttpSample getSample(CSVRecord record) {
         final HttpSample sample = new HttpSample();
         sample.setDate(parseTimestamp(record.get(timestampIdx)));
-        sample.setDuration(Long.valueOf(record.get(elapsedIdx)));
+        sample.setDuration(Long.parseLong(record.get(elapsedIdx)));
         sample.setHttpCode(record.get(responseCodeIdx));
-        sample.setSuccessful(Boolean.valueOf(record.get(successIdx)));
+        sample.setSuccessful(Boolean.parseBoolean(record.get(successIdx)));
         long bytes = Long.parseLong(record.get(bytesIdx));
         if (sentBytesIdx != -1) {
             bytes += Long.parseLong(record.get(sentBytesIdx));
         }
-        sample.setSizeInKb(Double.valueOf(bytes) / 1024d);
+        sample.setSizeInKb((double) bytes / 1024d);
         sample.setUri(record.get(urlIdx));
         return sample;
     }
