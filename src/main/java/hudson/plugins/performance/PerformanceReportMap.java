@@ -585,6 +585,10 @@ public class PerformanceReportMap implements ModelObject {
         String filename = getTrendReportFilename(request);
         PerformanceReport report = performanceReportMap.get(filename);
         Run<?, ?> build = getBuild();
+        if (build == null) {
+            // Handle the situation when build is null
+            return null;
+        }
 
         TrendReportGraphs trendReport = new TrendReportGraphs(build.getParent(),
                 build, request, filename, report);
