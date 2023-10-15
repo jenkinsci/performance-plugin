@@ -1,10 +1,7 @@
 package hudson.plugins.performance;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -646,9 +643,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         String[] arr = glob.split("/");
 
         File xmlfile = new File(xmlDirectory, "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
-
-        try (FileWriter fw = new FileWriter(xmlfile);
-                BufferedWriter bw = new BufferedWriter(fw)) {            
+        try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(xmlfile), StandardCharsets.UTF_8);
+             BufferedWriter bw = new BufferedWriter(fw)) {
             String xml = "<?xml version=\"1.0\"?>\n";
             xml += "<results>\n";
             xml += "<absoluteDefinition>\n";
