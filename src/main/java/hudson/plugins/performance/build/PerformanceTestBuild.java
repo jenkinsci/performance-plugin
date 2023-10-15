@@ -417,7 +417,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         try {
             return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join();
         } catch (IOException ex) {
-            logger.write(ex.getMessage().getBytes());
+            logger.write(ex.getMessage().getBytes(StandardCharsets.UTF_8));
             if (printDebugOutput) {
                 logger.write(Functions.printThrowable(ex).getBytes(StandardCharsets.UTF_8));
             }
