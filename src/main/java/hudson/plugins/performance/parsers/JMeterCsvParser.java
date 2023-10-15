@@ -1,10 +1,7 @@
 package hudson.plugins.performance.parsers;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -65,8 +62,7 @@ public class JMeterCsvParser extends AbstractParser {
                 header = readCSVHeader(line);
             }
         }
-
-        try (Reader fileReader = new FileReader(reportFile)) {
+        try (Reader fileReader = new InputStreamReader(new FileInputStream(reportFile), StandardCharsets.UTF_8)) {
             parseCSV(fileReader, header, report);
         }
 
