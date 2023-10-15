@@ -782,7 +782,7 @@ public class PerformanceProjectAction implements Action {
 
         for (File entry : Objects.requireNonNull(file.listFiles())) {
             if (entry.isDirectory()) {
-                for (File e : entry.listFiles()) {
+                for (File e : Objects.requireNonNull(entry.listFiles())) {
                     if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
                         this.performanceReportList.add(e.getName());
                     }
