@@ -55,7 +55,7 @@ public class JMeterCsvParser extends AbstractParser {
         report.setReportFileName(reportFile.getName());
 
         String[] header = null;
-        try (FileReader fr = new FileReader(reportFile);
+        try (FileReader fr = new FileReader(reportFile, StandardCharsets.UTF_8);
                 BufferedReader reader = new BufferedReader(fr)) {
             String line = reader.readLine();
             if (line != null) {
