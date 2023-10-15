@@ -880,9 +880,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         File xmlDirectory = createArchiveDirectoryIfMissing(run);
 
         File xmlfile = new File(xmlDirectory, "dashBoard_results.xml");
-
-        try (FileWriter fw = new FileWriter(xmlfile);
-                BufferedWriter bw = new BufferedWriter(fw)) {            
+        try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(xmlfile), StandardCharsets.UTF_8);
+             BufferedWriter bw = new BufferedWriter(fw)) {
 
             String buildNo = "\t<buildNum>" + (compareBuildPrevious ? "previous" : nthBuildNumber) + "</buildNum>\n";
 
