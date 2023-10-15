@@ -209,7 +209,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
 
         try {
             return isNumberDateFormat ?
-                    new Date(Long.valueOf(timestamp)) :
+                    new Date(Long.parseLong(timestamp)) :
                     format.parse(timestamp);
         } catch (ParseException e) {
             throw new IllegalArgumentException("Cannot parse timestamp: " + timestamp +
