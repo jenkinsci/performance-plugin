@@ -779,20 +779,26 @@ public class PerformanceProjectAction implements Action {
         if (!file.isDirectory()) {
             return performanceReportList;
         }
+        File[] files = file.listFiles();
+        if (files != null) {
 
-        for (File entry : Objects.requireNonNull(file.listFiles())) {
-            if (entry.isDirectory()) {
-                for (File e : Objects.requireNonNull(entry.listFiles())) {
-                    if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
-                        this.performanceReportList.add(e.getName());
+            for (File entry : Objects.requireNonNull(file.listFiles())) {
+                if (entry.isDirectory()) {
+                    for (File e : Objects.requireNonNull(entry.listFiles())) {
+                        if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
+                            this.performanceReportList.add(e.getName());
+                        }
+                    }
+                } else {
+                    if (!entry.getName().endsWith(".serialized") && !entry.getName().endsWith(".serialized-v2")) {
+                        this.performanceReportList.add(entry.getName());
                     }
                 }
-            } else {
-                if (!entry.getName().endsWith(".serialized") && !entry.getName().endsWith(".serialized-v2")) {
-                    this.performanceReportList.add(entry.getName());
-                }
-            }
 
+            }
+        } else {
+            // Handle the situation when files is null
+            return performanceReportList;
         }
 
         Collections.sort(performanceReportList);
