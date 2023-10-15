@@ -52,11 +52,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.GregorianCalendar;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -783,7 +780,7 @@ public class PerformanceProjectAction implements Action {
             return performanceReportList;
         }
 
-        for (File entry : file.listFiles()) {
+        for (File entry : Objects.requireNonNull(file.listFiles())) {
             if (entry.isDirectory()) {
                 for (File e : entry.listFiles()) {
                     if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
