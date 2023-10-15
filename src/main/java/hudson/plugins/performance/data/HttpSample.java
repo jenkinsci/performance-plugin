@@ -4,6 +4,7 @@ import hudson.plugins.performance.reports.UriReport;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Information about a particular HTTP request and how that went.
@@ -133,6 +134,11 @@ public class HttpSample implements Serializable, Comparable<HttpSample> {
         if (obj == null || getClass() != obj.getClass()) return false;
         HttpSample that = (HttpSample) obj;
         return getDuration() == that.getDuration();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getDuration());
     }
 
     public double getSizeInKb() {
