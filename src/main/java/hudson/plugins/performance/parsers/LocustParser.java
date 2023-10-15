@@ -66,7 +66,7 @@ public class LocustParser extends AbstractParser {
             long max = Double.valueOf(record.get(ReportColumns.Max.getColumn())).longValue();
             long failures = Double.valueOf(record.get(ReportColumns.Failures.getColumn())).longValue();
             long success = Double.valueOf(record.get(ReportColumns.Requests.getColumn())).longValue();
-            long errors = Double.valueOf(failures / success).longValue();
+            long errors = (long) ((double) failures / success);
             long avgContentSize = Double.valueOf(record.get(ReportColumns.AvgContentSize.getColumn())).longValue();
 
             if (name.equals("Aggregated")) {
