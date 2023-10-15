@@ -136,7 +136,7 @@ public class JMeterParser extends AbstractParser {
                 } else {
                     durationValue = attributes.getValue("time");
                 }
-                sample.setDuration(Long.valueOf(durationValue));
+                sample.setDuration(Long.parseLong(durationValue));
 
                 final String successfulValue;
                 if (attributes.getValue("s") != null) {
@@ -168,7 +168,7 @@ public class JMeterParser extends AbstractParser {
                 } else {
                     sizeInKbValue = "0";
                 }
-                sample.setSizeInKb(Double.valueOf(sizeInKbValue) / 1024d);
+                sample.setSizeInKb(Double.parseDouble(sizeInKbValue) / 1024d);
 
                 if (counter == 0) {
                     currentSample = sample;
