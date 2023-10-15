@@ -781,8 +781,8 @@ public class PerformanceProjectAction implements Action {
             return performanceReportList;
         }
         File[] files = file.listFiles();
-        if (files != null) {
 
+        if (file.listFiles() != null) {
             for (File entry : Objects.requireNonNull(file.listFiles())) {
                 if (entry.isDirectory()) {
                     File[] entryFiles = entry.listFiles();
@@ -801,6 +801,7 @@ public class PerformanceProjectAction implements Action {
                 }
 
             }
+
         } else {
             // Handle the situation when files is null
             return performanceReportList;
