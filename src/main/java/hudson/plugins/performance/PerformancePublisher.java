@@ -452,8 +452,14 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
             List<FilePath> files = locatePerformanceReports(workspace, glob);
             if (files.isEmpty()) {
-                if (run.getResult().isWorseThan(Result.UNSTABLE)) {
-                    return Collections.emptyList();
+                Result result = run.getResult();
+                if (result != null) {
+                    if (result.isWorseThan(Result.UNSTABLE)) {
+                        return Collections.emptyList();
+                    }
+                } else {
+                    // Handle the situation when result is null
+                    logger.println("Result is null");
                 }
 
                 if (failBuildIfNoResultFile) {
