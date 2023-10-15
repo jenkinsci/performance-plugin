@@ -1,6 +1,7 @@
 package hudson.plugins.performance.parsers;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -49,8 +50,7 @@ public class JmeterSummarizerParser extends AbstractParser {
         report.setExcludeResponseTime(excludeResponseTime);
         report.setShowTrendGraphs(showTrendGraphs);
         report.setReportFileName(reportFile.getName());
-
-        try (Scanner fileScanner = new Scanner(reportFile)){
+        try (Scanner fileScanner = new Scanner(reportFile, StandardCharsets.UTF_8)){
             String line;
             String lastEqualsLine = null;
             while (fileScanner.hasNextLine()) {
