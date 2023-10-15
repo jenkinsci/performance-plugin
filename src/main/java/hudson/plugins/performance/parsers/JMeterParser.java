@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import javax.xml.parsers.SAXParserFactory;
@@ -68,7 +69,7 @@ public class JMeterParser extends AbstractParser {
      * @return <code>true</code> if the file content has been determined to be XML, otherwise <code>false</code>.
      */
     public static boolean isXmlFile(File file) throws IOException {
-        try (FileReader fr = new FileReader(file);
+        try (FileReader fr = new FileReader(file, StandardCharsets.UTF_8);
                 BufferedReader reader = new BufferedReader(fr)) {
             String line;
             boolean isXml = false;
