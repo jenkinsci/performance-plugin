@@ -311,7 +311,10 @@ public class ConstraintReport {
     public void writeResultsToFile() throws IOException {
         performanceLog = new File(newBuild.getRootDir() + File.separator + "performance-results" + File.separator + "performance.log");
         if (!performanceLog.exists()) {
-            performanceLog.getParentFile().mkdirs();
+            boolean dirsCreated = performanceLog.getParentFile().mkdirs();
+            if (!dirsCreated && !performanceLog.getParentFile().exists()) {
+                throw new IOException("Failed to create directory " + performanceLog.getParentFile());
+            }
             if (!performanceLog.createNewFile()) {
                 throw new IOException("Cannot create new file "+performanceLog.getAbsolutePath());
             }
