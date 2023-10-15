@@ -93,20 +93,21 @@ public class TaurusParser extends AbstractParser {
     private TaurusFinalStats getTaurusFinalStats(Element group) {
         final TaurusFinalStats report = new TaurusFinalStats();
 
-        report.setBytes(Long.valueOf(getValueAttribute("bytes", group)));
-        report.setFail(Integer.valueOf(getValueAttribute("fail", group)));
-        report.setSucc(Integer.valueOf(getValueAttribute("succ", group)));
+        report.setBytes(Long.parseLong(getValueAttribute("bytes", group)));
+        report.setFail(Integer.parseInt(getValueAttribute("fail", group)));
+        report.setSucc(Integer.parseInt(getValueAttribute("succ", group)));
         if (group.getElementsByTagName("throughput").getLength() > 0) {
-            report.setThroughput(Long.valueOf(getValueAttribute("throughput", group)));
+            report.setThroughput(Long.parseLong(getValueAttribute("throughput", group)));
         }
-        report.setAverageResponseTime(Double.valueOf(getValueAttribute("avg_rt", group)) * 1000); // to ms
+        report.setAverageResponseTime(Double.parseDouble(getValueAttribute("avg_rt", group)) * 1000); // to ms
 
         NodeList perc = group.getElementsByTagName("perc");
         for (int i = 0; i < perc.getLength(); i++) {
             Node nNode = perc.item(i);
             String attributeParam = ((Element) nNode).getAttribute("param");
-            Double valueInMs = Double.valueOf(((Element) nNode).getAttribute("value")) * 1000;
-            
+            double valueInMs;
+            valueInMs = Double.parseDouble(((Element) nNode).getAttribute("value")) * 1000;
+
             if ("50.0".equals(attributeParam)) {
                 report.setPerc50(valueInMs); // to ms
             } else if ("90.0".equals(attributeParam)) {
