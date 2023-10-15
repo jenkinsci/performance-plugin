@@ -603,7 +603,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private void writeStandardResultsToXML(Run<?, ?> run, Collection<PerformanceReport> parsedReports) throws IOException {
         File xmlDirectory = createArchiveDirectoryIfMissing(run);
         File xmlfile = new File(xmlDirectory, "standardResults.xml");
-        try (FileWriter fw = new FileWriter(xmlfile);
+        try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(xmlfile), StandardCharsets.UTF_8);
                 BufferedWriter bw = new BufferedWriter(fw)){
             
             String xml = new StringBuilder("<?xml version=\"1.0\"?>\n")
