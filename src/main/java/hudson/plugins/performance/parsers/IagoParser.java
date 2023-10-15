@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -68,8 +69,8 @@ public class IagoParser extends AbstractParser {
         report.setShowTrendGraphs(showTrendGraphs);
         report.setReportFileName(reportFile.getName());
 
-        try (FileReader fr = new FileReader(reportFile);
-                BufferedReader reader = new BufferedReader(fr)){
+        try (FileReader fr = new FileReader(reportFile, StandardCharsets.UTF_8);
+             BufferedReader reader = new BufferedReader(fr)){
             String line = reader.readLine();
             while (line != null) {
                 final HttpSample sample = this.getSample(line, reportFile.getName());
