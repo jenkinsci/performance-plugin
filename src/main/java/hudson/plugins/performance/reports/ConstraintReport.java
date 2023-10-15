@@ -3,6 +3,7 @@ package hudson.plugins.performance.reports;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -320,7 +321,7 @@ public class ConstraintReport {
             }
         }
         try (FileOutputStream outWriter = new FileOutputStream(performanceLog, true)){
-            outWriter.write(getLoggerMsgAdv().getBytes());
+            outWriter.write(getLoggerMsgAdv().getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         }
