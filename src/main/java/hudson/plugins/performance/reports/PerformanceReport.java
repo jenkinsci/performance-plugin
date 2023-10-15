@@ -266,6 +266,11 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         return getReportFileName() != null ? getReportFileName().equals(that.getReportFileName()) : that.getReportFileName() == null;
     }
 
+    @Override
+    public int hashCode() {
+        return getReportFileName() != null ? getReportFileName().hashCode() : 0;
+    }
+
     public int countErrors() {
         return nbError;
     }
