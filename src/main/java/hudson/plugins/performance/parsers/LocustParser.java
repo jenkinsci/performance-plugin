@@ -8,11 +8,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -96,9 +93,8 @@ public class LocustParser extends AbstractParser {
 
     List<CSVRecord> getCsvData(final File reportFile) {
         List<CSVRecord> records = null;
-        try (Reader reader = new BufferedReader(new FileReader(reportFile));
-                CSVParser csvParser = new CSVParser(reader,
-                        CSVFormat.Builder.create(CSVFormat.DEFAULT).setHeader().build())) {
+        try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(reportFile), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.Builder.create(CSVFormat.DEFAULT).setHeader().build())) {
             records = csvParser.getRecords();
         } catch (IOException e) {
             e.printStackTrace();
