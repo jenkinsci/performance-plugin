@@ -47,7 +47,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_OPTION};
     protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_OPTION};
 
-    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION =
+    final static String[] CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION =
             new String[]{VIRTUALENV_COMMAND, "--clear", "--system-site-packages", "taurus-venv"};
     final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", "taurus-venv"};
 
@@ -143,7 +143,8 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                     getBztJobResult(testExitCode) :
                     getJobResult(testExitCode)
             );
-            if (generatePerformanceTrend && Result.FAILURE.isWorseThan(Objects.requireNonNull(run.getResult()))) {
+            Result result = run.getResult();
+            if (generatePerformanceTrend && result != null && Result.FAILURE.isWorseThan(result)) {
                 generatePerformanceTrend(bztWorkingDirectory.getRemote(), run, workspace, launcher, listener);
             }
 
