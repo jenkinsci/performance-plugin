@@ -209,6 +209,18 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         }
         return uriReport.getUri().compareTo(this.getUri());
     }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        UriReport uriReport = (UriReport) obj;
+        return getUri() != null ? getUri().equals(uriReport.getUri()) : uriReport.getUri() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return getUri() != null ? getUri().hashCode() : 0;
+    }
 
     public int countErrors() {
         return nbError;
@@ -617,6 +629,22 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
             if (this.date.before(other.date)) return -1;
             if (this.date.after(other.date)) return 1;
             return 0;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            Sample other = (Sample) obj;
+            if (duration != other.duration) return false;
+            return date != null ? date.equals(other.date) : other.date == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = (int) (duration ^ (duration >>> 32));
+            result = 31 * result + (date != null ? date.hashCode() : 0);
+            return result;
         }
     }
 

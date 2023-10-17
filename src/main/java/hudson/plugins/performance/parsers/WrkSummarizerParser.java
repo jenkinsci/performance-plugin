@@ -9,6 +9,7 @@ import hudson.plugins.performance.tools.SafeMaths;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -85,7 +86,7 @@ public class WrkSummarizerParser extends AbstractParser {
 
         Scanner s = null;
         try {
-            s = new Scanner(reportFile);
+            s = new Scanner(reportFile, StandardCharsets.UTF_8);
             HttpSample sample = new HttpSample();
 
             while (s.hasNextLine()) {

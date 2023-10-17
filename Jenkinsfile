@@ -14,7 +14,7 @@ node('linux-amd64') {
             sh 'pip install -r requirements.txt'
             
             def args = ['clean', 'install', '-Dset.changelist']
-            infra.runMaven(args, 11)
+            infra.runMaven(args, 21)
         }
     }
 

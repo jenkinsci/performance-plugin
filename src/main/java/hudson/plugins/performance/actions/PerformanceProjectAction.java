@@ -47,16 +47,14 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.GregorianCalendar;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -243,7 +241,7 @@ public class PerformanceProjectAction implements Action {
     }
 
     public static JFreeChart doCreateSummarizerChart(CategoryDataset dataset,
-            String yAxis, String chartTitle) {
+                                                     String yAxis, String chartTitle) {
 
         final JFreeChart chart = ChartFactory.createBarChart(chartTitle, // chart
                 // title
@@ -549,7 +547,7 @@ public class PerformanceProjectAction implements Action {
             protected JFreeChart createGraph() {
                 return createRespondingTimeChart(dataSetBuilderAverage.build(), limit);
             }
-        }.doPng(request, response);      
+        }.doPng(request, response);
     }
 
     public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
@@ -782,20 +780,31 @@ public class PerformanceProjectAction implements Action {
         if (!file.isDirectory()) {
             return performanceReportList;
         }
+        File[] files = file.listFiles();
 
-        for (File entry : file.listFiles()) {
-            if (entry.isDirectory()) {
-                for (File e : entry.listFiles()) {
-                    if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
-                        this.performanceReportList.add(e.getName());
+        if (files != null) {
+            for (File entry : files) {
+                if (entry.isDirectory()) {
+                    File[] entryFiles = entry.listFiles();
+                    if (entryFiles != null) {
+                        for (File e : Objects.requireNonNull(entryFiles)) {
+                            if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
+                                this.performanceReportList.add(e.getName());
+                            }
+                        }
+                    }
+
+                } else {
+                    if (!entry.getName().endsWith(".serialized") && !entry.getName().endsWith(".serialized-v2")) {
+                        this.performanceReportList.add(entry.getName());
                     }
                 }
-            } else {
-                if (!entry.getName().endsWith(".serialized") && !entry.getName().endsWith(".serialized-v2")) {
-                    this.performanceReportList.add(entry.getName());
-                }
+
             }
 
+        } else {
+            // Handle the situation when files is null
+            return performanceReportList;
         }
 
         Collections.sort(performanceReportList);
@@ -820,7 +829,7 @@ public class PerformanceProjectAction implements Action {
      * @return the dynamic result of the analysis (detail page).
      */
     public Object getDynamic(final String link, final StaplerRequest request,
-            final StaplerResponse response) {
+                             final StaplerResponse response) {
         if (CONFIGURE_LINK.equals(link)) {
             return createUserConfiguration(request);
         } else if (TRENDREPORT_LINK.equals(link)) {
@@ -873,7 +882,7 @@ public class PerformanceProjectAction implements Action {
     }
 
     private DataSetBuilder<String, NumberOnlyBuildLabel> getTrendReportData(final StaplerRequest request,
-            String performanceReportNameFile) {
+                                                                            String performanceReportNameFile) {
 
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<>();
         List<? extends Run<?, ?>> builds = getJob().getBuilds();

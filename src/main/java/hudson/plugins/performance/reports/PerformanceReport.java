@@ -258,6 +258,19 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         return getReportFileName().compareTo(jmReport.getReportFileName());
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        PerformanceReport that = (PerformanceReport) obj;
+        return getReportFileName() != null ? getReportFileName().equals(that.getReportFileName()) : that.getReportFileName() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return getReportFileName() != null ? getReportFileName().hashCode() : 0;
+    }
+
     public int countErrors() {
         return nbError;
     }

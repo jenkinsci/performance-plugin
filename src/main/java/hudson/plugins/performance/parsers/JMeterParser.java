@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import javax.xml.parsers.SAXParserFactory;
@@ -68,7 +69,7 @@ public class JMeterParser extends AbstractParser {
      * @return <code>true</code> if the file content has been determined to be XML, otherwise <code>false</code>.
      */
     public static boolean isXmlFile(File file) throws IOException {
-        try (FileReader fr = new FileReader(file);
+        try (FileReader fr = new FileReader(file, StandardCharsets.UTF_8);
                 BufferedReader reader = new BufferedReader(fr)) {
             String line;
             boolean isXml = false;
@@ -128,7 +129,7 @@ public class JMeterParser extends AbstractParser {
                 } else {
                     dateValue = attributes.getValue("timeStamp");
                 }
-                sample.setDate(new Date(Long.valueOf(dateValue)));
+                sample.setDate(new Date(Long.parseLong(dateValue)));
 
                 final String durationValue;
                 if (attributes.getValue("t") != null) {
@@ -136,7 +137,7 @@ public class JMeterParser extends AbstractParser {
                 } else {
                     durationValue = attributes.getValue("time");
                 }
-                sample.setDuration(Long.valueOf(durationValue));
+                sample.setDuration(Long.parseLong(durationValue));
 
                 final String successfulValue;
                 if (attributes.getValue("s") != null) {
@@ -168,7 +169,7 @@ public class JMeterParser extends AbstractParser {
                 } else {
                     sizeInKbValue = "0";
                 }
-                sample.setSizeInKb(Double.valueOf(sizeInKbValue) / 1024d);
+                sample.setSizeInKb(Double.parseDouble(sizeInKbValue) / 1024d);
 
                 if (counter == 0) {
                     currentSample = sample;

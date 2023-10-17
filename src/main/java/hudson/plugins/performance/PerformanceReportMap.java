@@ -244,9 +244,9 @@ public class PerformanceReportMap implements ModelObject {
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, NumberOnlyBuildLabel>();
         ReportValueSelector valueSelector = ReportValueSelector.get(getBuild().getParent());
         String keyLabel = getKeyLabel(valueSelector.getGraphType());
-        for (Run<?, ?> currentBuild : buildReports.keySet()) {
-            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-            PerformanceReport report = buildReports.get(currentBuild).get(parameter);
+        for (Map.Entry<Run<?, ?>, Map<String, PerformanceReport>> entry : buildReports.entrySet()) {
+            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(entry.getKey());
+            PerformanceReport report = entry.getValue().get(parameter);
             dataSetBuilder.add(valueSelector.getValue(report),
                     keyLabel, label);
         }
@@ -443,16 +443,15 @@ public class PerformanceReportMap implements ModelObject {
         Map<Run<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
         DataSetBuilder<NumberOnlyBuildLabel, String> dataSetBuilderSummarizer = new DataSetBuilder<NumberOnlyBuildLabel, String>();
         ReportValueSelector valueSelector = ReportValueSelector.get(getBuild().getParent());
-        for (Run<?, ?> currentBuild : buildReports.keySet()) {
-            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-            PerformanceReport report = buildReports.get(currentBuild).get(parameter);
+        for (Map.Entry<Run<?, ?>, Map<String, PerformanceReport>> entry : buildReports.entrySet()) {
+            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(entry.getKey());
+            PerformanceReport report = entry.getValue().get(parameter);
 
             // Now we should have the data necessary to generate the graphs!
-            for (String key : report.getUriReportMap().keySet()) {
-                long methodValue = valueSelector.getValue(report.getUriReportMap().get(key));
-                dataSetBuilderSummarizer.add(methodValue, label, key);
+            for (Map.Entry<String, UriReport> secondEntry : report.getUriReportMap().entrySet()) {
+                long methodValue = valueSelector.getValue(secondEntry.getValue());
+                dataSetBuilderSummarizer.add(methodValue, label, secondEntry.getKey());
             }
-
         }
 
         new Graph(-1, 400, 200) {
@@ -511,11 +510,15 @@ public class PerformanceReportMap implements ModelObject {
                             return false;
                         }
                     });
-                    try {
-                        collector.addAll(p.parse(build, Arrays.asList(listFiles), listener));
-                    } catch (IOException ex) {
-                        listener.getLogger().println("Unable to process directory '" + dir + "'.");
-                        ex.printStackTrace(listener.getLogger());
+                    if (listener != null && listener.getLogger() != null) {
+                        try {
+                            collector.addAll(p.parse(build, Arrays.asList(listFiles), listener));
+                        } catch (IOException ex) {
+                            listener.getLogger().println("Unable to process directory '" + dir + "'.");
+                            ex.printStackTrace(listener.getLogger());
+                        }
+                    } else {
+                        // Handle the situation when listener or its logger is null
                     }
                 }
             }
@@ -585,6 +588,10 @@ public class PerformanceReportMap implements ModelObject {
         String filename = getTrendReportFilename(request);
         PerformanceReport report = performanceReportMap.get(filename);
         Run<?, ?> build = getBuild();
+        if (build == null) {
+            // Handle the situation when build is null
+            return null;
+        }
 
         TrendReportGraphs trendReport = new TrendReportGraphs(build.getParent(),
                 build, request, filename, report);

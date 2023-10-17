@@ -23,19 +23,14 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -50,12 +45,12 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     protected final static String VIRTUALENV_PATH_UNIX = "/taurus-venv/bin/";
     protected final static String VIRTUALENV_PATH_WINDOWS = "\\taurus-venv\\Scripts\\";
 
-    protected final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_OPTION};
-    protected final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_OPTION};
+    final static String[] CHECK_BZT_COMMAND = new String[]{PERFORMANCE_TEST_COMMAND, HELP_OPTION};
+    final static String[] CHECK_VIRTUALENV_COMMAND = new String[]{VIRTUALENV_COMMAND, HELP_OPTION};
 
-    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION =
+    final static String[] CREATE_LOCAL_PYTHON_COMMAND_WITH_SYSTEM_PACKAGES_OPTION =
             new String[]{VIRTUALENV_COMMAND, "--clear", "--system-site-packages", "taurus-venv"};
-    protected final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", "taurus-venv"};
+    final static String[] CREATE_LOCAL_PYTHON_COMMAND = new String[]{VIRTUALENV_COMMAND, "--clear", "taurus-venv"};
 
     protected final static String DEFAULT_CONFIG_FILE = "jenkins-report.yml";
 
@@ -149,8 +144,8 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
                     getBztJobResult(testExitCode) :
                     getJobResult(testExitCode)
             );
-
-            if (generatePerformanceTrend && run.getResult().isBetterThan(Result.FAILURE)) {
+            Result result = run.getResult();
+            if (generatePerformanceTrend && result != null && Result.FAILURE.isWorseThan(result)) {
                 generatePerformanceTrend(bztWorkingDirectory.getRemote(), run, workspace, launcher, listener);
             }
 
@@ -422,9 +417,9 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         try {
             return launcher.launch().cmds(commands).envs(envVars).stdout(logger).stderr(logger).pwd(workspace).start().join();
         } catch (IOException ex) {
-            logger.write(ex.getMessage().getBytes());
+            logger.write(ex.getMessage().getBytes(StandardCharsets.UTF_8));
             if (printDebugOutput) {
-                logger.write(Functions.printThrowable(ex).getBytes());
+                logger.write(Functions.printThrowable(ex).getBytes(StandardCharsets.UTF_8));
             }
             return 1;
         }
@@ -432,7 +427,10 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
 
     protected String extractDefaultReportToWorkingDirectory(FilePath workingDirectory) throws IOException, InterruptedException {
         FilePath defaultConfig = workingDirectory.child(DEFAULT_CONFIG_FILE);
-        defaultConfig.copyFrom(getClass().getResourceAsStream(DEFAULT_CONFIG_FILE));
+        try (InputStream is = getClass().getResourceAsStream(DEFAULT_CONFIG_FILE)) {
+            assert is != null;
+            defaultConfig.copyFrom(is);
+        }
         return defaultConfig.getRemote();
     }
 

@@ -217,11 +217,11 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
         AVERAGE("Average", false), MEDIAN("Median", false), LINE90("90% Line", false), MAXIMUM("Maximum", false), MINIMUM("Minimum", false), ERRORPRC("Error %", false);
 
         private final String text;
-        private boolean isSelected;
+        private final boolean isSelected;
 
         private Metric(final String text, boolean isSelected) {
             this.text = text;
-            this.setSelected(isSelected);
+            this.isSelected = isSelected;
         }
 
         @Override
@@ -233,20 +233,17 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
             return isSelected;
         }
 
-        public void setSelected(boolean isSelected) {
-            this.isSelected = isSelected;
-        }
     }
 
     public enum Escalation {
         INFORMATION("Information", false), WARNING("Warning", false), ERROR("Error", false);
 
         private final String text;
-        private boolean isSelected;
+        private final boolean isSelected;
 
         private Escalation(final String text, boolean isSelected) {
             this.text = text;
-            this.setSelected(isSelected);
+            this.isSelected = isSelected;
         }
 
         @Override
@@ -258,20 +255,17 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
             return isSelected;
         }
 
-        public void setSelected(boolean isSelected) {
-            this.isSelected = isSelected;
-        }
     }
 
     public enum Operator {
         NOT_GREATER("not be greater than", false), NOT_LESS("not be less than", false), NOT_EQUAL("not be equal to", false);
 
         public final String text;
-        private boolean isSelected;
+        private final boolean isSelected;
 
         private Operator(final String text, boolean isSelected) {
             this.text = text;
-            this.setSelected(isSelected);
+            this.isSelected = isSelected;
         }
 
         @Override
@@ -283,9 +277,6 @@ public abstract class AbstractConstraint implements Describable<AbstractConstrai
             return isSelected;
         }
 
-        public void setSelected(boolean isSelected) {
-            this.isSelected = isSelected;
-        }
     }
 
     public void setSuccess(boolean success) {

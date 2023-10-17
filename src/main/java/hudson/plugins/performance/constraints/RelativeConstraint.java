@@ -3,11 +3,7 @@ package hudson.plugins.performance.constraints;
 import java.io.PrintStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
@@ -469,10 +465,10 @@ public class RelativeConstraint extends AbstractConstraint {
         int i = 1;
         int j = 0;
         while (j < getPreviousResults() && i < builds.size()) {
-            if (builds.get(i).getResult().equals(Result.SUCCESS) 
-                    || (builds.get(i).getResult().equals(Result.UNSTABLE) 
+            if (Objects.equals(builds.get(i).getResult(), Result.SUCCESS)
+                    || (Objects.equals(builds.get(i).getResult(), Result.UNSTABLE)
                     && !getSettings().isIgnoreUnstableBuilds())
-                    || (builds.get(i).getResult().equals(Result.FAILURE) && !getSettings().isIgnoreFailedBuilds())) {
+                    || (Result.FAILURE.equals(builds.get(i).getResult()) && !getSettings().isIgnoreFailedBuilds())) {
                 result.add(builds.get(i));
                 j++;
             }

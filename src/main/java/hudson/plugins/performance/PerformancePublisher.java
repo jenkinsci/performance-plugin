@@ -1,10 +1,7 @@
 package hudson.plugins.performance;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -455,8 +452,14 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
             List<FilePath> files = locatePerformanceReports(workspace, glob);
             if (files.isEmpty()) {
-                if (run.getResult().isWorseThan(Result.UNSTABLE)) {
-                    return Collections.emptyList();
+                Result result = run.getResult();
+                if (result != null) {
+                    if (result.isWorseThan(Result.UNSTABLE)) {
+                        return Collections.emptyList();
+                    }
+                } else {
+                    // Handle the situation when result is null
+                    logger.println("Result is null");
                 }
 
                 if (failBuildIfNoResultFile) {
@@ -606,7 +609,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
     private void writeStandardResultsToXML(Run<?, ?> run, Collection<PerformanceReport> parsedReports) throws IOException {
         File xmlDirectory = createArchiveDirectoryIfMissing(run);
         File xmlfile = new File(xmlDirectory, "standardResults.xml");
-        try (FileWriter fw = new FileWriter(xmlfile);
+        try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(xmlfile), StandardCharsets.UTF_8);
                 BufferedWriter bw = new BufferedWriter(fw)){
             
             String xml = new StringBuilder("<?xml version=\"1.0\"?>\n")
@@ -646,9 +649,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         String[] arr = glob.split("/");
 
         File xmlfile = new File(xmlDirectory, "/dashBoard_" + arr[arr.length - 1].split("\\.")[0] + ".xml");
-
-        try (FileWriter fw = new FileWriter(xmlfile);
-                BufferedWriter bw = new BufferedWriter(fw)) {            
+        try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(xmlfile), StandardCharsets.UTF_8);
+             BufferedWriter bw = new BufferedWriter(fw)) {
             String xml = "<?xml version=\"1.0\"?>\n";
             xml += "<results>\n";
             xml += "<absoluteDefinition>\n";
@@ -884,9 +886,8 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         File xmlDirectory = createArchiveDirectoryIfMissing(run);
 
         File xmlfile = new File(xmlDirectory, "dashBoard_results.xml");
-
-        try (FileWriter fw = new FileWriter(xmlfile);
-                BufferedWriter bw = new BufferedWriter(fw)) {            
+        try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(xmlfile), StandardCharsets.UTF_8);
+             BufferedWriter bw = new BufferedWriter(fw)) {
 
             String buildNo = "\t<buildNum>" + (compareBuildPrevious ? "previous" : nthBuildNumber) + "</buildNum>\n";
 
@@ -1057,9 +1058,20 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         if (junitOutput != null && !junitOutput.isEmpty()) {
             listener.getLogger().println("Performance: Generating JUnit output: "+junitOutput);
             FilePath output = new FilePath(workspace, junitOutput);
-            output.getParent().mkdirs();
+            FilePath parent = output.getParent();
+            if (parent != null) {
+                parent.mkdirs();
+            } else {
+                // Handle the situation when parent is null
+                listener.getLogger().println("Failed to create parent dirs because the path is null.");
+            }
             try {
-                output.write(cr.getJunitReport(), null);
+                String junitReport = cr.getJunitReport();
+                if (junitReport != null) {
+                    output.write(junitReport, null);
+                } else {
+                    listener.getLogger().println("Failed to write JUnit file because junitreport is null.");
+                }
             }
             catch (IOException ex) {
                 listener.getLogger().println("Failed to write JUnit file: "+ex.getMessage());

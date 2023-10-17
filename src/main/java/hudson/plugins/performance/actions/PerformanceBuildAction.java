@@ -70,17 +70,19 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
         return hudsonConsoleWriter;
     }
 
-    public PerformanceReportMap getPerformanceReportMap() {
+    public synchronized PerformanceReportMap getPerformanceReportMap() {
         return getPerformanceReportMap(true);
     }
 
     public synchronized PerformanceReportMap getPerformanceReportMap(boolean isInitNextLevel) {
         PerformanceReportMap reportMap = null;
-        WeakReference<PerformanceReportMap> wr = this.performanceReportMap;
-        if (wr != null) {
-            reportMap = wr.get();
-            if (reportMap != null) {
-                return reportMap;
+        synchronized(this) {
+            WeakReference<PerformanceReportMap> wr = this.performanceReportMap;
+            if (wr != null) {
+                reportMap = wr.get();
+                if (reportMap != null) {
+                    return reportMap;
+                }
             }
         }
         try {
@@ -92,8 +94,9 @@ public class PerformanceBuildAction implements Action, StaplerProxy {
         return reportMap;
     }
 
-
-    public void setPerformanceReportMap(WeakReference<PerformanceReportMap> performanceReportMap) {
-        this.performanceReportMap = performanceReportMap;
+    public synchronized void setPerformanceReportMap(WeakReference<PerformanceReportMap> performanceReportMap) {
+        synchronized(this) {
+            this.performanceReportMap = performanceReportMap;
+        }
     }
 }

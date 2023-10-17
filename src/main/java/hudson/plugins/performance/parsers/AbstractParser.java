@@ -53,7 +53,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
     protected boolean isNumberDateFormat = false;
     protected transient SimpleDateFormat format;
 
-    protected static final String[] DATE_FORMATS = new String[]{
+    static final String[] DATE_FORMATS = new String[]{
             "yyyy/MM/dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss,SSS", "yyyy/mm/dd HH:mm:ss"
     };
 
@@ -209,7 +209,7 @@ public abstract class AbstractParser extends PerformanceReportParser {
 
         try {
             return isNumberDateFormat ?
-                    new Date(Long.valueOf(timestamp)) :
+                    new Date(Long.parseLong(timestamp)) :
                     format.parse(timestamp);
         } catch (ParseException e) {
             throw new IllegalArgumentException("Cannot parse timestamp: " + timestamp +

@@ -3,6 +3,7 @@ package hudson.plugins.performance.reports;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -311,13 +312,16 @@ public class ConstraintReport {
     public void writeResultsToFile() throws IOException {
         performanceLog = new File(newBuild.getRootDir() + File.separator + "performance-results" + File.separator + "performance.log");
         if (!performanceLog.exists()) {
-            performanceLog.getParentFile().mkdirs();
+            boolean dirsCreated = performanceLog.getParentFile().mkdirs();
+            if (!dirsCreated && !performanceLog.getParentFile().exists()) {
+                throw new IOException("Failed to create directory " + performanceLog.getParentFile());
+            }
             if (!performanceLog.createNewFile()) {
                 throw new IOException("Cannot create new file "+performanceLog.getAbsolutePath());
             }
         }
         try (FileOutputStream outWriter = new FileOutputStream(performanceLog, true)){
-            outWriter.write(getLoggerMsgAdv().getBytes());
+            outWriter.write(getLoggerMsgAdv().getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         }

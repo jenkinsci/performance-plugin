@@ -1,10 +1,7 @@
 package hudson.plugins.performance.parsers;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -58,15 +55,14 @@ public class JMeterCsvParser extends AbstractParser {
         report.setReportFileName(reportFile.getName());
 
         String[] header = null;
-        try (FileReader fr = new FileReader(reportFile);
+        try (FileReader fr = new FileReader(reportFile, StandardCharsets.UTF_8);
                 BufferedReader reader = new BufferedReader(fr)) {
             String line = reader.readLine();
             if (line != null) {
                 header = readCSVHeader(line);
             }
         }
-
-        try (Reader fileReader = new FileReader(reportFile)) {
+        try (Reader fileReader = new InputStreamReader(new FileInputStream(reportFile), StandardCharsets.UTF_8)) {
             parseCSV(fileReader, header, report);
         }
 
@@ -135,14 +131,14 @@ public class JMeterCsvParser extends AbstractParser {
     private HttpSample getSample(CSVRecord record) {
         final HttpSample sample = new HttpSample();
         sample.setDate(parseTimestamp(record.get(timestampIdx)));
-        sample.setDuration(Long.valueOf(record.get(elapsedIdx)));
+        sample.setDuration(Long.parseLong(record.get(elapsedIdx)));
         sample.setHttpCode(record.get(responseCodeIdx));
-        sample.setSuccessful(Boolean.valueOf(record.get(successIdx)));
+        sample.setSuccessful(Boolean.parseBoolean(record.get(successIdx)));
         long bytes = Long.parseLong(record.get(bytesIdx));
         if (sentBytesIdx != -1) {
             bytes += Long.parseLong(record.get(sentBytesIdx));
         }
-        sample.setSizeInKb(Double.valueOf(bytes) / 1024d);
+        sample.setSizeInKb((double) bytes / 1024d);
         sample.setUri(record.get(urlIdx));
         return sample;
     }
