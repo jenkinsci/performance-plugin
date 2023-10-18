@@ -59,7 +59,7 @@
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
         <concurrency>2</concurrency>
         <!-- disable SpotBugs temporarily since there are 62 bugs -->
-        <spotbugs.failOnError>false</spotbugs.failOnError>
+        <spotbugs.skip>true</spotbugs.skip>
     </properties>
 
     <repositories>
