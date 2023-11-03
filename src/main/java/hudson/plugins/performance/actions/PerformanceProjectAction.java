@@ -1,28 +1,20 @@
 package hudson.plugins.performance.actions;
 
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.Job;
-import hudson.model.Run;
-import hudson.plugins.performance.Messages;
-import hudson.plugins.performance.PerformancePublisher;
-import hudson.plugins.performance.PerformanceReportMap;
-import hudson.plugins.performance.data.PerformanceReportPosition;
-import hudson.plugins.performance.data.ReportValueSelector;
-import hudson.plugins.performance.details.GraphConfigurationDetail;
-import hudson.plugins.performance.details.TestSuiteReportDetail;
-import hudson.plugins.performance.details.TrendReportDetail;
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.UriReport;
-import hudson.plugins.performance.reports.ThroughputReport;
-import hudson.util.ChartUtil;
-import hudson.util.ChartUtil.NumberOnlyBuildLabel;
-import hudson.util.ColorPalette;
-import hudson.util.DataSetBuilder;
-import hudson.util.Graph;
-import hudson.util.ShiftedCategoryAxis;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -47,16 +39,29 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.Job;
+import hudson.model.Run;
+import hudson.plugins.performance.Messages;
+import hudson.plugins.performance.PerformancePublisher;
+import hudson.plugins.performance.PerformanceReportMap;
+import hudson.plugins.performance.data.PerformanceReportPosition;
+import hudson.plugins.performance.data.ReportValueSelector;
+import hudson.plugins.performance.details.GraphConfigurationDetail;
+import hudson.plugins.performance.details.TestSuiteReportDetail;
+import hudson.plugins.performance.details.TrendReportDetail;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.ThroughputReport;
+import hudson.plugins.performance.reports.UriReport;
+import hudson.util.ChartUtil;
+import hudson.util.ChartUtil.NumberOnlyBuildLabel;
+import hudson.util.ColorPalette;
+import hudson.util.DataSetBuilder;
+import hudson.util.Graph;
+import hudson.util.ShiftedCategoryAxis;
 
 public class PerformanceProjectAction implements Action {
 
@@ -535,6 +540,8 @@ public class PerformanceProjectAction implements Action {
                         Messages.ProjectAction_Average(), label);
                 dataSetBuilderAverage.add(performanceReport.get90Line(),
                         Messages.ProjectAction_Line90(), label);
+                dataSetBuilderAverage.add(performanceReport.get95Line(),
+                        Messages.ProjectAction_Line95(), label);
             }
             nbBuildsToAnalyze--;
         }

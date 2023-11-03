@@ -18,6 +18,7 @@ public class TaurusFinalStats implements Serializable {
     private double perc0;
     private double perc50;
     private double perc90;
+    private double perc95;
     private double perc100;
 
     private Double testDuration;
@@ -77,8 +78,16 @@ public class TaurusFinalStats implements Serializable {
         return perc90;
     }
 
+    public double getPerc95() {
+        return perc95;
+    }
+
     public void setPerc90(double perc90) {
         this.perc90 = perc90;
+    }
+
+    public void setPerc95(double perc95) {
+        this.perc95 = perc95;
     }
 
     public double getPerc0() {

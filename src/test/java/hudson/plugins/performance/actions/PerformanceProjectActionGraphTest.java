@@ -1,13 +1,12 @@
 package hudson.plugins.performance.actions;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
-
+import hudson.model.AbstractProject;
+import hudson.model.Run;
+import hudson.plugins.performance.AbstractGraphGenerationTest;
+import hudson.plugins.performance.PerformancePublisher;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.util.RunList;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
 import org.junit.Before;
@@ -15,12 +14,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import hudson.model.AbstractProject;
-import hudson.model.Run;
-import hudson.plugins.performance.AbstractGraphGenerationTest;
-import hudson.plugins.performance.PerformancePublisher;
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.util.RunList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTest {
@@ -72,7 +70,7 @@ public class PerformanceProjectActionGraphTest extends AbstractGraphGenerationTe
     public void testRespondingTimeGraph() throws Exception {
         setGraphType(PerformancePublisher.MRT);
         target.doRespondingTimeGraph(request, response);
-        assertArrayEquals(new Number[]{14720L, 4142L, 501L}, toArray(target.dataset));
+        assertArrayEquals(new Number[]{14720L, 14720L, 4142L, 501L}, toArray(target.dataset));
     }
 
     @Test

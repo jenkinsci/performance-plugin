@@ -49,6 +49,7 @@ public class TaurusParserTest {
         assertEquals("Check min", 0.15600 * 1000, report.getMin(), DELTA);
         assertEquals("Check median", 0.84300 * 1000, report.getMedian(), DELTA);
         assertEquals("Check line 90", 1.29300 * 1000, report.get90Line(), DELTA);
+        assertEquals("Check line 95", 1.42000 * 1000, report.get95Line(), DELTA);
         assertEquals("Check max", 1.71800 * 1000, report.getMax(), DELTA);
         assertEquals("Check average", (long) (0.80638 * 1000), report.getAverage());
         assertEquals("Check samples count", 326 + 11, report.samplesCount(), DELTA);
@@ -60,6 +61,7 @@ public class TaurusParserTest {
         assertEquals("Check min", 0.06400 * 1000, report.getMin(), DELTA);
         assertEquals("Check median", 0.07200 * 1000, report.getMedian(), DELTA);
         assertEquals("Check line 90", 0.18900 * 1000, report.get90Line(), DELTA);
+        assertEquals("Check line 95", 0.20400 * 1000, report.get95Line(), DELTA);
         assertEquals("Check max", 0.52200 * 1000, report.getMax(), DELTA);
         assertEquals("Check average", (long) (0.11568 * 1000), report.getAverage());
         assertEquals("Check samples count", 340, report.samplesCount(), DELTA);
@@ -71,6 +73,7 @@ public class TaurusParserTest {
         assertEquals("Check min", 0.06400 * 1000, report.getMin(), DELTA);
         assertEquals("Check median", 0.18700 * 1000, report.getMedian(), DELTA);
         assertEquals("Check line 90", 1.15800 * 1000, report.get90Line(), DELTA);
+        assertEquals("Check line 95", 1.29300 * 1000, report.get95Line(), DELTA);
         assertEquals("Check max", 1.71800 * 1000, report.getMax(), DELTA);
         assertEquals("Check average", (long) (0.45950 * 1000), report.getAverage());
         assertEquals("Check samples count", 666 + 11, report.samplesCount(), DELTA);
@@ -81,7 +84,8 @@ public class TaurusParserTest {
         // Check summary values
         assertEquals("Check diff median", -14.0, report.getMedianDiff(), DELTA);
         assertEquals("Check diff average", -400, report.getAverageDiff());
-        assertEquals("Check diff line 90",  213, report.get90LineDiff());
+        assertEquals("Check diff line 90", 213, report.get90LineDiff());
+        assertEquals("Check diff line 95", 348, report.get95LineDiff());
         assertEquals("Check diff samples count", 232, report.getSamplesCountDiff());
     }
 

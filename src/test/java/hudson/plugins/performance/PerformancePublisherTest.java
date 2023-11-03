@@ -147,6 +147,7 @@ public class PerformancePublisherTest {
                 "\t<min>501</min>\n" +
                 "\t<median>598</median>\n" +
                 "\t<ninetieth>14720</ninetieth>\n" +
+                "\t<ninetyFifth>14720</ninetyFifth>\n" +
                 "\t<max>15902</max>\n" +
                 "\t<httpCode>200</httpCode>\n" +
                 "\t<errors>0.0</errors>\n" +
@@ -158,6 +159,7 @@ public class PerformancePublisherTest {
                 "\t<min>58</min>\n" +
                 "\t<median>63</median>\n" +
                 "\t<ninetieth>278</ninetieth>\n" +
+                "\t<ninetyFifth>278</ninetyFifth>\n" +
                 "\t<max>1017</max>\n" +
                 "\t<httpCode>200</httpCode>\n" +
                 "\t<errors>0.0</errors>\n" +
