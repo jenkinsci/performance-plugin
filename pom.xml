@@ -55,7 +55,7 @@
 
     <properties>
         <changelist>999999-SNAPSHOT</changelist>
-        <jenkins.version>2.401.3</jenkins.version>
+        <jenkins.version>2.426.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
         <concurrency>2</concurrency>
         <!-- disable SpotBugs temporarily since there are 62 bugs -->
@@ -80,8 +80,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.401.x</artifactId>
-                <version>2745.vc7b_fe4c876fa_</version>
+                <artifactId>bom-2.426.x</artifactId>
+                <version>3613.v584fca_12cf5c</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
