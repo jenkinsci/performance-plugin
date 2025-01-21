@@ -1,33 +1,5 @@
 package hudson.plugins.performance;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.Issue;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.JenkinsRule.WebClient;
-import org.jvnet.hudson.test.TestBuilder;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -52,17 +24,41 @@ import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PerformancePublisherTest {
-
-    @Rule
-    public final JenkinsRule jenkinsRule = new JenkinsRule();
+@WithJenkins
+class PerformancePublisherTest {
 
     @Test
-    public void testBuild() throws Exception {
+    void testBuild(JenkinsRule jenkinsRule) throws Exception {
         FreeStyleProject p = jenkinsRule.createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
             @Override
@@ -93,7 +89,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testBuildWithFormattedTimeStamp() throws Exception {
+    void testBuildWithFormattedTimeStamp(JenkinsRule jenkinsRule) throws Exception {
         final FreeStyleProject p = jenkinsRule.createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
             @Override
@@ -112,7 +108,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testStandardResultsXML() throws Exception {
+    void testStandardResultsXML(JenkinsRule jenkinsRule) throws Exception {
         FreeStyleProject p = jenkinsRule.createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
             @Override
@@ -138,7 +134,7 @@ public class PerformancePublisherTest {
         String standardExportFilename = b.getRootDir().getAbsolutePath() + File.separator + "archive" + File.separator
                 + "standardResults.xml";
         String content = new String(Files.readAllBytes(Paths.get(standardExportFilename)));
-        Assert.assertEquals("<?xml version=\"1.0\"?>\n" +
+        assertEquals("<?xml version=\"1.0\"?>\n" +
                 "<results>\n" +
                 "<api>\n" +
                 "\t<uri>Home</uri>\n" +
@@ -168,7 +164,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testBuildWithParameters() throws Exception {
+    void testBuildWithParameters(JenkinsRule jenkinsRule) throws Exception {
         FreeStyleProject p = jenkinsRule.createFreeStyleProject("JobTest");
         p.getBuildersList().add(new TestBuilder() {
             @Override
@@ -200,7 +196,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testBuildUnstableResponseThreshold() throws Exception {
+    void testBuildUnstableResponseThreshold(JenkinsRule jenkinsRule) throws Exception {
         FreeStyleProject p = jenkinsRule.createFreeStyleProject("TestJob");
         p.getBuildersList().add(new TestBuilder() {
             @Override
@@ -231,7 +227,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testBuildStableResponseThreshold() throws Exception {
+    void testBuildStableResponseThreshold(JenkinsRule jenkinsRule) throws Exception {
         FreeStyleProject p = jenkinsRule.createFreeStyleProject();
         p.getBuildersList().add(new TestBuilder() {
             @Override
@@ -268,8 +264,9 @@ public class PerformancePublisherTest {
     // not failing due to threshold problems Ignore flag not being
     // used, have to look at dependency tree, most likely pre 4.x
     // junit dependency
-    @Ignore
-    public void buildUnstableAverageResponseTimeRelativeThreshold() throws Exception {
+    @Disabled
+    @Test
+    void buildUnstableAverageResponseTimeRelativeThreshold(JenkinsRule jenkinsRule) throws Exception {
         FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
         p.getPublishersList().add(
@@ -306,7 +303,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testEmptyReportParsersList() throws Exception {
+    void testEmptyReportParsersList(JenkinsRule jenkinsRule) throws Exception {
         PerformancePublisher publisher = new PerformancePublisher("", 0, 0, "", 0.0, 0.0, 0.0, 0.0, 0, true, "MRT",
                 true, true, true, true, false, null);
         RunExt run = new RunExt(jenkinsRule.createFreeStyleProject());
@@ -332,7 +329,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testOptionMethods() throws Exception {
+    void testOptionMethods(JenkinsRule jenkinsRule) throws Exception {
         final double DELTA = 0.001;
         PerformancePublisher publisher = new PerformancePublisher("reportFile.xml", 15, 16, "reportFile.xml:100", 9.0,
                 8.0, 7.0, 6.0, 3, true, "MRT",
@@ -420,7 +417,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testErrorThresholdUnstable() throws Exception {
+    void testErrorThresholdUnstable(JenkinsRule jenkinsRule) throws Exception {
 
         PerformancePublisher publisherUnstable = new PerformancePublisher("JMeterPublisher.csv",
                 -1,
@@ -451,7 +448,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testErrorThresholdFailed() throws Exception {
+    void testErrorThresholdFailed(JenkinsRule jenkinsRule) throws Exception {
 
         PerformancePublisher publisherFailed = new PerformancePublisher("JMeterPublisher.csv",
                 2, // errorFailedThreshold
@@ -481,7 +478,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testErrorThresholdAverageResponseTime() throws Exception {
+    void testErrorThresholdAverageResponseTime(JenkinsRule jenkinsRule) throws Exception {
 
         PerformancePublisher publisherART = new PerformancePublisher("JMeterPublisher.csv", -1, -1,
                 "JMeterPublisher.csv:1000", 0.0, 0.0, 0.0, 0.0, 1, true, "MRT",
@@ -519,7 +516,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testMigration() throws Exception {
+    void testMigration(JenkinsRule jenkinsRule) throws Exception {
         List<PerformanceReportParser> parsers = new ArrayList<PerformanceReportParser>();
         parsers.add(new JMeterCsvParser("test1", PerformanceReportTest.DEFAULT_PERCENTILES));
         parsers.add(new JMeterParser("test2", PerformanceReportTest.DEFAULT_PERCENTILES));
@@ -540,7 +537,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testRelativeThresholdUnstableNegative() throws Exception {
+    void testRelativeThresholdUnstableNegative(JenkinsRule jenkinsRule) throws Exception {
 
         FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
@@ -573,7 +570,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testRelativeThresholdUnstablePositive() throws Exception {
+    void testRelativeThresholdUnstablePositive(JenkinsRule jenkinsRule) throws Exception {
 
         FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
@@ -607,7 +604,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testRelativeThresholdFailedNegative() throws Exception {
+    void testRelativeThresholdFailedNegative(JenkinsRule jenkinsRule) throws Exception {
 
         FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
@@ -641,7 +638,7 @@ public class PerformancePublisherTest {
     }
 
     @Test
-    public void testRelativeThresholdFailedPositive() throws Exception {
+    void testRelativeThresholdFailedPositive(JenkinsRule jenkinsRule) throws Exception {
 
         FreeStyleProject p = jenkinsRule.createFreeStyleProject();
 
@@ -674,7 +671,8 @@ public class PerformancePublisherTest {
         jenkinsRule.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
     }
 
-    public void testRelativeThresholds() throws Exception {
+    @Test
+    void testRelativeThresholds(JenkinsRule jenkinsRule) throws Exception {
         FreeStyleProject freeStyleProject = jenkinsRule.createFreeStyleProject();
 
         final RunExt prevBuild = new RunExt(freeStyleProject);

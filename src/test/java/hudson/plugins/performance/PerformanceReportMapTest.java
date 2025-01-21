@@ -1,44 +1,45 @@
 package hudson.plugins.performance;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.Collections;
-
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.util.DescribableList;
 import hudson.util.RunList;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
 
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.plugins.performance.actions.PerformanceBuildAction;
+import java.io.IOException;
+import java.util.Collections;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+
+@ExtendWith(MockitoExtension.class)
+class PerformanceReportMapTest extends AbstractGraphGenerationTest {
 
     private TestablePerformanceReportMap target;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected PerformancePublisher performancePublisher;
 
-    @Before
-    public void reportMapSetup() throws Exception {
+    @BeforeEach
+    void reportMapSetup() throws Exception {
         when(build.getParent()).thenReturn(project);
         when(request.getParameter("performanceReportPosition")).thenReturn("JMeterResults.jtl");
         when(project.getBuilds()).thenReturn(RunList.fromRuns(Collections.singletonList(build)));
 
-        DescribableList publisherList = mock(DescribableList.class);
+        DescribableList publisherList = mock(DescribableList.class, withSettings().strictness(Strictness.LENIENT));
         when(publisherList.get(PerformancePublisher.class)).thenReturn(performancePublisher);
         when(performancePublisher.isModeThroughput()).thenReturn(true);
         when(performancePublisher.isModePerformancePerTestCase()).thenReturn(false);
@@ -47,7 +48,7 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
     }
 
     @Test
-    public void testGetters() throws Exception {
+    void testGetters() throws Exception {
         PerformanceReportMap reportMap = new PerformanceReportMap(performanceBuildAction, mock(TaskListener.class));
         assertTrue(reportMap.ifModeThroughputUsed());
         assertFalse(reportMap.ifModePerformancePerTestCaseUsed());
@@ -58,48 +59,48 @@ public class PerformanceReportMapTest extends AbstractGraphGenerationTest {
     }
 
     @Test
-    public void testRespondingTimeGraphAverageValues() throws Exception {
+    void testRespondingTimeGraphAverageValues() throws Exception {
         setGraphType(PerformancePublisher.ART);
         target.doRespondingTimeGraph(request, response);
         assertArrayEquals(new Number[]{4142L}, toArray(target.dataset));
     }
 
     @Test
-    public void testRespondingTimeGraphMedianValues() throws Exception {
+    void testRespondingTimeGraphMedianValues() throws Exception {
         setGraphType(PerformancePublisher.MRT);
         target.doRespondingTimeGraph(request, response);
         assertArrayEquals(new Number[]{501L}, toArray(target.dataset));
     }
 
     @Test
-    public void testSummarizerGraphAverageValues() throws Exception {
+    void testSummarizerGraphAverageValues() throws Exception {
         setGraphType(PerformancePublisher.ART);
         target.doSummarizerGraph(request, response);
         assertArrayEquals(new Number[]{7930L, 354L}, toArray(target.dataset));
     }
 
     @Test
-    public void testSummarizerGraphMedianValues() throws Exception {
+    void testSummarizerGraphMedianValues() throws Exception {
         setGraphType(PerformancePublisher.MRT);
         target.doSummarizerGraph(request, response);
         assertArrayEquals(new Number[]{598L, 63L}, toArray(target.dataset));
     }
 
     @Test
-    public void testThroughputGraph() throws Exception {
+    void testThroughputGraph() throws Exception {
         target.doThroughputGraph(request, response);
         assertArrayEquals(new Number[]{0.04515946937623483}, toArray(target.dataset));
     }
 
     @Test
-    public void testRespondingTimeGraphPerTestCaseMode() throws Exception {
+    void testRespondingTimeGraphPerTestCaseMode() throws Exception {
         setGraphType(PerformancePublisher.MRT);
         target.doRespondingTimeGraphPerTestCaseMode(request, response);
         assertArrayEquals(new Number[]{598L, 63L}, toArray(target.dataset));
     }
 
     @Test
-    public void testErrorsGraph() throws Exception {
+    void testErrorsGraph() throws Exception {
         setGraphType(PerformancePublisher.MRT);
         target.doErrorsGraph(request, response);
         assertArrayEquals(new Number[]{0.0}, toArray(target.dataset));

@@ -1,22 +1,21 @@
 package hudson.plugins.performance.parsers;
 
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.Issue;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
-import org.jvnet.hudson.test.Issue;
-
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class ParserDetectorTest {
 
-
     @Test
-    public void testFlow() throws Exception {
+    void testFlow() throws Exception {
         String filePath;
 
         filePath = getClass().getResource("/TaurusXMLReport.xml").toURI().getPath();
@@ -49,21 +48,21 @@ public class ParserDetectorTest {
 
     @Issue("JENKINS-44317")
     @Test
-    public void testIssue44317() throws Exception {
+    void testIssue44317() throws Exception {
         String filePath = getClass().getResource("/TEST-results.xml").toURI().getPath();
         assertEquals(JUnitParser.class.getSimpleName(), ParserDetector.detect(filePath));
     }
 
     @Issue("JENKINS-45723")
     @Test
-    public void testIssue45723() throws Exception {
+    void testIssue45723() throws Exception {
         String filePath = getClass().getResource("/TEST-JUnitResults-success-failure-error.xml").toURI().getPath();
         assertEquals(JUnitParser.class.getSimpleName(), ParserDetector.detect(filePath));
     }
 
     @Issue("JENKINS-47808")
     @Test
-    public void testIssue() throws Exception {
+    void testIssue() throws Exception {
         assertEquals(JMeterParser.class.getSimpleName(), ParserDetector.detectXMLFileType(getHugeJMeterInputStream()));
     }
 

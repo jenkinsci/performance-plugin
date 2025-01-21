@@ -3,24 +3,24 @@ package hudson.plugins.performance.parsers;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.plugins.performance.reports.UriReport;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class JMeterCsvParserTest {
+class JMeterCsvParserTest {
     private static final String NO_GLOB = null;
     private File reportFile;
     private File reportFile2;
     private File reportFile3;
 
-    @Before
-    public void beforeMethod() throws Exception {
+    @BeforeEach
+    void beforeMethod() throws Exception {
         reportFile = new File(getClass().getResource("/JMeterCsvResults.csv").toURI());
         reportFile2 = new File(getClass().getResource("/JMeterCsvResults2.csv").toURI());
         reportFile3 = new File(getClass().getResource("/JMeterCsvResults3.csv").toURI());
@@ -28,19 +28,13 @@ public class JMeterCsvParserTest {
 
 
     @Test
-    public void canParseCsvFile() throws Exception {
+    void canParseCsvFile() throws Exception {
         final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, PerformanceReportTest.DEFAULT_PERCENTILES);
         parseAndVerifyResult(parser, reportFile);
     }
 
     @Test
-    public void canParseCsvFileWhenSkipFirstLineIsNotSpecifiedAndFirstLineHasHeader() throws Exception {
-        final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, PerformanceReportTest.DEFAULT_PERCENTILES);
-        parseAndVerifyResult(parser, reportFile);
-    }
-
-    @Test
-    public void testDateDateFormats() throws Exception {
+    void testDateDateFormats() throws Exception {
         final JMeterCsvParser parser = new JMeterCsvParser(NO_GLOB, PerformanceReportTest.DEFAULT_PERCENTILES);
         PerformanceReport performanceReport = parseAndVerifyResult(parser, reportFile);
         assertEquals(41.9, performanceReport.getTotalTrafficInKb(), 0.01);
@@ -54,12 +48,12 @@ public class JMeterCsvParserTest {
         final PerformanceReport result = parser.parse(file);
         // Verify results.
         assertNotNull(result);
-        assertEquals("The source file contains three samples. These should all have been added to the performance report.", 3, result.samplesCount());
+        assertEquals(3, result.samplesCount(), "The source file contains three samples. These should all have been added to the performance report.");
         return result;
     }
 
     @Test
-    public void testLookingForDelimeter() throws Exception {
+    void testLookingForDelimeter() throws Exception {
         assertEquals(',', JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc,adzxcAZZAAZ"));
         assertEquals('\t', JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc\tadzxcAZZAAZ"));
         assertEquals(';', JMeterCsvParser.lookingForDelimiter("acaaAZSZAzzafergc;adzxcAZZAAZ"));
@@ -73,8 +67,9 @@ public class JMeterCsvParserTest {
             assertEquals("Cannot find delimiter in header asdadadadasd", ex.getMessage());
         }
     }
+
     @Test
-    public void testMultiLineCSV() throws Exception {
+    void testMultiLineCSV() throws Exception {
 
         // Setup fixture.
         final JMeterCsvParser parser = new JMeterCsvParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
@@ -98,9 +93,9 @@ public class JMeterCsvParserTest {
             }
         }
     }
-    
+
     @Test
-    public void testCSVWithRegex() throws Exception {
+    void testCSVWithRegex() throws Exception {
         final JMeterCsvParser parser = new JMeterCsvParser(
                 null, PerformanceReportTest.DEFAULT_PERCENTILES, "^(HP|Scenario|Search)(-success|-failure)?$");
         final File reportFile = new File(getClass().getResource("/filewithtransactions.csv").toURI());
@@ -114,7 +109,7 @@ public class JMeterCsvParserTest {
         assertEquals("Search", reportMap.get("Search").getUri());
         assertEquals("Scenario", reportMap.get("Scenario").getUri());
         assertEquals("HP", reportMap.get("HP").getUri());
-        
+
         assertEquals(37, reportMap.get("HP").samplesCount());
         assertEquals(33, reportMap.get("Search").samplesCount());
         assertEquals(33, reportMap.get("Scenario").samplesCount());

@@ -1,30 +1,30 @@
 package hudson.plugins.performance.details;
 
 import hudson.model.FreeStyleProject;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GraphConfigurationDetailTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+@ExtendWith(MockitoExtension.class)
+class GraphConfigurationDetailTest {
 
     @Mock
     private StaplerRequest request;
 
     @Test
-    public void testDefault() throws Exception {
+    void testDefault(JenkinsRule j) throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("testProject");
 
         GraphConfigurationDetail detail =
@@ -59,7 +59,7 @@ public class GraphConfigurationDetailTest {
     }
 
     @Test
-    public void testCalendar() throws Exception {
+    void testCalendar(JenkinsRule j) throws Exception {
         GregorianCalendar calendar = GraphConfigurationDetail.getGregorianCalendarFromString("9/5/2001");
 
         assertEquals(2001, calendar.get(GregorianCalendar.YEAR));

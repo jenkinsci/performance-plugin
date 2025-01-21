@@ -1,29 +1,5 @@
 package hudson.plugins.performance.constraints;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
@@ -37,10 +13,32 @@ import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
 import hudson.plugins.performance.data.ConstraintSettings;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
-import jenkins.model.Jenkins;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class ConstraintCheckerTest {
+import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class ConstraintCheckerTest {
 
     @InjectMocks
     ConstraintChecker constraintChecker = new ConstraintChecker(null, null);
@@ -48,108 +46,91 @@ public class ConstraintCheckerTest {
     @InjectMocks
     ConstraintSettings constraintSettings = new ConstraintSettings(null, false, false, false, 0);
 
-    @Mock
-    Jenkins jenkins;
-
-    @Mock
-    ConstraintChecker constraintChecker1;
-
     // @Mock
     List<AbstractBuild<?, ?>> abstractBuildsList = new ArrayList<AbstractBuild<?, ?>>();
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     AbstractBuild<?, ?> abstractBuild0;
     // needed for check_evaluatePreviousBuilds
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     AbstractBuild<?, ?> abstractBuild1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     AbstractBuild<?, ?> abstractBuild2;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     AbstractBuild<?, ?> abstractBuild3;
-    @Mock
-    AbstractBuild<?, ?> abstractBuild4;
-    @Mock
-    AbstractBuild<?, ?> abstractBuild5;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceBuildAction performanceBuildAction0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceBuildAction performanceBuildAction1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceBuildAction performanceBuildAction2;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceBuildAction performanceBuildAction3;
-    @Mock
-    PerformanceBuildAction performanceBuildAction4;
-    @Mock
-    PerformanceBuildAction performanceBuildAction5;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReportMap performanceReportMap0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReportMap performanceReportMap1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReportMap performanceReportMap2;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReportMap performanceReportMap3;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReport performanceReport0_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReport performanceReport0_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReport performanceReport1_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReport performanceReport1_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReport performanceReport2_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReport performanceReport2_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReport performanceReport3_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReport performanceReport3_1;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport0_0_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport0_0_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport0_1_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport0_1_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport1_0_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport1_0_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport1_1_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport1_1_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport2_0_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport2_0_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport2_1_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport2_1_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport3_0_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport3_0_1;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport3_1_0;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     UriReport uriReport3_1_1;
 
-    @Mock
-    Iterator<AbstractBuild<?, ?>> buildIterator;
-
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     BuildListener buildListener;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PrintStream printStream;
 
     // Constraints
@@ -194,7 +175,7 @@ public class ConstraintCheckerTest {
      */
 
     @Test
-    public void happyPathForAbsoluteConstraints()
+    void happyPathForAbsoluteConstraints()
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
             InvocationTargetException, IOException, InterruptedException, ParseException {
 
@@ -228,7 +209,7 @@ public class ConstraintCheckerTest {
     }
 
     @Test
-    public void happyPathForRelativeConstraints()
+    void happyPathForRelativeConstraints()
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
             InvocationTargetException, IOException, InterruptedException, ParseException {
 
@@ -265,7 +246,7 @@ public class ConstraintCheckerTest {
     }
 
     @Test
-    public void happyPathForMixedConstraints()
+    void happyPathForMixedConstraints()
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
             InvocationTargetException, IOException, InterruptedException, ParseException {
 
@@ -302,8 +283,8 @@ public class ConstraintCheckerTest {
         assertEquals(10, result.get(5).getMeasuredValue(), 0);
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         /**
          * Mock behaviour of the builds
          */
@@ -721,7 +702,7 @@ public class ConstraintCheckerTest {
     }
 
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         ConstraintChecker checker = new ConstraintChecker(null, null);
         checker.setSettings(constraintSettings);
         assertEquals(constraintSettings, checker.getSettings());
@@ -734,7 +715,7 @@ public class ConstraintCheckerTest {
     }
 
     @Test
-    public void generateJunitOutput() throws Exception {
+    void generateJunitOutput() throws Exception {
         List<AbstractConstraint> constraints = new ArrayList<AbstractConstraint>();
         constraints.add(rc0);
         constraints.add(rc1);
