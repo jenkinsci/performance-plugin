@@ -1,21 +1,20 @@
 package hudson.plugins.performance.parsers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
+import hudson.plugins.performance.reports.UriReport;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Map;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.PerformanceReportTest;
-import hudson.plugins.performance.reports.UriReport;
-
-public class LoadRunnerParserTest {
+class LoadRunnerParserTest {
     private static final String NO_GLOB = null;
 
-    /* Simple test scenario  with 2 VUsers x 1 iteration (until completion), 
+    /* Simple test scenario  with 2 VUsers x 1 iteration (until completion),
      * no rampup, 2 transactions as below:
         Action()
         {	int i;
@@ -28,7 +27,7 @@ public class LoadRunnerParserTest {
         }
     */
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         final LoadRunnerParser parser = new LoadRunnerParser(NO_GLOB, PerformanceReportTest.DEFAULT_PERCENTILES);
         final PerformanceReport result = parser.parse(new File(getClass().getResource("/lr-session.mdb").toURI()));
         assertNotNull(result);

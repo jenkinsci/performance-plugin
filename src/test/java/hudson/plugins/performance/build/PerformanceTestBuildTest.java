@@ -1,27 +1,6 @@
 package hudson.plugins.performance.build;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
-
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -35,14 +14,31 @@ import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.tasks.Publisher;
 import hudson.util.StreamTaskListener;
 import jenkins.util.BuildListenerAdapter;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@WithJenkins
 public class PerformanceTestBuildTest {
 
-    @Rule
-    public final JenkinsRule jenkinsRule = new JenkinsRule();
-
     @Test
-    public void testFlow() throws Exception {
+    void testFlow(JenkinsRule jenkinsRule) throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
         FreeStyleProject project = jenkinsRule.createFreeStyleProject();
@@ -81,7 +77,7 @@ public class PerformanceTestBuildTest {
     }
 
     @Test
-    public void testInstallFromGit() throws Exception {
+    void testInstallFromGit(JenkinsRule jenkinsRule) throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
         String gitRepo = "git+https://github.com/Blazemeter/taurus.git";
 
@@ -123,7 +119,7 @@ public class PerformanceTestBuildTest {
     }
 
     @Test
-    public void testInstallFromURL() throws Exception {
+    void testInstallFromURL(JenkinsRule jenkinsRule) throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
         String url = "http://gettaurus.org/snapshots/bzt-1.9.5.1622.tar.gz";
 
@@ -164,7 +160,7 @@ public class PerformanceTestBuildTest {
     }
 
     @Test
-    public void testInstallFromPath() throws Exception {
+    void testInstallFromPath(JenkinsRule jenkinsRule) throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
         FreeStyleProject project = jenkinsRule.createFreeStyleProject();
@@ -239,7 +235,7 @@ public class PerformanceTestBuildTest {
     }
 
     @Test
-    public void testGetters() throws Exception {
+    void testGetters(JenkinsRule jenkinsRule) throws Exception {
         PerformanceTestBuild.Descriptor descriptor = new PerformanceTestBuild.Descriptor();
         assertTrue(descriptor.isApplicable(null));
 
@@ -285,7 +281,7 @@ public class PerformanceTestBuildTest {
     }
 
     @Test
-    public void testGenerateReportInPipe() throws Exception {
+    void testGenerateReportInPipe(JenkinsRule jenkinsRule) throws Exception {
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
         WorkflowJob p = jenkinsRule.createProject(WorkflowJob.class, "p");
@@ -322,7 +318,7 @@ public class PerformanceTestBuildTest {
     }
 
     @Test
-    public void testFailCriteria() throws Exception {
+    void testFailCriteria(JenkinsRule jenkinsRule) throws Exception {
         String path = getClass().getResource("/performanceTestWithFailCriteria.yml").getPath();
 
         WorkflowJob p = jenkinsRule.createProject(WorkflowJob.class, "p");
@@ -359,7 +355,7 @@ public class PerformanceTestBuildTest {
     }
 
     @Test
-    public void testResutsChecker() throws Exception {
+    void testResutsChecker(JenkinsRule jenkinsRule) throws Exception {
         PerformanceTestBuild testBuild = new PerformanceTestBuild("test option");
         testBuild.setGeneratePerformanceTrend(false);
         testBuild.setPrintDebugOutput(false);
@@ -378,7 +374,7 @@ public class PerformanceTestBuildTest {
     }
 
     @Test
-    public void testPWD() throws Exception {
+    void testPWD(JenkinsRule jenkinsRule) throws Exception {
         WorkflowJob p = jenkinsRule.createProject(WorkflowJob.class, "p");
         File buildWorkspace = Files.createTempDirectory(null).toFile();
         FilePath workspace = new FilePath(buildWorkspace);
@@ -424,7 +420,7 @@ public class PerformanceTestBuildTest {
     }
 
     @Test
-    public void testDefaultVirtualEnvCommand() throws Exception {
+    void testDefaultVirtualEnvCommand(JenkinsRule jenkinsRule) throws Exception {
         resetVirtualEnvCommands();
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
@@ -459,13 +455,14 @@ public class PerformanceTestBuildTest {
 
         assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
         assertEquals(5, buildTest.commands.size(), jobLog);
-        assertTrue(buildTest.commands.get(0)[0].equals("virtualenv"),
+        assertEquals("virtualenv",
+                buildTest.commands.get(0)[0],
                 "Command should have been 'virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'");
         resetVirtualEnvCommands();
     }
 
     @Test
-    public void testHardcodedVirtualEnvCommand() throws Exception {
+    void testHardcodedVirtualEnvCommand(JenkinsRule jenkinsRule) throws Exception {
         resetVirtualEnvCommands();
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
@@ -501,14 +498,14 @@ public class PerformanceTestBuildTest {
 
         assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
         assertEquals(5, buildTest.commands.size(), jobLog);
-        assertTrue(buildTest.commands.get(0)[0].equals("/path/to/virtualenv"),
-                "Command should have been '/path/to/virtualenv', but instead it was: '" + buildTest.commands.get(0)[0]
-                        + "'");
+        assertEquals("/path/to/virtualenv",
+                buildTest.commands.get(0)[0],
+                "Command should have been '/path/to/virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'");
         resetVirtualEnvCommands();
     }
 
     @Test
-    public void testVariableVirtualEnvCommand() throws Exception {
+    void testVariableVirtualEnvCommand(JenkinsRule jenkinsRule) throws Exception {
         resetVirtualEnvCommands();
         String path = getClass().getResource("/performanceTest.yml").getPath();
 
@@ -544,9 +541,9 @@ public class PerformanceTestBuildTest {
 
         assertEquals(Result.SUCCESS, buildExt.getResult(), jobLog);
         assertEquals(5, buildTest.commands.size(), jobLog);
-        assertTrue(buildTest.commands.get(0)[0].equals(workspace + "/virtualenv"),
-                "Command should have been '" + workspace + "/virtualenv', but instead it was: '"
-                        + buildTest.commands.get(0)[0] + "'");
+        assertEquals(workspace + "/virtualenv",
+                buildTest.commands.get(0)[0],
+                "Command should have been '" + workspace + "/virtualenv', but instead it was: '" + buildTest.commands.get(0)[0] + "'");
         resetVirtualEnvCommands();
     }
 }

@@ -1,18 +1,18 @@
 package hudson.plugins.performance.parsers;
 
 import hudson.plugins.performance.reports.PerformanceReport;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class AbstractParserTest {
+class AbstractParserTest {
 
     @Test
-    public void testDeserialized() throws Exception {
+    void testDeserialized() throws Exception {
         File serializedFile = new File(getClass().getResource("/results.v.2.0.jtl.serialized").toURI());
         String reportFilePath = serializedFile.getAbsolutePath().replace(".serialized", "");
         File reportFile = new File(reportFilePath);
@@ -20,12 +20,12 @@ public class AbstractParserTest {
         assertNotNull(report);
         report = AbstractParser.loadSerializedReport(reportFile); // subsequent calls should be cached
         assertNotNull(report);
-        assertEquals("totalDuration", 2030.47, report.getTotalTrafficInKb(), 0.001);
-        assertEquals("samples count", 200, report.samplesCount());
+        assertEquals(2030.47, report.getTotalTrafficInKb(), 0.001, "totalDuration");
+        assertEquals(200, report.samplesCount(), "samples count");
     }
 
     @Test
-    public void testUploadOldReport() throws Exception {
+    void testUploadOldReport() throws Exception {
         File serializedFile = new File(getClass().getResource("/result.csv.serialized").toURI());
         String reportFilePath = serializedFile.getAbsolutePath().replace(".serialized", "");
 
@@ -44,7 +44,5 @@ public class AbstractParserTest {
         assertEquals(455, report.get95Line());
         assertEquals(100, report.getMin());
         assertEquals(468, report.getMax());
-
-        System.out.println();
     }
 }

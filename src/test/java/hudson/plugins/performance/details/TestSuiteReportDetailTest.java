@@ -1,18 +1,10 @@
 package hudson.plugins.performance.details;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import hudson.model.Descriptor;
+import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.Project;
+import hudson.model.Run;
 import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.PerformanceReportMap;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
@@ -20,25 +12,34 @@ import hudson.plugins.performance.actions.PerformanceProjectAction;
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
-import org.jfree.data.category.CategoryDataset;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import hudson.model.FreeStyleBuild;
-import hudson.model.Project;
-import hudson.model.Run;
 import hudson.tasks.Publisher;
 import hudson.util.ChartUtil;
 import hudson.util.DescribableList;
 import hudson.util.RunList;
+import org.jfree.data.category.CategoryDataset;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+
+@WithJenkins
+@ExtendWith(MockitoExtension.class)
 public class TestSuiteReportDetailTest {
 
     private static final String TEST_URI = "myUri";
@@ -57,13 +58,10 @@ public class TestSuiteReportDetailTest {
     @Mock
     PerformanceReport report;
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
-
     private Map<String, UriReport> uriReportMap = new HashMap<String, UriReport>();
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         uriReportMap.put(TEST_URI, getUriReport());
     }
 
@@ -83,13 +81,13 @@ public class TestSuiteReportDetailTest {
     }
 
     @Test
-    public void chartDatasetHasAverageOfSamples() throws Exception {
+    void chartDatasetHasAverageOfSamples(JenkinsRule j) throws Exception {
         when(publisher.getGraphType()).thenReturn(PerformancePublisher.ART);
         assertEquals(550L, getDatasetValue());
     }
 
     @Test
-    public void chartDatasetHasMedianOfSamples() throws Exception {
+    void chartDatasetHasMedianOfSamples(JenkinsRule j) throws Exception {
         when(publisher.getGraphType()).thenReturn(PerformancePublisher.MRT);
         assertEquals(100L, getDatasetValue());
     }
@@ -110,14 +108,14 @@ public class TestSuiteReportDetailTest {
     }
 
     public static PerformanceProjectAction.Range alwaysInRangeMock() {
-        final PerformanceProjectAction.Range mock = mock(PerformanceProjectAction.Range.class);
+        final PerformanceProjectAction.Range mock = mock(PerformanceProjectAction.Range.class, withSettings().strictness(Strictness.LENIENT));
         when(mock.in(anyInt())).thenReturn(true);
         when(mock.includedByStep(anyInt())).thenReturn(true);
         return mock;
     }
 
     @Test
-    public void testFlow() throws Exception {
+    void testFlow(JenkinsRule j) throws Exception {
         FreeStyleProject project = j.createFreeStyleProject();
         project.createExecutable();
 

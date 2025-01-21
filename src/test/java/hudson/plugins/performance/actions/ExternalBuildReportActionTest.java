@@ -1,18 +1,19 @@
 package hudson.plugins.performance.actions;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class ExternalBuildReportActionTest {
+class ExternalBuildReportActionTest {
 
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         ExternalBuildReportAction report = new ExternalBuildReportAction("http://some.url.com");
 
         assertEquals("View External Report", report.getDisplayName());
         assertEquals("graph.gif", report.getIconFileName());
         assertEquals("http://some.url.com", report.getUrlName());
-        assertEquals(null, report.getTarget());
+        assertNull(report.getTarget());
     }
 }

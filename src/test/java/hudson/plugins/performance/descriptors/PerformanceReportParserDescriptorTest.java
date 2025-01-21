@@ -7,47 +7,47 @@ import hudson.plugins.performance.parsers.JUnitParser;
 import hudson.plugins.performance.parsers.JmeterSummarizerParser;
 import hudson.plugins.performance.parsers.TaurusParser;
 import hudson.plugins.performance.parsers.WrkSummarizerParser;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class PerformanceReportParserDescriptorTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class PerformanceReportParserDescriptorTest {
 
     @Test
-    public void name() throws Exception {
+    void name(JenkinsRule j) throws Exception {
         PerformanceReportParserDescriptor descriptor = PerformanceReportParserDescriptor.getById(IagoParser.DescriptorImpl.class.getName());
         assertNotNull(descriptor);
-        assertTrue(descriptor instanceof IagoParser.DescriptorImpl);
+        assertInstanceOf(IagoParser.DescriptorImpl.class, descriptor);
 
         PerformanceReportParserDescriptor descriptor2 = PerformanceReportParserDescriptor.getById(JMeterCsvParser.DescriptorImpl.class.getName());
         assertNotNull(descriptor2);
-        assertTrue(descriptor2 instanceof JMeterCsvParser.DescriptorImpl);
+        assertInstanceOf(JMeterCsvParser.DescriptorImpl.class, descriptor2);
 
         PerformanceReportParserDescriptor descriptor3 = PerformanceReportParserDescriptor.getById(JMeterParser.DescriptorImpl.class.getName());
         assertNotNull(descriptor3);
-        assertTrue(descriptor3 instanceof JMeterParser.DescriptorImpl);
+        assertInstanceOf(JMeterParser.DescriptorImpl.class, descriptor3);
 
         PerformanceReportParserDescriptor descriptor4 = PerformanceReportParserDescriptor.getById(JmeterSummarizerParser.DescriptorImpl.class.getName());
         assertNotNull(descriptor4);
-        assertTrue(descriptor4 instanceof JmeterSummarizerParser.DescriptorImpl);
+        assertInstanceOf(JmeterSummarizerParser.DescriptorImpl.class, descriptor4);
 
         PerformanceReportParserDescriptor descriptor5 = PerformanceReportParserDescriptor.getById(JUnitParser.DescriptorImpl.class.getName());
         assertNotNull(descriptor5);
-        assertTrue(descriptor5 instanceof JUnitParser.DescriptorImpl);
+        assertInstanceOf(JUnitParser.DescriptorImpl.class, descriptor5);
 
 
         PerformanceReportParserDescriptor descriptor6 = PerformanceReportParserDescriptor.getById(TaurusParser.DescriptorImpl.class.getName());
         assertNotNull(descriptor6);
-        assertTrue(descriptor6 instanceof TaurusParser.DescriptorImpl);
+        assertInstanceOf(TaurusParser.DescriptorImpl.class, descriptor6);
 
         PerformanceReportParserDescriptor descriptor7 = PerformanceReportParserDescriptor.getById(WrkSummarizerParser.DescriptorImpl.class.getName());
         assertNotNull(descriptor7);
-        assertTrue(descriptor7 instanceof WrkSummarizerParser.DescriptorImpl);
+        assertInstanceOf(WrkSummarizerParser.DescriptorImpl.class, descriptor7);
 
         assertNull(ConstraintDescriptor.getById("null"));
     }

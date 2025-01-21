@@ -1,25 +1,5 @@
 package hudson.plugins.performance.reports;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
@@ -30,9 +10,26 @@ import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
 import hudson.plugins.performance.constraints.ConstraintEvaluation;
 import hudson.plugins.performance.constraints.RelativeConstraint;
 import jenkins.model.Jenkins;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConstraintReportTest {
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class ConstraintReportTest {
 
     @Mock
     ArrayList<ConstraintEvaluation> ceList;
@@ -64,16 +61,10 @@ public class ConstraintReportTest {
     AbsoluteConstraint ac5;
 
     @Mock
-    Date date;
-
-    @Mock
     Calendar calendar;
 
     @Mock
     FilePath filePath;
-
-    @Mock
-    URI uri;
 
     @SuppressWarnings("rawtypes")
     @Mock
@@ -110,8 +101,8 @@ public class ConstraintReportTest {
 
     final MockedStatic<Jenkins> staticJenkins = Mockito.mockStatic(Jenkins.class);
 
-    @Before
-    public void setUp() throws IOException, InterruptedException {
+    @BeforeEach
+    void setUp() throws IOException, InterruptedException {
         when(ce0.getAbstractConstraint()).thenReturn(rc0);
         when(ce1.getAbstractConstraint()).thenReturn(rc1);
         when(ce2.getAbstractConstraint()).thenReturn(rc2);
@@ -165,13 +156,13 @@ public class ConstraintReportTest {
         when(jenkins.getRootUrl()).thenReturn("test-jenkins-rooturl");
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         staticJenkins.closeOnDemand();
     }
 
     @Test
-    public void happyPathWithoutConstraintLog() throws IOException, InterruptedException {
+    void happyPathWithoutConstraintLog() throws IOException, InterruptedException {
 
         ceList = new ArrayList<ConstraintEvaluation>();
         ceList.add(ce0);
@@ -199,7 +190,7 @@ public class ConstraintReportTest {
     }
 
     @Test
-    public void happyPathWithConstraintLog() throws IOException, InterruptedException {
+    void happyPathWithConstraintLog() throws IOException, InterruptedException {
         ceList = new ArrayList<ConstraintEvaluation>();
         ceList.add(ce0);
         ceList.add(ce1);

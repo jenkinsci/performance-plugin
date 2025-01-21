@@ -4,7 +4,7 @@ import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.parsers.TaurusParser;
 import hudson.util.StreamTaskListener;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,25 +15,25 @@ import java.util.Date;
 import java.util.Map;
 
 import static hudson.plugins.performance.reports.PerformanceReportTest.DEFAULT_PERCENTILES;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Artem Stasiuk (artem.stasuk@gmail.com)
  */
-public class ThroughputReportTest {
+class ThroughputReportTest {
 
-    private final static double DELTA = 0.000001;
+    private static final double DELTA = 0.000001;
     private PerformanceReport performanceReport = new PerformanceReport(DEFAULT_PERCENTILES);
 
     private ThroughputReport throughputReport = new ThroughputReport(performanceReport);
 
     @Test
-    public void shouldReturnZeroIfNoUri() {
+    void shouldReturnZeroIfNoUri() {
         assertEquals(0.0, throughputReport.get(), DELTA);
     }
 
     @Test
-    public void shouldSummarizeThroughputByDifferentUri() {
+    void shouldSummarizeThroughputByDifferentUri() {
         HttpSample httpSample1 = new HttpSample();
         Date date = new Date();
         httpSample1.setDate(date);
@@ -55,7 +55,7 @@ public class ThroughputReportTest {
     }
 
     @Test
-    public void shouldSummarizeThroughputUnder1ByDifferentUri() {
+    void shouldSummarizeThroughputUnder1ByDifferentUri() {
         HttpSample httpSample1 = new HttpSample();
         Date date = new Date();
         httpSample1.setDate(date);
@@ -81,7 +81,7 @@ public class ThroughputReportTest {
     }
 
     @Test
-    public void testThroughputJMeterReport() throws Exception {
+    void testThroughputJMeterReport() throws Exception {
         long time = System.currentTimeMillis();
 
         HttpSample firstSample = new HttpSample();
@@ -120,7 +120,7 @@ public class ThroughputReportTest {
     }
 
     @Test
-    public void testThroughputTaurusReport() throws Exception {
+    void testThroughputTaurusReport() throws Exception {
         performanceReport.getUriReportMap().clear();
 
         TaurusFinalStats stats = new TaurusFinalStats();
@@ -132,7 +132,7 @@ public class ThroughputReportTest {
     }
 
     @Test
-    public void testDuration() throws IOException, URISyntaxException {
+    void testDuration() throws IOException, URISyntaxException {
         File report = new File(getClass().getResource("/TaurusXmlWithDuration.xml").getPath());
         TaurusParser parser = new TaurusParser(report.getAbsolutePath(), DEFAULT_PERCENTILES);
         PerformanceReport performanceReport = parser.parse(null, Collections.singleton(report), new StreamTaskListener(System.out, StandardCharsets.UTF_8)).iterator().next();
@@ -147,7 +147,7 @@ public class ThroughputReportTest {
     }
 
     @Test
-    public void testDurationBackwardCompatibility() throws IOException, URISyntaxException {
+    void testDurationBackwardCompatibility() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = new PerformanceReport(DEFAULT_PERCENTILES);
 
         UriReport report1 = new UriReport(performanceReport, "f1", "uri1");

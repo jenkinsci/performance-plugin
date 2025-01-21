@@ -4,8 +4,8 @@ import hudson.model.TaskListener;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.PerformanceReportTest;
 import hudson.util.StreamTaskListener;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -13,25 +13,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class WrkSummarizerParserTest {
+class WrkSummarizerParserTest {
 
     private WrkSummarizerParser parser;
     private TaskListener listener;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         parser = new WrkSummarizerParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         listener = new StreamTaskListener((java.io.OutputStream) System.out, StandardCharsets.UTF_8);
     }
 
     @Test
-    public void testParseResultsWithMilliSecondResponseTimes() {
+    void testParseResultsWithMilliSecondResponseTimes() {
         List<File> files = new ArrayList<File>(1);
         files.add(new File(getClass().getResource("/WrkResultsQuick.wrk").getFile()));
 
-        try {
+        assertDoesNotThrow(() -> {
             Collection<PerformanceReport> reports = parser.parse(null, files,
                     listener);
             assertFalse(reports.isEmpty());
@@ -39,47 +42,41 @@ public class WrkSummarizerParserTest {
                 // should not have average time >= 1s
                 assertTrue(report.getAverage() < 1000);
             }
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+        });
     }
 
     @Test
-    public void testParseResultsWithSecondResponseTimes() {
+    void testParseResultsWithSecondResponseTimes() {
         List<File> files = new ArrayList<File>(1);
         files.add(new File(getClass().getResource("/WrkResultsLong.wrk").getFile()));
 
-        try {
+        assertDoesNotThrow(() -> {
             Collection<PerformanceReport> reports = parser.parse(null, files, listener);
             assertFalse(reports.isEmpty());
             for (PerformanceReport report : reports) {
                 // should have average time >= 1s
                 assertTrue(report.getAverage() >= 1000);
             }
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+        });
     }
 
     @Test
-    public void testParseWithLatencyDistributionBuckets() {
+    void testParseWithLatencyDistributionBuckets() {
         List<File> files = new ArrayList<File>(1);
         files.add(new File(getClass().getResource("/WrkResultsWithLatencyFlag.wrk").getFile()));
 
-        try {
+        assertDoesNotThrow(() -> {
             Collection<PerformanceReport> reports = parser.parse(null, files, listener);
             assertFalse(reports.isEmpty());
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+        });
     }
 
     @Test
-    public void testParseWithErrors() {
+    void testParseWithErrors() {
         List<File> files = new ArrayList<File>(1);
         files.add(new File(getClass().getResource("/WrkResultsWithErrors.wrk").getFile()));
 
-        try {
+        assertDoesNotThrow(() -> {
             Collection<PerformanceReport> reports = parser.parse(null, files, listener);
             assertFalse(reports.isEmpty());
 
@@ -88,13 +85,11 @@ public class WrkSummarizerParserTest {
             // for(PerformanceReport report: reports) {
             //   assertTrue(report.countErrors() > 0);
             // }
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+        });
     }
 
     @Test
-    public void testParseTimeMeasurements() {
+    void testParseTimeMeasurements() {
         // milliseconds
         assertEquals(5, parser.getTime("5ms", WrkSummarizerParser.TimeUnit.MILLISECOND));
         assertEquals(5000, parser.getTime("5s", WrkSummarizerParser.TimeUnit.MILLISECOND));

@@ -1,13 +1,13 @@
 package hudson.plugins.performance.data;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PerformanceReportPositionTest {
+class PerformanceReportPositionTest {
 
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         PerformanceReportPosition position = new PerformanceReportPosition();
 
         position.setPerformanceReportPosition("test1");

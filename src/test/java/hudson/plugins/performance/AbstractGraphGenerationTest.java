@@ -1,46 +1,46 @@
 package hudson.plugins.performance;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.ServletOutputStream;
-
-import hudson.plugins.performance.actions.PerformanceBuildAction;
-import org.jfree.data.category.CategoryDataset;
-import org.junit.Before;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-import org.mockito.Mock;
-
 import hudson.model.AbstractProject;
 import hudson.model.Run;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.parsers.JMeterTestHelper;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.util.DescribableList;
+import org.jfree.data.category.CategoryDataset;
+import org.junit.jupiter.api.BeforeEach;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+import org.mockito.Mock;
+import org.mockito.quality.Strictness;
+
+import javax.servlet.ServletOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 
 public abstract class AbstractGraphGenerationTest {
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected PerformanceBuildAction performanceBuildAction;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected AbstractProject project;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected Run build;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected StaplerRequest request;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected StaplerResponse response;
 
     protected PerformanceReport report;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected PerformanceReportMap reportMap;
 
-    @Before
+    @BeforeEach
     public void baseSetup() throws Exception {
         report = JMeterTestHelper.parse("/JMeterResults.jtl");
         report.setBuildAction(performanceBuildAction);
@@ -55,9 +55,9 @@ public abstract class AbstractGraphGenerationTest {
     }
 
     protected void setGraphType(String graphType) {
-        DescribableList list = mock(DescribableList.class);
+        DescribableList list = mock(DescribableList.class, withSettings().strictness(Strictness.LENIENT));
         when(project.getPublishersList()).thenReturn(list);
-        PerformancePublisher publisher = mock(PerformancePublisher.class);
+        PerformancePublisher publisher = mock(PerformancePublisher.class, withSettings().strictness(Strictness.LENIENT));
         when(list.get(PerformancePublisher.class)).thenReturn(publisher);
         when(publisher.getGraphType()).thenReturn(graphType);
     }

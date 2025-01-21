@@ -2,16 +2,16 @@ package hudson.plugins.performance.parsers;
 
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.PerformanceReportTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JmeterSummarizerParserTest {
+class JmeterSummarizerParserTest {
 
     @Test
-    public void testParse() throws Exception {
+    void testParse() throws Exception {
         JmeterSummarizerParser jmeterSummarizerParser = new JmeterSummarizerParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         File summaryLogFile = new File(getClass().getResource("/summary.log").toURI());
         PerformanceReport performanceReport = jmeterSummarizerParser.parse(summaryLogFile);
@@ -25,7 +25,7 @@ public class JmeterSummarizerParserTest {
 
 
     @Test
-    public void testParseNewLog() throws Exception {
+    void testParseNewLog() throws Exception {
 
         String path = getClass().getResource("/jmeter.log").getPath();
         String parser = ParserDetector.detect(path);

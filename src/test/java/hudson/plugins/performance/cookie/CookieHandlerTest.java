@@ -1,19 +1,19 @@
 package hudson.plugins.performance.cookie;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.kohsuke.stapler.Ancestor;
 
 import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CookieHandlerTest {
+class CookieHandlerTest {
 
     @Test
-    public void testCookieHandler() throws Exception {
+    void testCookieHandler() throws Exception {
         CookieHandler cookieHandler = new CookieHandler("testCookie");
 
         final List<Ancestor> list = new ArrayList<Ancestor>();

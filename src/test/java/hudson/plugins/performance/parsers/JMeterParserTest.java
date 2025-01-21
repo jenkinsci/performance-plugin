@@ -1,17 +1,16 @@
 package hudson.plugins.performance.parsers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-import org.junit.Test;
-
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.PerformanceReportTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * This class contains basic tests that verify the parsing behavior of
@@ -19,13 +18,13 @@ import hudson.plugins.performance.reports.PerformanceReportTest;
  *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
-public class JMeterParserTest {
+class JMeterParserTest {
     /**
      * Verifies that {@link JMeterParser#isXmlFile(File)} correctly identifies an
      * XML file.
      */
     @Test
-    public void testIsXml() throws Exception {
+    void testIsXml() throws Exception {
         // Setup fixture.
         final File xmlFile = new File(getClass().getResource("/JMeterResults.jtl").toURI());
 
@@ -41,7 +40,7 @@ public class JMeterParserTest {
      * provided data is CSV.
      */
     @Test
-    public void testIsCsv() throws Exception {
+    void testIsCsv() throws Exception {
         // Setup fixture.
         final File csvFile = new File(getClass().getResource("/JENKINS-16627_CSV_instead_of_XML.jtl").toURI());
 
@@ -57,7 +56,7 @@ public class JMeterParserTest {
      * provided data is CSV.
      */
     @Test
-    public void testIsEmpty() throws Exception {
+    void testIsEmpty() throws Exception {
         // Setup fixture.
         final File emptyFile = new File(getClass().getResource("/emptyfile.jtl").toURI());
 
@@ -73,7 +72,7 @@ public class JMeterParserTest {
      * XML data is preceded by whitespace.
      */
     @Test
-    public void testIsWhitespaceXml() throws Exception {
+    void testIsWhitespaceXml() throws Exception {
         // Setup fixture.
         final File xml = new File(getClass().getResource("/whitespace-followed-by-xml.jtl").toURI());
 
@@ -93,7 +92,7 @@ public class JMeterParserTest {
      * verify the correctness of the parsed data.
      */
     @Test
-    public void testParseXmlJtlFile() throws Exception {
+    void testParseXmlJtlFile() throws Exception {
         // Setup fixture.
         final AbstractParser parser = new JMeterParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         final File reportFile = new File(getClass().getResource("/JMeterResults.jtl").toURI());
@@ -103,8 +102,7 @@ public class JMeterParserTest {
 
         // Verify results.
         assertNotNull(result);
-        assertEquals("The source file contains eight samples. These should all have been added to the performance report.",
-                8, result.samplesCount());
+        assertEquals(8, result.samplesCount(), "The source file contains eight samples. These should all have been added to the performance report.");
     }
 
     /**
@@ -116,7 +114,7 @@ public class JMeterParserTest {
      * verify the correctness of the parsed data.
      */
     @Test
-    public void testParseCsvJtlFile() throws Exception {
+    void testParseCsvJtlFile() throws Exception {
         // Setup fixture.
         final AbstractParser parser = new JMeterParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         final File reportFile = new File(getClass().getResource("/JENKINS-16627_CSV_instead_of_XML.jtl").toURI());
@@ -133,14 +131,14 @@ public class JMeterParserTest {
 
   /*
   @Test
-  public void parseXmlTest() throws Exception 
+  public void parseXmlTest() throws Exception
   {
     // Setup fixture.
-    
+
     // Execute system under test.
-    
+
     // Verify results.
   }
-   
+
    */
 }

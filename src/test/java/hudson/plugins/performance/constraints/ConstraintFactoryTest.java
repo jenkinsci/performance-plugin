@@ -1,21 +1,6 @@
 package hudson.plugins.performance.constraints;
 
 
-import static org.hamcrest.CoreMatchers.is;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import hudson.model.AbstractBuild;
 import hudson.plugins.performance.PerformanceReportMap;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
@@ -26,10 +11,24 @@ import hudson.plugins.performance.constraints.blocks.PreviousResultsBlock;
 import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConstraintFactoryTest {
+@ExtendWith(MockitoExtension.class)
+class ConstraintFactoryTest {
 
     private List<AbstractConstraint> constraints1;
     private List<AbstractConstraint> constraints2;
@@ -37,21 +36,21 @@ public class ConstraintFactoryTest {
     @InjectMocks
     ConstraintFactory constraintFactory;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     AbstractBuild<?, ?> abstractBuild;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceBuildAction performanceBuildAction;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReportMap performanceReportMap;
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PerformanceReport performanceReport;
 
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         /**
          * Creating constraints
          */
@@ -106,7 +105,7 @@ public class ConstraintFactoryTest {
     }
 
     @Test
-    public void testHappyPath() {
+    void testHappyPath() {
         /**
          * Executing method
          */
@@ -137,7 +136,7 @@ public class ConstraintFactoryTest {
     }
 
     @Test
-    public void testOptionalBlock() {
+    void testOptionalBlock() {
         /**
          * Executing method
          */
@@ -147,6 +146,6 @@ public class ConstraintFactoryTest {
          */
         MatcherAssert.assertThat(result.get(0).getTestCaseBlock().getTestCase(), is("tc1"));
         MatcherAssert.assertThat(result.get(1).isSpecifiedTestCase(), is(false));
-        Assert.assertNull(result.get(1).getTestCaseBlock());
+        assertNull(result.get(1).getTestCaseBlock());
     }
 }

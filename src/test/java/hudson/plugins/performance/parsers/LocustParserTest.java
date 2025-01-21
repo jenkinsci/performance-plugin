@@ -2,38 +2,42 @@ package hudson.plugins.performance.parsers;
 
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.PerformanceReportTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class LocustParserTest {
-    final static String FILE_NAME = "test_results_stats.csv";
+class LocustParserTest {
+    static final String FILE_NAME = "test_results_stats.csv";
     File requestReportFile;
     LocustParser locustParser;
     PerformanceReport report;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         requestReportFile = new File(getClass().getResource(String.format("/%s", FILE_NAME)).toURI());
         locustParser = new LocustParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
         report = locustParser.parse(requestReportFile);
     }
 
     @Test
-    public void shouldCreateParser() throws Exception {
+    void shouldCreateParser() throws Exception {
         assertNotNull(locustParser);
     }
 
     @Test
-    public void parserShouldReturnGlobPattern() throws Exception {
+    void parserShouldReturnGlobPattern() throws Exception {
         assertEquals("**/*_stats.csv", locustParser.getDefaultGlobPattern());
     }
 
     @Test
-    public void reportShouldContainSummarizedValues() throws Exception {
+    void reportShouldContainSummarizedValues() throws Exception {
         assertEquals(4, report.getSummarizerSize());
         assertEquals(1993, report.getSummarizerMax());
         assertEquals(196, report.getSummarizerMin());
@@ -41,30 +45,30 @@ public class LocustParserTest {
     }
 
     @Test
-    public void reportShouldContainAllReports() throws Exception {
+    void reportShouldContainAllReports() throws Exception {
         String[] reportUris = new String[]{"big", "huge", "medium", "small"};
         assertArrayEquals(reportUris, report.getUriReportMap().keySet().toArray(new String[0]));
 
         for (String uri : reportUris) {
-            assertEquals(true, report.getUriReportMap().get(uri).hasSamples());
+            assertTrue(report.getUriReportMap().get(uri).hasSamples());
         }
     }
 
     @Test
-    public void reportHasValuesInUriReport() {
-        assertEquals(false, report.getUriReportMap().get("big").isExcludeResponseTime());
+    void reportHasValuesInUriReport() {
+        assertFalse(report.getUriReportMap().get("big").isExcludeResponseTime());
         assertEquals(370, report.getUriReportMap().get("big").getAverage());
         assertEquals(1, report.getUriReportMap().get("big").samplesCount());
         assertEquals(638.0, report.getUriReportMap().get("big").getAverageSizeInKb(), 0.001);
     }
 
     @Test
-    public void reportShouldContainTrafficSize() {
+    void reportShouldContainTrafficSize() {
         assertEquals(71464.0, report.getTotalTrafficInKb(), 0.001);
     }
 
     @Test
-    public void reportShouldReturnProperFileName() throws Exception {
+    void reportShouldReturnProperFileName() throws Exception {
         assertEquals(FILE_NAME, report.getReportFileName());
     }
 }

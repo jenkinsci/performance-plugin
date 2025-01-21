@@ -5,37 +5,37 @@ import hudson.model.TaskListener;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.reports.PerformanceReport;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class BaselineComparisonTest extends AbstractGraphGenerationTest {
-    private final static String LABEL = "BlazeDemo";
+@ExtendWith(MockitoExtension.class)
+class BaselineComparisonTest extends AbstractGraphGenerationTest {
+    private static final String LABEL = "BlazeDemo";
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected Run prevBuild;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected PerformanceBuildAction prevAction;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected PerformanceReportMap prevReportMap;
 
 
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected Run buildWithNumber3;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected PerformanceBuildAction actionWithNumber3;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     protected PerformanceReportMap reportMapWithNumber3;
 
     private Map<String, PerformanceReport> reportMapForBuild = new HashMap<>();
@@ -43,8 +43,8 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
     private Map<String, PerformanceReport> reportMapForBuildNumber3 = new HashMap<>();
 
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         when(build.getPreviousBuild()).thenReturn(prevBuild);
         when(prevBuild.getPreviousBuild()).thenReturn(buildWithNumber3);
         when(prevBuild.getPreviousCompletedBuild()).thenReturn(buildWithNumber3);
@@ -87,7 +87,7 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
     }
 
     @Test
-    public void testBaselineBuild5() throws Exception {
+    void testBaselineBuild5() throws Exception {
         new PerformanceReportMap(performanceBuildAction, mock(TaskListener.class)) {
             @Override
             protected void parseReports(Run<?, ?> build, TaskListener listener, PerformanceReportCollector collector, String filename) throws IOException {
@@ -119,7 +119,7 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
     }
 
     @Test
-    public void testBaselineBuild4() throws Exception {
+    void testBaselineBuild4() throws Exception {
         new PerformanceReportMap(prevAction, mock(TaskListener.class)) {
             @Override
             protected void parseReports(Run<?, ?> build, TaskListener listener, PerformanceReportCollector collector, String filename) throws IOException {
@@ -151,7 +151,7 @@ public class BaselineComparisonTest extends AbstractGraphGenerationTest {
     }
 
     @Test
-    public void testBaselineBuild3() throws Exception {
+    void testBaselineBuild3() throws Exception {
         new PerformanceReportMap(actionWithNumber3, mock(TaskListener.class)) {
             @Override
             protected void parseReports(Run<?, ?> build, TaskListener listener, PerformanceReportCollector collector, String filename) throws IOException {

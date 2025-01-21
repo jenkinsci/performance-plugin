@@ -1,16 +1,5 @@
 package hudson.plugins.performance.constraints;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.TestBuilder;
-
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -21,11 +10,20 @@ import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.constraints.AbstractConstraint.Escalation;
 import hudson.plugins.performance.constraints.AbstractConstraint.Metric;
 import hudson.plugins.performance.constraints.AbstractConstraint.Operator;
+import hudson.plugins.performance.constraints.blocks.TestCaseBlock;
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class ConstraintTest {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@WithJenkins
+class ConstraintTest {
 
     /**
      * Testing: Escalation.INFORMATION
@@ -37,7 +35,7 @@ public class ConstraintTest {
      * @throws Exception if test encounters errors.
      */
     @Test
-    public void informationModeDoesntAffectBuildStatus() throws Exception {
+    void informationModeDoesntAffectBuildStatus(JenkinsRule j) throws Exception {
         TestCaseBlock testCaseBlock = new TestCaseBlock("listShows");
 
         // Value set to 1L to violate constraint. Due to Escalation.INFORMATION the build status must be SUCCESS.
@@ -67,7 +65,7 @@ public class ConstraintTest {
         });
 
         FreeStyleBuild result = p.scheduleBuild2(0).get();
-        Assert.assertEquals(Result.SUCCESS, result.getResult());
+        assertEquals(Result.SUCCESS, result.getResult());
     }
 
     /**
@@ -80,7 +78,7 @@ public class ConstraintTest {
      * @throws Exception if test encounters errors.
      */
     @Test
-    public void warningModeMakesBuildUnstable() throws Exception {
+    void warningModeMakesBuildUnstable(JenkinsRule j) throws Exception {
         TestCaseBlock testCaseBlock = new TestCaseBlock("listShows");
 
         // Value set to 1L to violate constraint. Due to Escalation.WARNING the build status must be UNSTABLE.
@@ -110,7 +108,7 @@ public class ConstraintTest {
         });
 
         FreeStyleBuild result = p.scheduleBuild2(0).get();
-        Assert.assertEquals(Result.UNSTABLE, result.getResult());
+        assertEquals(Result.UNSTABLE, result.getResult());
     }
 
     /**
@@ -123,7 +121,7 @@ public class ConstraintTest {
      * @throws Exception if test encounters errors.
      */
     @Test
-    public void errorModeMakesBuildFail() throws Exception {
+    void errorModeMakesBuildFail(JenkinsRule j) throws Exception {
         TestCaseBlock testCaseBlock = new TestCaseBlock("listShows");
 
         // Value set to 1L to violate constraint. Due to Escalation.ERROR the build status must be FAILURE.
@@ -152,7 +150,7 @@ public class ConstraintTest {
         });
 
         FreeStyleBuild result = p.scheduleBuild2(0).get();
-        Assert.assertEquals(Result.FAILURE, result.getResult());
+        assertEquals(Result.FAILURE, result.getResult());
     }
 
     /**
@@ -165,7 +163,7 @@ public class ConstraintTest {
      * @throws Exception if test encounters errors.
      */
     @Test
-    public void equalValuesWithNotGreaterOperator() throws Exception {
+    void equalValuesWithNotGreaterOperator(JenkinsRule j) throws Exception {
         TestCaseBlock testCaseBlock = new TestCaseBlock("listShows");
 
         // The specified value and calculated value are equal.
@@ -195,7 +193,7 @@ public class ConstraintTest {
         });
 
         FreeStyleBuild result = p.scheduleBuild2(0).get();
-        Assert.assertEquals(Result.SUCCESS, result.getResult());
+        assertEquals(Result.SUCCESS, result.getResult());
     }
 
     /**
@@ -208,7 +206,7 @@ public class ConstraintTest {
      * @throws Exception if test encounters errors.
      */
     @Test
-    public void calculatedValueGreaterWithNotGreaterOperator() throws Exception {
+    void calculatedValueGreaterWithNotGreaterOperator(JenkinsRule j) throws Exception {
         TestCaseBlock testCaseBlock = new TestCaseBlock("listShows");
 
         // The specified should not be exceeded.
@@ -237,7 +235,7 @@ public class ConstraintTest {
         });
 
         FreeStyleBuild result = p.scheduleBuild2(0).get();
-        Assert.assertEquals(Result.FAILURE, result.getResult());
+        assertEquals(Result.FAILURE, result.getResult());
     }
 
     /**
@@ -250,7 +248,7 @@ public class ConstraintTest {
      * @throws Exception if test encounters errors.
      */
     @Test
-    public void equalValuesWithNotEqualOperator() throws Exception {
+    void equalValuesWithNotEqualOperator(JenkinsRule j) throws Exception {
         TestCaseBlock testCaseBlock = new TestCaseBlock("listShows");
 
         // The specified value and calculated value are equal.
@@ -279,7 +277,7 @@ public class ConstraintTest {
         });
 
         FreeStyleBuild result = p.scheduleBuild2(0).get();
-        Assert.assertEquals(Result.FAILURE, result.getResult());
+        assertEquals(Result.FAILURE, result.getResult());
     }
 
     /**
@@ -292,7 +290,7 @@ public class ConstraintTest {
      * @throws Exception if test encounters errors.
      */
     @Test
-    public void notEqualValueWithNotEqualOperator() throws Exception {
+    void notEqualValueWithNotEqualOperator(JenkinsRule j) throws Exception {
         TestCaseBlock testCaseBlock = new TestCaseBlock("listShows");
 
         // The specified should not be exceeded.
@@ -322,7 +320,7 @@ public class ConstraintTest {
         });
 
         FreeStyleBuild result = p.scheduleBuild2(0).get();
-        Assert.assertEquals(Result.SUCCESS, result.getResult());
+        assertEquals(Result.SUCCESS, result.getResult());
     }
 
     /**
@@ -335,7 +333,7 @@ public class ConstraintTest {
      * @throws Exception if test encounters errors.
      */
     @Test
-    public void equalValuesWithNotLessOperator() throws Exception {
+    void equalValuesWithNotLessOperator(JenkinsRule j) throws Exception {
         TestCaseBlock testCaseBlock = new TestCaseBlock("listShows");
 
         // The specified value and calculated value are equal.
@@ -365,7 +363,7 @@ public class ConstraintTest {
         });
 
         FreeStyleBuild result = p.scheduleBuild2(0).get();
-        Assert.assertEquals(Result.SUCCESS, result.getResult());
+        assertEquals(Result.SUCCESS, result.getResult());
     }
 
     /**
@@ -378,7 +376,7 @@ public class ConstraintTest {
      * @throws Exception if test encounters errors.
      */
     @Test
-    public void calculatedValueLessWithNotLessOperator() throws Exception {
+    void calculatedValueLessWithNotLessOperator(JenkinsRule j) throws Exception {
         TestCaseBlock testCaseBlock = new TestCaseBlock("listShows");
 
         // The specified should not be exceeded.
@@ -407,6 +405,6 @@ public class ConstraintTest {
         });
 
         FreeStyleBuild result = p.scheduleBuild2(0).get();
-        Assert.assertEquals(Result.FAILURE, result.getResult());
+        assertEquals(Result.FAILURE, result.getResult());
     }
 }

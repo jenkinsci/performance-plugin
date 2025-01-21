@@ -4,18 +4,19 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.PerformanceReportTest;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TrendReportGraphsTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class TrendReportGraphsTest {
 
     @Test
-    public void test() throws Exception {
+    void test(JenkinsRule j) throws Exception {
         FreeStyleProject project = j.createFreeStyleProject();
         FreeStyleBuild build = project.createExecutable();
         PerformanceReport report = new PerformanceReport(PerformanceReportTest.DEFAULT_PERCENTILES);
@@ -29,6 +30,6 @@ public class TrendReportGraphsTest {
         assertEquals(project, graphs.getProject());
         assertEquals(build, graphs.getBuild());
         assertEquals(report, graphs.getPerformanceReport());
-        assertEquals(null, graphs.getUriReport("null"));
+        assertNull(graphs.getUriReport("null"));
     }
 }

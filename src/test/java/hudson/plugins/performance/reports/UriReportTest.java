@@ -2,16 +2,20 @@ package hudson.plugins.performance.reports;
 
 import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.reports.UriReport.Sample;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UriReportTest {
+class UriReportTest {
 
     private static final String HTTP_200 = "200";
     private static final long AVERAGE = 5;
@@ -19,8 +23,8 @@ public class UriReportTest {
     private static final long MAX = 10;
     private UriReport uriReport;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         PerformanceReport performanceReport = new PerformanceReport(PerformanceReportTest.DEFAULT_PERCENTILES);
         uriReport = new UriReport(performanceReport, null, null);
         HttpSample httpSample1 = new HttpSample();
@@ -42,32 +46,32 @@ public class UriReportTest {
     }
 
     @Test
-    public void testHasSamples() throws Exception {
+    void testHasSamples() throws Exception {
         assertTrue(uriReport.hasSamples());
     }
 
     @Test
-    public void testCountErrors() {
+    void testCountErrors() {
         assertEquals(2, uriReport.countErrors());
     }
 
     @Test
-    public void testGetAverage() {
+    void testGetAverage() {
         assertEquals(AVERAGE, uriReport.getAverage());
     }
 
-//	@Test
-//	public void testGetMax() {
-//		assertEquals(MAX, uriReport.getMax());
-//	}
-
-//	@Test
-//	public void testGetMin() {
-//		assertEquals(MIN, uriReport.getMin());
-//	}
+    @Test
+    void testGetMax() {
+		assertEquals(MAX, uriReport.getMax());
+	}
 
     @Test
-    public void testIsFailed() {
+    void testGetMin() {
+		assertEquals(MIN, uriReport.getMin());
+	}
+
+    @Test
+    void testIsFailed() {
         assertTrue(uriReport.isFailed());
     }
 
@@ -75,7 +79,7 @@ public class UriReportTest {
      * Same dates, different duration. Shortest duration should be ordered first.
      */
     @Test
-    public void testCompareSameDateDifferentDuration() {
+    void testCompareSameDateDifferentDuration() {
         // setup fixture
         final List<Sample> samples = new ArrayList<Sample>();
         samples.add(new Sample(new Date(1), 2, HTTP_200, true, false));
@@ -94,7 +98,7 @@ public class UriReportTest {
      * Different dates, same duration. Oldest date should be ordered first.
      */
     @Test
-    public void testCompareDifferentDateSameDuration() {
+    void testCompareDifferentDateSameDuration() {
         // setup fixture
         final List<Sample> samples = new ArrayList<Sample>();
         samples.add(new Sample(new Date(2), 1, HTTP_200, true, false));
@@ -113,7 +117,7 @@ public class UriReportTest {
      * Different dates, different duration. Shortest duration should be ordered first.
      */
     @Test
-    public void testCompareDifferentDateDifferentDuration() {
+    void testCompareDifferentDateDifferentDuration() {
         // setup fixture
         final List<Sample> samples = new ArrayList<Sample>();
         samples.add(new Sample(new Date(1), 2, HTTP_200, true, false));
@@ -132,18 +136,15 @@ public class UriReportTest {
      * Null dates. Ordering is unspecified, but should not cause exceptions.
      */
     @Test
-    public void testCompareNullDateSameDuration() {
+    void testCompareNullDateSameDuration() {
         // setup fixture
         final List<Sample> samples = new ArrayList<Sample>();
         samples.add(new Sample(null, 1, HTTP_200, true, false));
         samples.add(new Sample(null, 1, HTTP_200, true, false));
 
-        try {
+        assertDoesNotThrow(() -> {
             // execute system under test
             Collections.sort(samples);
-        } catch (NullPointerException e) {
-            // verify result
-            Assert.fail("A NullPointerException was thrown (which should not have happened).");
-        }
+        }, "A NullPointerException was thrown (which should not have happened).");
     }
 }

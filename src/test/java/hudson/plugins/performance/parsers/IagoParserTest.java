@@ -1,5 +1,16 @@
 package hudson.plugins.performance.parsers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import hudson.model.FreeStyleBuild;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.parsers.IagoParser.Stats;
+import hudson.plugins.performance.reports.PerformanceReport;
+import hudson.plugins.performance.reports.PerformanceReportTest;
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -8,27 +19,15 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import hudson.model.FreeStyleBuild;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.parsers.IagoParser.Stats;
-import hudson.plugins.performance.reports.PerformanceReport;
-import hudson.plugins.performance.reports.PerformanceReportTest;
-
-public class IagoParserTest {
-
-    @Rule
-    public final JenkinsRule jenkinsRule = new JenkinsRule();
+@WithJenkins
+class IagoParserTest {
 
     @Test
-    public void testParseValidLine() throws Exception {
+    void testParseValidLine(JenkinsRule jenkinsRule) throws Exception {
         IagoParser parser = new IagoParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);
 
         // Line to parse
@@ -36,16 +35,16 @@ public class IagoParserTest {
         String key = "TEST";
 
         HttpSample sample = parser.getSample(line, key);
-        Assert.assertEquals(105, sample.getSummarizerMax());
-        Assert.assertEquals(1, sample.getSummarizerMin());
-        Assert.assertEquals(85, sample.getSummarizerSamples());
-        Assert.assertEquals((float) 1.0, sample.getSummarizerErrors(), 0.0);
-        Assert.assertEquals(3, sample.getDuration());
-        Assert.assertEquals(key, sample.getUri());
+        assertEquals(105, sample.getSummarizerMax());
+        assertEquals(1, sample.getSummarizerMin());
+        assertEquals(85, sample.getSummarizerSamples());
+        assertEquals((float) 1.0, sample.getSummarizerErrors(), 0.0);
+        assertEquals(3, sample.getDuration());
+        assertEquals(key, sample.getUri());
     }
 
     @Test
-    public void testParseInvalidLine() throws Exception {
+    void testParseInvalidLine(JenkinsRule jenkinsRule) throws Exception {
         IagoParser parser = new IagoParser("", PerformanceReportTest.DEFAULT_PERCENTILES);
 
         // Valid line to parse
@@ -59,12 +58,12 @@ public class IagoParserTest {
             exceptionFound = true;
         }
 
-        Assert.assertTrue(exceptionFound);
+        assertTrue(exceptionFound);
 
     }
 
     @Test
-    public void testParseInvalidDate() throws Exception {
+    void testParseInvalidDate(JenkinsRule jenkinsRule) throws Exception {
         IagoParser parser = new IagoParser("", PerformanceReportTest.DEFAULT_PERCENTILES);
 
         // Line to parse
@@ -78,12 +77,12 @@ public class IagoParserTest {
             exceptionFound = true;
         }
 
-        Assert.assertTrue(exceptionFound);
+        assertTrue(exceptionFound);
 
     }
 
     @Test
-    public void testParseValidFile() throws Exception {
+    void testParseValidFile(JenkinsRule jenkinsRule) throws Exception {
 
         Stats stats1 = new IagoParser.Stats();
         stats1.setClientRequestLatencyMsAverage((long) 4);
@@ -128,20 +127,21 @@ public class IagoParserTest {
                 out.close();
             }
         }
-        Assert.assertFalse(exceptionOccured);
+        assertFalse(exceptionOccured);
 
         IagoParser parser = new IagoParser("", PerformanceReportTest.DEFAULT_PERCENTILES);
         Collection<PerformanceReport> reports = parser.parse(new FreeStyleBuild(jenkinsRule.createFreeStyleProject()),
                 Arrays.asList(temp), jenkinsRule.createTaskListener());
-        Assert.assertEquals(1, reports.size());
+        assertEquals(1, reports.size());
 
         PerformanceReport report = (PerformanceReport) reports.toArray()[0];
 
-        Assert.assertEquals((stats1.getClientRequestLatencyMsAverage() + stats2.getClientRequestLatencyMsAverage()) / 2,
+        assertEquals((stats1.getClientRequestLatencyMsAverage() + stats2.getClientRequestLatencyMsAverage()) / 2,
                 report.getAverage());
     }
 
-    public void testUserRegexNoValidationErrors() throws Exception {
+    @Test
+    void testUserRegexNoValidationErrors(JenkinsRule jenkinsRule) throws Exception {
 
         IagoParser parser = new IagoParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);// , "4[0-9]+,5[0-9]+",
                                                                                             // ",");
@@ -151,16 +151,17 @@ public class IagoParserTest {
         String key = "TEST";
 
         HttpSample sample = parser.getSample(line, key);
-        Assert.assertEquals(105, sample.getSummarizerMax());
-        Assert.assertEquals(1, sample.getSummarizerMin());
-        Assert.assertEquals(85, sample.getSummarizerSamples());
-        Assert.assertEquals((float) 1.0, sample.getSummarizerErrors(), 0.0);
-        Assert.assertEquals(3, sample.getDuration());
-        Assert.assertEquals(key, sample.getUri());
+        assertEquals(105, sample.getSummarizerMax());
+        assertEquals(1, sample.getSummarizerMin());
+        assertEquals(85, sample.getSummarizerSamples());
+        assertEquals((float) 1.0, sample.getSummarizerErrors(), 0.0);
+        assertEquals(3, sample.getDuration());
+        assertEquals(key, sample.getUri());
 
     }
 
-    public void testNoErrors() throws Exception {
+    @Test
+    void testNoErrors(JenkinsRule jenkinsRule) throws Exception {
         IagoParser parser = new IagoParser(null, PerformanceReportTest.DEFAULT_PERCENTILES);// , "4[0-9]+,5[0-9]+",
                                                                                             // ",");
 
@@ -169,12 +170,12 @@ public class IagoParserTest {
         String key = "TEST";
 
         HttpSample sample = parser.getSample(line, key);
-        Assert.assertEquals(105, sample.getSummarizerMax());
-        Assert.assertEquals(1, sample.getSummarizerMin());
-        Assert.assertEquals(85, sample.getSummarizerSamples());
-        Assert.assertEquals((float) 0.0, sample.getSummarizerErrors(), 0.0);
-        Assert.assertEquals(3, sample.getDuration());
-        Assert.assertEquals(key, sample.getUri());
+        assertEquals(105, sample.getSummarizerMax());
+        assertEquals(1, sample.getSummarizerMin());
+        assertEquals(85, sample.getSummarizerSamples());
+        assertEquals((float) 0.0, sample.getSummarizerErrors(), 0.0);
+        assertEquals(3, sample.getDuration());
+        assertEquals(key, sample.getUri());
     }
 
 }

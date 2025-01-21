@@ -1,9 +1,14 @@
 package hudson.plugins.performance.reports;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import hudson.plugins.performance.actions.PerformanceBuildAction;
+import hudson.plugins.performance.data.HttpSample;
+import hudson.plugins.performance.data.TaurusFinalStats;
+import hudson.plugins.performance.parsers.JMeterParser;
+import hudson.plugins.performance.parsers.JUnitParser;
+import hudson.util.StreamTaskListener;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,31 +20,26 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import hudson.plugins.performance.actions.PerformanceBuildAction;
-import hudson.plugins.performance.data.HttpSample;
-import hudson.plugins.performance.data.TaurusFinalStats;
-import hudson.plugins.performance.parsers.JMeterParser;
-import hudson.plugins.performance.parsers.JUnitParser;
-import hudson.util.StreamTaskListener;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PerformanceReportTest {
     public static final String DEFAULT_PERCENTILES = "0,50,90,95,100";
 
     private PerformanceReport performanceReport;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         PerformanceBuildAction buildAction = Mockito.mock(PerformanceBuildAction.class);
         performanceReport = new PerformanceReport(DEFAULT_PERCENTILES);
         performanceReport.setBuildAction(buildAction);
     }
 
     @Test
-    public void testAddSample() throws Exception {
+    void testAddSample() throws Exception {
         PrintStream printStream = Mockito.mock(PrintStream.class);
         Mockito.when(
                 performanceReport.getBuildAction().getHudsonConsoleWriter())
@@ -70,7 +70,7 @@ public class PerformanceReportTest {
     }
 
     @Test
-    public void testAddTaurusSample() throws Exception {
+    void testAddTaurusSample() throws Exception {
         PrintStream printStream = Mockito.mock(PrintStream.class);
         Mockito.when(
                 performanceReport.getBuildAction().getHudsonConsoleWriter())
@@ -84,7 +84,7 @@ public class PerformanceReportTest {
     }
 
     @Test
-    public void testPerformanceReport() throws IOException, URISyntaxException {
+    void testPerformanceReport() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResults.jtl").toURI()));
         Map<String, UriReport> uriReportMap = performanceReport
                 .getUriReportMap();
@@ -114,7 +114,7 @@ public class PerformanceReportTest {
     }
 
     @Test
-    public void testPerformanceNonHTTPSamplesMultiThread() throws IOException, URISyntaxException {
+    void testPerformanceNonHTTPSamplesMultiThread() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsMultiThread.jtl").toURI()));
 
         Map<String, UriReport> uriReportMap = performanceReport
@@ -133,7 +133,7 @@ public class PerformanceReportTest {
     }
 
     @Test
-    public void testPerformanceReportJUnit() throws IOException, URISyntaxException {
+    void testPerformanceReportJUnit() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJUnit(new File(getClass().getResource("/TEST-JUnitResults.xml").toURI()));
         Map<String, UriReport> uriReportMap = performanceReport
                 .getUriReportMap();
@@ -153,7 +153,7 @@ public class PerformanceReportTest {
     }
 
     @Test
-    public void testIssue5571() throws IOException, URISyntaxException {
+    void testIssue5571() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJUnit(new File(getClass().getResource("/jUnitIssue5571.xml").toURI()));
 
         Map<String, UriReport> uriReportMap = performanceReport
@@ -170,7 +170,7 @@ public class PerformanceReportTest {
     }
 
     @Test
-    public void testPerformanceReportMultiLevel() throws IOException, URISyntaxException {
+    void testPerformanceReportMultiLevel() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsMultiLevel.jtl").toURI()));
         Map<String, UriReport> uriReportMap = performanceReport
                 .getUriReportMap();
@@ -180,80 +180,82 @@ public class PerformanceReportTest {
     }
 
     @Test
-    public void testGetUriListOrdered() throws IOException, URISyntaxException {
+    void testGetUriListOrdered() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsRandomUri.jtl").toURI()));
         List<UriReport> uriReports = performanceReport.getUriListOrdered();
         assertEquals("Ant", uriReports.get(0).getUri());
     }
 
     @Test
-    public void testCanGetCorrect90LineValue() throws IOException, URISyntaxException {
+    void testCanGetCorrect90LineValue() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsTenSamples.jtl").toURI()));
         assertEquals(9L, performanceReport.get90Line());
     }
 
     @Test
-    public void testCanGetCorrect95LineValue() throws IOException, URISyntaxException {
+    void testCanGetCorrect95LineValue() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsTenSamples.jtl").toURI()));
         assertEquals(9L, performanceReport.get95Line());
     }
 
     @Test
-    public void testCanGetCorrect90LineValueWithThreeSamples() throws IOException, URISyntaxException {
+    void testCanGetCorrect90LineValueWithThreeSamples() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsThreeSamples.jtl").toURI()));
         assertEquals(2L, performanceReport.get90Line());
     }
 
     @Test
-    public void testCanGetCorrect95LineValueWithThreeSamples() throws IOException, URISyntaxException {
+    void testCanGetCorrect95LineValueWithThreeSamples() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsThreeSamples.jtl").toURI()));
         assertEquals(2L, performanceReport.get95Line());
     }
 
     @Test
-    public void testCanGetCorrectMaxValueWithThreeSamples() throws IOException, URISyntaxException {
+    void testCanGetCorrectMaxValueWithThreeSamples() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsThreeSamples.jtl").toURI()));
         assertEquals(3L, performanceReport.getMax());
     }
 
     @Test
-    public void testCanGetCorrectMinValueWithThreeSamples() throws IOException, URISyntaxException {
+    void testCanGetCorrectMinValueWithThreeSamples() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsThreeSamples.jtl").toURI()));
         assertEquals(1L, performanceReport.getMin());
     }
 
     @Test
-    public void testCanGetZeroPercentileDurationForEmptySampleFile() throws IOException, URISyntaxException {
+    void testCanGetZeroPercentileDurationForEmptySampleFile() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/emptyfile.jtl").toURI()));
         assertEquals(0L, performanceReport.getMin());
     }
 
     @Test
-    public void testCanGetZeroPercentileDurationFromOneSampleFile() throws IOException, URISyntaxException {
+    void testCanGetZeroPercentileDurationFromOneSampleFile() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsOneSample.jtl").toURI()));
         assertEquals(2L, performanceReport.getDurationAt(0));
     }
 
     @Test
-    public void testCanGetOneHundredPercentileDurationFromOneSampleFile() throws IOException, URISyntaxException {
+    void testCanGetOneHundredPercentileDurationFromOneSampleFile() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsOneSample.jtl").toURI()));
         assertEquals(2L, performanceReport.getDurationAt(100));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testCannotGetDurationForNegativePercentile() throws IOException, URISyntaxException {
+    @Test
+    void testCannotGetDurationForNegativePercentile() throws IOException, URISyntaxException {
         PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsThreeSamples.jtl").toURI()));
-        performanceReport.getDurationAt(-1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCannotGetDurationForMoreThan100Percentile() throws IOException, URISyntaxException {
-        PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsThreeSamples.jtl").toURI()));
-        performanceReport.getDurationAt(101);
+        assertThrows(IllegalArgumentException.class, () ->
+            performanceReport.getDurationAt(-1));
     }
 
     @Test
-    public void testCompare() {
+    void testCannotGetDurationForMoreThan100Percentile() throws IOException, URISyntaxException {
+        PerformanceReport performanceReport = parseOneJMeter(new File(getClass().getResource("/JMeterResultsThreeSamples.jtl").toURI()));
+        assertThrows(IllegalArgumentException.class, () ->
+            performanceReport.getDurationAt(101));
+    }
+
+    @Test
+    void testCompare() {
         PerformanceReport report = new PerformanceReport(DEFAULT_PERCENTILES);
         report.setReportFileName("aaaaaa");
         PerformanceReport report1 = new PerformanceReport(DEFAULT_PERCENTILES);
@@ -264,7 +266,7 @@ public class PerformanceReportTest {
     }
 
     @Test
-    public void testExcludeResponseTimeOfErroredSamples() throws Exception {
+    void testExcludeResponseTimeOfErroredSamples() throws Exception {
         PerformanceReport report = new PerformanceReport(DEFAULT_PERCENTILES);
         report.setExcludeResponseTime(false);
 
@@ -316,7 +318,7 @@ public class PerformanceReportTest {
     }
 
     @Test
-    public void testDivisionByZero() throws Exception {
+    void testDivisionByZero() throws Exception {
         PerformanceReport report = new PerformanceReport(DEFAULT_PERCENTILES);
         report.setExcludeResponseTime(false);
 
