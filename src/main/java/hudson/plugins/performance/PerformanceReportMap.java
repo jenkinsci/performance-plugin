@@ -141,7 +141,7 @@ public class PerformanceReportMap implements ModelObject {
 
     public boolean ifShowTrendGraphsUsed() {
         PerformancePublisher publisher = getPublisher();
-        return publisher.isShowTrendGraphs();
+        return publisher == null || publisher.isShowTrendGraphs();
     }
 
     public boolean ifModePerformancePerTestCaseUsed() {
