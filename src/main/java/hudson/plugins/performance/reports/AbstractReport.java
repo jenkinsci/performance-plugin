@@ -1,7 +1,7 @@
 package hudson.plugins.performance.reports;
 
 import hudson.plugins.performance.data.HttpSample;
-import org.apache.commons.lang.StringUtils;
+
 import org.kohsuke.stapler.Stapler;
 
 import java.text.DecimalFormat;
@@ -82,7 +82,7 @@ public abstract class AbstractReport {
 
     protected List<Double> parsePercentiles(String percentiles) {
         final List<Double> res = new ArrayList<>();
-        if (!StringUtils.isBlank(percentiles)) {
+        if (percentiles != null && !percentiles.isBlank()) {
             String[] percs = percentiles.split(",");
             for (String perc : percs) {
                 try {

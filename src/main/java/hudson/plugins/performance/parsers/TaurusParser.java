@@ -1,5 +1,6 @@
 package hudson.plugins.performance.parsers;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.descriptors.PerformanceReportParserDescriptor;
@@ -88,6 +89,7 @@ public class TaurusParser extends AbstractParser {
         return report;
     }
 
+    @SuppressFBWarnings("DM_BOXED_PRIMITIVE_FOR_PARSING")
     private TaurusFinalStats getTaurusFinalStats(Element group) {
         final TaurusFinalStats report = new TaurusFinalStats();
 

@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -259,6 +260,7 @@ public class RelativeConstraint extends AbstractConstraint {
      *
      * @return clone of this object
      */
+    @SuppressFBWarnings("CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE")
     public RelativeConstraint clone() {
         return new RelativeConstraint(this.getMeteredValue(), this.getOperator(), 
                 this.getRelatedPerfReport(), this.getEscalationLevel(), this.getSuccess(), 

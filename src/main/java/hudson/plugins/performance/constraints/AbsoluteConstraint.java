@@ -13,7 +13,7 @@ import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.UriReport;
 import hudson.util.FormValidation;
 
-import org.apache.commons.lang.StringUtils;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -40,14 +40,14 @@ public class AbsoluteConstraint extends AbstractConstraint {
         }
 
         public FormValidation doCheckRelatedPerfReport(@QueryParameter String relatedPerfReport) {
-            if (StringUtils.isEmpty(relatedPerfReport)) {
+            if (relatedPerfReport == null || relatedPerfReport.isEmpty()) {
                 return FormValidation.error("This field must not be empty");
             }
             return FormValidation.ok();
         }
 
         public FormValidation doCheckTestCase(@QueryParameter String testCase) {
-            if (StringUtils.isEmpty(testCase)) {
+            if (testCase == null || testCase.isEmpty()) {
                 return FormValidation.error("This field must not be empty");
             }
             return FormValidation.ok();
@@ -67,6 +67,7 @@ public class AbsoluteConstraint extends AbstractConstraint {
      *
      * @return clone of this object
      */
+    @SuppressFBWarnings("CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE")
     public AbsoluteConstraint clone() {
         return new AbsoluteConstraint(this.getMeteredValue(), this.getOperator(), 
                 this.getRelatedPerfReport(), this.getEscalationLevel(), 

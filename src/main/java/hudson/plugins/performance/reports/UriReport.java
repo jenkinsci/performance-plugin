@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import org.apache.commons.lang.StringUtils;
+
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.time.FixedMillisecond;
 import org.jfree.data.time.Minute;
@@ -140,7 +140,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         checkPercentileAndSet(90.0, perc90);
         checkPercentileAndSet(95.0, perc95);
         checkPercentileAndSet(100.0, perc100);
-        if (StringUtils.isBlank(percentiles)) {
+        if (percentiles == null || percentiles.isBlank()) {
             this.percentiles = DEFAULT_PERCENTILES;
         }
         return this;
@@ -307,7 +307,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
     }
 
     public String getHttpCode() {
-        return StringUtils.join(httpCodes, ',');
+        return String.join(",", httpCodes);
     }
 
     public long getMedian() {

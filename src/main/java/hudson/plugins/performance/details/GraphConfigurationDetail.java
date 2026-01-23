@@ -19,7 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -132,22 +132,22 @@ public class GraphConfigurationDetail implements ModelObject {
             JSONObject formData = request.getSubmittedForm();
             String buildCountString = formData.getString("buildCountString");
             int buildCount = 0;
-            if (StringUtils.isNotBlank(buildCountString)) {
+            if (buildCountString != null && !buildCountString.isBlank()) {
                 buildCount = formData.getInt("buildCountString");
             }
             String firstDayCountString = formData.getString("firstDayCountString");
             String firstDayCount = DEFAULT_DATE;
-            if (StringUtils.isNotBlank(firstDayCountString)) {
+            if (firstDayCountString != null && !firstDayCountString.isBlank()) {
                 firstDayCount = formData.getString("firstDayCountString");
             }
             String lastDayCountString = formData.getString("lastDayCountString");
             String lastDayCount = DEFAULT_DATE;
-            if (StringUtils.isNotBlank(lastDayCountString)) {
+            if (lastDayCountString != null && !lastDayCountString.isBlank()) {
                 lastDayCount = formData.getString("lastDayCountString");
             }
             String radioConfigType = formData.getString("radioConfigType");
             String configType = NONE_CONFIG;
-            if (StringUtils.isNotBlank(radioConfigType)) {
+            if (radioConfigType != null && !radioConfigType.isBlank()) {
                 configType = formData.getString("radioConfigType");
             }
 
@@ -155,7 +155,7 @@ public class GraphConfigurationDetail implements ModelObject {
             if (formData.has("buildStepString")) {
                 String buildStepString = formData.getString("buildStepString");
 
-                if (StringUtils.isNotBlank(buildStepString)) {
+                if (buildStepString != null && !buildStepString.isBlank()) {
                     buildStep = formData.getInt("buildStepString");
                 }
             }
@@ -253,16 +253,16 @@ public class GraphConfigurationDetail implements ModelObject {
      */
     private List<Integer> initializeFrom(final String value) {
         List<Integer> listErrors = new ArrayList<Integer>(0);
-        if (StringUtils.isBlank(value)) {
+        if (value == null || value.isBlank()) {
             listErrors.add(-1);
             return listErrors;
         }
 
         String[] values;
         if (value.contains(LEGACY_SEPARATOR))
-            values = StringUtils.split(value, LEGACY_SEPARATOR);
+            values = value.split(LEGACY_SEPARATOR);
         else
-            values = StringUtils.split(value, SEPARATOR);
+            values = value.split(SEPARATOR);
 
         if ((values.length != 4) && (values.length != 5)) {
             listErrors.add(-1);
@@ -398,7 +398,7 @@ public class GraphConfigurationDetail implements ModelObject {
      * @return the default values from file.
      */
     private String readFromDefaultsFile(final File defaultsFile) {
-        String defaultValue = StringUtils.EMPTY;
+        String defaultValue = "";
         FileInputStream input = null;
         try {
             input = new FileInputStream(defaultsFile);

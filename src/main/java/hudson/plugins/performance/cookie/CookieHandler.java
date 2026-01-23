@@ -1,6 +1,6 @@
 package hudson.plugins.performance.cookie;
 
-import org.apache.commons.lang.StringUtils;
+
 import org.kohsuke.stapler.Ancestor;
 
 import javax.servlet.http.Cookie;
@@ -54,7 +54,7 @@ public class CookieHandler {
      * @return the cookie value or an empty string if the cookie is not found
      */
     public String getValue(final Cookie[] cookies) {
-        String values = StringUtils.EMPTY;
+        String values = "";
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(name)) {

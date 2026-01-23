@@ -8,7 +8,7 @@ import hudson.plugins.performance.data.HttpSample;
 import hudson.plugins.performance.data.TaurusFinalStats;
 import hudson.plugins.performance.parsers.PerformanceReportParser;
 import hudson.plugins.performance.tools.SafeMaths;
-import org.apache.commons.lang.StringUtils;
+
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -136,7 +136,7 @@ public class PerformanceReport extends AbstractReport implements Serializable,
         checkPercentileAndSet(90.0, perc90);
         checkPercentileAndSet(95.0, perc95);
         checkPercentileAndSet(100.0, perc100);
-        if (StringUtils.isBlank(percentiles)) {
+        if (percentiles == null || percentiles.isBlank()) {
             this.percentiles = DEFAULT_PERCENTILES;
         }
         return this;

@@ -1,6 +1,6 @@
 package hudson.plugins.performance.cookie;
 
-import org.apache.commons.lang.StringUtils;
+
 import org.junit.jupiter.api.Test;
 import org.kohsuke.stapler.Ancestor;
 
@@ -28,7 +28,7 @@ class CookieHandlerTest {
         assertEquals("Something value", testValue1);
 
         String testValue2 = cookieHandler.getValue(new Cookie[] {new Cookie("otherCookie", "some  other value")});
-        assertEquals(StringUtils.EMPTY, testValue2);
+        assertEquals("", testValue2);
     }
 
     private static class AncestorImpl implements Ancestor {

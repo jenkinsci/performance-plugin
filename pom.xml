@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>5.2102.v5f5fe09fccf1</version>
+        <version>6.2116.v7501b_67dc517</version>
         <relativePath />
     </parent>
 
@@ -65,6 +65,7 @@
         <!-- disable SpotBugs temporarily since there are 62 bugs -->
         <spotbugs.failOnError>false</spotbugs.failOnError>
         <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
+        <ban-commons-lang-2.skip>false</ban-commons-lang-2.skip>
     </properties>
 
     <repositories>

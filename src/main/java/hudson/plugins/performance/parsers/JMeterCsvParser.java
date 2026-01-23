@@ -3,6 +3,7 @@ package hudson.plugins.performance.parsers;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -14,13 +15,21 @@ import hudson.plugins.performance.reports.PerformanceReport;
 
 public class JMeterCsvParser extends AbstractParser {
 
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     public char delimiter;
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     public int timestampIdx = -1;
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     public int elapsedIdx = -1;
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     public int responseCodeIdx = -1;
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     public int successIdx = -1;
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     public int urlIdx = -1;
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     public int bytesIdx = -1;
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     public int sentBytesIdx = -1;
 
     public JMeterCsvParser(String glob, String percentiles) {
