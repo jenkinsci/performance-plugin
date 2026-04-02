@@ -1,4 +1,4 @@
 virtualenv
 bzt
-urwid
+urwid>=3.0.2,<4.0.0
 apiritif
