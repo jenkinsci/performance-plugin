@@ -17,6 +17,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 
 /**
  * Absolute Constraints compare the result of a new load test against some user defined values.
@@ -39,6 +40,8 @@ public class AbsoluteConstraint extends AbstractConstraint {
             return "Absolute Constraint";
         }
 
+        @POST
+        @SuppressWarnings("lgtm[jenkins/no-permission-check]")
         public FormValidation doCheckRelatedPerfReport(@QueryParameter String relatedPerfReport) {
             if (relatedPerfReport == null || relatedPerfReport.isEmpty()) {
                 return FormValidation.error("This field must not be empty");
@@ -46,6 +49,8 @@ public class AbsoluteConstraint extends AbstractConstraint {
             return FormValidation.ok();
         }
 
+        @POST
+        @SuppressWarnings("lgtm[jenkins/no-permission-check]")
         public FormValidation doCheckTestCase(@QueryParameter String testCase) {
             if (testCase == null || testCase.isEmpty()) {
                 return FormValidation.error("This field must not be empty");
