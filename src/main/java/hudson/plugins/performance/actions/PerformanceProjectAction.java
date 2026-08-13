@@ -795,16 +795,12 @@ public class PerformanceProjectAction implements Action {
                     File[] entryFiles = entry.listFiles();
                     if (entryFiles != null) {
                         for (File e : Objects.requireNonNull(entryFiles)) {
-                            if (!e.getName().endsWith(".serialized") && !e.getName().endsWith(".serialized-v2")) {
-                                this.performanceReportList.add(e.getName());
-                            }
+                            this.performanceReportList.add(e.getName());
                         }
                     }
 
                 } else {
-                    if (!entry.getName().endsWith(".serialized") && !entry.getName().endsWith(".serialized-v2")) {
-                        this.performanceReportList.add(entry.getName());
-                    }
+                    this.performanceReportList.add(entry.getName());
                 }
 
             }

@@ -475,9 +475,8 @@ public class PerformanceReportMap implements ModelObject {
         // files directly under the directory are for JMeter, for compatibility
         // reasons.
         File[] files = repo.listFiles(new FileFilter() {
-
             public boolean accept(File f) {
-                return !f.isDirectory() && !f.getName().endsWith(".serialized");
+                return !f.isDirectory();
             }
         });
         // this may fail, if the build itself failed, we need to recover gracefully
@@ -501,7 +500,7 @@ public class PerformanceReportMap implements ModelObject {
                     File[] listFiles = dir.listFiles(new FilenameFilter() {
 
                         public boolean accept(File dir, String name) {
-                            if (filename == null && !name.endsWith(".serialized")) {
+                            if (filename == null) {
                                 return true;
                             }
                             if (name.equals(filename)) {

@@ -1201,14 +1201,6 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         final File[] localReport = getPerformanceReportDirectory(build, parserDisplayName, logger);
 
         for (int i = 0; i < localReport.length; i++) {
-
-            String name = localReport[i].getName();
-            String[] arr = name.split("\\.");
-
-            // skip the serialized jmeter report file
-            if (arr[arr.length - 1].equalsIgnoreCase("serialized"))
-                continue;
-
             localReports.add(localReport[i]);
         }
         return localReports;

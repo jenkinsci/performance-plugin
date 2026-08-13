@@ -28,7 +28,7 @@ class PerformancePipelineTest {
                 "-o \\'execution.0.scenario.requests.1={url: \"http://blazedemo.com/\": assert: [\"yo mamma\"]}\\'";
         p.setDefinition(new CpsFlowDefinition(
                 "node('" + rule.jenkins.getSelfLabel().getName() + "'){ bzt(params: '" + bztParams
-                        + "', useSystemSitePackages: false, printDebugOutput: true, bztVersion: '1.16.19') }",
+                        + "', useSystemSitePackages: false, printDebugOutput: true, bztVersion: '1.16.51') }",
                 true));
         WorkflowRun r = p.scheduleBuild2(0).waitForStart();
         rule.assertBuildStatusSuccess(rule.waitForCompletion(r));
@@ -36,7 +36,7 @@ class PerformancePipelineTest {
         rule.assertLogContains("File aggregate-results.xml reported", r);
         rule.assertLogContains("of errors [SUCCESS].", r);
         if (JenkinsRule.getLog(r).contains("Performance test: Installing bzt into 'taurus-venv'")) {
-            rule.assertLogContains("Taurus CLI Tool v1.16.19", r);
+            rule.assertLogContains("Taurus CLI Tool v1.16.51", r);
         }
     }
 
