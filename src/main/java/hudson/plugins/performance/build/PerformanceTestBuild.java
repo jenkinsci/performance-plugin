@@ -17,7 +17,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.output.NullOutputStream;
-import org.codehaus.plexus.util.cli.CommandLineUtils;
+import org.apache.tools.ant.types.Commandline;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -318,7 +318,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
         testCommand.add((isVirtualenvInstallation ? getVirtualenvPath(workspace) : "") + PERFORMANCE_TEST_COMMAND);
         String[] parsedParams;
         try {
-            parsedParams = CommandLineUtils.translateCommandline(envVars.expand(this.params));
+            parsedParams = Commandline.translateCommandline(envVars.expand(this.params));
         } catch (Exception e) {
             logger.println("Failed parse Taurus parameters");
             e.printStackTrace(logger);

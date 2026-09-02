@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>6.2189.v695a_c41f5249</version>
+        <version>6.2221.va_045130417c9</version>
         <relativePath />
     </parent>
 
@@ -59,7 +59,7 @@
         <jenkins.baseline>2.516</jenkins.baseline>
         <jenkins.version>${jenkins.baseline}.1</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-        <hpi.bundledArtifacts>commons-csv,hsqldb,jackcess,plexus-utils,ucanaccess</hpi.bundledArtifacts>
+        <hpi.bundledArtifacts>commons-csv,hsqldb,jackcess,ucanaccess</hpi.bundledArtifacts>
         <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
         <concurrency>2</concurrency>
         <!-- disable SpotBugs temporarily since there are 62 bugs -->
@@ -95,11 +95,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>4.0.3</version>
-        </dependency>
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>gson-api</artifactId>
@@ -150,9 +145,23 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.sf.ucanaccess</groupId>
+            <groupId>io.github.spannm</groupId>
             <artifactId>ucanaccess</artifactId>
-            <version>5.0.1</version>
+            <version>5.1.7</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.poi</groupId>
+                    <artifactId>poi</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>
