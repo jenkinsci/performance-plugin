@@ -147,7 +147,7 @@
         <dependency>
             <groupId>io.github.spannm</groupId>
             <artifactId>ucanaccess</artifactId>
-            <version>5.1.7</version>
+            <version>5.1.8</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-codec</groupId>
