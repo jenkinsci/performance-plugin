@@ -21,7 +21,7 @@ public class TrendReportGraphs implements ModelObject {
     private Job<?, ?> project;
 
     public TrendReportGraphs(final Job<?, ?> project,
-                             final Run<?, ?> build, final StaplerRequest2 request,
+                             final Run<?, ?> build,
                              String filename, PerformanceReport performanceReport) {
         this.build = build;
         this.filename = filename;

@@ -828,11 +828,9 @@ public class PerformanceProjectAction implements Action {
      *
      * @param link     not used
      * @param request  Stapler request
-     * @param response Stapler response
      * @return the dynamic result of the analysis (detail page).
      */
-    public Object getDynamic(final String link, final StaplerRequest2 request,
-                             final StaplerResponse2  response) {
+    public Object getDynamic(final String link, final StaplerRequest2 request) {
         if (CONFIGURE_LINK.equals(link)) {
             return createUserConfiguration(request);
         } else if (TRENDREPORT_LINK.equals(link)) {
@@ -863,7 +861,7 @@ public class PerformanceProjectAction implements Action {
     private Object createTrendReport(final StaplerRequest2 request) {
         String filename = getTrendReportFilename(request);
         CategoryDataset dataSet = getTrendReportData(request, filename).build();
-        return new TrendReportDetail(job, PLUGIN_NAME, request, filename, dataSet);
+        return new TrendReportDetail(job, filename, dataSet);
     }
 
     private Object createTestsuiteReport(final StaplerRequest2 request) {

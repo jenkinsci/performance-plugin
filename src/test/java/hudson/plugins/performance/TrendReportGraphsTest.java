@@ -21,7 +21,7 @@ class TrendReportGraphsTest {
         FreeStyleBuild build = project.createExecutable();
         PerformanceReport report = new PerformanceReport(PerformanceReportTest.DEFAULT_PERCENTILES);
 
-        TrendReportGraphs graphs = new TrendReportGraphs(project, build, null, "simpleFilename", report);
+        TrendReportGraphs graphs = new TrendReportGraphs(project, build, "simpleFilename", report);
 
         assertEquals(0, graphs.getUris().size());
         assertFalse(graphs.hasSamples(""));

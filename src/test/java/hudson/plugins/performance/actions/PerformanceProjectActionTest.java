@@ -31,16 +31,16 @@ class PerformanceProjectActionTest {
         FreeStyleProject freeStyleProject = j.createFreeStyleProject("testProject");
         PerformanceProjectAction performanceProjectAction = new PerformanceProjectAction(freeStyleProject);
 
-        Object nullObj = performanceProjectAction.getDynamic("testNull", null, null);
+        Object nullObj = performanceProjectAction.getDynamic("testNull", null);
         assertNull(nullObj);
 
-        Object graphConfigurationDetail = performanceProjectAction.getDynamic("configure", staplerRequest, null);
+        Object graphConfigurationDetail = performanceProjectAction.getDynamic("configure", staplerRequest);
         assertInstanceOf(GraphConfigurationDetail.class, graphConfigurationDetail);
 
-        Object trendReportDetail = performanceProjectAction.getDynamic("trendReport", staplerRequest, null);
+        Object trendReportDetail = performanceProjectAction.getDynamic("trendReport", staplerRequest);
         assertInstanceOf(TrendReportDetail.class, trendReportDetail);
 
-        Object testSuiteReportDetail = performanceProjectAction.getDynamic("testsuiteReport", staplerRequest, null);
+        Object testSuiteReportDetail = performanceProjectAction.getDynamic("testsuiteReport", staplerRequest);
         assertInstanceOf(TestSuiteReportDetail.class, testSuiteReportDetail);
 
         assertFalse(performanceProjectAction.ifModePerformancePerTestCaseUsed());

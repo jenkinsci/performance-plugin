@@ -4,7 +4,6 @@ import hudson.model.Job;
 import hudson.model.ModelObject;
 import hudson.plugins.performance.Messages;
 import org.jfree.data.category.CategoryDataset;
-import org.kohsuke.stapler.StaplerRequest2;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,7 +20,7 @@ public class TrendReportDetail implements ModelObject,
     private CategoryDataset dataSet;
 
     public TrendReportDetail(final Job<?, ?> project,
-                             final String pluginName, final StaplerRequest2 request, String filename,
+                             String filename,
                              CategoryDataset dataSet) {
         this.project = project;
         this.filename = filename;
