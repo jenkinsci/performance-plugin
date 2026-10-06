@@ -27,8 +27,8 @@ import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import java.awt.Color;
 import java.awt.BasicStroke;
@@ -55,8 +55,8 @@ public class TestSuiteReportDetail implements ModelObject {
         this.buildsLimits = buildsLimits;
     }
 
-    public void doRespondingTimeGraphPerTestCaseMode(StaplerRequest request,
-                                                     StaplerResponse response) throws IOException {
+    public void doRespondingTimeGraphPerTestCaseMode(StaplerRequest2 request,
+                                                     StaplerResponse2 response) throws IOException {
         if (ChartUtil.awtProblemCause != null) {
             // not available. send out error message
             response.sendRedirect2(request.getContextPath() + "/images/headless.png");

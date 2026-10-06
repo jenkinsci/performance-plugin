@@ -1,10 +1,10 @@
 package hudson.plugins.performance.cookie;
 
+import java.util.List;
 
 import org.kohsuke.stapler.Ancestor;
 
-import javax.servlet.http.Cookie;
-import java.util.List;
+import jakarta.servlet.http.Cookie;
 
 /**
  * Creates and converts cookies.

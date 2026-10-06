@@ -27,7 +27,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
 import java.util.*;
@@ -240,7 +240,7 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     // Step 1.1: Check bzt using "bzt --help".
     private boolean isGlobalBztInstalled(FilePath workspace, PrintStream logger, Launcher launcher, EnvVars envVars) throws InterruptedException, IOException {
         logger.println("Performance test: Checking global bzt installation...");
-        boolean result = isSuccessCode(runCmd(CHECK_BZT_COMMAND, workspace, NullOutputStream.NULL_OUTPUT_STREAM, launcher, envVars));
+        boolean result = isSuccessCode(runCmd(CHECK_BZT_COMMAND, workspace, NullOutputStream.INSTANCE, launcher, envVars));
         logger.println(result ?
                 "Performance test: Found global bzt installation." :
                 "Performance test: You don't have global bzt installed on this Jenkins host. Installing it globally will speed up job. Run 'sudo pip install bzt' to install it."
@@ -387,9 +387,9 @@ public class PerformanceTestBuild extends Builder implements SimpleBuildStep {
     private boolean isURLToFile() {
         try {
             if (bztVersion.startsWith("git+")) {
-                new URL(bztVersion.substring(4));
+                URI.create(bztVersion.substring(4)).toURL();
             } else {
-                new URL(bztVersion);
+                URI.create(bztVersion).toURL();
             }
             return true;
         } catch (MalformedURLException e) {

@@ -49,7 +49,7 @@ public abstract class AbstractReport {
     public abstract void calculateDiffPercentiles();
 
     public AbstractReport() {
-        final Locale useThisLocale = (Stapler.getCurrentRequest() != null) ? Stapler.getCurrentRequest().getLocale() : Locale.getDefault();
+        final Locale useThisLocale = (Stapler.getCurrentRequest2() != null) ? Stapler.getCurrentRequest2().getLocale() : Locale.getDefault();
 
         percentFormat = new ThreadLocal<DecimalFormat>() {
 
@@ -69,7 +69,7 @@ public abstract class AbstractReport {
     }
 
     public String errorPercentFormated() {
-        Stapler.getCurrentRequest().getLocale();
+        Stapler.getCurrentRequest2().getLocale();
         return percentFormat.get().format(errorPercent());
     }
 

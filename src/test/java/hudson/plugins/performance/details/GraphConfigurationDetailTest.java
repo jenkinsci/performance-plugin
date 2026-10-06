@@ -1,27 +1,28 @@
 package hudson.plugins.performance.details;
 
-import hudson.model.FreeStyleProject;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
-import org.kohsuke.stapler.StaplerRequest;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import hudson.model.FreeStyleProject;
 
 @WithJenkins
 @ExtendWith(MockitoExtension.class)
 class GraphConfigurationDetailTest {
 
     @Mock
-    private StaplerRequest request;
+    private StaplerRequest2 request;
 
     @Test
     void testDefault(JenkinsRule j) throws Exception {

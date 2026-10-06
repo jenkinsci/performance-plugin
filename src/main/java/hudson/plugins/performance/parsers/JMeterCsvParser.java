@@ -80,7 +80,7 @@ public class JMeterCsvParser extends AbstractParser {
 
     protected void parseCSV(Reader in, String[] header, PerformanceReport report) throws IOException {
         CSVFormat csvFormat = CSVFormat.Builder.create().setDelimiter(delimiter).setHeader(header).setQuote('"')
-                .setSkipHeaderRecord(true).build();
+                .setSkipHeaderRecord(true).get();
         Iterable<CSVRecord> records = csvFormat.parse(in);
         for (CSVRecord record : records) {
             final HttpSample sample = getSample(record);

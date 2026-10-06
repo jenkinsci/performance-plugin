@@ -15,18 +15,16 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-
 import org.apache.commons.io.IOUtils;
-
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import hudson.model.Job;
 import hudson.model.ModelObject;
 import hudson.plugins.performance.Messages;
 import hudson.plugins.performance.cookie.CookieHandler;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
@@ -100,7 +98,7 @@ public class GraphConfigurationDetail implements ModelObject {
     }
 
     public GraphConfigurationDetail(final Job<?, ?> project,
-                                    final String pluginName, final StaplerRequest request) {
+                                    final String pluginName, final StaplerRequest2 request) {
 
         String value = createCookieHandler(pluginName).getValue(
                 request.getCookies());
@@ -126,8 +124,8 @@ public class GraphConfigurationDetail implements ModelObject {
      * @param request  Stapler request
      * @param response Stapler response
      */
-    public void doSave(final StaplerRequest request,
-                       final StaplerResponse response) {
+    public void doSave(final StaplerRequest2 request,
+                       final StaplerResponse2 response) {
         try {
             JSONObject formData = request.getSubmittedForm();
             String buildCountString = formData.getString("buildCountString");
@@ -197,8 +195,8 @@ public class GraphConfigurationDetail implements ModelObject {
         return new CookieHandler(cookieName);
     }
 
-    protected void persistValue(final String value, final StaplerRequest request,
-                                final StaplerResponse response) {
+    protected void persistValue(final String value, final StaplerRequest2 request,
+                                final StaplerResponse2 response) {
 
         // First check for URL values
         String buildCount = request.getParameter("buildCount");
