@@ -574,8 +574,7 @@ public class PerformanceReportMap implements ModelObject {
         void addAll(Collection<PerformanceReport> parse);
     }
 
-    public Object getDynamic(final String link, final StaplerRequest2 request,
-                             final StaplerRequest2 response) {
+    public Object getDynamic(final String link, final StaplerRequest2 request) {
         if (TRENDREPORT_LINK.equals(link)) {
             return createTrendReportGraphs(request);
         } else {
@@ -593,7 +592,7 @@ public class PerformanceReportMap implements ModelObject {
         }
 
         TrendReportGraphs trendReport = new TrendReportGraphs(build.getParent(),
-                build, request, filename, report);
+                build, filename, report);
 
         return trendReport;
     }
