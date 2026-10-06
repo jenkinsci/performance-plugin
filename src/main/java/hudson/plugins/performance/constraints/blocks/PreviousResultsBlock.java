@@ -1,7 +1,7 @@
 package hudson.plugins.performance.constraints.blocks;
 
 import hudson.Extension;
-import hudson.model.AbstractDescribableImpl;
+import hudson.model.Describable;
 import hudson.model.Descriptor;
 
 import org.jenkinsci.Symbol;
@@ -12,7 +12,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author Rene Kugel
  */
-public class PreviousResultsBlock extends AbstractDescribableImpl<PreviousResultsBlock> {
+public class PreviousResultsBlock implements Describable<PreviousResultsBlock> {
     /**
      * True: relative constraint includes a user defined number of builds into the evaluation False:
      * relative constraint includes all builds that have taken place in an user defined time frame

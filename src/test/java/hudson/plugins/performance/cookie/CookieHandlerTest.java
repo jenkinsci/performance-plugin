@@ -1,14 +1,14 @@
 package hudson.plugins.performance.cookie;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.kohsuke.stapler.Ancestor;
 
-import javax.servlet.http.Cookie;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import jakarta.servlet.http.Cookie;
 
 class CookieHandlerTest {
 

@@ -1,7 +1,7 @@
 package hudson.plugins.performance.constraints.blocks;
 
 import hudson.Extension;
-import hudson.model.AbstractDescribableImpl;
+import hudson.model.Describable;
 import hudson.model.Descriptor;
 
 import org.jenkinsci.Symbol;
@@ -12,7 +12,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author Rene Kugel
  */
-public class TestCaseBlock extends AbstractDescribableImpl<TestCaseBlock> {
+public class TestCaseBlock implements Describable<TestCaseBlock> {
     private String testCase;
 
     @Symbol("testCase")

@@ -24,8 +24,8 @@ import hudson.util.Graph;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -235,8 +235,8 @@ public class PerformanceReportMap implements ModelObject {
         return getPerformanceReport(performanceReportName) == null;
     }
 
-    public void doRespondingTimeGraph(StaplerRequest request,
-                                      StaplerResponse response) throws IOException {
+    public void doRespondingTimeGraph(StaplerRequest2 request,
+                                      StaplerResponse2 response) throws IOException {
         String parameter = request.getParameter("performanceReportPosition");
         Run<?, ?> previousBuild = getBuild();
         final Map<Run<?, ?>, Map<String, PerformanceReport>> buildReports = getBuildReports(parameter, previousBuild);
@@ -260,7 +260,7 @@ public class PerformanceReportMap implements ModelObject {
         }.doPng(request, response);
     }
 
-    public void doThroughputGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+    public void doThroughputGraph(StaplerRequest2 request, StaplerResponse2 response) throws IOException {
         String parameter = request.getParameter("performanceReportPosition");
         if (parameter == null) {
             return;
@@ -306,7 +306,7 @@ public class PerformanceReportMap implements ModelObject {
 
 
     public void doRespondingTimeGraphPerTestCaseMode(
-            StaplerRequest request, StaplerResponse response) throws IOException {
+            StaplerRequest2 request, StaplerResponse2 response) throws IOException {
         final String performanceReportNameFile = request.getParameter("performanceReportPosition");
         if (performanceReportNameFile == null) {
             return;
@@ -354,7 +354,7 @@ public class PerformanceReportMap implements ModelObject {
         }.doPng(request, response);
     }
 
-    public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
+    public void doErrorsGraph(StaplerRequest2 request, StaplerResponse2 response)
             throws IOException {
         final String performanceReportNameFile = request.getParameter("performanceReportPosition");
         if (performanceReportNameFile == null) {
@@ -436,7 +436,7 @@ public class PerformanceReportMap implements ModelObject {
         return buildReports;
     }
 
-    public void doSummarizerGraph(StaplerRequest request, StaplerResponse response)
+    public void doSummarizerGraph(StaplerRequest2 request, StaplerResponse2 response)
             throws IOException {
         String parameter = request.getParameter("performanceReportPosition");
         Run<?, ?> previousBuild = getBuild();
@@ -574,8 +574,8 @@ public class PerformanceReportMap implements ModelObject {
         void addAll(Collection<PerformanceReport> parse);
     }
 
-    public Object getDynamic(final String link, final StaplerRequest request,
-                             final StaplerRequest response) {
+    public Object getDynamic(final String link, final StaplerRequest2 request,
+                             final StaplerRequest2 response) {
         if (TRENDREPORT_LINK.equals(link)) {
             return createTrendReportGraphs(request);
         } else {
@@ -583,7 +583,7 @@ public class PerformanceReportMap implements ModelObject {
         }
     }
 
-    public Object createTrendReportGraphs(final StaplerRequest request) {
+    public Object createTrendReportGraphs(final StaplerRequest2 request) {
         String filename = getTrendReportFilename(request);
         PerformanceReport report = performanceReportMap.get(filename);
         Run<?, ?> build = getBuild();
@@ -598,7 +598,7 @@ public class PerformanceReportMap implements ModelObject {
         return trendReport;
     }
 
-    private String getTrendReportFilename(final StaplerRequest request) {
+    private String getTrendReportFilename(final StaplerRequest2 request) {
         PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
         return performanceReportPosition.getPerformanceReportPosition();

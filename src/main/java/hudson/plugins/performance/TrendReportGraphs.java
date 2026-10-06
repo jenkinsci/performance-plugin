@@ -7,8 +7,8 @@ import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.data.PerformanceReportPosition;
 import hudson.plugins.performance.reports.UriReport;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class TrendReportGraphs implements ModelObject {
     private Job<?, ?> project;
 
     public TrendReportGraphs(final Job<?, ?> project,
-                             final Run<?, ?> build, final StaplerRequest request,
+                             final Run<?, ?> build, final StaplerRequest2 request,
                              String filename, PerformanceReport performanceReport) {
         this.build = build;
         this.filename = filename;
@@ -29,7 +29,7 @@ public class TrendReportGraphs implements ModelObject {
         this.project = project;
     }
 
-    private UriReport getUriReportForRequest(StaplerRequest request) {
+    private UriReport getUriReportForRequest(StaplerRequest2 request) {
 
         PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
@@ -46,32 +46,32 @@ public class TrendReportGraphs implements ModelObject {
         return null;
     }
 
-    public void doRespondingTimeGraph(StaplerRequest request,
-                                      StaplerResponse response) throws IOException {
+    public void doRespondingTimeGraph(StaplerRequest2 request,
+                                      StaplerResponse2 response) throws IOException {
         UriReport uriReport = getUriReportForRequest(request);
         if (uriReport != null) {
             uriReport.doSummarizerTrendGraph(request, response);
         }
     }
 
-    public void doPercentileGraph(StaplerRequest request,
-                                  StaplerResponse response) throws IOException {
+    public void doPercentileGraph(StaplerRequest2 request,
+                                  StaplerResponse2 response) throws IOException {
         UriReport uriReport = getUriReportForRequest(request);
         if (uriReport != null) {
             uriReport.doPercentileGraph(request, response);
         }
     }
 
-    public void doThroughputGraph(StaplerRequest request,
-                                  StaplerResponse response) throws IOException {
+    public void doThroughputGraph(StaplerRequest2 request,
+                                  StaplerResponse2 response) throws IOException {
         UriReport uriReport = getUriReportForRequest(request);
         if (uriReport != null) {
             uriReport.doThroughputGraph(request, response);
         }
     }
 
-    public void doErrorGraph(StaplerRequest request,
-                                  StaplerResponse response) throws IOException {
+    public void doErrorGraph(StaplerRequest2 request,
+                                  StaplerResponse2 response) throws IOException {
         UriReport uriReport = getUriReportForRequest(request);
         if (uriReport != null) {
             uriReport.doErrorGraph(request, response);

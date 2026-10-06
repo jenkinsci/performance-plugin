@@ -24,8 +24,8 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import hudson.model.ModelObject;
 import hudson.model.Run;
@@ -475,7 +475,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         return summarizerErrors / summarizerSize * 100;
     }
 
-    public void doSummarizerTrendGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+    public void doSummarizerTrendGraph(StaplerRequest2 request, StaplerResponse2 response) throws IOException {
         TimeSeries responseTimes = new TimeSeries(Messages.ProjectAction_RespondingTime());
         synchronized (samples) {
             for (Sample sample : samples) {
@@ -499,7 +499,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         }.doPng(request, response);
     }
 
-    public void doErrorGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+    public void doErrorGraph(StaplerRequest2 request, StaplerResponse2 response) throws IOException {
         TimeSeries errors = new TimeSeries(Messages.ProjectAction_Errors());
         synchronized (samples) {
             for (Sample sample : samples) {
@@ -520,7 +520,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         }.doPng(request, response);
     }
 
-    public void doPercentileGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+    public void doPercentileGraph(StaplerRequest2 request, StaplerResponse2 response) throws IOException {
         final ConcurrentSkipListMap<Long, Long> responseTimesHistogram = new ConcurrentSkipListMap<>(); // we want keys in sorted order
         long totalNoOfSamples = 0L;
         synchronized (samples) {
@@ -550,7 +550,7 @@ public class UriReport extends AbstractReport implements Serializable, ModelObje
         }.doPng(request, response);
     }
 
-    public void doThroughputGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+    public void doThroughputGraph(StaplerRequest2 request, StaplerResponse2 response) throws IOException {
         final Map<Minute, Long> throughputIntervals = new HashMap<>();
         synchronized (samples) {
             for (Sample sample : samples) {

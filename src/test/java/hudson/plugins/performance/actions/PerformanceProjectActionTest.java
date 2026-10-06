@@ -1,29 +1,30 @@
 package hudson.plugins.performance.actions;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import hudson.model.FreeStyleProject;
 import hudson.plugins.performance.PerformancePublisher;
 import hudson.plugins.performance.details.GraphConfigurationDetail;
 import hudson.plugins.performance.details.TestSuiteReportDetail;
 import hudson.plugins.performance.details.TrendReportDetail;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
-import org.kohsuke.stapler.StaplerRequest;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @WithJenkins
 @ExtendWith(MockitoExtension.class)
 class PerformanceProjectActionTest {
 
     @Mock
-    private StaplerRequest staplerRequest;
+    private StaplerRequest2 staplerRequest;
 
     @Test
     void testDynamic(JenkinsRule j) throws Exception {

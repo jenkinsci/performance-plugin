@@ -35,8 +35,8 @@ import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
@@ -365,7 +365,7 @@ public class PerformanceProjectAction implements Action {
         return chart;
     }
 
-    private String getPerformanceReportNameFile(StaplerRequest request) {
+    private String getPerformanceReportNameFile(StaplerRequest2 request) {
         PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
         return getPerformanceReportNameFile(performanceReportPosition);
@@ -379,7 +379,7 @@ public class PerformanceProjectAction implements Action {
         return performanceReportNameFile;
     }
 
-    public void doErrorsGraph(StaplerRequest request, StaplerResponse response)
+    public void doErrorsGraph(StaplerRequest2 request, StaplerResponse2 response)
             throws IOException {
         final String performanceReportNameFile = getPerformanceReportNameFile(request);
         if (performanceReportNameFile == null) {
@@ -435,7 +435,7 @@ public class PerformanceProjectAction implements Action {
     }
 
     public void doRespondingTimeGraphPerTestCaseMode(
-            StaplerRequest request, StaplerResponse response) throws IOException {
+            StaplerRequest2 request, StaplerResponse2  response) throws IOException {
         final String performanceReportNameFile = getPerformanceReportNameFile(request);
         if (performanceReportNameFile == null) {
             return;
@@ -498,7 +498,7 @@ public class PerformanceProjectAction implements Action {
         return doCreateRespondingTimeChart(dataset, legendLimit);
     }
 
-    public void doRespondingTimeGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+    public void doRespondingTimeGraph(StaplerRequest2 request, StaplerResponse2  response) throws IOException {
         final String performanceReportNameFile = getPerformanceReportNameFile(request);
         if (performanceReportNameFile == null) {
             return;
@@ -557,7 +557,7 @@ public class PerformanceProjectAction implements Action {
         }.doPng(request, response);
     }
 
-    public void doThroughputGraph(final StaplerRequest request, final StaplerResponse response) throws IOException {
+    public void doThroughputGraph(final StaplerRequest2 request, final StaplerResponse2  response) throws IOException {
         final String performanceReportNameFile = getPerformanceReportNameFile(request);
         if (performanceReportNameFile == null) {
             return;
@@ -612,7 +612,7 @@ public class PerformanceProjectAction implements Action {
         return createThroughputChart(dataset);
     }
 
-    public void doSummarizerGraph(StaplerRequest request, StaplerResponse response) throws IOException {
+    public void doSummarizerGraph(StaplerRequest2 request, StaplerResponse2  response) throws IOException {
         final PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
         final String performanceReportNameFile = getPerformanceReportNameFile(performanceReportPosition);
@@ -686,7 +686,7 @@ public class PerformanceProjectAction implements Action {
      * @param builds
      * @return outList
      */
-    private Range getFirstAndLastBuild(StaplerRequest request, List<?> builds) {
+    private Range getFirstAndLastBuild(StaplerRequest2 request, List<?> builds) {
         GraphConfigurationDetail graphConf = (GraphConfigurationDetail) createUserConfiguration(request);
 
         if (graphConf.isNone()) {
@@ -831,8 +831,8 @@ public class PerformanceProjectAction implements Action {
      * @param response Stapler response
      * @return the dynamic result of the analysis (detail page).
      */
-    public Object getDynamic(final String link, final StaplerRequest request,
-                             final StaplerResponse response) {
+    public Object getDynamic(final String link, final StaplerRequest2 request,
+                             final StaplerResponse2  response) {
         if (CONFIGURE_LINK.equals(link)) {
             return createUserConfiguration(request);
         } else if (TRENDREPORT_LINK.equals(link)) {
@@ -850,7 +850,7 @@ public class PerformanceProjectAction implements Action {
      * @param request Stapler request
      * @return a view to configure the trend graph for the current user
      */
-    private Object createUserConfiguration(final StaplerRequest request) {
+    private Object createUserConfiguration(final StaplerRequest2 request) {
         return new GraphConfigurationDetail(job, PLUGIN_NAME, request);
     }
 
@@ -860,31 +860,31 @@ public class PerformanceProjectAction implements Action {
      * @param request Stapler request
      * @return a view to configure the trend graph for the current user
      */
-    private Object createTrendReport(final StaplerRequest request) {
+    private Object createTrendReport(final StaplerRequest2 request) {
         String filename = getTrendReportFilename(request);
         CategoryDataset dataSet = getTrendReportData(request, filename).build();
         return new TrendReportDetail(job, PLUGIN_NAME, request, filename, dataSet);
     }
 
-    private Object createTestsuiteReport(final StaplerRequest request) {
+    private Object createTestsuiteReport(final StaplerRequest2 request) {
         String filename = getTestSuiteReportFilename(request);
         Range buildsLimits = getFirstAndLastBuild(request, getJob().getBuilds());
         return new TestSuiteReportDetail(job, filename, buildsLimits);
     }
 
-    private String getTrendReportFilename(final StaplerRequest request) {
+    private String getTrendReportFilename(final StaplerRequest2 request) {
         PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
         return performanceReportPosition.getPerformanceReportPosition();
     }
 
-    private String getTestSuiteReportFilename(final StaplerRequest request) {
+    private String getTestSuiteReportFilename(final StaplerRequest2 request) {
         PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
         return performanceReportPosition.getPerformanceReportPosition();
     }
 
-    private DataSetBuilder<String, NumberOnlyBuildLabel> getTrendReportData(final StaplerRequest request,
+    private DataSetBuilder<String, NumberOnlyBuildLabel> getTrendReportData(final StaplerRequest2 request,
                                                                             String performanceReportNameFile) {
 
         DataSetBuilder<String, NumberOnlyBuildLabel> dataSet = new DataSetBuilder<>();

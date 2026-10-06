@@ -1,26 +1,26 @@
 package hudson.plugins.performance;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jfree.data.category.CategoryDataset;
+import org.junit.jupiter.api.BeforeEach;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
+import org.mockito.Mock;
+import org.mockito.quality.Strictness;
+
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.plugins.performance.actions.PerformanceBuildAction;
 import hudson.plugins.performance.parsers.JMeterTestHelper;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.util.DescribableList;
-import org.jfree.data.category.CategoryDataset;
-import org.junit.jupiter.api.BeforeEach;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-import org.mockito.Mock;
-import org.mockito.quality.Strictness;
-
-import javax.servlet.ServletOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
-
+import jakarta.servlet.ServletOutputStream;
 
 public abstract class AbstractGraphGenerationTest {
 
@@ -31,9 +31,9 @@ public abstract class AbstractGraphGenerationTest {
     @Mock(strictness = Mock.Strictness.LENIENT)
     protected Run build;
     @Mock(strictness = Mock.Strictness.LENIENT)
-    protected StaplerRequest request;
+    protected StaplerRequest2 request;
     @Mock(strictness = Mock.Strictness.LENIENT)
-    protected StaplerResponse response;
+    protected StaplerResponse2 response;
 
     protected PerformanceReport report;
 
