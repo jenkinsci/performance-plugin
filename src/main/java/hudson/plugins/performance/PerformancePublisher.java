@@ -71,6 +71,7 @@ import hudson.plugins.performance.reports.ConstraintReport;
 import hudson.plugins.performance.reports.PerformanceReport;
 import hudson.plugins.performance.reports.ThroughputReport;
 import hudson.plugins.performance.reports.UriReport;
+import hudson.plugins.performance.tools.ExternalUrlValidator;
 import hudson.plugins.performance.tools.SafeMaths;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -437,7 +438,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
 
     private void addExternalReportActionsToBuild(Run<?, ?> run, List<PerformanceReportParser> parsers) {
         for (PerformanceReportParser parser : parsers) {
-            if (parser.reportURL != null && !parser.reportURL.isEmpty()) {
+            if (ExternalUrlValidator.isValid(parser.reportURL)) {
                 run.addAction(new ExternalBuildReportAction(parser.reportURL));
             }
         }
@@ -518,7 +519,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
                 // add the report to the build object.
                 List<File> localReports = getExistingReports(build, listener.getLogger(), parser.getDescriptor().getDisplayName());
 
-                // For more than one parser of the same type, existing reports will be found multiple times, 
+                // For more than one parser of the same type, existing reports will be found multiple times,
                 // so we collect them in a Set to avoid duplicates (based on comparison by report filename).
                 parsedReports.addAll(parser.parse(build, localReports, listener));
             }
@@ -615,7 +616,7 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         File xmlfile = new File(xmlDirectory, "standardResults.xml");
         try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(xmlfile), StandardCharsets.UTF_8);
                 BufferedWriter bw = new BufferedWriter(fw)){
-            
+
             String xml = new StringBuilder("<?xml version=\"1.0\"?>\n")
                     .append("<results>\n")
                     .append(appendStandardResultsStatsToXml(parsedReports))
@@ -1558,4 +1559,3 @@ public class PerformancePublisher extends Recorder implements SimpleBuildStep {
         this.filterRegex = filterRegex;
     }
 }
-
